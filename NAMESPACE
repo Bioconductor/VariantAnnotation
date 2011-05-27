@@ -1,0 +1,30 @@
+
+importMethodsFrom(Biostrings, translate)
+
+importMethodsFrom(GenomicRanges, seqlevels, strand)
+
+importMethodsFrom(GenomicFeatures, cdsBy, exons, transcripts,
+                  fiveUTRsByTranscript, threeUTRsByTranscript)
+
+importMethodsFrom(IRanges, append, as.list, as.vector, colnames,
+                  countOverlaps, elementLengths, end, findOverlaps,
+                  follow, head, "%in%", lapply, match, precede,
+                  queryHits, shift, split, start, subjectHits, substr,
+                  substring, unique, unlist, values, "values<-", width)
+
+importFrom(Biostrings, DNAStringSet)
+
+importFrom(GenomicFeatures, extractTranscriptsFromGenome)
+
+importFrom(AnnotationDbi, mappedkeys)
+
+importFrom(IRanges, CharacterList, DataFrame, IRanges,
+           PartitioningByWidth)
+
+importFrom(methods, as)
+
+
+export(annotateVariants, locateVariants,
+       getTranscriptSeqs, globalToLocal, predictCoding,
+       listCumsum, listCumsumShifted)
+

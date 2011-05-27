@@ -1,0 +1,15 @@
+Package: variantseq
+Type: Package
+Title: What the package does (short line)
+Version: 0.2
+Date: 2011-05-23
+Author: Michael Lawrence and Valerie Obenchain 
+Maintainer: Who to complain to <yourfault@somewhere.net>
+Description: More about what it does (maybe more than one line)
+License: Artistic-2.0 
+biocViews: 
+Depends: R (>= 2.8.0), methods, GenomicRanges, Biostrings 
+Imports: Biostrings, GenomicRanges, methods, GenomicFeatures, AnnotationDbi, IRanges 
+Suggests: 
+LazyLoad: yes
+
