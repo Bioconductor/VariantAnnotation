@@ -1,0 +1,254 @@
+%\VignetteIndexEntry{Genetic Variant Annotation}
+%\VignetteDepends{Rsamtools, GenomicRanges}
+%\VignetteKeywords{sequence, sequencing, alignments}
+%\VignettePackage{VariantAnnotation}
+\documentclass[10pt]{article}
+
+\usepackage{times}
+\usepackage{hyperref}
+
+\textwidth=6.5in
+\textheight=8.5in
+%\parskip=.3cm
+\oddsidemargin=-.1in
+\evensidemargin=-.1in
+\headheight=-.3in
+
+\newcommand{\Rfunction}[1]{{\texttt{#1}}}
+\newcommand{\Robject}[1]{{\texttt{#1}}}
+\newcommand{\Rpackage}[1]{{\textit{#1}}}
+\newcommand{\Rmethod}[1]{{\texttt{#1}}}
+\newcommand{\Rfunarg}[1]{{\texttt{#1}}}
+\newcommand{\Rclass}[1]{{\textit{#1}}}
+\newcommand{\Rcode}[1]{{\texttt{#1}}}
+
+\newcommand{\software}[1]{\textsf{#1}}
+\newcommand{\R}{\software{R}}
+\newcommand{\Bioconductor}{\software{Bioconductor}}
+\newcommand{\VariantAnnotation}{\Rpackage{VariantAnnotation}}
+
+\title{Genetic Variant Annotation}
+\author{Valerie Obenchain}
+\date{\today}
+
+\begin{document} 
+
+\maketitle
+
+<<options, echo=FALSE>>=
+options(width=72)
+@
+
+<<setup, results=hide>>=
+library(VariantAnnotation)
+@
+
+\section{Introduction}
+This document illustrates how to annotate genetic variants with exisiting Bioconductor
+tools. Specifically, we attempt to reproduce the functionality of the ANNOVAR software 
+and Ensembl's Variant Effect Predictor. A brief outline of the capability of each tool
+follows.
+
+\subsection{ANNOVAR}
+ANNOVAR annotations are organized into three categories: gene-based, filter-based 
+and region-based. Databases are provided with the software or the user
+can download UCSC tracks (or user supplied GFF3), along with mRNA FASTA
+files to create a local annotation databse. Current gene
+reference options are refGene, knownGene or ensGene. 
+
+mRNA/cDNA sequences at UCSC evidently may not match
+the true genomic sequence for a given reference genome because they
+are observed rather than theoretical. FASTA can be downloaded from
+ANNOVAR or user can build themselves.
+
+Build FASTA :\\
+- use whole genome DNA sequence and gene definition file \\
+- generate mRNA sequence for all of the genes\\
+
+Gene-based annotations define the location of the variants, with respect to
+the gene, e.g., intronic, exonic, intergenic etc.
+In the case of an intergenic variant, the names of the flanking genes are provided. 
+The functional consequence is provided for variants that fall inside exons. These
+include synonomous or non-synonmous SNV, frameshift insertion or deletion,
+nonframeshift insertion or deletion, frameshift or nonframeshift block substitution.
+If there is a change in amino acid sequence it is provided as a 'sequence change',
+where a standard nomenclature is used to describe the sequence changes.
+
+Filter-based annotations allow the user to search for the presence of the variant
+in the 1000 Genomes Project or dbSNP databases.
+
+Region-based annotaions are used to identify variants at conserved genomic regions.
+Overlaps between the variants and a user-specified conservation track are provided. 
+
+\subsection{Ensembl Variant Effect Predictor}
+Ensembl provides both a web-based tool, Variant Effect Predictor, as well as an 
+API interface for functional variant annotation for all species in Ensembl. 
+For the web tool, input consists of variant positions, chromosome, allele and strand. 
+Output includes Ensembl IDs for the relevant transcript and gene, transcript coordinates, 
+possible amino acids and the identifier of any existing variants that are co-located 
+with the user-defined variant.
+
+
+\section{Gene-based Annotations}
+The goal of gene-based annotation is to define a position of the variant
+with respect to their functional consequence on genes.
+
+Identify variant location in terms of intragenic, intronic, 
+exonic, 3' and 5' UTR. If a variant matches multiple transcripts
+in a gene, results for all transcripts will be returned.
+If a variant matches multiple regions within a transcript (i.e., both
+exon and intron) the highest priority position will be returned.
+See table below for prioritization scheme.
+
+For the variants that fall in exons, further information reguarding
+synonomous or non-synonomous and amino acids affected will be
+provided.
+
+\begin{tabular}{l l l l l}
+Region & Tx & GeneID & CDS & 5UTR \\
+exon & yes & yes & yes & - \\
+intron & yes & yes & no & - \\
+5UTR & yes & yes & no & yes \\
+3UTR & yes & yes & no & no \\
+intergenic & yes & no & - & - \\
+ncRNA & ? & ? & ? - \\
+\end{tabular}
+
+\begin{tabular}{l l l}
+Region & Precedence & Details \\
+exon & 1 & variant falls within a coding exon \\
+splicing & * & variant is within 2-bp of a splicing junction \\
+ncRNA & 2 & variant overlaps a transcript without coding annotation in the gene definition \\ 
+UTR5 & 3 & variant overlaps a 5' untranslated region \\ 
+UTR3 & 3 & variant overlaps a 3' untranslated region \\ 
+intron & 4 & variant overlaps an intron \\ 
+upstream & 5 & 	variant overlaps 1-kb region upstream of transcription start site \\ 
+downstream & 5 & variant overlaps 1-kb region downtream of transcription end site \\ 
+intergenic & 6 & 	variant is in intergenic region  \\ 
+\end{tabular}
+
+
+\begin{tabular}{l l l}
+Annotation & Precedence & Details \\
+frameshift insertion & 1 & an insertion of one or more nucleotides that cause 
+    frameshift changes in protein coding sequence \\
+frameshift deletion & 2 & a deletion of one or more nucleotides that cause 
+    frameshift changes in protein coding sequence \\
+frameshift block substitution & 3 & a block substitution of one or more nucleotides 
+    that cause frameshift changes in protein coding sequence  \\ 
+stopgain & 4 & a nonsynonymous SNV, frameshift insertion/deletion, nonframeshift 
+    insertion/deletion or block substitution that lead to the immediate creation of 
+    stop codon at the variant site. For frameshift mutations, the creation of stop codon 
+    downstream of the variant will not be counted as stopgain  \\ 
+stoploss & 5 & 	a nonsynonymous SNV, frameshift insertion/deletion, nonframeshift 
+    insertion/deletion or block substitution that lead to the immediate elimination of 
+    stop codon at the variant site  \\ 
+nonframeshift insertion & 6 & an insertion of 3 or multiples of 3 nucleotides that do 
+    not cause frameshift changes in protein coding sequence  \\ 
+nonframeshift deletion & 7 & a deletion of 3 or mutliples of 3 nucleotides that do 
+    not cause frameshift changes in protein coding sequence  \\ 
+nonframeshift block substitution & 8 & a block substitution of one or more nucleotides 
+    that do not cause frameshift changes in protein coding sequence  \\ 
+nonsynonmous SNV & 9 & a single nucleotide change that cause an amino acid change   \\ 
+synonmous SNV & 10 & a single nucleotide change that cause an amino acid change  \\ 
+unknown & 11 & unknown function \\ 
+\end{tabular}
+
+\subsection{Work flow}
+- id location of variant via overlap with TranscriptDb objects\\
+- obtain gene DNA sequences from BSgenome or FASTA file\\
+- for exonic variants, transcribe DNA to mRNA\\
+- identify amino acids affected\\
+- output location, gene name/symbol, non-synonomous, possible AA sequences 
+  for each variant (ref ad alt)\\
+
+The \Rpackage{VariantAnnotation} package contains a \Robject{GRanges} object 
+consisting of 12 variants. 
+
+
+<<data, echo=TRUE>>=
+data(variants)
+strand(variants) <- "+"
+variants
+@
+
+Identify the location of the variants with respect to genes using
+the \Rfunction{locateVariants} function. 
+Required inputs
+are the variant location in ranges, chromosome, and the allele that was
+observed for this variant. 
+<<location, echo=TRUE>>=
+library(TxDb.Hsapiens.UCSC.hg18.knownGene)
+library(org.Hs.eg.db)
+
+txdb <- Hsapiens_UCSC_hg18_knownGene_TxDb
+loc <- locateVariants(variants, txdb, orgPackage="org.Hs.eg.db")
+head(loc)
+@
+
+New columns for the location and Entrez gene ID have been added to the metadata of 
+'variants'. For intergenic variants, gene ID's for genes on either side of the variant 
+are provided.
+<<location_b, echo=TRUE>>=
+loc[,c("location", "geneID")]
+@
+
+For the variants that fall within exons, determine if they are non-synonomous
+and amino acid coding changes with \Rfunction{predictCoding}.
+<<coding, echo=TRUE>>=
+library(BSgenome.Hsapiens.UCSC.hg18)
+BSgenomeOrganism <- Hsapiens
+aaCoding <- predictCoding(variants, txdb, BSgenomeOrganism, variantColumn="obsAllele")
+aaCoding
+@
+In the object returned, there is one row for each transcript hit by a variant
+in an exon. If an exonic variant matched 4 transcipts, there would be four
+rows in the result for that single variant. Example here 
+
+
+
+\section{Region-based} 
+Annotate genomic elements other than genes. This is especially 
+important for whole genome sequencing data as the vast majority of 
+variants will be outside of protein encoding regions and their 
+function effects cannot be asessed by gene-based annotations.
+The following types of regions may be useful to annotate,\\
+- conserved genomic\\
+- predicted transcription factor binding sites\\
+- predicted RNA secondary structures\\
+
+\subsection{Prototype function}
+Download various UCSC tables based on user-specified track. Or user
+specified GFF3 file to fine overlaps with variants.\\
+query = \\
+subject =\\
+
+
+\section{Filter-based}
+Evaluate and filter out subsets of variants not appearing in public 
+databases such as 1000 Genomes Project and dbSNP.
+
+\subsection{Prototype function}
+
+\section{Other functionalities}
+- Retrieve the nucleotide sequence in any user-specific genomic positions in
+batch,\\
+- identify a candidate gene list for Mendelian diseases from exome data,\\
+- identify a list of SNPs from 1000 Genomes that are in strong LD with a GWAS
+hit, and many other creative utilities.\\
+
+\section{References}
+\begin{itemize}
+\item{Wang K, Li M, Hakonarson H, (2010), ANNOVAR: functional annotation of genetic 
+variants from high-throughput sequencing data. Nucleic Acids Research, Vol 38,
+No. 16, e164.}
+\item{McLaren W, Pritchard B, RiosD, et. al., (2010), Deriving the consequences of
+genomic variants with the Ensembl API and SNP Effect Predictor. Bioinformatics,
+Vol. 26, No. 16, 2069-2070.}
+\end{itemize}
+
+<<SessionInfo, echo=TRUE>>=
+sessionInfo()
+@
+
+\end{document}

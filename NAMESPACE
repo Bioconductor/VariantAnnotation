@@ -1,3 +1,4 @@
+import(methods)
 
 importMethodsFrom(Biostrings, translate)
 

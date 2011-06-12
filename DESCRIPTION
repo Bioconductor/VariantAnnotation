@@ -1,15 +1,14 @@
-Package: variantseq
+Package: VariantAnnotation 
 Type: Package
-Title: What the package does (short line)
-Version: 0.3
-Date: 2011-05-23
-Author: Michael Lawrence and Valerie Obenchain 
-Maintainer: Who to complain to <yourfault@somewhere.net>
+Title: Annotation of Genetic Variants 
 Description: More about what it does (maybe more than one line)
+Version: 0.0.4
+Author: Michael Lawrence and Valerie Obenchain 
+Maintainer: Valerie Obenchain <vobencha@fhcrc.org> 
 License: Artistic-2.0 
 biocViews: 
 Depends: R (>= 2.8.0), methods, GenomicRanges, Biostrings 
-Imports: Biostrings, GenomicRanges, methods, GenomicFeatures, AnnotationDbi, IRanges 
+Imports: methods, stats, utils, Biostrings, GenomicRanges, GenomicFeatures, AnnotationDbi, IRanges 
 Suggests: 
 LazyLoad: yes
 
