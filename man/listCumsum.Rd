@@ -41,18 +41,6 @@ listCumsum(x)
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function(x) {
-  x_unlisted <- unlist(x, use.names=FALSE)
-  x_cumsum <- cumsum(x_unlisted)
-  x_part <- PartitioningByWidth(elementLengths(x))
-  x_cumsum - rep(x_cumsum[start(x_part)] - x_unlisted[start(x_part)],
-                 width(x_part))
-  }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

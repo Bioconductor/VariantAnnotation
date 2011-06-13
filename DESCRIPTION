@@ -2,13 +2,13 @@ Package: VariantAnnotation
 Type: Package
 Title: Annotation of Genetic Variants 
 Description: More about what it does (maybe more than one line)
-Version: 0.0.4
+Version: 0.0.5
 Author: Michael Lawrence and Valerie Obenchain 
 Maintainer: Valerie Obenchain <vobencha@fhcrc.org> 
 License: Artistic-2.0 
 biocViews: 
 Depends: R (>= 2.8.0), methods, GenomicRanges, Biostrings 
 Imports: methods, stats, utils, Biostrings, GenomicRanges, GenomicFeatures, AnnotationDbi, IRanges 
-Suggests: 
+Suggests: BSgenome.Hsapiens.UCSC.hg18, TxDb.Hsapiens.UCSC.hg18.knownGene 
 LazyLoad: yes
 

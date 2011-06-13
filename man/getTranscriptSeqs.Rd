@@ -8,7 +8,7 @@
 \usage{getTranscriptSeqs(cds_by_tx, BSgenomeOrganism)}
 
 \arguments{
-  \item{cds_by_tx}{
+  \item{cdsByTx}{
   }
   \item{BSgenomeOrganism}{
   }
@@ -39,16 +39,7 @@
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
 
-## The function is currently defined as
-function(cds_by_tx, organism) {
-  cds_seqs <- getSeq(organism, unlist(cds_by_tx, use.names=FALSE))
-  tx_id <- rep(seq(length(cds_by_tx)), elementLengths(cds_by_tx))
-  unlist(lapply(split(cds_seqs, tx_id), paste, collapse=""))
-  }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

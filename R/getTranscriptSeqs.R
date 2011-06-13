@@ -1,5 +1,5 @@
-getTranscriptSeqs <- function(cds_by_tx, BSgenomeOrganism) 
+getTranscriptSeqs <- function(cdsByTx, BSgenomeOrganism) 
 {
-    extractTranscriptsFromGenome(BSgenomeOrganism, cds_by_tx)
+    extractTranscriptsFromGenome(BSgenomeOrganism, cdsByTx)
 }
 

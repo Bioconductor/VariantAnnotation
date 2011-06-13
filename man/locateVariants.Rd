@@ -6,14 +6,12 @@
 \description{Identify variant location with respect to genes}
 
 \usage{
-  locateVariants(query, subject, orgPackage, ...)
+  locateVariants(query, subject, ...)
 }
 
 \arguments{
   \item{query}{A \link[GenomicRanges]{GRanges} object}
   \item{subject}{A \link[GenomicFeatures]{TranscriptDb} object}
-  \item{orgPackage}{A chararacter containing the name of the organism package
-    to be used for gene annotations}
   \item{\dots}{Additional arguments}
 }
 
@@ -44,11 +42,10 @@
   ## using sample data from ANNOVAR
   library(TxDb.Hsapiens.UCSC.hg18.knownGene)
   library(BSgenome.Hsapiens.UCSC.hg18)
-  library(org.Hs.eg.db)
   data(variants)
  
   txdb <- Hsapiens_UCSC_hg18_knownGene_TxDb
-  location <- locateVariants(variants, txdb, orgPackage="org.Hs.eg.db")
+  location <- locateVariants(variants, txdb)
   }
 }
 
