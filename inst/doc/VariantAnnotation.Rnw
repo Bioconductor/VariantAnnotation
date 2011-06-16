@@ -119,14 +119,13 @@ matching the region specified or by the absence of GeneID.
 \begin{center}
 \begin{tabular}{l|l|l|l|l|l}
 \hline
-Region & Tx & HasGeneID & CDS & 5UTR & 3UTR \\
+Region & Tx & CDS & 5UTR & 3UTR \\
 \hline
-exon & yes & yes & yes & NA & NA \\
-intron & yes & yes & no & NA & NA \\
-5UTR & yes & yes & no & yes & no \\
-3UTR & yes & yes & no & no & yes \\
-intergenic & yes & no & NA & NA & NA\\
-ncRNA & yes & no & no & NA & NA \\
+exon & yes &  yes & NA & NA \\
+intron & yes & no & NA & NA \\
+5UTR & yes & no & yes & no \\
+3UTR & yes & no & no & yes \\
+intergenic & no & NA & NA & NA\\
 \hline
 \end{tabular}
 \end{center}
@@ -134,41 +133,40 @@ ncRNA & yes & no & no & NA & NA \\
 \label{table:variantLocation}
 \end{table}
 
-If a variant matches multiple regions within a transcript (i.e., both
-exon and intron) the highest priority position will be returned.
-\begin{table}[ht]
-\begin{center}
-\begin{tabular}{l|l|l}
-\hline
-Region & Precedence & Details \\
-\hline
-exon & 1 & variant falls within a coding exon \\
-splicing & * & variant is within 2-bp of a splicing junction \\
-ncRNA & 2 & variant overlaps a transcript without coding annotation in the gene
-definition \\
-UTR5 & 3 & variant overlaps a 5' untranslated region \\
-UTR3 & 3 & variant overlaps a 3' untranslated region \\
-intron & 4 & variant overlaps an intron \\
-upstream & 5 &  variant overlaps 1-kb region upstream of transcription start
-site \\
-downstream & 5 & variant overlaps 1-kb region downtream of transcription end
-site \\
-intergenic & 6 &        variant is in intergenic region  \\
-\hline
-\end{tabular}
-\end{center}
-\caption{Variant Location Precedence}
-\label{table:variantLocationPrecedence}
-\end{table}
+%If a variant matches multiple regions within a transcript (i.e., both
+%exon and intron) the highest priority position will be returned.
+%\begin{table}[ht]
+%\begin{center}
+%\begin{tabular}{l|l|l}
+%\hline
+%Region & Precedence & Details \\
+%\hline
+%exon & 1 & variant falls within a coding exon \\
+%splicing & * & variant is within 2-bp of a splicing junction \\
+%ncRNA & 2 & variant overlaps a transcript without coding annotation in the gene
+%definition \\
+%UTR5 & 3 & variant overlaps a 5' untranslated region \\
+%UTR3 & 3 & variant overlaps a 3' untranslated region \\
+%intron & 4 & variant overlaps an intron \\
+%upstream & 5 &  variant overlaps 1-kb region upstream of transcription start
+%site \\
+%downstream & 5 & variant overlaps 1-kb region downtream of transcription end
+%site \\
+%intergenic & 6 &        variant is in intergenic region  \\
+%\hline
+%\end{tabular}
+%\end{center}
+%\caption{Variant Location Precedence}
+%\label{table:variantLocationPrecedence}
+%\end{table}
 
 Amino acid coding changes for variants that fall within exons can be 
 determined with \Rfunction{predictCoding}. Three new columns, txID, aaRef,
 and aa are added to the metadata of 'variants'.
 <<coding>>=
 library(BSgenome.Hsapiens.UCSC.hg18)
-BSgenomeOrganism <- Hsapiens
 aaCoding <- predictCoding(variants, txdb, variantColumn="obsAllele",
-    BSgenomeOrganism)
+    seqSource=Hsapiens)
 head(aaCoding[,c("txID", "refAA", "obsAA")])
 @
 In the object returned, there is one row for each transcript hit by a variant
@@ -205,20 +203,13 @@ Wang K, Li M, Hakonarson H, (2010), ANNOVAR: functional annotation of genetic
 variants from high-throughput sequencing data. Nucleic Acids Research, Vol 38,
 No. 16, e164.\\
 
-McLaren W, Pritchard B, RiosD, et. al., (2010), Deriving the consequences of
+\noindent McLaren W, Pritchard B, RiosD, et. al., (2010), Deriving the consequences of
 genomic variants with the Ensembl API and SNP Effect Predictor. Bioinformatics,
 Vol. 26, No. 16, 2069-2070.
 
 \section{Session Information}
-\begin{table*}[tbp]
-\begin{minipage}{\textwidth}
-<<sessionInfo, results=tex, print=TRUE>>=
-toLatex(sessionInfo())
+<<sessionInfo>>=
+sessionInfo()
 @
-\end{minipage}
-\caption{\label{table:sessionInfo}
-The output of \Rfunction{sessionInfo} on the build system
-after running this vignette.}
-\end{table*}
 
 \end{document}

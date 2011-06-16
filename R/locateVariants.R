@@ -17,6 +17,8 @@ locateVariants <- function(query, subject, ...)
     exonic <- cdsCO > 0 
 
     ## intergenic :
+    ## FIXME : is it possible to not be in a tx and be something other than
+    ## intergenic? 
     intergenic <- txCO == 0
     intvar <- query[txCO == 0]
     flankGenes <- lapply(seq_len(length(intvar)), 
@@ -33,7 +35,6 @@ locateVariants <- function(query, subject, ...)
     threeUTR <- threeUTRsByTranscript(subject)
     utr5 <- countOverlaps(query, fiveUTR) > 0
     utr3 <- countOverlaps(query, threeUTR) > 0
-
 
     ## geneID 
     genes <- character(length(query)) 

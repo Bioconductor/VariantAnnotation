@@ -3,11 +3,11 @@
 \docType{data}
 
 \title{
-  A genetic variant test dataset
+  A genetic variant test dataset from ANNOVAR
 }
 
 \description{
-  The genetic varaints used in the ANNOVAR examples
+  Twelve genetic variants from human for testing 
 }
 
 \usage{data(variants)}

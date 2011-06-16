@@ -10,9 +10,12 @@
 }
 
 \arguments{
-  \item{query}{A \link[GenomicRanges]{GRanges} object}
-  \item{subject}{A \link[GenomicFeatures]{TranscriptDb} object}
-  \item{\dots}{Additional arguments}
+  \item{query}{A \link[GenomicRanges]{GRanges} object
+  }
+  \item{subject}{A \link[GenomicFeatures]{TranscriptDb} object
+  }
+  \item{\dots}{Additional arguments
+  }
 }
 
 \details{
@@ -39,13 +42,12 @@
 
 \examples{
   \dontrun{
-  ## using sample data from ANNOVAR
   library(TxDb.Hsapiens.UCSC.hg18.knownGene)
   library(BSgenome.Hsapiens.UCSC.hg18)
   data(variants)
  
   txdb <- Hsapiens_UCSC_hg18_knownGene_TxDb
-  location <- locateVariants(variants, txdb)
+  loc <- locateVariants(variants, txdb)
   }
 }
 
