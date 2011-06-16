@@ -1,4 +1,7 @@
 \name{getTranscriptSeqs}
+\alias{getTranscriptSeqs,GRangesList,BSgenome-method}
+\alias{getTranscriptSeqs,GRangesList,FaFile-method}
+\alias{getTranscriptSeqs,GRanges,FaFile-method}
 \alias{getTranscriptSeqs}
 
 \title{Get transcript subject}
@@ -9,16 +12,17 @@
 }
 
 \usage{
-  \S4method{getTranscriptSeqs}{BSgenome,GRangesList}(seqSource, subject, ...)
-  \S4method{getTranscriptSeqs}{FaFileList,GRangesList}(seqSource, subject, ...)
+  \S4method{getTranscriptSeqs}{GRangesList, BSgenome}(query, subject, ...)
+  \S4method{getTranscriptSeqs}{GRangesList, FaFile}(query, subject, ...)
+  \S4method{getTranscriptSeqs}{GRanges, FaFile}(query, subject, ...)
 }
 
 \arguments{
-  \item{seqSource}{A \link{BSgenome} object or a \link{FaFileList} from which
-    the sequences will be taken.
-  }
-  \item{subject}{A \link{GRangesList} of coding regions by transcript which
+  \item{query}{A \link{GRangesList} of coding regions by transcript which
     specifies the sequences to be retrieved from \code{seqSource}.
+  }
+  \item{subject}{A \link{BSgenome} object or a \link{FaFileList} from which
+    the sequences will be taken.
   }
   \item{\dots}{Additional arguments
   }
@@ -48,20 +52,18 @@ library(TxDb.Hsapiens.UCSC.hg18.knownGene)
 library(BSgenome.Hsapiens.UCSC.hg18)
 
 ## create or find fasta files
-#f1 <- FaFile("/home/vobencha/chr16.fa")
-#f2 <- FaFile("/home/vobencha/chr2.fa")
-#faFiles <- FaFileList(f1, f2)
+#fafile <- FaFile("/home/vobencha/chr16.fa")
 
 txdb <- Hsapiens_UCSC_hg18_knownGene_TxDb
 cdsByTx <- cdsBy(txdb)
-subject <- cdsByTx
-subj <- keepSeqlevels(subject, "chr20")
+grl <- cdsByTx
+grl20 <- keepSeqlevels(subject, "chr20")
 
 ## BSgenome as source
-bsSource <- getTranscriptSeqs(Hsapiens, subj)
+bsSource <- getTranscriptSeqs(glr20, Hsapiens)
 
 ## fasta files as source
-#faSource <- getTranscriptSeqs(faFiles, subj)
+#faSource <- getTranscriptSeqs(grl20, fafile)
 
 # identical(bsSource, faSource)
 
