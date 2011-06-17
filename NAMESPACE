@@ -1,8 +1,6 @@
+import(Biostrings)
+import(GenomicRanges)
 import(Rsamtools)
-
-importMethodsFrom(Biostrings, translate)
-
-importMethodsFrom(GenomicRanges, seqlevels, strand)
 
 importMethodsFrom(GenomicFeatures, cdsBy, exons, transcripts,
                   fiveUTRsByTranscript, threeUTRsByTranscript)
@@ -13,20 +11,15 @@ importMethodsFrom(IRanges, append, as.list, as.vector, colnames,
                   queryHits, shift, split, start, subjectHits, substr,
                   substring, unique, unlist, values, "values<-", width)
 
-importFrom(Biostrings, DNAStringSet)
-
 importFrom(GenomicFeatures, extractTranscriptsFromGenome)
-
-importFrom(AnnotationDbi, mappedkeys)
 
 importFrom(IRanges, CharacterList, DataFrame, IRanges,
            PartitioningByWidth)
 
-importFrom(methods, as)
+export(
+    locateVariants, 
+    getTranscriptSeqs, globalToLocal,
+    listCumsum, listCumsumShifted)
 
-
-export(locateVariants, 
-       getTranscriptSeqs, globalToLocal,
-       listCumsum, listCumsumShifted)
-
-exportMethods(predictCoding)
+exportMethods(
+    predictCoding, getTranscriptSeqs)

@@ -29,7 +29,7 @@
 }
 
 
-\author{M. Lawrence}
+\author{Michael Lawrence}
 
 
 \seealso{

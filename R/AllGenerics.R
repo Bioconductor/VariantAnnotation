@@ -1,5 +1,5 @@
 setGeneric("predictCoding", signature = c("query", "subject"),
-           function(query, subject, variantColumn, seqSource, ...)
+           function(query, subject, variantAllele, seqSource, ...)
            standardGeneric("predictCoding")
 )
 

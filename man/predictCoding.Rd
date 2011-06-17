@@ -7,13 +7,14 @@
 \alias{predictCoding,Ranges,GRangesList-method}
 \alias{predictCoding,GRanges,GRangesList-method}
 
-\title{Predict amino acid coding changes for single nucleotide variants}
+\title{Predict amino acid coding changes for variants}
 
 \description{
+  Predict amino acid coding changes for variants that fall in a coding region.
 }
 
 \usage{
-  \S4method{predictCoding}{GRanges,GRangesList}(query, subject, variantColumn, 
+  \S4method{predictCoding}{GRanges,GRangesList}(query, subject, variantAllele, 
     seqSource, ...) 
 }
 
@@ -33,10 +34,10 @@
     object it was created with the 'cdsBy' function on a \link{TranscriptDb}
     object.
   } 
-  \item{variantColumn}{A character vector with the name of the column
+  \item{variantAllele}{A character vector with the name of the column
     in \code{query} that contains the observed variant allele
   }
-  \item{seqSource}{A \link{BSgenome} object or \link{FaFileList}.
+  \item{seqSource}{A \code{\link[BSgenome]{BSgenome}} object or \link{FaFileList}.
   }
   \item{\dots}{Additional arguments
   }
@@ -44,7 +45,7 @@
 
 \details{
   Sequences for the variants in \code{query} that fall in a coding region
-  can be extracted from fasta files or a \link{BSgenome} object. The
+  can be extracted from fasta files or a \code{\link[BSgenome]{BSgenome}} object. The
   sequences are translated and amino acid coding changes are returned. 
 } 
 
@@ -66,12 +67,14 @@
   \dontrun{
   library(TxDb.Hsapiens.UCSC.hg18.knownGene)
   library(BSgenome.Hsapiens.UCSC.hg18)
+ 
   data(variants)
-
   strand(variants) <- "+"
   txdb <- Hsapiens_UCSC_hg18_knownGene_TxDb 
-  aaCoding <- predictCoding(variants, txdb, variantColumn="obsAllele",
+  aaCoding <- predictCoding(variants, txdb, variantAllele="obsAllele",
       seqSource=Hsapiens)
+
+  ## FIXME : example for fasta
   }
 }
 

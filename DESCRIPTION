@@ -1,14 +1,14 @@
 Package: VariantAnnotation 
 Type: Package
 Title: Annotation of Genetic Variants 
-Description: More about what it does (maybe more than one line)
-Version: 0.0.7
+Description: Annotate variants with respect to gene functionality, selectively filter based on multiple criteria 
+Version: 0.0.8
 Author: Michael Lawrence and Valerie Obenchain 
 Maintainer: Valerie Obenchain <vobencha@fhcrc.org> 
 License: Artistic-2.0 
 biocViews: 
-Depends: R (>= 2.8.0), methods, GenomicRanges, Biostrings 
-Imports: methods, stats, utils, Biostrings, GenomicRanges, GenomicFeatures, Rsamtools, AnnotationDbi, IRanges 
-Suggests: BSgenome.Hsapiens.UCSC.hg18, TxDb.Hsapiens.UCSC.hg18.knownGene 
+Depends: R (>= 2.8.0), methods, GenomicRanges, Biostrings, Rsamtools 
+Imports: GenomicFeatures, IRanges 
+Suggests: RUnit, BSgenome.Hsapiens.UCSC.hg18, TxDb.Hsapiens.UCSC.hg18.knownGene
 LazyLoad: yes
 

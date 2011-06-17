@@ -9,10 +9,21 @@ setMethod("getTranscriptSeqs",  c("GRangesList", "BSgenome"),
 setMethod("getTranscriptSeqs",  c("GRangesList", "FaFile"),
     function(query, subject, ...)
     {
-        uquery <- unlist(query, use.names=FALSE)
-        widths <- sum(width(query)) 
-        seq <- callGeneric(uquery, subject, ...)
-        vws <- successiveViews(seq, widths)
+        ## orders by exon rank, checking for mixed chromosomes, mixed strand 
+        txlist <- GenomicFeatures:::.makeUCSCTxListFromGRangesList(query,
+            reorder.exons.on.minus.strand=FALSE)
+
+        ## back to GRanges for getSeq method 
+        widthEL <- elementLengths(grl16)
+        gr <- GRanges(seqnames=Rle(txlist$chrom, widthEL), 
+                      ranges=IRanges(start=unlist(txlist$exonStarts), 
+                                     end=unlist(txlist$exonEnds)), 
+                      strand=Rle(txlist$strand, widthEL))
+
+        seqs <- callGeneric(gr, subject, ...)
+        oneseq <- unlist(seqs)
+        widthView <- sum(width(query)) 
+        vws <- successiveViews(oneseq, widthView)
         tx <- as(vws, "DNAStringSet") 
         names(tx) <- names(query) 
         tx
@@ -30,12 +41,10 @@ setMethod("getTranscriptSeqs",  c("GRanges", "FaFile"),
             stop(paste("sequence ", missingSeq, 
                 " not found in 'query' \n", sep=""))
         }
-        dna <- scanFa(fa, query)
-        ans <- unlist(dna)
+        
+        dna <- getSeq(fa, query) 
         close(fa)
-        ans 
- 
-        ## FIXME : handle strand
+        dna 
     }
 )
 

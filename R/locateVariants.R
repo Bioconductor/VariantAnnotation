@@ -47,13 +47,13 @@ locateVariants <- function(query, subject, ...)
     geneID <- CharacterList(genes)
     txID <- CharacterList(transcripts)
 
-    ## FIXME : report all matches or by priority?
+    ## FIXME : report all matches or only priority?
     location <- character(length(query))
-    location[exonic == TRUE] <- "exon"
-    location[intronic == TRUE] <- "intron"
     location[intergenic == TRUE] <- "intergenic"
+    location[intronic == TRUE] <- "intron"
     location[utr5 == TRUE] <- "5'UTR"
     location[utr3 == TRUE] <- "3'UTR"
+    location[exonic == TRUE] <- "exon"
 
     values(query) <- append(values(query), DataFrame(location, txID, geneID))
     query

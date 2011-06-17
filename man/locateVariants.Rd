@@ -3,29 +3,31 @@
 
 \title{Locate variants}
 
-\description{Identify variant location with respect to genes}
+\description{Identify variant location with respect to gene functionality}
 
 \usage{
   locateVariants(query, subject, ...)
 }
 
 \arguments{
-  \item{query}{A \link[GenomicRanges]{GRanges} object
+  \item{query}{A \link[GenomicRanges]{GRanges} object containing the variants
   }
-  \item{subject}{A \link[GenomicFeatures]{TranscriptDb} object
+  \item{subject}{A \link[GenomicFeatures]{TranscriptDb} object that will serve
+    as the annotation reference
   }
   \item{\dots}{Additional arguments
   }
 }
 
 \details{
-%%  ~~ If necessary, more details than the description above ~~
+  Add some ..
 }
+
 
 \value{
   The \code{query} object is returned with two columns added to the metadata.
-  The 'location' column describes the variant location as exonic, intronic,
-  intergenic, 3UTR, or 5UTR. The 'genes' column contains the gene symbol
+  The 'location' column describes the variant location as being in an exon, 
+  intron, intergenic, 3UTR, or 5UTR. The 'genes' column contains the gene ID 
   from the organism package specified. If the variant is intergenic, 
   the 'genes' column contains the names of the genes on either side.
 }
