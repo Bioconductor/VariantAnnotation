@@ -28,7 +28,7 @@
 \newcommand{\VariantAnnotation}{\Rpackage{VariantAnnotation}}
 
 \title{Genetic Variant Annotation}
-\author{Valerie Obenchain}
+\author{Valerie Obenchain and Michael Lawrence}
 \date{\today}
 
 \begin{document} 
