@@ -1,31 +1,30 @@
 locateVariants <- function(query, subject, ...)
 {
     chrom <- unique(seqlevels(query))
-    #exons <- exons(subject, vals=list(exon_chrom=chrom),
-    #   columns=c("exon_id", "tx_id", "gene_id"))
     cdsByTx <- cdsBy(subject)
     tx <- transcripts(subject, vals=list(exon_chrom=chrom),
        columns=c("exon_id", "tx_id", "gene_id"))
-    #exFO <- findOverlaps(query, exons)
-    cdsFO <- findOverlaps(query, cdsByTx, type="within")
+    ## FIXME : type='within' doesn't catch indels on the ends 
+    #cdsFO <- findOverlaps(query, cdsByTx, type="within")
+    cdsFO <- findOverlaps(query, cdsByTx)
     txFO <- findOverlaps(query, tx)
-    #exCO <- tabulate(queryHits(exFO), length(query))
     cdsCO <- tabulate(queryHits(cdsFO), length(query))
     txCO <- tabulate(queryHits(txFO), length(query))
 
-    ## exon :
-    exonic <- cdsCO > 0 
+    ## coding :
+    coding <- cdsCO > 0 
 
     ## intergenic :
-    ## FIXME : is it possible to not be in a tx and be something other than
-    ## intergenic? 
-    intergenic <- txCO == 0
-    intvar <- query[txCO == 0]
-    flankGenes <- lapply(seq_len(length(intvar)), 
-        function(x, tx) {
-            values(c(tx[precede(intvar[x,], tx)], 
-            tx[follow(intvar[x,], tx)]))[["gene_id"]] 
-        }, tx)
+    ## FIXME : possible to not match a tx but be something other than intergenic? 
+    if (any(txCO == 0)) {
+        intergenic <- txCO == 0
+        intvar <- query[txCO == 0]
+        flankGenes <- lapply(seq_len(length(intvar)), 
+            function(x, tx) {
+                values(c(tx[precede(intvar[x,], tx)], 
+                tx[follow(intvar[x,], tx)]))[["gene_id"]] 
+            }, tx)
+    } else flankGenes <- NA
 
     ## intron :
     intronic <- txCO != 0 & cdsCO == 0
@@ -53,7 +52,7 @@ locateVariants <- function(query, subject, ...)
     location[intronic == TRUE] <- "intron"
     location[utr5 == TRUE] <- "5'UTR"
     location[utr3 == TRUE] <- "3'UTR"
-    location[exonic == TRUE] <- "exon"
+    location[coding == TRUE] <- "coding"
 
     values(query) <- append(values(query), DataFrame(location, txID, geneID))
     query

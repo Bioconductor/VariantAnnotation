@@ -75,17 +75,14 @@ Outputs are Ensembl IDs for the relevant transcript and gene, transcript coordin
 possible amino acids and the identifier of any existing variants that are co-located 
 with the user-defined variant.
 
-\section{Gene-based Annotations}
-The goal of gene-based annotation is to define the location of the variant
+\section{Variant Location and Amino Acid Coding}
+In this section we identify the location of the variant
 with respect to the functional consequence on genes. 
 
-When a variant falls in a coding exon region we can further determine if the
-variant is non-synonymous and the amino acid codes for the change. If a
-variant matches multiple transcripts, results for all transcripts will
-be provided. 
 %%
 The \Rpackage{VariantAnnotation} package contains a \Robject{GRanges} object 
-consisting of 12 variants. We will use this as our sample data. 
+consisting of variants from the ANNOVAR web site and other modified
+variants. We will use this as our sample data. 
 
 <<data>>=
 library(VariantAnnotation)
@@ -94,10 +91,10 @@ strand(variants) <- "+"
 variants
 @
 
-Location of the variants with respect to genes can be obtained using
+Variant location with respect to genes can be obtained using
 the \Rfunction{locateVariants} function. Required inputs
-are the variant location in ranges, chromosome, and the allele that was
-observed for this variant. New columns for the location, transcript ID 
+for the \Robject{query} are the variant location in ranges
+and chromosome. New columns for the location, transcript ID 
 and Entrez gene ID are added to the metadata of 'variants'. 
 <<location>>=
 library(TxDb.Hsapiens.UCSC.hg18.knownGene)
@@ -112,44 +109,24 @@ on either side of the variant are provided.
 loc[values(loc)[["location"]] == "intergenic", c("location", "txID", "geneID")]
 @
 
-%The table below outlines how variant location is determined.
-%The row names are the classification and column names are the region
-%that was matched by the variant.
-%\begin{table}[ht]
-%\begin{center}
-%\begin{tabular}{l|l|l|l|l|l}
-%\hline
-%Region & Transcript & Coding Region & 5UTR & 3UTR \\
-%\hline
-%exon & yes &  yes & NA & NA \\
-%intron & yes & no & NA & NA \\
-%5UTR & yes & no & yes & no \\
-%3UTR & yes & no & no & yes \\
-%intergenic & no & NA & NA & NA\\
-%\hline
-%\end{tabular}
-%\end{center}
-%\caption{Determination of Variant Location}
-%\label{table:variantLocation}
-%\end{table}
-
 Currently, if a variant matches multiple regions within a transcript (i.e., both
 exon and intron) the highest priority position will be returned. A
 prioritization scheme is outlined in table
-\ref{table:variantlocationPrecedence}.
+\ref{table:variantLocationPrecedence}.
 \begin{table}[ht]
 \begin{center}
 \begin{tabular}{l|l|l}
 \hline
 Region & Precedence & Details \\
 \hline
-exon & 1 & variant falls within a coding exon \\
+coding & 1 & variant overlaps any portion of a coding exon \\
 %splicing & * & variant is within 2-bp of a splicing junction \\
 %ncRNA & 2 & variant overlaps a transcript without coding annotation in the gene
 %definition \\
-UTR5 & 2 & variant overlaps a 5' untranslated region \\
-UTR3 & 2 & variant overlaps a 3' untranslated region \\
-intron & 3 & variant overlaps an intron \\
+UTR5 & 2 & variant overlaps any portion of a 5' untranslated region \\
+UTR3 & 2 & variant overlaps any portion of a 3' untranslated region \\
+intron & 3 & variant overlaps a transcript but does not fall within a coding
+exon \\
 %upstream & 5 &  variant overlaps 1-kb region upstream of transcription start
 %site \\
 %downstream & 5 & variant overlaps 1-kb region downtream of transcription end
@@ -165,7 +142,8 @@ intergenic & 4 & variant is in an intergenic region (i.e., not in a transcript) 
 Amino acid coding changes for variants that fall within exons can be 
 determined with \Rfunction{predictCoding}. This method accepts a
 \Robject{TranscriptDb} or \Robject{GRangesList} as the subject. The 
-exonic variants we are intrested in are chromosomes 1, 2 and 16. We create a
+coding variants we are intrested in fall in chromosomes 1, 2 and 16. 
+In the interest of efficiency we create a
 subset \Robject{GRangesList} with the chromosomes
 of interest but could also have used the \Robject{TranscriptDb} object.
 <<coding_setup>>=
@@ -176,31 +154,53 @@ grl <- keepSeqlevels(cdsByTx, c("chr1", "chr2", "chr16"))
 
 The object returned from \Rmethod{predictCoding} is a 
 \Robject{GRanges} containing only the variants that
-matched an exon region. Three new columns of metadata,
-txID, refAA, and obsAA contain the transcript ID's
-and reference and observed amino acid codes. 
+matched a coding region. New columns of metadata,
+include the metatdata from the \Robject{subject},
+tx\_ID, CodonChange, AAChange and Consequence.
 
 <<coding_result>>= 
-aaCoding <- predictCoding(variants, grl, variantAllele="obsAllele",
+aaCoding <- predictCoding(variants, grl, alleles="alleles",
     seqSource=Hsapiens)
-head(aaCoding[,c("txID", "refAA", "obsAA")])
-aaCoding[1:4,]
+head(aaCoding[,c("CodonChange", "AAChange", "Consequence")])
 @
-Each row of the reult represents a transcript
-matched by a variant. If a variant matched multiple
+Each row of the result represents a transcript
+matched by a variant. When a variant matches multiple
 transcripts, we see multiple rows for that variant.
-For example, we see the variant in the sixth row of the 'variants'
-data fell within an exon and hit four transcripts. The 'aaCoding'
-result shows four rows for this variant, one for each transcript.
+For example, the variant in the sixth row of the 'variants'
+object fell within a coding region and hit four transcripts. 
+The 'aaCoding' result shows four rows for this variant, 
+one for each transcript.
 <<coding_result_multrows>>= 
 aaCoding[1:4,]
 @
 
-\section{Filter-based}
+\begin{table}[ht]
+\begin{center}
+\begin{tabular}{l|l|l|l}
+\hline
+alleles & AA Coding Provided & Classification & Details \\
+\hline
+G/T & yes & synonymous or nonsynonymous & single basepair replacement\\
+G/TG & no & frameshift & substitution with incompatible number of replacement
+basepairs \\
+G/TGCG & yes & synonymous or nonsynonymous & substitution with compatible number of replacement
+basepairs \\
+-/G & no & frameshift & insertion \\
+A/- & no & frameshift & deletion \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Amino Acid Coding of Variants}
+\label{table:variantLocationPrecedence}
+\end{table}
+
+\section{Filtering}
 Evaluate and filter out subsets of variants not appearing in public 
 databases such as 1000 Genomes Project and dbSNP.
 
-\section{Region-based} 
+\subsection{Filter options}
+
+Region Based : \\
 Annotate genome elements other than genes. This is especially 
 important for whole genome sequencing data as the vast majority of 
 variants will be outside of protein encoding regions and their 
@@ -209,6 +209,11 @@ The following types of regions may be useful to annotate,\\
 - conserved genomic\\
 - predicted transcription factor binding sites\\
 - predicted RNA secondary structures\\
+
+\subsection{Filter composition} 
+
+\subsection{Filter application}
+
 
 \section{Other functionalities}
 - Retrieve the nucleotide sequence in any user-specific genomic positions in

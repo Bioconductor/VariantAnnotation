@@ -14,7 +14,7 @@
 }
 
 \usage{
-  \S4method{predictCoding}{GRanges,GRangesList}(query, subject, variantAllele, 
+  \S4method{predictCoding}{GRanges,GRangesList}(query, subject, alleles, 
     seqSource, ...) 
 }
 
@@ -34,8 +34,12 @@
     object it was created with the 'cdsBy' function on a \link{TranscriptDb}
     object.
   } 
-  \item{variantAllele}{A character vector with the name of the column
-    in \code{query} that contains the observed variant allele
+  \item{alleles}{A character representing the name of the column 
+    in \code{query} that contains the reference and variant alleles. The
+    data in the column must be character have format 'reference/variant'.
+    For example, 'A/G' would indicate the reference allele is A and the 
+    variant is G. An two nucleotide insertion would be represented by
+    '-/AT', and a four nucleotide deletion would be 'GCCT/-'. 
   }
   \item{seqSource}{A \code{\link[BSgenome]{BSgenome}} object or \link{FaFileList}.
   }
@@ -52,10 +56,14 @@
 \value{
   A \code{\link{GRanges}} object containing only the variants from
   \code{query} that overlap with a coding sequence in a transcript. A row is
-  returned for each transcript the variant overlapped. Three metadata columns
-  are added, 'txID', 'refAA', and 'obsAA'. The 'txID' corresponds to the
-  transcript id found in the cdsByTx object. 'refAA' and 'obsAA' represent
-  the reference and observed amino acids codes, respectively. 
+  returned for each transcript the variant overlapped. The metadata columns
+  from the \code{subject} are included with the results as well as a column 
+  for 'tx_ID'. Columns for 'CodonChange', and 'AAChange' contain the coding
+  changes in the format 'reference/variant'. The 'Consequence' column
+  indicates if the variant is synonymous or nonsynonymous coding,
+  or a frameshift. Amino acid codes are currently computed for snvs and
+  substitutions with the appropriate number of variant basepairs but not 
+  frameshifts. 
 }
 
 \references{
@@ -71,7 +79,7 @@
   data(variants)
   strand(variants) <- "+"
   txdb <- Hsapiens_UCSC_hg18_knownGene_TxDb 
-  aaCoding <- predictCoding(variants, txdb, variantAllele="obsAllele",
+  aaCoding <- predictCoding(variants, txdb, alleles="alleles",
       seqSource=Hsapiens)
 
   ## FIXME : example for fasta
