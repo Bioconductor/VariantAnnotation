@@ -67,6 +67,10 @@
 
 \author{Michael Lawrence and Valerie Obenchain}
 
+\seealso{
+  \code{\link{locateVariants}}
+}
+
 \examples{
   \dontrun{
   library(TxDb.Hsapiens.UCSC.hg18.knownGene)

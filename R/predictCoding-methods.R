@@ -106,9 +106,9 @@ setMethod("predictCoding", c("GRanges", "GRangesList"),
 
         ## FIXME : better check for equality
         nonsynonymous <- as.character(refAA) != varAA 
-        Consequence <- rep("synonymous_coding", length(xCoding))
-        Consequence[nonsynonymous] <- "nonsynonymous_coding" 
-        Consequence[!translateIdx] <- "frameshift_coding" 
+        Consequence <- rep("synonymous", length(xCoding))
+        Consequence[nonsynonymous] <- "nonsynonymous" 
+        Consequence[!translateIdx] <- "frameshift" 
         values(xCoding)$Consequence <- Consequence 
         
         xCoding

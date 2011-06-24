@@ -4,9 +4,8 @@ locateVariants <- function(query, subject, ...)
     cdsByTx <- cdsBy(subject)
     tx <- transcripts(subject, vals=list(exon_chrom=chrom),
        columns=c("exon_id", "tx_id", "gene_id"))
-    ## FIXME : type='within' doesn't catch indels on the ends 
-    #cdsFO <- findOverlaps(query, cdsByTx, type="within")
-    cdsFO <- findOverlaps(query, cdsByTx)
+    ## FIXME : type = 'within' or 'any' ?
+    cdsFO <- findOverlaps(query, cdsByTx, type="within")
     txFO <- findOverlaps(query, tx)
     cdsCO <- tabulate(queryHits(cdsFO), length(query))
     txCO <- tabulate(queryHits(txFO), length(query))
@@ -47,14 +46,14 @@ locateVariants <- function(query, subject, ...)
     txID <- CharacterList(transcripts)
 
     ## FIXME : report all matches or only priority?
-    location <- character(length(query))
-    location[intergenic == TRUE] <- "intergenic"
-    location[intronic == TRUE] <- "intron"
-    location[utr5 == TRUE] <- "5'UTR"
-    location[utr3 == TRUE] <- "3'UTR"
-    location[coding == TRUE] <- "coding"
+    Location <- rep("unknown", length(query))
+    Location[intergenic == TRUE] <- "intergenic"
+    Location[intronic == TRUE] <- "intron"
+    Location[utr5 == TRUE] <- "5'UTR"
+    Location[utr3 == TRUE] <- "3'UTR"
+    Location[coding == TRUE] <- "coding"
 
-    values(query) <- append(values(query), DataFrame(location, txID, geneID))
+    values(query) <- append(values(query), DataFrame(Location, txID, geneID))
     query
 }
 

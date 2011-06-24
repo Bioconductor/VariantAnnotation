@@ -25,21 +25,18 @@
 
 
 \value{
-  The \code{query} object is returned with two columns added to the metadata.
-  The 'location' column describes the variant location as being in an exon, 
-  intron, intergenic, 3UTR, or 5UTR. The 'genes' column contains the gene ID 
-  from the organism package specified. If the variant is intergenic, 
-  the 'genes' column contains the names of the genes on either side.
-}
-
-\references{
-%% ~put references to the literature/web site here ~
+  The \code{query} object is returned with three columns added to the metadata,
+  Location, txID and geneID. The Location column describes the variant location 
+  as one of exon, intron, intergenic, 3UTR, or 5UTR. The txID and geneID
+  columns contain the transcript and gene IDs from the organism package specified. 
+  If the variant is intergenic, the geneID column contains the IDs for genes
+  on either side of the variant.
 }
 
 \author{Valerie Obenchain}
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+  \code{\link{predictCoding}}
 }
 
 \examples{
