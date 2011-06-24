@@ -3,22 +3,22 @@
 \docType{data}
 
 \title{
-  A genetic variant test dataset from ANNOVAR
+  Human genetic variant test dataset
 }
 
 \description{
-  Twelve genetic variants from human for testing 
+  Human genetic variants from the ANNOVAR web site and other sources.  
 }
 
 \usage{data(variants)}
 
 \format{
-  The dataset is an object of class \code{GRanges} with 12 variants
-  from human. These data are from the ANNOVAR site and used to
-  demonstrant the annotation of multiple types of variants.
+  The dataset is an object of class \code{GRanges} with Human 
+  variants from build hg18. These data come from both the ANNOVAR 
+  web site and other variant sources. 
 
   Information for each variant includes chromosome, range, strand,
-  reference and observed allele, and a comment describing the varaint.
+  reference and observed allele, and a comment.
 }
 
 \source{

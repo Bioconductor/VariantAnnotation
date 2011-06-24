@@ -40,32 +40,49 @@ options(width=72)
 @
 
 \section{Introduction}
-This document illustrates how to annotate genetic variants with existing Bioconductor
-tools. Specifically, we attempt to reproduce the functionality of the ANNOVAR software 
-and Ensembl's Variant Effect Predictor. A brief outline of the capability of each tool
-follows.
+This document illustrates the annotation of genetic variants using the 
+\VariantAnnotation package and existing Bioconductor tools. 
 
-\subsection{ANNOVAR}
-Annotations in ANNOVAR are presented as three categories: gene-based, filter-based 
-and region-based. Sample databases are provided with the software or the user
-can download UCSC tracks along with mRNA FASTA
-files to create a local annotation database. Current gene
-reference options are refGene, knownGene or ensGene. 
+Predicting the effects that genetic variants have on known 
+transcripts is valuable for priorization of variants. This information
+may aid in the selection of variants in genotyping studies and play a role
+in the discovery of new drugs and other biologically significant
+loci.
 
-Gene-based annotations define the location of the variants, with respect to
-the gene, e.g., intronic, exonic, intergenic etc.
-In the case of an intergenic variant, the names of the flanking genes are provided. 
-The functional consequence is provided for variants that fall inside exons. These
-include synonymous or non-synonymous SNV, frameshift insertion or deletion,
-non-frameshift insertion or deletion, frameshift or non-frameshift block substitution.
-If there is a change in amino acid sequence it is provided as a 'sequence change',
-where a standard nomenclature is used to describe the sequence changes.
+A variety of tools exist for the annotation of genetic variants ranging
+from web-based interfaces where data are uploaded to command line
+software that can be downloaded and run locally. ANNOVAR,
+SeattleSeqAnnotation, and Ensembl's Variant Effect predictor
+are a few recent contributions. In general, these tools
+provide information regarding the functional consequence on genes
+and provide a method of filtering the variants based on some
+user-specified criteria. 
 
-Filter-based annotations allow the user to search for the presence of the variant
-in the 1000 Genomes Project or dbSNP databases.
 
-Region-based annotations are used to identify variants at conserved genomic regions.
-Overlaps between the variants and a user-specified conservation track are provided. 
+%A brief outline of the capability of each tool
+%follows.
+%
+%\subsection{ANNOVAR}
+%Annotations in ANNOVAR are presented as three categories: gene-based, filter-based 
+%and region-based. Sample databases are provided with the software or the user
+%can download UCSC tracks along with mRNA FASTA
+%files to create a local annotation database. Current gene
+%reference options are refGene, knownGene or ensGene. 
+%
+%Gene-based annotations define the location of the variants, with respect to
+%the gene, e.g., intronic, exonic, intergenic etc.
+%In the case of an intergenic variant, the names of the flanking genes are provided. 
+%The functional consequence is provided for variants that fall inside exons. These
+%include synonymous or non-synonymous SNV, frameshift insertion or deletion,
+%non-frameshift insertion or deletion, frameshift or non-frameshift block substitution.
+%If there is a change in amino acid sequence it is provided as a 'sequence change',
+%where a standard nomenclature is used to describe the sequence changes.
+%
+%Filter-based annotations allow the user to search for the presence of the variant
+%in the 1000 Genomes Project or dbSNP databases.
+%
+%Region-based annotations are used to identify variants at conserved genomic regions.
+%Overlaps between the variants and a user-specified conservation track are provided. 
 
 \subsection{Ensembl Variant Effect Predictor}
 Ensembl provides a web-based tool, Variant Effect Predictor, as well as an 
@@ -87,8 +104,7 @@ variants. We will use this as our sample data.
 <<data>>=
 library(VariantAnnotation)
 data(variants)
-strand(variants) <- "+"
-variants
+head(variants)
 @
 
 Variant location with respect to genes can be obtained using
@@ -174,9 +190,13 @@ one for each transcript.
 aaCoding[1:4,]
 @
 
+The insertion or deletion of nucleotides that are not multiples of 3 result
+are categorized as a frameshift.
+
+
 \begin{table}[ht]
 \begin{center}
-\begin{tabular}{l|l|l|l}
+\begin{tabular}{p{2cm}|p{2cm}|p{3cm}|p{3cm}}
 \hline
 alleles & AA Coding Provided & Classification & Details \\
 \hline
@@ -185,8 +205,14 @@ G/TG & no & frameshift & substitution with incompatible number of replacement
 basepairs \\
 G/TGCG & yes & synonymous or nonsynonymous & substitution with compatible number of replacement
 basepairs \\
--/G & no & frameshift & insertion \\
-A/- & no & frameshift & deletion \\
+-/G & no & frameshift & insertion with incompatible number of replacement
+basepairs \\
+-/TTG & yes & synonymous or nonsynonymous & insertion with compatible number of replacement
+basepairs \\
+A/- & no & frameshift & deletion with incompatible number of replacement
+basepairs \\
+GGCCTA/- & yes & synonymous or nonsynonymous & deletion with compatible number of replacement
+basepairs \\
 \hline
 \end{tabular}
 \end{center}

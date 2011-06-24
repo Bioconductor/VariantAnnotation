@@ -1,7 +1,6 @@
 setMethod("predictCoding",  c("Ranges", "TranscriptDb"),
     function(query, subject, alleles, seqSource, ...)
     {
-        ## FIXME : pass on only subj that hits query
         cdsByTx <- cdsBy(subject)
         x <- as(query, "GRanges")
         callGeneric(query=x, subject=cdsByTx, alleles=alleles,
@@ -12,7 +11,6 @@ setMethod("predictCoding",  c("Ranges", "TranscriptDb"),
 setMethod("predictCoding",  c("GRanges", "TranscriptDb"),
     function(query, subject, alleles, seqSource, ...)
     {
-        ## FIXME : pass on only subj that hits query
         cdsByTx <- cdsBy(subject)
         callGeneric(query=query, subject=cdsByTx, alleles=alleles,
             seqSource=seqSource, ...) 
@@ -31,9 +29,10 @@ setMethod("predictCoding", c("Ranges", "GRangesList"),
 setMethod("predictCoding", c("GRanges", "GRangesList"),
     function(query, subject, alleles, seqSource, ...)
     {
+        ## FIXME : findOverlaps is done here, globalToLocal and locateVariants
+        fo <- findOverlaps(query, subject, type = "within")
+        subject <- subject[unique(subjectHits(fo))]
         txSeqs <- getTranscriptSeqs(subject, seqSource)
-        ## FIXME : query include only variants in exons?
-        ##         findOverlaps is repeated 3x
         txLocal <- globalToLocal(query, subject)
         xCoding <- query[txLocal$global.ind]
         splitAlleles <- do.call(rbind, strsplit(values(xCoding)[[alleles]], "/"))
@@ -42,32 +41,57 @@ setMethod("predictCoding", c("GRanges", "GRangesList"),
 
         ## FIXME : check original sequence from BSgenome/fasta
         ##         against user provided refAllele?
-        ##         check observed allele is same length as range
  
         ## original codons
         originalWidth <- width(xCoding)
         codonStart <- (start(txLocal$local) - 1L) %/% 3L * 3L + 1L
         codonEnd <- codonStart + 
             originalWidth %/% 3L * 3L + 2L
-        codons <- substring(txSeqs[txLocal$ranges.ind], codonStart, codonEnd)
+        codons <- tolower(substring(txSeqs[txLocal$ranges.ind], codonStart,
+            codonEnd))
+	#substring(codons, varPosition, varPosition) <- 
+	#    toupper(substring(codons, varPosition, varPosition)) 
 
         ## variant codons
-        ## FIXME : treat indels like substitutions?
         varWidth <- nchar(varAlleles)
         varPosition <- (start(txLocal$local) - 1L) %% 3L + 1L
-        substitutionIdx <- (varWidth - originalWidth) %% 3L == 0
-        indelIdx <- refAlleles == "-" | varAlleles == "-" 
-        translateIdx <- substitutionIdx & !indelIdx 
-        varCodons <- tolower(codons)
-	substring(varCodons, varPosition, (varPosition + varWidth - 1L)) <- 
-            toupper(as.character(varAlleles))
+        insertions <- refAlleles == "-" 
+        deletions <- varAlleles == "-" 
+        indels <- insertions | deletions
+        allowedSubstitutions <- !indels &
+            abs(varWidth - originalWidth) %% 3L == 0
+        allowedIndels <- indels  &
+            (abs(varWidth - originalWidth) + 1L) %% 3L == 0
+        translateIdx <- allowedSubstitutions | allowedIndels 
+        varCodons <- codons
+
+
+	## FIXME : simplify
+        ## substitutions, including snvs
+        first <- substr(varCodons[!indels], 1,
+            varPosition[!indels] - 1L)
+        last <- substr(varCodons[!indels], varPosition[!indels] + 1L,
+            nchar(varCodons[!indels]))
+        varCodons[!indels] <- paste(first, varAlleles[!indels], last, sep="")
+        ## insertions
+        first <- substr(varCodons[insertions], varPosition[insertions] - 1L,
+            varPosition[insertions] - 1L)
+        last <- substr(varCodons[insertions], varPosition[insertions],
+            nchar(varCodons[insertions]))
+        varCodons[insertions] <- paste(first, varAlleles[insertions], last, sep="")
+        ## deletions
+        first <- substr(varCodons[deletions], 1, varPosition[deletions] - 1L)
+        last <- substr(varCodons[deletions], varPosition[deletions] +
+            originalWidth[deletions], nchar(varCodons[deletions]))
+        varCodons[deletions] <- paste(first, last, sep="")
+	
 
         ## results
         values(xCoding)[colnames(values(subject@unlistData))] <-
             values(subject@unlistData)[txLocal$ranges.ind,]
         values(xCoding)$tx_ID <- names(subject)[txLocal$ranges.ind]
 
-        CodonChange <- paste(tolower(codons), "/",
+        CodonChange <- paste(codons, "/",
             varCodons, sep="") 
         CodonChange[!translateIdx] <- NA
         values(xCoding)$CodonChange <- CodonChange 
