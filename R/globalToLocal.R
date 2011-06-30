@@ -17,7 +17,7 @@ globalToLocal <- function(global, ranges)
     ## location wrt transcript 
     local <- shift(local, 1L + listCumsumShifted(width(ranges))[shits])
 
-    ranges_ind <- rep(seq(length(ranges)), elementLengths(ranges))[shits]
-    DataFrame(global.ind = qhits, ranges.ind = ranges_ind, local = local)
+    rangesInd <- rep(seq(length(ranges)), elementLengths(ranges))[shits]
+    DataFrame(globalInd = qhits, rangesInd, local)
 }
 

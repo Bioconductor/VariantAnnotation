@@ -26,7 +26,7 @@ locateVariants <- function(query, subject, ...)
     } else flankGenes <- NA
 
     ## intron :
-    intronic <- txCO != 0 & cdsCO == 0
+    intron <- txCO != 0 & cdsCO == 0
 
     ## UTRs :
     fiveUTR <- fiveUTRsByTranscript(subject)
@@ -48,13 +48,17 @@ locateVariants <- function(query, subject, ...)
     ## FIXME : report all matches or only priority?
     Location <- rep("unknown", length(query))
     Location[intergenic == TRUE] <- "intergenic"
-    Location[intronic == TRUE] <- "intron"
+    Location[intron == TRUE] <- "intron"
     Location[utr5 == TRUE] <- "5'UTR"
     Location[utr3 == TRUE] <- "3'UTR"
     Location[coding == TRUE] <- "coding"
 
-    values(query) <- append(values(query), DataFrame(Location, txID, geneID))
-    query
+    ## results appended to query
+    #values(query) <- append(values(query), DataFrame(Location, txID, geneID))
+    #query
+
+    ## results as DataFrame
+    DataFrame(txID, geneID, Location)
 }
 
 

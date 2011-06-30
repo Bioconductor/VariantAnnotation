@@ -8,15 +8,14 @@ setGeneric("getTranscriptSeqs", signature = c("query", "subject"),
            standardGeneric("getTranscriptSeqs")
 )
 
+setGeneric("name", function(x, ...) standardGeneric("name"))
 
-### SRFilter
-#
-#setGeneric("name", function(x, ...) standardGeneric("name"))
-#
-#setGeneric("stats", function(x, ...) standardGeneric("stats"))
-#
-#setGeneric("srFilter", function(fun, name=NA_character_, ...)
-#           standardGeneric("srFilter"),
-#           signature="fun")
-#
+setGeneric("stats", function(x, ...) standardGeneric("stats"))
+
+setGeneric("subset", function(x, ...) standardGeneric("subset"))
+
+setGeneric("vaFilter", function(fun, name=NA_character_, ...)
+           standardGeneric("vaFilter"),
+           signature="fun")
+
 

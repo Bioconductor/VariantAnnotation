@@ -24,9 +24,9 @@ setMethod("getTranscriptSeqs",  c("GRangesList", "FaFile"),
         oneseq <- unlist(seqs)
         widthView <- sum(width(query)) 
         vws <- successiveViews(oneseq, widthView)
-        tx <- as(vws, "DNAStringSet") 
-        names(tx) <- names(query) 
-        tx
+        txseq <- as(vws, "DNAStringSet") 
+        names(txseq) <- names(query) 
+        txseq
     }
 )
  

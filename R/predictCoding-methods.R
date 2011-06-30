@@ -38,7 +38,7 @@ setMethod("predictCoding", c("GRanges", "GRangesList"),
         subject <- subject[unique(subjectHits(fo))]
         txSeqs <- getTranscriptSeqs(subject, seqSource)
         txLocal <- globalToLocal(queryAdj, subject)
-        xCoding <- query[txLocal$global.ind]
+        xCoding <- query[txLocal$globalInd]
 
         ## FIXME : check original sequence from BSgenome/fasta
         ##         against user provided refAllele?
@@ -48,7 +48,7 @@ setMethod("predictCoding", c("GRanges", "GRangesList"),
         codonStart <- (start(txLocal$local) - 1L) %/% 3L * 3L + 1L
         codonEnd <- codonStart + 
             originalWidth %/% 3L * 3L + 2L
-        codons <- DNAStringSet(substring(txSeqs[txLocal$ranges.ind], 
+        codons <- DNAStringSet(substring(txSeqs[txLocal$rangesInd], 
             codonStart, codonEnd))
 
         ## variant codons
@@ -61,10 +61,10 @@ setMethod("predictCoding", c("GRanges", "GRangesList"),
             values(xCoding)[[varAllele]]
 
         ## results
-        queryIndex <- txLocal$global.ind
-        tx_id <- names(subject)[txLocal$ranges.ind]
+        queryIndex <- txLocal$globalInd
+        tx_id <- names(subject)[txLocal$rangesInd]
         fromSubject <-
-            values(subject@unlistData)[txLocal$ranges.ind,]
+            values(subject@unlistData)[txLocal$rangesInd,]
         refCodon <- codons
         varCodon <- varCodons
         refAA <- translate(codons)

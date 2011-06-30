@@ -1,25 +1,43 @@
 import(Biostrings)
 import(GenomicRanges)
-import(Rsamtools)
+
+importClassesFrom(Biobase, ScalarCharacter)
+importClassesFrom(BSgenome, BSgenome)
+importClassesFrom(GenomicFeatures, TranscriptDb)
+importClassesFrom(IRanges, FilterRules, Ranges)
+importClassesFrom(methods, ANY, data.frame, "function", logical,
+                  missing)
+importClassesFrom(Rsamtools, FaFile)
+
 
 importMethodsFrom(GenomicFeatures, cdsBy, exons, transcripts,
                   fiveUTRsByTranscript, threeUTRsByTranscript)
+importMethodsFrom(IRanges, '%in%', append, as.vector, countOverlaps,
+                  elementLengths, end, eval, findOverlaps, follow,
+                  head, lapply, match, paste, precede, queryHits,
+                  rbind, rev, Rle, runValue, sapply, shift, split,
+                  start, "start<-", subjectHits, "subseq<-", substring,
+                  unique, unlist, values, "values<-", width)
+importMethodsFrom(methods, coerce, Logic, show)
+importMethodsFrom(Rsamtools, scanFaIndex)
 
-importMethodsFrom(IRanges, append, as.list, as.vector, colnames,
-                  countOverlaps, elementLengths, end, findOverlaps,
-                  follow, head, "%in%", lapply, match, precede,
-                  queryHits, shift, split, start, subjectHits, substr,
-                  substring, unique, unlist, values, "values<-", width)
 
 importFrom(GenomicFeatures, extractTranscriptsFromGenome)
+importFrom(Biobase, mkScalar, selectSome)
+importFrom(IRanges, CharacterList, DataFrame, FilterRules, IRanges,
+           PartitioningByWidth, successiveViews)
+importFrom(methods, as, callGeneric, callNextMethod, new, slot)
 
-importFrom(IRanges, CharacterList, DataFrame, IRanges,
-           PartitioningByWidth)
+
+exportClassPattern("^.*$")
+
+exportMethods(
+    predictCoding, getTranscriptSeqs,
+    show, c)
 
 export(
     locateVariants, 
     getTranscriptSeqs, globalToLocal,
     listCumsum, listCumsumShifted)
 
-exportMethods(
-    predictCoding, getTranscriptSeqs)
+exportPattern("^[^\\.]")
