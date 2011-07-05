@@ -6,7 +6,7 @@
 \alias{regionFilter}
 \alias{compose}
 
-\title{Functions for user-created and built-in VariantAnnotation filters}
+\title{Functions for VariantAnnotation filters}
 
 \description{
 
@@ -14,8 +14,8 @@
   instances of \code{\linkS4class{VAFilter}}  objects. Filters can be
   applied to genomic variants in a \code{\linkS4class{GRanges}}
   object. The object returned contains a logical vector of which
-  components satisfied the filter as well as a subset object and
-  stats on how many elements satisfied the filter.
+  components satisfied the filter and stats on how many elements satisfied 
+  the filter.
 
 }
 
@@ -97,7 +97,7 @@ regionFilter(txdb, region="coding", returnRecordsFound=TRUE,
 
   \code{vaFilter} returns an object of \code{\linkS4class{VAFilter}}.
 
-  Built-in filters return a logical vector of \code{length(x)}, with
+  Filters return a logical vector of \code{length(x)}, with
   \code{TRUE} indicating components that pass the filter.
 
 }
@@ -111,16 +111,16 @@ data(variants)
 
 # variants present in dbSNP 
 snpfilt <- dbSNPFilter("SNPlocs.Hsapiens.dbSNP.20090506")
-snpfilt(variants)
+snpFilt(variants)
 
 # variants present in coding regions 
 library(TxDb.Hsapiens.UCSC.hg18.knownGene)
 txdb <- Hsapiens_UCSC_hg18_knownGene_TxDb
 regfilt <- regionFilter(txdb, region="coding")
-regfilt(variants)
+regionFilt(variants)
 
 # both filters as a single filter
-combofilt <- compose(snpfilt, regfilt)
+combofilt <- compose(snpFilt, regionFilt)
 combofilt(variants)
 
 ## both filters as a collection

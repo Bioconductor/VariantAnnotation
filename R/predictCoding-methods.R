@@ -31,10 +31,16 @@ setMethod("predictCoding", c("GRanges", "GRangesList"),
     {
         ## FIXME : findOverlaps is done here, globalToLocal and locateVariants
         ## adjust query start for width=0
-        queryAdj <- query
-        start(queryAdj[width(query) == 0]) <- 
-            start(query)[width(query) == 0] - 1 
+        if (any(width(query) == 0)) {
+            queryAdj <- query
+            start(queryAdj[width(query) == 0]) <- 
+                start(query)[width(query) == 0] - 1
+        } else queryAdj <- query
+ 
         fo <- findOverlaps(queryAdj, subject, type = "within")
+        if (length(fo) == 0)
+            stop("there is no overlap between the query and subject")
+
         subject <- subject[unique(subjectHits(fo))]
         txSeqs <- getTranscriptSeqs(subject, seqSource)
         txLocal <- globalToLocal(queryAdj, subject)
@@ -62,7 +68,7 @@ setMethod("predictCoding", c("GRanges", "GRangesList"),
 
         ## results
         queryIndex <- txLocal$globalInd
-        tx_id <- names(subject)[txLocal$rangesInd]
+        txID <- names(subject)[txLocal$rangesInd]
         fromSubject <-
             values(subject@unlistData)[txLocal$rangesInd,]
         refCodon <- codons
@@ -77,7 +83,7 @@ setMethod("predictCoding", c("GRanges", "GRangesList"),
         Consequence[nonsynonymous] <- "nonsynonymous" 
         Consequence[!translateIdx] <- "frameshift" 
         
-        DataFrame(queryIndex, tx_id, refCodon, varCodon, 
+        DataFrame(queryIndex, txID, refCodon, varCodon, 
             refAA, varAA, Consequence, fromSubject) 
     }
 )

@@ -8,8 +8,6 @@
 \alias{show,VAFilterResult-method}
 \alias{stats}
 \alias{stats,VAFilterResult-method}
-\alias{subset}
-\alias{subset,VAFilterResult-method}
 
 \title{"VAFilterResult" for VAFilter output and statistics}
 
@@ -23,12 +21,11 @@
 }
 
 \usage{
-VAFilterResult(x = logical(), name = NA_character_, subset = GRanges(),
+VAFilterResult(x = logical(), name = NA_character_, 
    input = length(x), passing = sum(x), op = NA_character_)
 \S4method{Logic}{VAFilterResult,VAFilterResult}(e1, e2)
 \S4method{name}{VAFilterResult}(x, ...)
 stats(x, ...)
-subset(x, ...)
 \S4method{show}{VAFilterResult}(object)
 }
 
@@ -43,9 +40,6 @@ subset(x, ...)
     \code{passing}, and \code{op} may all be vectors representing
     columns of a \code{data.frame} summarizing the application of
     successive filters.
-  }
-  \item{subset}{\code{\linkS4class{GRanges}} containing the subset of
-    records that passed the filter.
   }
   \item{input}{\code{integer()} indicating the length of the original
     input.
@@ -89,9 +83,6 @@ subset(x, ...)
       participated. The \code{data.frame} rows correspond either to
       single filters, or to logical combinations of filters.}
 
-    \item{\code{subset}:}{Object of class \code{\linkS4class{GRanges}} 
-      containing the records that passed the filter. }
-
   }
 }
 
@@ -116,10 +107,6 @@ Class \code{"vectorORfactor"}, by class "logical", distance 3.
 
     \item{stats}{\code{signature(x = "VAFilterResult")}: a
       \code{data.frame} as described in the \sQuote{Slots} section of
-      this page.}
-
-    \item{subset}{\code{signature(x = "VAFilterResult")}: a
-      \code{\linkS4class{GRanges}} as described in the \sQuote{Slots} section of
       this page.}
 
     \item{show}{\code{signature(object = "VAFilterResult")}: summary of

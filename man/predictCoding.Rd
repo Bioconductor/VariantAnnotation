@@ -58,7 +58,7 @@
 } 
 
 \value{
-  A \code{\link{DataFrame}} with columns of queryIndex, tx_id, refCodon,
+  A \code{\link{DataFrame}} with columns of queryIndex, txID, refCodon,
   varCodon, refAA, varAA, Consequence, and any metadata columns that
   were present in the \code{subject}. 
 

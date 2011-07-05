@@ -14,7 +14,7 @@ setMethod("getTranscriptSeqs",  c("GRangesList", "FaFile"),
             reorder.exons.on.minus.strand=FALSE)
 
         ## back to GRanges for getSeq method 
-        widthEL <- elementLengths(grl16)
+        widthEL <- elementLengths(query)
         gr <- GRanges(seqnames=Rle(txlist$chrom, widthEL), 
                       ranges=IRanges(start=unlist(txlist$exonStarts), 
                                      end=unlist(txlist$exonEnds)), 

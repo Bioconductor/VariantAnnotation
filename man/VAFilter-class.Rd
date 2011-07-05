@@ -14,16 +14,14 @@
 \description{
   Objects of this class are functions that operate on
   \code{\linkS4class{GRanges}} objects containing genetic variants.
-  They return logical vectors indicating
-  which parts of the object satisfy the filter criterion as well
-  as a subset object and statistics describing the number of records
-  that passed the filter.
+  They return logical vectors indicating which parts of the object satisfy 
+  the filter criterion and statistics describing the number of records that 
+  passed the filter.
 }
 
 \section{Objects from the Class}{
 
-  Objects can be created through \code{\link{vaFilter}} (to create a
-  user-defined filter) or through calls to constructors for predefined
+  Objects are created through calls to constructors for predefined
   filters, as described on the \code{\link{vaFilter}} page.
 
 }
@@ -34,10 +32,9 @@
     \item{\code{.Data}:}{Object of class \code{"function"} taking a
       single named argument \code{x} corresponding to the 
       \code{\link{GRanges}} object that the filter will be applied to. 
-      The return value of the
-      filter function is expected to be a logical vector that can be
-      used to subset \code{x} to include those elements of \code{x}
-      satisfying the filter.
+      The return value of the filter function is expected to be a logical 
+      vector that can be used to subset \code{x} to include those elements 
+      of \code{x} satisfying the filter.
     }
 
     \item{\code{name}:}{Object of class \code{"ScalarCharacter"}
@@ -71,21 +68,13 @@ Class \code{"\linkS4class{PossibleMethod}"}, by class "function", distance 2.
       summary of the filter
     }
 
-    \item{coerce}{\code{signature(from = "VAFilter", to =
-        "FilterRules")}: Coerce a filter to a
-      \code{\link[IRanges]{FilterRules}} object of length one.
-    }
-
-    \item{c}{\code{signature(x = "VAFilter", ...)}: Combine filters into a
-      single \code{\link[IRanges]{FilterRules}} object.
-    }
   }
 }
 
 \author{Valerie Obenchain <vobencha@fhcrc.org>}
 
 \seealso{
-  \code{\link{vaFilter}} for predefined and user-defined filters.
+  \code{\link{vaFilter}} for predefined filters.
 }
 
 \examples{

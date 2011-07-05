@@ -48,8 +48,9 @@ for identifying subsets of variants based on criteria such as inclusion in
 dbSNP, 1000 Genomes, and SIFT scores. 
 
 \section{Location with respect to gene function}
-As sample data we use the \Robject{GRanges} object, \Rcode{variants},
-that contains both real and faux variants. The ranges in the \Rcode{variants} 
+As sample data we use the \Robject{GRanges} object, \Robject{variants},
+
+that contains both real and faux variants. The ranges in the \Robject{variants} 
 object represent the position of the variant.
 A SNP is represented with equal start and end positions and 
 has a width of length 1. A deletion or substitution will have a width of 1 or
@@ -57,8 +58,8 @@ greater depending on the number of basepairs being deleted or substituted.
 Insertions are represented with the start position one less than the end 
 which results in a width of length 0. 
 
-The reference and variant alleles are contained in the \Rcode{refAllele} and 
-\Rcode{varAllele} columns as \Robject{DNAStringSet}s. An insertion 
+The reference and variant alleles are contained in the \Robject{refAllele} and 
+\Robject{varAllele} columns as \Robject{DNAStringSet}s. An insertion 
 will have a missing value in the \Robject{refAllele} column and a deletion
 will have a missing value in the \Robject{varAllele} column.
  
@@ -68,10 +69,11 @@ data(variants)
 head(variants)
 @
 
-The \Rfunction{locateVariants} function returns a \Robject{DataFrame} the
-same length as the \Robject{query} argument with columns for the location and
-transcript and gene ID. For intergenic variants, gene ID's for the 
-genes on either side of the variant are provided.
+The \Rfunction{locateVariants} function returns a \Robject{DataFrame} with
+location, transript ID and gene ID information. For intergenic variants, 
+ID's for genes on either side of the variant are provided. At least one
+row will be returned for each variant. When a variant matches multiple 
+transcripts, a row is returned for each match.
 
 <<location>>=
 library(TxDb.Hsapiens.UCSC.hg18.knownGene)
@@ -82,29 +84,26 @@ head(loc)
 
 Location categories of `coding', `UTR5', `UTR3', `intron' and
 `intergenic' are assigned based on the criteria in Table \ref{table:location}. 
-If a variant matches multiple regions the highest priority position is 
-chosen. For example, if there is a match to both an intron and 5' UTR region,
-the data for the 5' UTR region will be returned. 
 
 \begin{table}[ht]
 \begin{center}
-\begin{tabular}{c|c|l}
+\begin{tabular}{c|l}
 \hline
-Region & Priority & Details \\
+Region & Details \\
 \hline
-coding & 1 & variant falls \emph{within} a coding region \\
+coding &  variant falls \emph{within} a coding region \\
 %splicing & * & variant is within 2-bp of a splicing junction \\
 %ncRNA & 2 & variant overlaps a transcript without coding annotation in the gene
 %definition \\
-UTR5 & 2 & variant overlaps \emph{any} portion of a 5' untranslated region \\
-UTR3 & 2 & variant overlaps \emph{any} portion of a 3' untranslated region \\
-intron & 3 & variant overlaps \emph{any} portion of a transcript but does not
+UTR5 &  variant overlaps \emph{any} portion of a 5' untranslated region \\
+UTR3 &  variant overlaps \emph{any} portion of a 3' untranslated region \\
+intron &  variant overlaps \emph{any} portion of a transcript but does not
 fall \emph{within} a coding region \\
 %upstream & 5 &  variant overlaps 1-kb region upstream of transcription start
 %site \\
 %downstream & 5 & variant overlaps 1-kb region downtream of transcription end
 %site \\
-intergenic & 4 & variant does not overlap \emph{any} portion of a transcript \\
+intergenic & variant does not overlap \emph{any} portion of a transcript \\
 \hline
 \end{tabular}
 \end{center}
@@ -112,35 +111,47 @@ intergenic & 4 & variant does not overlap \emph{any} portion of a transcript \\
 \label{table:location}
 \end{table}
 
+Here is an example of a snp that was aligned to different chromosome locations
+for different assemblies. 
+
+<<singleSNP>>=
+singleSNP <- GRanges(seqnames="chr16",
+        ranges=IRanges(start=c(23004226, 22316999, 24133766),
+               width=c(1,1,1)),
+        refAllele=DNAStringSet("A"), varAllele=DNAStringSet("T"),
+        comments=c("Celera assembly", "HuRef assembly", "reference assembly"))
+
+locateVariants(singleSNP, txdb)
+@
+
 \section{Amino Acid Coding Changes}
 
 The \Rfunction{predictCoding} function identifies overlaps 
-between the variants in the \Rcode{query}, a 
-\Rcode{GRanges} object, and the coding regions of a \Robject{TranscriptDb} 
-object. Reference sequences for the codons are retrieved from either a 
-\Robject{BSgenome} object or fasta file.
-Codons sequences for the variants are produced by substituting,
+between the variants in the \Robject{query} and the coding 
+regions of a \Robject{TranscriptDb} object. Reference sequences 
+for the codons are retrieved from either a \Robject{BSgenome} 
+or fasta file. Codons sequences for the variants are produced by substituting,
 inserting or deleting the alleles specified in the varAllele column
-into the reference sequences. When the resulting codon sequence is a multiple 
-of 3, amino acid codes are computed for the variant codon sequence. Table 
-\ref{table:aacoding} contains examples of situtions when amino acid codes 
-are and are not computed for the variant codon sequence. The insertion position 
-of the variant alleles in Table \ref{table:aacoding} are random and were chosen 
+into the reference sequences. When the resulting variant codon sequence 
+is a multiple of 3, amino acid codes are computed for the codon sequence. 
+Table \ref{table:aacoding} shows examples of when amino acid codes are and 
+are not computed for the variant codon sequence. Positions of substitution,
+insertion or deletion in Table \ref{table:aacoding} are random and were chosen 
 for example purposes only.
 
 \begin{table}[ht]
 \begin{center}
-\begin{tabular}{c|c|c|c|c|l}
+\begin{tabular}{c|c|c|c|l}
 \hline
-refAllele & varAllele & refCodon & varCodon & AA coding provided & Rationale \\
+refAllele & varAllele & refCodon & varCodon & AA coding of varCodon  \\
 \hline
-G & T & agg & agT & yes & snp result is multiple of 3\\
-G & TG & tga & tTGa & no & substitution result is not multiple of 3\\
-G & TGCG & gtc & TGCGtc & yes & substitution result is multiple of 3\\
-`' & G & cgg & Gcgg & no & insertion result is not multiple of 3\\
-`' & TTG & ttg & TttgTG & yes & insertion result is multiple of 3\\
-A & `' & atc & tc & no & deletion result is not multiple of 3\\
-GGCCTA & `' & acggcctaa & aca & yes & deletion results is multiple of 3\\
+G & T & agg & agT & yes, snp substitution result is multiple of 3\\
+G & TG & tga & tTGa & no, substitution result is not multiple of 3\\
+G & TGCG & gtc & TGCGtc & yes, substitution result is multiple of 3\\
+`' & G & cgg & Gcgg & no, insertion result is not multiple of 3\\
+`' & TTG & ttg & TttgTG & yes, insertion result is multiple of 3\\
+A & `' & atc & tc & no, deletion result is not multiple of 3\\
+GGCCTA & `' & acggcctaa & aca & yes, deletion result is multiple of 3\\
 \hline
 \end{tabular}
 \end{center}
@@ -148,10 +159,10 @@ GGCCTA & `' & acggcctaa & aca & yes & deletion results is multiple of 3\\
 \label{table:aacoding}
 \end{table}
 
-The coding variants fall in chromosomes 1, 2 and 16. Here we create a 
-\Robject{GRanges} of coding regions by transcripts and retian only the 
-chromosomes of interest to use as the \Rcode{subject}. Alternatively we 
-could use the full \Robject{TranscriptDb}.
+The variants that fall in coding regions are in chromosomes 1, 2 and 16. 
+Here we create a \Robject{GRanges} of coding regions by transcripts and 
+retain only the chromosomes of interest. Alternatively we could have used 
+the full \Robject{TranscriptDb} as the \Robject{subject}.
 
 <<aacoding>>=
 library(BSgenome.Hsapiens.UCSC.hg18)
@@ -165,14 +176,14 @@ head(aaCoding)
 
 Our result is a \Robject{DataFrame} containing only the variants that
 matched a coding region. Columns include queryIndex, 
-tx\_id, refCodon, varCodon, refAA, varAA, Consequence and any
+txID, refCodon, varCodon, refAA, varAA, Consequence and any
 metadata columns that were present in the \Robject{subject}. 
 
 The result has one row for each transcript matched by a variant. The
 queryIdx column is the map back to the rows in the original \Robject{query}.
 If a variant matches multiple transcripts there will be multiple rows
 for that variant. For example, the variant in the sixth row of the 
-\Rcode{variants} object fell within a coding region and matched four transcripts. 
+\Robject{variants} object fell within a coding region and matched four transcripts. 
 The first four rows of the aaCoding result are the data for this variant.
 
 The Consequence column indicates `synonymous' or `nonsynonymous' for 
@@ -183,12 +194,13 @@ amino acid codes were computed have a missing in value in the varAA column.
 aaCoding[width(aaCoding$varAA) == 0,] 
 @
 
+
 \section{Filtering Variants}
 
 Identifying subsets of variants that meet a specific criteria can be
 accomplished with the filter functions in the \Rpackage{VariantAnnotaion} package.
 Currenty there is support for filtering based on location (e.g., coding, intron,
-5' utr, etc.) and for presence of the variant in dbSNP.
+5' utr, etc.) and for presence/absence of the variant in dbSNP.
 
 investigating : \\
 - SIFT \\
@@ -197,17 +209,17 @@ investigating : \\
 - HapMap \\
 - conservation regions \\ 
 
-<<snpfiltering>>=
+<<filtering>>=
 # variants present in dbSNP 
-snpfilt <- dbSNPFilter("SNPlocs.Hsapiens.dbSNP.20090506")
-snpfilt(variants)
+snpFilt <- dbSNPFilter("SNPlocs.Hsapiens.dbSNP.20090506")
+snpFilt(variants)
 
 # variants present in coding regions 
-regfilt <- regionFilter(txdb, region="coding")
-regfilt(variants)
+regionFilt <- regionFilter(txdb, region="coding")
+regionFilt(variants)
 
 # both filters as a single filter
-combofilt <- compose(snpfilt, regfilt)
+combofilt <- compose(snpFilt, regionFilt)
 combofilt(variants)
 
 ## both filters as a collection

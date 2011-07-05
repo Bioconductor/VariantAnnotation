@@ -7,15 +7,16 @@
 }
 
 \description{
-  Human genetic variants from the ANNOVAR web site and other sources.  
+  This dataset contains sample Human genetic variants from the ANNOVAR web 
+  site and fabricated variants. 
 }
 
 \usage{data(variants)}
 
 \format{
   The dataset is an object of class \code{GRanges} with Human 
-  variants from build hg18. These data come from both the ANNOVAR 
-  web site and other variant sources. 
+  variants from build hg18. Some of the varaints come from the ANNOVAR 
+  web site and some are fabricated for example purposes. 
 
   Information for each variant includes chromosome, range, strand,
   reference and observed allele, and a comment.

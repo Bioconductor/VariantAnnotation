@@ -16,6 +16,5 @@ setClass("VAFilterResult",
          contains=c("logical", ".VAUtil"),
          representation=representation(
            name="ScalarCharacter",
-           stats="data.frame",
-           subset="GRanges"))
+           stats="data.frame"))
 

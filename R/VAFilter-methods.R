@@ -24,8 +24,7 @@ setMethod(vaFilter, "function",
     env[[".stats"]] <- NULL
     fun <- eval(substitute(function(x) {
         res <- FUN(x)
-        subset <- x[res]
-        VAFilterResult(res, NAME, subset)
+        VAFilterResult(res, NAME)
     }, list(FUN=fun, NAME=name)))
     environment(fun) <- env
 
@@ -38,6 +37,11 @@ setMethod(vaFilter, "VAFilter", function(fun, name, ...) {
 
 setMethod(name, "VAFilter", function(x, ...) slot(x, "name"))
 
+setMethod(show, "VAFilter", function(object) {
+    cat("class:", class(object), "\n")
+    cat("name:", name(object), "\n")
+    cat("use vaFilter(object) to see filter\n")
+})
 
 dbSNPFilter <-
     function(dbSNP=character(0), returnRecordsFound=TRUE,
@@ -68,7 +72,6 @@ dbSNPFilter <-
     }, name = .name)
 }
 
-
 regionFilter <-
     function(txdb, region="coding", returnRecordsFound=TRUE, 
              .name="regionFilter")
@@ -76,10 +79,11 @@ regionFilter <-
     #.check_type_and_length(min, "numeric", 1)
     vaFilter(function(x) {
         loc <- locateVariants(x, txdb)
-        loc$Location %in% region 
+        res <- logical(length(x))
+        res[unique(loc$queryIndex[loc$Location %in% region])] <- TRUE
+        res 
     }, name=.name)
 }
-
 
 compose <-
     function(filt, ..., .name)
@@ -97,24 +101,19 @@ compose <-
     }, name =.name)
 }
 
-setMethod(show, "VAFilter", function(object) {
-    cat("class:", class(object), "\n")
-    cat("name:", name(object), "\n")
-    cat("use vaFilter(object) to see filter\n")
-})
 
-setAs("VAFilter", "FilterRules", function(from) {
-    exprs <- list(from)
-    names(exprs) <- name(from)
-    FilterRules(exprs)
-})
-
-setMethod(c, "VAFilter", function (x, ..., recursive = FALSE) {
-    if (missing(x))
-        args <- unname(list(...))
-    else
-        args <- unname(list(x, ...))
-    args <- list(x, ...)
-    rules <- lapply(args, as, "FilterRules")
-    do.call(c, c(rules, recursive = recursive))
-})
+#setAs("VAFilter", "FilterRules", function(from) {
+#    exprs <- list(from)
+#    names(exprs) <- name(from)
+#    FilterRules(exprs)
+#})
+#
+#setMethod(c, "VAFilter", function (x, ..., recursive = FALSE) {
+#    if (missing(x))
+#        args <- unname(list(...))
+#    else
+#        args <- unname(list(x, ...))
+#    args <- list(x, ...)
+#    rules <- lapply(args, as, "FilterRules")
+#    do.call(c, c(rules, recursive = recursive))
+#})
