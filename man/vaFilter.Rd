@@ -10,12 +10,11 @@
 
 \description{
 
-  These functions create user-defined (\code{vaFitler}) or built-in
-  instances of \code{\linkS4class{VAFilter}}  objects. Filters can be
-  applied to genomic variants in a \code{\linkS4class{GRanges}}
-  object. The object returned contains a logical vector of which
-  components satisfied the filter and stats on how many elements satisfied 
-  the filter.
+  These functions create instances of \code{\linkS4class{VAFilter}}  
+  objects. Filters can be applied to genomic variants in a 
+  \code{\linkS4class{GRanges}} object. The object returned contains a logical 
+  vector indicating which records satisfied the filter and stats on how many 
+  elements satisfied the filter.
 
 }
 
@@ -26,10 +25,8 @@ vaFilter(fun, name = NA_character_, ...)
 
 compose(filt, ..., .name)
 
-dbSNPFilter(dbSNP=character(0), returnRecordsFound=TRUE,
-         .name="dbSNPFilter")
-regionFilter(txdb, region="coding", returnRecordsFound=TRUE,
-                 .name="regionFilter")
+dbSNPFilter(dbSNP=character(0), .name="dbSNPFilter")
+regionFilter(txdb, region="coding", .name="regionFilter")
 }
 
 \arguments{
@@ -57,20 +54,17 @@ regionFilter(txdb, region="coding", returnRecordsFound=TRUE,
     to identifying gene regions.
   }
   \item{region}{A \code{character(1)} object specifying the region
-    on which to filter the results.
-  }
-  \item{returnRecordsFound}{\code{logical(1)} which, when \code{TRUE}, will
-    result results that satisfy the filter.
+    on which to filter the results. Possible values are "coding",
+    "intron", "3UTR", "5UTR" and "intergenic".
   }
 }
 
 \details{
 
   \code{vaFilter} allows users to construct their own filters. The
-  \code{fun} argument to \code{vaFilter} must be a function accepting a
-  single argument \code{x} and returning a logical vector that can be
-  used to select elements of \code{x} satisfying the filter with
-  \code{x[fun(x)]}
+  \code{fun} argument to \code{vaFilter} must be a function accepting
+  a single argument \code{x} and returning a logical vector indicating
+  which records passed the filter. 
 
   The \code{signature(fun="missing")} method creates a default filter
   that returns a vector of \code{TRUE} values with length equal to
@@ -83,7 +77,7 @@ regionFilter(txdb, region="coding", returnRecordsFound=TRUE,
   of all component filters, each separated by \code{" o "}.
 
   The remaining functions documented on this page are built-in filters
-  that accept an argument \code{x} and return a logical vector of
+  that accept arguments \code{x, subset=TRUE} and return a logical vector of
   \code{length(x)} indicating which components of \code{x} satisfy the
   filter.
 
@@ -110,23 +104,22 @@ regionFilter(txdb, region="coding", returnRecordsFound=TRUE,
 data(variants)
 
 # variants present in dbSNP 
-snpfilt <- dbSNPFilter("SNPlocs.Hsapiens.dbSNP.20090506")
+snpFilt <- dbSNPFilter("SNPlocs.Hsapiens.dbSNP.20090506")
+# subset of variants that passed the filter
 snpFilt(variants)
+# VAFilterResult with logical vector indicating which variants passed the filter
+snpFilt(variants, subset=FALSE)
 
 # variants present in coding regions 
 library(TxDb.Hsapiens.UCSC.hg18.knownGene)
 txdb <- Hsapiens_UCSC_hg18_knownGene_TxDb
-regfilt <- regionFilter(txdb, region="coding")
-regionFilt(variants)
+regionFilt <- regionFilter(txdb, region="coding")
+regionFilt(variants, subset=FALSE)
 
-# both filters as a single filter
-combofilt <- compose(snpFilt, regionFilt)
-combofilt(variants)
+# subset of variants that passed both filters
+comboFilt <- compose(snpFilt, regionFilt)
+comboFilt(variants)
 
-## both filters as a collection
-#colfilt <- c(snpfilt, regfilt)
-#subsetByFilter(variants, colfilt)
-#summary(colfilt, variants)
 }
 
 

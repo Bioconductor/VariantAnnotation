@@ -12,11 +12,13 @@
 \title{"VAFilter" for representing functions operating on genetic variants}
 
 \description{
+
   Objects of this class are functions that operate on
   \code{\linkS4class{GRanges}} objects containing genetic variants.
   They return logical vectors indicating which parts of the object satisfy 
   the filter criterion and statistics describing the number of records that 
   passed the filter.
+
 }
 
 \section{Objects from the Class}{
@@ -57,7 +59,7 @@ Class \code{"\linkS4class{PossibleMethod}"}, by class "function", distance 2.
     \item{vaFilter}{\code{signature(fun = "VAFilter")}: Return the function
       representing the underlying filter; this is primarily for
       interactive use to understanding filter function; usually the
-      filter is invoked as a normal function call, as illustrated below
+      filter is invoked as a normal function call
     }
 
     \item{name}{\code{signature(x = "VAFilter")}: Return, as a

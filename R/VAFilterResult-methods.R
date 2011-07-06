@@ -1,15 +1,21 @@
 
 VAFilterResult <-
-    function(x=logical(), name=NA_character_,
-             input=length(x), passing=sum(x), op=NA_character_)
+    function(data=GRanges(), x=logical(), name=NA_character_,
+             subset=TRUE, input=length(x), passing=sum(x), op=NA_character_)
 {
-    new("VAFilterResult", x, name=mkScalar(as.character(name)[length(name)]),
-        stats=data.frame(Name=as.character(name), Input=input, Passing=passing,
-          Op=op, stringsAsFactors=FALSE))
+    name=mkScalar(as.character(name)[length(name)])
+    stats <- data.frame(Name=as.character(name), Input=input, Passing=passing,
+        Op=op, stringsAsFactors=FALSE)
+    if (subset) {
+        res <- data[x]
+        metadata(res) <- list(name=name, stats=stats)
+        res 
+    } else {
+    new("VAFilterResult", x, name=name, stats=stats)
+    }
 }
 
 setMethod(name, "VAFilterResult", function(x, ...) slot(x, "name"))
-
 setMethod(stats, "VAFilterResult", function(x, ...) slot(x, "stats"))
 
 setMethod("Logic", c("VAFilterResult", "VAFilterResult"),
@@ -41,7 +47,7 @@ setMethod(show, "VAFilterResult",
 {
     cat("class:", class(object), "\n")
     cat("name:", name(object), "\n")
-    cat("pass filter:", selectSome(object), "\n")
+    cat("output:", selectSome(object), "\n")
     cat("stats:\n")
     print(stats(object))
 })

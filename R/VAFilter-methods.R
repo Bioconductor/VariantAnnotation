@@ -2,8 +2,8 @@
 setMethod(.vaValidity, "VAFilter", function (object) {
     msg <- NULL
     fmls <- formals(object)
-    if (length(fmls) != 1 || names(fmls)[[1]] != "x")
-        msg <- c(msg, paste("'filter' must have one argument, 'x'"))
+    if (length(fmls) == 0 || names(fmls)[[1]] != "x")
+        msg <- c(msg, paste("'filter' must have at least one argument, 'x'"))
     if (is.null(msg)) TRUE else msg
 })
 
@@ -16,15 +16,15 @@ setMethod(vaFilter, "function",
 {
     name <- mkScalar(as.character(name))
     fmls <- formals(fun)
-    if (length(fmls) != 1 || names(fmls)[[1]] != "x")
+    if (length(fmls) == 0 || names(fmls)[[1]] != "x")
         stop("UserArgumentMismatch",
-             "'filter' must have one argument, 'x'")
+             "'filter' must have at least one argument, 'x'")
 
     env <- new.env(parent=environment(fun))
     env[[".stats"]] <- NULL
-    fun <- eval(substitute(function(x) {
+    fun <- eval(substitute(function(x, subset=TRUE) {
         res <- FUN(x)
-        VAFilterResult(res, NAME)
+        VAFilterResult(x, res, NAME, subset)
     }, list(FUN=fun, NAME=name)))
     environment(fun) <- env
 
@@ -44,8 +44,7 @@ setMethod(show, "VAFilter", function(object) {
 })
 
 dbSNPFilter <-
-    function(dbSNP=character(0), returnRecordsFound=TRUE,
-             .name="dbSNPFilter")
+    function(dbSNP=character(0), .name="dbSNPFilter")
 {
     #.check_type_and_length(regex, "character", 0:1)
     require(dbSNP, quietly=TRUE, character.only=TRUE)
@@ -67,21 +66,19 @@ dbSNPFilter <-
         }, snps)
 
         .idx[do.call(rbind, res)$Index] <- TRUE
-        if (!returnRecordsFound) .idx <- !.idx
         .idx
     }, name = .name)
 }
 
 regionFilter <-
-    function(txdb, region="coding", returnRecordsFound=TRUE, 
-             .name="regionFilter")
+    function(txdb, region="coding", .name="regionFilter")
 {
     #.check_type_and_length(min, "numeric", 1)
     vaFilter(function(x) {
         loc <- locateVariants(x, txdb)
         res <- logical(length(x))
         res[unique(loc$queryIndex[loc$Location %in% region])] <- TRUE
-        res 
+        res
     }, name=.name)
 }
 
@@ -89,16 +86,17 @@ compose <-
     function(filt, ..., .name)
 {
     lst <- if (missing(filt)) list(...) else list(filt, ...)
-    for (`filt, ...` in lst)
+    #for (`filt, ...` in lst)
     #    .check_type_and_length(`filt, ...`, "VAFilter", NA)
     if (missing(.name))
         .name <- paste(sapply(lst, name), collapse=" o ")
     vaFilter(function(x) {
-        .idx <- VAFilterResult(!logical(length(x)))
-        for (elt in rev(lst))
-            .idx <- .idx & elt(x)
+        .idx <- VAFilterResult(x, !logical(length(x)), subset=FALSE)
+        for (elt in rev(lst)){
+            .idx <- .idx & elt(x, subset=FALSE)@.Data
+        }
         .idx
-    }, name =.name)
+    }, name = .name)
 }
 
 

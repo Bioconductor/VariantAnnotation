@@ -21,8 +21,8 @@
 }
 
 \usage{
-VAFilterResult(x = logical(), name = NA_character_, 
-   input = length(x), passing = sum(x), op = NA_character_)
+VAFilterResult(data = GRanges(), x = logical(), name = NA_character_, 
+   subset = TRUE, input = length(x), passing = sum(x), op = NA_character_)
 \S4method{Logic}{VAFilterResult,VAFilterResult}(e1, e2)
 \S4method{name}{VAFilterResult}(x, ...)
 stats(x, ...)
@@ -31,6 +31,8 @@ stats(x, ...)
 
 \arguments{
 
+  \item{data}{A \code{linkS4class{GRanges}} of the data to be filtered.
+  }
   \item{x, object, e1, e2}{For \code{VAFilterResult}, \code{logical()}
     indicating records that passed filter or, for others, an instance of
     \code{VAFilterResult} class.
@@ -40,6 +42,12 @@ stats(x, ...)
     \code{passing}, and \code{op} may all be vectors representing
     columns of a \code{data.frame} summarizing the application of
     successive filters.
+  }
+  \item{subset}{\code{logical()} when TRUE, the function returns a 
+    subset of the data that passed the filter as a
+    \code{linkS4class{GRanges}} object. The \code{name} and \code{stats}
+    information are in the metadata slot. When FALSE, an object of 
+    \code{VAFilterResult} is returned.
   }
   \item{input}{\code{integer()} indicating the length of the original
     input.
@@ -57,7 +65,7 @@ stats(x, ...)
 }
 
 \section{Objects from the Class}{
-  
+ 
   Objects can be created through \code{\link{VAFilterResult}}, but these
   are automatically created by the application of \code{\link{vaFilter}}
   instances.
@@ -97,7 +105,7 @@ Class \code{"vectorORfactor"}, by class "logical", distance 3.
   \describe{
 
     \item{Logic}{\code{signature(e1 = "VAFilterResult", e2 =
-	"VAFilterResult")}: logic operations on filters.}
+      "VAFilterResult")}: logic operations on filters.}
 
     \item{!}{\code{signature(x = "VAFilterResult")}: Negate the outcome
       of the current filter results }
@@ -121,7 +129,7 @@ Class \code{"vectorORfactor"}, by class "logical", distance 3.
 \seealso{\code{\link{vaFilter}}}
 
 \examples{
-
+## see ?vaFilter
 }
 
 \keyword{classes}

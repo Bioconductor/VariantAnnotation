@@ -206,47 +206,41 @@ aaCoding[width(aaCoding$varAA) == 0,]
 
 Identifying subsets of variants that meet a specific criteria can be
 accomplished with the filter functions in the \Rpackage{VariantAnnotaion} package.
-Currenty there is support for filtering based on location (e.g., coding, intron,
-5' utr, etc.) and for presence/absence of the variant in dbSNP.
+Filters are first created with the appropriate reference to construct the 
+filter, either a dbSNP package or \Robject{TranscriptDb} object. 
 
-investigating : \\
-- SIFT \\
-- polyphen \\
-- 1000 genomes \\
-- HapMap \\
-- conservation regions \\ 
-
-<<filtering>>=
+<<createFilters>>=
 # variants present in dbSNP 
 snpFilt <- dbSNPFilter("SNPlocs.Hsapiens.dbSNP.20090506")
-snpFilt(variants)
+snpFilt
 
 # variants present in coding regions 
 regionFilt <- regionFilter(txdb, region="coding")
-regionFilt(variants)
-
-# both filters as a single filter
-combofilt <- compose(snpFilt, regionFilt)
-combofilt(variants)
-
-## both filters as a collection
-#colfilt <- c(snpfilt, regfilt)
-#subsetByFilter(variants, colfilt)
-#summary(colfilt, variants)
+regionFilt
 @
 
-%Region-based annotations are used to identify variants at conserved genomic regions.
-%Overlaps between the variants and a user-specified conservation track are provided. 
-%Region Based : \\
-%Annotate genome elements other than genes. This is especially 
-%important for whole genome sequencing data as the vast majority of 
-%variants will be outside of protein encoding regions and their 
-%function effects cannot be assessed by gene-based annotations.
-%The following types of regions may be useful to annotate,\\
-%- conserved genomic\\
-%- predicted transcription factor binding sites\\
-%- predicted RNA secondary structures\\
-%
+When applying a filter to the data, the optional argument \Rcode{subset}
+can be specified. If \Rcode{subset=TRUE} (the default), a \Robject{GRanges} 
+object of subset data is returned. The filter name and number of 
+records filtered are included in the object metadata. When \Rcode{subset=FALSE}
+a \Robject{VAFilterResult} object is returned which contains a logical
+vector indicating which records passed the filter.
+
+<<filtering>>=
+# return a subset of records passing the filter
+snpResult <- snpFilt(variants)
+snpResult 
+metadata(snpResult)
+
+# return a VAFilterResult object
+snpFilt(variants, subset=FALSE)
+
+
+# return a subset of data passing both filters
+combofilt <- compose(snpFilt, regionFilt)
+combofilt(variants)
+@
+
 
 \section{References}
 Wang K, Li M, Hakonarson H, (2010), ANNOVAR: functional annotation of genetic 
@@ -257,9 +251,9 @@ No. 16, e164.\\
 genomic variants with the Ensembl API and SNP Effect Predictor. Bioinformatics,
 Vol. 26, No. 16, 2069-2070.
 
-%\section{Session Information}
-%<<sessionInfo>>=
-%sessionInfo()
-%@
+\section{Session Information}
+<<sessionInfo>>=
+sessionInfo()
+@
 
 \end{document}
