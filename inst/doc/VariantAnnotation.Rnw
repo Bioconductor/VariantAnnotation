@@ -210,6 +210,7 @@ Filters are first created with the appropriate reference to construct the
 filter, either a dbSNP package or \Robject{TranscriptDb} object. 
 
 <<createFilters>>=
+library("SNPlocs.Hsapiens.dbSNP.20090506")
 # variants present in dbSNP 
 snpFilt <- dbSNPFilter("SNPlocs.Hsapiens.dbSNP.20090506")
 snpFilt
