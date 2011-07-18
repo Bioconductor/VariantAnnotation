@@ -1,27 +1,41 @@
 ## FIXME : (1) overlaps all type = 'within' or 'any' ?
 ##         (2) if doesn't match a tx -> classified as intergenic 
  
-#setMethod("locateVariants",  c("GRanges", "TranscriptDb"),
-#    function(query, subject, ...)
-#    {
-#        cdsByTx <- cdsBy(subject)
-#        callGeneric(query=query, subject=cdsByTx, ...) 
-#    }
-#)
-
 setMethod("locateVariants", c("GRanges", "TranscriptDb"),
     function(query, subject, ...)
     {
-        chrom <- unique(seqlevels(query))
+        chrom <- seqlevels(query)
+        isActiveSeq(subject)[!names(isActiveSeq(subject)) %in% chrom] <- FALSE 
         cdsByTx <- cdsBy(subject)
-        tx <- transcripts(subject, vals=list(exon_chrom=chrom),
-           columns=c("exon_id", "tx_id", "gene_id"))
-        ## adjust query start for width=0
+        tx <- transcripts(subject, columns=c("exon_id", "tx_id", "gene_id"))
+
+        ## adjust query with width=0
+        ## - increment end to equal start value 
+        ## - findOverlaps - findOverlaps(type="start") 
         if (any(width(query) == 0)) {
+            insertion <- width(query) == 0
             queryAdj <- query
-            start(queryAdj[width(query) == 0]) <- 
-                start(query)[width(query) == 0] - 1
+            start(queryAdj[insertion]) <- 
+                start(query)[insertion] - 1
         } else queryAdj <- query
+
+### insertions in coding regions
+#foany <- findOverlaps(queryAdj, cdsByTx)
+#fostart <- findOverlaps(queryAdj, cdsByTx, type="start")
+#m1 <- matchMatrix(foany)
+#m2 <- matchMatrix(fostart)
+#key <- function(m)paste(sep="\1",m[,1],m[,2])
+#m1[!is.element(key(m1),key(m2)),]
+#
+### insertions in transcripts 
+#foany <- findOverlaps(queryAdj, tx)
+#fostart <- findOverlaps(queryAdj, tx, type="start")
+#m1 <- matchMatrix(foany)
+#m2 <- matchMatrix(fostart)
+#key <- function(m)paste(sep="\1",m[,1],m[,2])
+#m1[!is.element(key(m1),key(m2)),]
+
+
         cdsFO <- findOverlaps(queryAdj, cdsByTx, type="within")
         txFO <- findOverlaps(queryAdj, tx, type="within")
         cdsCO <- tabulate(queryHits(cdsFO), length(query))
@@ -37,9 +51,19 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
         ## intron :
         intron <- txCO != 0 & cdsCO == 0
 
+t1 <- proc.time() 
+#splicings <- GenomicFeatures:::.getFullSplicings(subject,
+#    translated.transcripts.only=TRUE)
+#fiveUTR <- my5UTR(subject, splicings)
+#threeUTR <- my3UTR(subject, splicings)
+
         ## UTRs :
         fiveUTR <- fiveUTRsByTranscript(subject)
         threeUTR <- threeUTRsByTranscript(subject)
+t2 <- proc.time() 
+
+cat("diff :", t2 - t1, "\n")
+
         utr5 <- countOverlaps(queryAdj, fiveUTR, type="within") > 0
         utr3 <- countOverlaps(queryAdj, threeUTR, type="within") > 0
 
@@ -49,7 +73,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
         Location[queryIndex %in% which(utr3)] <- "3'UTR"
         Location[queryIndex %in% which(coding)] <- "coding"
 
-        dat1 <- DataFrame(queryIndex, txID, geneID, Location)
+        dat1 <- DataFrame(queryHits=queryIndex, txID, geneID, Location)
 
         ## intergenic :
         ## FIXME : ridiculous, need to simplify
@@ -76,7 +100,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
                 }, tx, intvar)
         } else flankGenes <- NA
 
-       dat2 <- DataFrame(queryIndex=which(intergenic), 
+       dat2 <- DataFrame(queryHits=which(intergenic), 
            txID=rep(NA, length(which(intergenic))), 
            geneID=CharacterList(flankGenes), 
            Location=rep("intergenic", length(which(intergenic))))
