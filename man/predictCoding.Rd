@@ -58,7 +58,7 @@
 } 
 
 \value{
-  A \code{\link{DataFrame}} with columns of queryIndex, txID, refCodon,
+  A \code{\link{DataFrame}} with columns of queryHits, txID, refCodon,
   varCodon, refAA, varAA, Consequence, and any metadata columns that
   were present in the \code{subject}. 
 
@@ -67,7 +67,7 @@
   in the \code{subject}. One row is returned for each transcript the variant 
   overlapped. If the variant overlaps multiple transcripts, multiple
   rows are returned for that variant. The variant from \code{query} is
-  identified via the 'queryIndex' column. Not all variant codons are
+  identified via the 'queryHits' column. Not all variant codons are
   transcribed. If the substitution, insertion or deletion results in
   a basepair sequence not divisible by 3, the codon(s) are not transcribed.
   In this case, the varAA column will be empty and the variant will be
