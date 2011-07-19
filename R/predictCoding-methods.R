@@ -67,14 +67,14 @@ setMethod("predictCoding", c("GRanges", "GRangesList"),
             values(xCoding)[[varAllele]]
 
         ## results
-        queryIndex <- txLocal$globalInd
+        queryHits <- txLocal$globalInd
         txID <- names(subject)[txLocal$rangesInd]
         fromSubject <-
             values(subject@unlistData)[txLocal$rangesInd,]
         refCodon <- codons
         varCodon <- varCodons
         refAA <- translate(codons)
-        varAA <- AAStringSet(rep("", length(queryIndex))) 
+        varAA <- AAStringSet(rep("", length(queryHits))) 
         varAA[translateIdx] <- translate(varCodons[translateIdx])
  
         ## FIXME : better check for equality
@@ -82,8 +82,8 @@ setMethod("predictCoding", c("GRanges", "GRangesList"),
         Consequence <- rep("synonymous", length(xCoding))
         Consequence[nonsynonymous] <- "nonsynonymous" 
         Consequence[!translateIdx] <- "frameshift" 
-        
-        DataFrame(queryIndex, txID, refCodon, varCodon, 
+ 
+        DataFrame(queryHits, txID, refCodon, varCodon, 
             refAA, varAA, Consequence, fromSubject) 
     }
 )
