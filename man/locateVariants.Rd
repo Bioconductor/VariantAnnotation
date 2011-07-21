@@ -1,5 +1,6 @@
 \name{locateVariants}
 \alias{locateVariants}
+\alias{locateVariants,GRanges,TranscriptDb-method}
 
 \title{Locate variants}
 

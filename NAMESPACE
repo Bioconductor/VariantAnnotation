@@ -1,12 +1,12 @@
 import(Biostrings)
 import(GenomicRanges)
 import(methods)
+import(Rsamtools)
 
 importClassesFrom(Biobase, ScalarCharacter)
 importClassesFrom(BSgenome, BSgenome)
 importClassesFrom(GenomicFeatures, TranscriptDb)
 importClassesFrom(IRanges, FilterRules, Ranges)
-importClassesFrom(Rsamtools, FaFile)
 
 
 importMethodsFrom(GenomicFeatures, cdsBy, exons, transcripts,
@@ -17,7 +17,6 @@ importMethodsFrom(IRanges, '%in%', append, as.vector, countOverlaps,
                   rbind, rev, Rle, runValue, sapply, shift, split,
                   start, "start<-", subjectHits, "subseq<-", substring,
                   unique, unlist, values, "values<-", width)
-importMethodsFrom(Rsamtools, scanFaIndex, scanBcf, ScanBcfParam, scanBcfHeader)
 
 
 importFrom(GenomicFeatures, extractTranscriptsFromGenome)

@@ -69,7 +69,7 @@ head(variants)
 
 The \Rfunction{locateVariants} function returns a \Robject{DataFrame} with
 one row for each variant-transcript match. Transcript ID, gene ID and location 
-are provided for each match. The queryIndex column maps back to the variant
+are provided for each match. The queryHits column maps back to the variant
 in the original query. Location categories of `coding', `UTR5', `UTR3', `intron' 
 and `intergenic' are assigned based on the criteria in Table \ref{table:location}. 
 Intergenic variants have two gene ID's, representing the closest genes on either
@@ -182,12 +182,12 @@ head(aaCoding)
 @
 
 Our result is a \Robject{DataFrame} containing only the variants that
-matched a coding region. Columns include queryIndex, 
+matched a coding region. Columns include queryHits, 
 txID, refCodon, varCodon, refAA, varAA, Consequence and any
 metadata columns that were present in the \Robject{subject}. 
 
 The result has one row for each transcript matched by a variant. The
-queryIndex column is the map back to the variants in the original \Robject{query}.
+queryHits column is the map back to the variants in the original \Robject{query}.
 If a variant matches multiple transcripts there will be multiple rows
 for that variant. For example, the variant in the sixth row of the 
 \Robject{variants} object fell within a coding region and matched four transcripts. 

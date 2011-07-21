@@ -22,15 +22,12 @@
 }
 
 \section{Objects from the Class}{
-
   Objects are created through calls to constructors for predefined
   filters, as described on the \code{\link{vaFilter}} page.
-
 }
 
 \section{Slots}{
   \describe{
-
     \item{\code{.Data}:}{Object of class \code{"function"} taking a
       single named argument \code{x} corresponding to the 
       \code{\link{GRanges}} object that the filter will be applied to. 
@@ -38,12 +35,13 @@
       vector that can be used to subset \code{x} to include those elements 
       of \code{x} satisfying the filter.
     }
-
     \item{\code{name}:}{Object of class \code{"ScalarCharacter"}
       representing the name of the filter. The name is useful for
       suggesting the purpose of the filter, and for debugging failed
       filters.
     }
+   \item{\dots}{Additional arguments, passed to methods.
+   }
   }
 }
 

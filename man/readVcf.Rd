@@ -1,50 +1,75 @@
 \name{readVcf}
 \alias{readVcf}
+\alias{readVcf,character,missing-method}
+\alias{readVcf,character,ANY-method}
+\alias{readVcf,TabixFile,GRanges-method}
+\alias{readVcf,TabixFile,RangedData-method}
+\alias{readVcf,TabixFile,RangesList-method}
 
-\title{Read VCF (variant call) files into a SummarizedExperiment object}
+
+\title{Read VCF (variant call format) files into a SummarizedExperiment object}
 
 \description{Read VCF files into a SummarizedExperiment object}
 
 \usage{
-  readVcf(file, index=file, param=ScanBcfParam, raw=FALSE, ...)
+\S4method{readVcf}{character,ANY}(file, index=paste(file, "tbi", sep = "."),
+..., param=NULL, raw=FALSE)
+\S4method{readVcf}{character,missing}(file, ..., param, raw=FALSE)
+\S4method{readVcf}{TabixFile,GRanges}(file, ..., param, raw=FALSE)
+\S4method{readVcf}{TabixFile,RangedData}(file, ..., param, raw=FALSE)
+\S4method{readVcf}{TabixFile,RangesList}(file, ..., param, raw=FALSE)
 }
 
 \arguments{
-  \item{file}{The character() file names(s) of the VCF file to be processed.
+  \item{file}{The character() file name(s) of the VCF file to be
+    processed, or more flexibly an instance of class
+    \code{\link{TabixFile}}.
+  }
+  \item{param}{A instance of \code{GRanges}, \code{RangedData},  or
+    \code{RangesList} provide the sequence names and regions to be
+    parsed.
+  }
+  \item{raw}{A logical indicating if modified ranges should appear in 
+    the alt metadata field of \code{rowData}. 
+
+    In a VCF file, the value in the POS field refers to the position of the 
+    first base in the REF field. For indels, the REF string includes the 
+    base before the event which is reflected in the POS field.
+    Reguardless of the value of `raw', the ranges in the \code{rowData} will 
+    be of width 1 and refect the exact position in the VCF POS field.
+
+    If \code{raw}=TRUE, the only ranges available will be those in the 
+    \code{GRanges} object in the \code{rowData}. If \code{raw}=FALSE
+    modified ranges will be supplied in the alt metadata field. These
+    ranges will reflect the \code{Bioconductor} standard of insertions
+    having a width of length 0 and the range reflecting only those 
+    basepairs involved in the substitution, insertion or deletion.
+
+    As an example, we use the string ACTG with positions 1,2,3,4.
+    In a VCF file a deletion of the T at position 3 would be represented as
+    POS = 2, REF = CT, ALT = ".". If \code{raw}=TRUE
+    the only ranges present for this variant will be in the \code{GRanges}
+    instance in the \code{rowData} and will have start = end = 2.
+    If \code{raw} = FALSE, the range in the \code{rowData} will be the
+    same but an additional range of start = end = 3 will be supplied in 
+    the \code{alt} metatdata slot of the \code{rowData}. The alleles
+    will also be modified such that the reference allele is T instead
+    of CT. The alternate allele will be the same missing value of ".".
   }
   \item{index}{The character() file names of the index file of the VCF file
     being processed; this is given \emph{without} the `.tbi' extension. 
     The default value is the name of the VCF file. 
   }
-  \item{param}{An instance of \code{\linkS4class{ScanBcfParam}}. This 
-    influences what fields and which records are imported. If a 
-    \code{param} is provided, an index for the VCF file must exist.
-  }
-  \item{raw}{A logical indicating if the ranges in \code{rowData} 
-    should appear exactly as represented in the VCF file or if
-    the ranges should reflect only the basepairs involved in
-    the variation.
-
-    In VCF format, the value in the POS field refers to the position of the 
-    first base in the REF field. For indels, the REF string includes the 
-    base before the event which is reflected in the POS field.
-
-    As an example, we use the string ACTG which has positions 1,2,3,4.
-    An deletion of the T at position 3 would be represented as
-    POS = 2, REF = CT, ALT = "." in VCF format. If \code{raw}=TRUE
-    the range for this variant would have start = end = 2.
-    If \code{raw} = FALSE, the range for this variant would be
-    start = end = 3.
-  }
   \item{\dots}{Additional arguments, passed to methods.
   }
 }
 
+
 \details{
-  The \code{readVcf} function parses VCF files into a
-  \code{\linkS4class{SummarizedExperiment}}.  \code{readVcf}
-  calls \code{Rsamtools} \code{link{scanBcf}} function
-  the details of which can be found on its help page. 
+  The \code{readVcf} function parses VCF and compressed VCF files into a
+  \code{\linkS4class{SummarizedExperiment}} object.  \code{readVcf}
+  calls \code{Rsamtools} \code{link{scanBcf}} and \code{link{scanTabix}}
+  functions, the details of which can be found on their respective help pages. 
 }
 
 \value{
@@ -95,13 +120,32 @@
 }
 
 \examples{
+
+## read entire VCF file
 vcfFile <- system.file("extdata", "ex1.vcf", package="VariantAnnotation") 
 vcf <- readVcf(vcfFile, index=character(0))
-head(rowData(vcf))
-
-## reference and alternate alleles with ranges
 values(rowData(vcf))[["ref"]][2:5]
 values(rowData(vcf))[["alt"]][2:5]
+
+
+## read a portion of a compressed VCF file
+gr <- GRanges(seqnames=Rle("1"),
+              ranges=IRanges(start=0, end=100000))
+from <- vcfFile 
+to <- tempfile()
+compressVcf <- bgzip(from, to)
+idx <- indexTabix(compressVcf, "vcf")
+tab <- TabixFile(compressVcf, idx)
+vcf_chr1 <- readVcf(tab, param=gr)
+values(rowData(vcf_chr1))[["ref"]]
+values(rowData(vcf_chr1))[["alt"]]
+
+
+## return alleles and ranges exactly as representeed in VCF file
+vcf_chr1_raw <- readVcf(tab, param=gr, raw=TRUE)
+values(rowData(vcf_chr1_raw))[["ref"]]
+values(rowData(vcf_chr1_raw))[["alt"]]
+
 }
 
 

@@ -21,4 +21,7 @@ setGeneric("vaFilter", function(fun, name=NA_character_, ...)
            standardGeneric("vaFilter"),
            signature="fun")
 
-
+setGeneric("readVcf", signature = c("file", "param"),
+           function(file, ..., param, raw=FALSE)
+           standardGeneric("readVcf")
+)
