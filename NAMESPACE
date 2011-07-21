@@ -11,7 +11,7 @@ importClassesFrom(Rsamtools, FaFile, TabixFile)
 importMethodsFrom(GenomicFeatures, as.list, cdsBy, exons, transcripts,
                   fiveUTRsByTranscript, threeUTRsByTranscript,
                   isActiveSeq, "isActiveSeq<-")
-importMethodsFrom(IRanges, %in%, append, as.matrix, as.vector,
+importMethodsFrom(IRanges, "%in%", append, as.matrix, as.vector,
                   countOverlaps, elementLengths, end, eval,
                   findOverlaps, follow, gsub, head, lapply, match,
                   "metadata<-", narrow, ncol, order, paste, precede,
