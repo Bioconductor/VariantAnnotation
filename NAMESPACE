@@ -1,28 +1,34 @@
 import(Biostrings)
 import(GenomicRanges)
 import(methods)
-import(Rsamtools)
 
 importClassesFrom(Biobase, ScalarCharacter)
 importClassesFrom(BSgenome, BSgenome)
 importClassesFrom(GenomicFeatures, TranscriptDb)
-importClassesFrom(IRanges, FilterRules, Ranges)
+importClassesFrom(IRanges, Ranges, RangesList, RangedData)
+importClassesFrom(Rsamtools, FaFile, TabixFile)
 
+importMethodsFrom(GenomicFeatures, as.list, cdsBy, exons, transcripts,
+                  fiveUTRsByTranscript, threeUTRsByTranscript,
+                  isActiveSeq, "isActiveSeq<-")
+importMethodsFrom(IRanges, %in%, append, as.matrix, as.vector,
+                  countOverlaps, elementLengths, end, eval,
+                  findOverlaps, follow, gsub, head, lapply, match,
+                  "metadata<-", narrow, ncol, order, paste, precede,
+                  queryHits, rbind, rev, Rle, runValue, sapply, shift,
+                  split, start, "start<-", subjectHits, "subseq<-",
+                  substring, unique, unlist, values, "values<-", which,
+                  width)
+importMethodsFrom(Rsamtools, scanBcf, ScanBcfParam, scanFaIndex,
+                  scanTabix)
 
-importMethodsFrom(GenomicFeatures, cdsBy, exons, transcripts,
-                  fiveUTRsByTranscript, threeUTRsByTranscript)
-importMethodsFrom(IRanges, '%in%', append, as.vector, countOverlaps,
-                  elementLengths, end, eval, findOverlaps, follow,
-                  head, lapply, match, paste, precede, queryHits,
-                  rbind, rev, Rle, runValue, sapply, shift, split,
-                  start, "start<-", subjectHits, "subseq<-", substring,
-                  unique, unlist, values, "values<-", width)
-
-
-importFrom(GenomicFeatures, extractTranscriptsFromGenome)
 importFrom(Biobase, mkScalar, selectSome)
-importFrom(IRanges, CharacterList, DataFrame, FilterRules, IRanges,
+importFrom(Biostrings, AAStringSet, DNAStringSet)
+importFrom(GenomicFeatures, extractTranscriptsFromGenome)
+importFrom(GenomicRanges, GRanges)
+importFrom(IRanges, CharacterList, DataFrame, IRanges,
            PartitioningByWidth, successiveViews)
+importFrom(Rsamtools, TabixFile)
 
 
 exportClassPattern("^.*$")
