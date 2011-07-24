@@ -1,3 +1,5 @@
+## TODO : move to IRanges
+
 listCumsum <- function(x) 
 {
     xUnlisted <- unlist(x, use.names=FALSE)

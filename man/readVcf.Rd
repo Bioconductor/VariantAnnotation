@@ -45,7 +45,7 @@
     having a width of length 0 and the range reflecting only those 
     basepairs involved in the substitution, insertion or deletion.
 
-    As an example, we use the string ACTG with positions 1,2,3,4.
+    We use the string ACTG with positions 1,2,3,4 as an example.
     In a VCF file a deletion of the T at position 3 would be represented as
     POS = 2, REF = CT, ALT = ".". If \code{raw}=TRUE
     the only ranges present for this variant will be in the \code{GRanges}
@@ -129,7 +129,7 @@ values(rowData(vcf))[["alt"]][2:5]
 
 
 ## read a portion of a compressed VCF file
-gr <- GRanges(seqnames=Rle("1"),
+gr <- GRanges(seqnames="1",
               ranges=IRanges(start=0, end=100000))
 from <- vcfFile 
 to <- tempfile()
@@ -141,7 +141,7 @@ values(rowData(vcf_chr1))[["ref"]]
 values(rowData(vcf_chr1))[["alt"]]
 
 
-## return alleles and ranges exactly as representeed in VCF file
+## return alleles and ranges exactly as represented in the VCF file
 vcf_chr1_raw <- readVcf(tab, param=gr, raw=TRUE)
 values(rowData(vcf_chr1_raw))[["ref"]]
 values(rowData(vcf_chr1_raw))[["alt"]]

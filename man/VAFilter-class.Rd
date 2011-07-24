@@ -12,7 +12,6 @@
 \title{"VAFilter" for representing functions operating on genetic variants}
 
 \description{
-
   Objects of this class are functions that operate on
   \code{\linkS4class{GRanges}} objects containing genetic variants.
   They return logical vectors indicating which parts of the object satisfy 
@@ -40,17 +39,9 @@
       suggesting the purpose of the filter, and for debugging failed
       filters.
     }
-   \item{\dots}{Additional arguments, passed to methods.
-   }
   }
 }
 
-\section{Extends}{
-Class \code{"\linkS4class{function}"}, from data part.
-Class \code{"\linkS4class{.VAUtil}"}, directly.
-Class \code{"\linkS4class{OptionalFunction}"}, by class "function", distance 2.
-Class \code{"\linkS4class{PossibleMethod}"}, by class "function", distance 2.
-}
 \section{Methods}{
   \describe{
 
@@ -71,7 +62,7 @@ Class \code{"\linkS4class{PossibleMethod}"}, by class "function", distance 2.
   }
 }
 
-\author{Valerie Obenchain <vobencha@fhcrc.org>}
+\author{Valerie Obenchain}
 
 \seealso{
   \code{\link{vaFilter}} for predefined filters.

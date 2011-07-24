@@ -9,7 +9,7 @@ setMethod("getTranscriptSeqs",  c("GRangesList", "BSgenome"),
 setMethod("getTranscriptSeqs",  c("GRangesList", "FaFile"),
     function(query, subject, ...)
     {
-        ## orders by exon rank, checking for mixed chromosomes, mixed strand 
+        ## order by exon rank, check for mixed chromosomes, mixed strand 
         txlist <- GenomicFeatures:::.makeUCSCTxListFromGRangesList(query,
             reorder.exons.on.minus.strand=FALSE)
 
@@ -41,7 +41,7 @@ setMethod("getTranscriptSeqs",  c("GRanges", "FaFile"),
             stop(paste("sequence ", missingSeq, 
                 " not found in 'query' \n", sep=""))
         }
-        
+ 
         dna <- getSeq(fa, query) 
         close(fa)
         dna 

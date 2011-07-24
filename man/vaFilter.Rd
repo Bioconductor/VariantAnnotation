@@ -57,6 +57,8 @@ regionFilter(txdb, region="coding", .name="regionFilter")
     on which to filter the results. Possible values are "coding",
     "intron", "3UTR", "5UTR" and "intergenic".
   }
+  \item{\dots}{Additional arguments
+  }
 }
 
 \details{

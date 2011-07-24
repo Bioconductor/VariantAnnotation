@@ -1,3 +1,7 @@
+## TODO : - Modify scanTabix/scanBcf to pull over 
+##          HQ and FT from INFO and sample names
+##        - Make scanTabix work with ScanBcfParam 
+
 .parseTabix <- function(tbx, param, ...)
 {
     ## currently returning all fields in ScanBcfParam
@@ -99,7 +103,6 @@
     names(rowdata) <- vcf$ID
 
     ## colData
-    ## FIXME : modify scanTabix/scanBcf to pull over this infomation 
     if (length(vcf$GENO) > 0) {
         samples <- ncol(do.call(rbind, geno))
         coldata <- DataFrame(Samples=seq_len(samples),

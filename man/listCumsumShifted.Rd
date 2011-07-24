@@ -4,8 +4,8 @@
 \title{Shifted cumsum on CompressedAtomicList}
 
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-}
+This function will be moving to IRanges}
+
 \usage{
 listCumsumShifted(x)
 }

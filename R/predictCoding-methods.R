@@ -1,36 +1,38 @@
 setMethod("predictCoding",  c("Ranges", "TranscriptDb"),
-    function(query, subject, seqSource, refAllele, varAllele, ...)
+    function(query, subject, seqSource, varAllele, ...)
     {
         cdsByTx <- cdsBy(subject)
         x <- as(query, "GRanges")
         callGeneric(query=x, subject=cdsByTx, seqSource=seqSource, 
-            refAllele=refAllele, varAllele=varAllele, ...) 
+            varAllele=varAllele, ...) 
     }
 )
 
 setMethod("predictCoding",  c("GRanges", "TranscriptDb"),
-    function(query, subject, seqSource, refAllele, varAllele, ...)
+    function(query, subject, seqSource, ...)
     {
         cdsByTx <- cdsBy(subject)
         callGeneric(query=query, subject=cdsByTx, seqSource=seqSource, 
-            refAllele=refAllele, varAllele=varAllele, ...) 
+            varAllele=varAllele, ...) 
     }
 )
 
 setMethod("predictCoding", c("Ranges", "GRangesList"),
-    function(query, subject, seqSource, refAllele, varAllele, ...)
+    function(query, subject, seqSource, ...)
     {
         x <- as(query, "GRanges")
         callGeneric(query=x, subject=subject, seqSource=seqSource, 
-            refAllele, varAllele, ...) 
+             ...) 
     }
 )
 
 setMethod("predictCoding", c("GRanges", "GRangesList"),
-    function(query, subject, seqSource, refAllele, varAllele, ...)
+    function(query, subject, seqSource, varAllele, ...)
     {
         ## FIXME : findOverlaps is done here, globalToLocal and locateVariants
-        ## adjust query start for width=0
+        ## findOverlaps won't find negative widths
+        ## adjust query with width=0 :
+        ## - increment end to equal start value 
         if (any(width(query) == 0)) {
             queryAdj <- query
             start(queryAdj[width(query) == 0]) <- 
@@ -46,10 +48,8 @@ setMethod("predictCoding", c("GRanges", "GRangesList"),
         txLocal <- globalToLocal(queryAdj, subject)
         xCoding <- query[txLocal$globalInd]
 
-        ## FIXME : check original sequence from BSgenome/fasta
-        ##         against user provided refAllele?
  
-        ## original codons
+        ## original sequences 
         originalWidth <- width(xCoding)
         codonStart <- (start(txLocal$local) - 1L) %/% 3L * 3L + 1L
         codonEnd <- codonStart + 
@@ -57,13 +57,13 @@ setMethod("predictCoding", c("GRanges", "GRangesList"),
         codons <- DNAStringSet(substring(txSeqs[txLocal$rangesInd], 
             codonStart, codonEnd))
 
-        ## variant codons
+        ## variant sequences 
         varWidth <- width(values(xCoding)[[varAllele]]) 
         varPosition <- (start(txLocal$local) - 1L) %% 3L + 1L
         indels <- originalWidth == 0 | varWidth == 0 
         translateIdx <- abs(varWidth - originalWidth) %% 3 == 0 
-        varCodons <- codons
-        subseq(varCodons, start=varPosition, width=originalWidth) <- 
+        varSeq <- codons
+        subseq(varSeq, start=varPosition, width=originalWidth) <- 
             values(xCoding)[[varAllele]]
 
         ## results
@@ -71,11 +71,11 @@ setMethod("predictCoding", c("GRanges", "GRangesList"),
         txID <- names(subject)[txLocal$rangesInd]
         fromSubject <-
             values(subject@unlistData)[txLocal$rangesInd,]
-        refCodon <- codons
-        varCodon <- varCodons
+        refSeq <- codons
+        varSeq <- varSeq
         refAA <- translate(codons)
         varAA <- AAStringSet(rep("", length(queryHits))) 
-        varAA[translateIdx] <- translate(varCodons[translateIdx])
+        varAA[translateIdx] <- translate(varSeq[translateIdx])
  
         ## FIXME : better check for equality
         nonsynonymous <- as.character(refAA) != as.character(varAA) 
@@ -83,7 +83,7 @@ setMethod("predictCoding", c("GRanges", "GRangesList"),
         Consequence[nonsynonymous] <- "nonsynonymous" 
         Consequence[!translateIdx] <- "frameshift" 
  
-        DataFrame(queryHits, txID, refCodon, varCodon, 
+        DataFrame(queryHits, txID, refSeq, varSeq, 
             refAA, varAA, Consequence, fromSubject) 
     }
 )

@@ -58,7 +58,7 @@ stats(x, ...)
   \item{op}{\code{character()} indicating the logical operation, if any,
     associated with this filter.
   }
-  \item{...}{Additional arguments, unused in methods documented on this
+  \item{\dots}{Additional arguments, unused in methods documented on this
     page.
   }
 
@@ -94,13 +94,6 @@ stats(x, ...)
   }
 }
 
-\section{Extends}{
-Class \code{"\linkS4class{logical}"}, from data part.
-Class \code{"\linkS4class{.VAUtil}"}, directly.
-Class \code{"\linkS4class{vector}"}, by class "logical", distance 2.
-Class \code{"\link{atomic}"}, by class "logical", distance 2.
-Class \code{"vectorORfactor"}, by class "logical", distance 3.
-}
 \section{Methods}{
   \describe{
 

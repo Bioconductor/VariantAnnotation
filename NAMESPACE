@@ -23,9 +23,7 @@ importMethodsFrom(Rsamtools, scanBcf, ScanBcfParam, scanFaIndex,
                   scanTabix)
 
 importFrom(Biobase, mkScalar, selectSome)
-importFrom(Biostrings, AAStringSet, DNAStringSet)
 importFrom(GenomicFeatures, extractTranscriptsFromGenome)
-importFrom(GenomicRanges, GRanges)
 importFrom(IRanges, CharacterList, DataFrame, IRanges,
            PartitioningByWidth, successiveViews)
 importFrom(Rsamtools, TabixFile)

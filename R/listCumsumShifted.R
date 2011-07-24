@@ -1,3 +1,5 @@
+## TODO : move to IRanges
+
 listCumsumShifted <- function(x) 
 {
     cs <- listCumsum(x)

@@ -15,7 +15,7 @@
 
 \usage{
   \S4method{predictCoding}{GRanges,GRangesList}(query, subject, seqSource,
-    refAllele, varAllele, ...)
+    varAllele, ...)
 }
 
 \arguments{
@@ -33,11 +33,6 @@
   \item{seqSource}{A \code{\link[BSgenome]{BSgenome}} instance or an \link{FaFile}
     to be used for sequence extraction.
   }
-  \item{refAllele}{A character representing the name of the column 
-    in \code{query} that contains the reference alleles. The
-    data in the column should be a DNAStringSet. Insertions and
-    deletions are represented by a missing value.
-  }
   \item{varAllele}{A character representing the name of the column 
     in \code{query} that contains the variant alleles. The
     data in the column should be a DNAStringSet. Insertions and
@@ -48,52 +43,50 @@
 }
 
 \details{
-  Variants that fall in a coding region are identified and categorized as 
-  synonymous, nonsynonymous or a frameshift. Amino acid coding changes 
-  are provided for substitutions, insertions and deletions that change
-  by a nucleotide multiple of 3.
-
-  Sequences for the variants can be extracted from fasta files or a 
-  \code{\link[BSgenome]{BSgenome}}. See the vignette for further details.
+  Reference sequences are extracted from fasta files or a 
+  \link[BSgenome]{BSgenome} based on the ranges specified in the
+  \code{query}. Variant alleles provided in the \code{varAllele} argument
+  are substituted into the reference sequences and transcribed. Variant
+  sequences are transcribed only if the substitution, insertion or deletion 
+  results in a new sequence length divisible by 3. 
 } 
 
 \value{
-  A \code{\link{DataFrame}} with columns of queryHits, txID, refCodon,
-  varCodon, refAA, varAA, Consequence, and any metadata columns that
-  were present in the \code{subject}. 
+  A \link[IRanges]{DataFrame} of variants that fall within a coding 
+  region. Each row represents a variant-transcript match. 
+  If a variant matched multiple transcripts, multiple rows are returned for
+  the variant. 
 
-  The \code{link{DataFrame}} contains data on the variants from
-  \code{query} that overlap with a coding sequence in a transcript
-  in the \code{subject}. One row is returned for each transcript the variant 
-  overlapped. If the variant overlaps multiple transcripts, multiple
-  rows are returned for that variant. The variant from \code{query} is
-  identified via the 'queryHits' column. Not all variant codons are
-  transcribed. If the substitution, insertion or deletion results in
-  a basepair sequence not divisible by 3, the codon(s) are not transcribed.
-  In this case, the varAA column will be empty and the variant will be
-  classified as a framshift in the Consequence column. Possible values
-  for the Consequence column are synonymous, nonsynonymous,
-  or frameshift. 
+  Columns include \code{queryHits}, \code{txID}, \code{refSeq}, \code{varSeq}, 
+  \code{refAA}, \code{varAA}, \code{Consequence}, and any metadata that was 
+  present in the \code{subject}. \code{queryHits} provides a map to the variants 
+  in the original \code{query}. \code{refSeq} and \code{varSeq} contain the reference 
+  and variant-modified DNA sequences. Reference and variant amino acid codes are
+  provided in \code{refAA} and \code{varAA}. Variant sequences are transcribed only if the 
+  substitution, insertion or deletion results in a new sequence length divisible 
+  by 3. When a sequence is not transcribed the \code{varAA} column is empty and the 
+  variant is classified as a frameshift in the \code{Consequence} column. Possible 
+  values for \code{Consequence} are synonymous, nonsynonymous, or frameshift. See 
+  the vignette for more details. 
 }
 
 \author{Michael Lawrence and Valerie Obenchain}
 
 \seealso{
-  \code{\link{locateVariants}}
+  \link{locateVariants}
+  \link{getTranscriptSeqs}
 }
 
 \examples{
-  \dontrun{
   library(TxDb.Hsapiens.UCSC.hg18.knownGene)
   library(BSgenome.Hsapiens.UCSC.hg18)
  
   data(variants)
   txdb <- Hsapiens_UCSC_hg18_knownGene_TxDb 
   aaCoding <- predictCoding(variants, txdb, seqSource=Hsapiens,
-      refAllele="refAllele", varAllele="varAllele")
+      varAllele="varAllele")
 
-  ## FIXME : example for fasta
-  }
+  ## TODO : example for fasta
 }
 
-\keyword{}
+\keyword{methods}

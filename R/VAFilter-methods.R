@@ -1,3 +1,4 @@
+## TODO : multicore in compose
 
 setMethod(.vaValidity, "VAFilter", function (object) {
     msg <- NULL
