@@ -79,7 +79,6 @@ regionFilter <-
         loc <- locateVariants(x, txdb)
         res <- logical(length(x))
         res[unique(loc$queryHits[loc$Location %in% region])] <- TRUE
-cat("region=", region, "\n")
         res
     }, name=.name)
 }
@@ -99,7 +98,7 @@ compose <-
         }
         .idx
     }, name = .name)
-
+}
 
 #setAs("VAFilter", "FilterRules", function(from) {
 #    exprs <- list(from)

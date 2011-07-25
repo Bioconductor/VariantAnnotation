@@ -48,7 +48,6 @@ Subsetting variants based on location and presence in dbSNP can be performed
 with provided filters. Additionally, a function for reading in Variant Call Format 
 (VCF) files into a \Robject{SummarizedExperiment} object is provided. 
 
-
 \section{Variant Location}
 As sample data we use the \Robject{GRanges} object, \Robject{variants},
 that contains both real and faux variants. The ranges in \Robject{variants} 
@@ -85,7 +84,6 @@ loc <- locateVariants(variants, txdb)
 head(loc)
 @
 
-
 \begin{table}[ht]
 \begin{center}
 \begin{tabular}{c|l}
@@ -113,9 +111,9 @@ intergenic & variant does not fall \emph{within} a transcript \\
 \end{table}
 
 Multiple alignments for a single variant should be entered as separate rows in
-the \Rcode{query} object. Below is an example of a snp from the hg18 dbSNP file 
-which is aligned to different chromosome locations for different 
-assemblies. Each alignment is entered as a separate row in the \Rcode{singleSNP} object. 
+the \Rcode{query} object. Below is an example snp from the Build 130 dbSNP 
+file which is aligned to different locations for different assemblies. Each 
+alignment is entered as a separate row in the \Rcode{singleSNP} object. 
 
 <<singleSNP>>=
 singleSNP <- GRanges(seqnames="chr16",
@@ -132,9 +130,17 @@ location matching two transcripts in the same gene, both intron regions.
 The HuRef assembly location falls in an intergenic region. The reference
 assembly location hits two different transcripts in the same gene, both
 in the 3' UTR region. 
-<<singleSNPresult>>=
-locateVariants(singleSNP, txdb)
-@
+\begin{verbatim}
+> locateVariants(singleSNP, txdb)
+DataFrame with 5 rows and 4 columns
+  queryHits        txID                    geneID    Location
+  <integer> <character> <CompressedCharacterList> <character>
+1         1       52091                     57478      intron
+2         1       52092                     57478      intron
+3         2          NA                1039,57478  intergenic
+4         3       50256                      5579       3'UTR
+5         3       50259                      5579       3'UTR
+\end{verbatim}
 
 \section{Amino Acid Coding}
 
@@ -220,8 +226,6 @@ snpFilt <- dbSNPFilter("SNPlocs.Hsapiens.dbSNP.20090506")
 
 ## create a filter to identify variants present in introns 
 regionFilt <- regionFilter(txdb, region="intron")
-
-## see the filter
 regionFilt
 @
 
@@ -243,11 +247,25 @@ snpFilt(variants, subset=FALSE)
 @
 
 Filters can be combined to act in unison,
-<<filtering_compose>>=
-## return a subset of data passing both filters
-combofilt <- compose(snpFilt, regionFilt)
-combofilt(variants)
-@
+\begin{verbatim}
+# return a subset of data passing both filters
+> combofilt <- compose(snpFilt, regionFilt)
+> combofilt(variants)
+region= intron 
+GRanges with 2 ranges and 3 elementMetadata values
+    seqnames                 ranges strand |      refAllele      varAllele
+       <Rle>              <IRanges>  <Rle> | <DNAStringSet> <DNAStringSet>
+[1]     chr1 [161003087, 161003087]      * |              C              T
+[2]     chr1 [ 84647761,  84647761]      * |              C              T
+          comments
+       <character>
+[1] rs1000050, SNP
+[2]  rs6576700 SNP
+
+seqlengths
+  chr1 chr13 chr16  chr2
+    NA    NA    NA    NA
+\end{verbatim}
 
 
 \section{Variant Call Format (VCF) files}
@@ -314,7 +332,7 @@ genomic variants with the Ensembl API and SNP Effect Predictor. Bioinformatics,
 Vol. 26, No. 16, 2069-2070.
 
 \section{Session Information}
-<<sessionInfo>>=
+<<sessionInfo, echo=FALSE>>=
 sessionInfo()
 @
 

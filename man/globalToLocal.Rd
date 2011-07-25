@@ -21,10 +21,10 @@
 }
 
 \value{
-  A \link[IRanges]{DataFrame} with three columns named 'global.ind', ranges.ind'
-  and 'local'. The 'global.ind' and 'ranges.ind' columns are the indices
-  of the \code{global} and \code{ranges} arguments, respectively. The
-  'local' column contains the range coordinates of the elements inf
+  A \link[IRanges]{DataFrame} with three columns of 'global.ind', ranges.ind'
+  and 'local'. 'global.ind' and 'ranges.ind' are the indices
+  of the \code{global} and \code{ranges} input arguments, respectively. The
+  'local' column contains the range coordinates of the elements in
   \code{global} translated with respect to the ranges in 'ranges.ind'. 
 }
 
@@ -34,8 +34,8 @@
 
 \seealso{
 \code{getTranscriptSeqs}
-\link[GenomicFeatres]{transcriptLocs2refLocs}
-\link[GenomicFeatres]{extractTranscriptsFromGenome}
+\link[GenomicFeatures]{transcriptLocs2refLocs}
+\link[GenomicFeatures]{extractTranscriptsFromGenome}
 }
 
 \examples{
