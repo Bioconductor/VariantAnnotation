@@ -7,7 +7,7 @@ Author: Michael Lawrence and Valerie Obenchain
 Maintainer: Valerie Obenchain <vobencha@fhcrc.org> 
 License: Artistic-2.0 
 biocViews: Sequencing, HighThroughputSequencing, SNP
-Depends: R (>= 2.8.0), methods, GenomicFeatures (>= 1.5.15) , GenomicRanges, Biostrings, Rsamtools 
+Depends: R (>= 2.8.0), methods, GenomicFeatures (>= 1.5.14) , GenomicRanges, Biostrings, Rsamtools 
 Imports: methods, GenomicRanges, Biostrings, GenomicFeatures, IRanges, Biobase, Rsamtools, BSgenome
 Suggests: RUnit, BSgenome.Hsapiens.UCSC.hg18, TxDb.Hsapiens.UCSC.hg18.knownGene, SNPlocs.Hsapiens.dbSNP.20090506
 LazyLoad: yes
