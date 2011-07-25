@@ -9,9 +9,12 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
     function(query, subject, ...)
     {
         chrom <- seqlevels(query)
-        isActiveSeq(subject)[!names(isActiveSeq(subject)) %in% chrom] <- FALSE 
+        #isActiveSeq(subject)[!names(isActiveSeq(subject)) %in% chrom] <- FALSE 
+        #tx <- transcripts(subject, columns=c("exon_id", "tx_id", "gene_id"))
         cdsByTx <- cdsBy(subject)
-        tx <- transcripts(subject, columns=c("exon_id", "tx_id", "gene_id"))
+        tx <- transcripts(subject, vals=list(exon_chrom=chrom),
+           columns=c("exon_id", "tx_id", "gene_id"))
+
 
         ## findOverlaps won't find negative widths
         ## adjust query with width=0 :
