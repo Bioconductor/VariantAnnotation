@@ -53,8 +53,8 @@ dbSNPFilter <-
         .idx <- logical(length(x))
         index <- seq_len(length(x))
         values(x) <- append(values(x), DataFrame(index))
-        snps <- x[width(values(x)[["refAllele"]]) &
-            width(values(x)[["varAllele"]]) == 1]
+        #snps <- x[width(values(x)[["refAllele"]]) &
+        snps <- x[width(x) & width(values(x)[["varAllele"]]) == 1]
         chroms <- names(getSNPcount())[names(getSNPcount()) %in%
             runValue(seqnames(snps))]
 
@@ -78,7 +78,8 @@ regionFilter <-
     vaFilter(function(x) {
         loc <- locateVariants(x, txdb)
         res <- logical(length(x))
-        res[unique(loc$queryIndex[loc$Location %in% region])] <- TRUE
+        res[unique(loc$queryHits[loc$Location %in% region])] <- TRUE
+cat("region=", region, "\n")
         res
     }, name=.name)
 }
@@ -98,7 +99,6 @@ compose <-
         }
         .idx
     }, name = .name)
-}
 
 
 #setAs("VAFilter", "FilterRules", function(from) {

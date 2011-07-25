@@ -28,7 +28,7 @@
 \newcommand{\VariantAnnotation}{\Rpackage{VariantAnnotation}}
 
 \title{Introduction to \VariantAnnotation}
-\author{Valerie Obenchain and Michael Lawrence}
+\author{Valerie Obenchain, Michael Lawrence}
 \date{\today}
 
 \begin{document} 
@@ -40,17 +40,20 @@ options(width=72)
 @
 
 \section{Introduction}
-In this vignette we illustrate the annotation and filtering of genetic 
-variants with the \VariantAnnotation  package. Location with respect to 
-gene function is provided as well as amino acid coding for non-synonymous 
-variants. Filters are available for subsetting variants based 
-on location and inclusion in dbSNP. 
-(PolyPhen, SIFT, 1000 Genomies work in progress ...). 
+In this vignette we introduce methods in the \VariantAnnotation
+package for the annotation and filtering of genetic variants. Functions are 
+available for identifying location with respect to gene function as well as 
+amino acid coding changes for variants that fall in coding regions. 
+Subsetting variants based on location and presence in dbSNP can be performed
+with provided filters. Additionally, a function for reading in Variant Call Format 
+(VCF) files into a \Robject{SummarizedExperiment} object is provided. 
 
-\section{Location with respect to gene function}
+
+\section{Variant Location}
 As sample data we use the \Robject{GRanges} object, \Robject{variants},
 that contains both real and faux variants. The ranges in \Robject{variants} 
-represent the position of the variant. A single basepair replacement
+represent the positions in the reference sequence that are altered in the
+variation. A single basepair replacement
 (SNP) has equal start and end positions and a width of length 1. A deletion 
 or substitution will have a width of 1 or greater depending on the number of 
 basepairs being deleted or substituted. Insertions are represented with 
@@ -67,7 +70,7 @@ data(variants)
 head(variants)
 @
 
-The \Rfunction{locateVariants} function returns a \Robject{DataFrame} with
+\Rfunction{locateVariants} returns a \Robject{DataFrame} with
 one row for each variant-transcript match. Transcript ID, gene ID and location 
 are provided for each match. The queryHits column maps back to the variant
 in the original query. Location categories of `coding', `UTR5', `UTR3', `intron' 
@@ -93,15 +96,15 @@ coding &  variant falls \emph{within} a coding region \\
 %splicing & * & variant is within 2-bp of a splicing junction \\
 %ncRNA & 2 & variant overlaps a transcript without coding annotation in the gene
 %definition \\
-UTR5 &  variant overlaps \emph{any} portion of a 5' untranslated region \\
-UTR3 &  variant overlaps \emph{any} portion of a 3' untranslated region \\
-intron &  variant overlaps \emph{any} portion of a transcript but does not
-fall \emph{within} a coding region \\
+UTR5 &  variant falls \emph{within} a 5' untranslated region \\
+UTR3 &  variant falls \emph{within} a 3' untranslated region \\
+intron &  variant falls \emph{within} a transcript but not
+\emph{within} a coding region \\
 %upstream & 5 &  variant overlaps 1-kb region upstream of transcription start
 %site \\
 %downstream & 5 & variant overlaps 1-kb region downtream of transcription end
 %site \\
-intergenic & variant does not overlap \emph{any} portion of a transcript \\
+intergenic & variant does not fall \emph{within} a transcript \\
 \hline
 \end{tabular}
 \end{center}
@@ -109,9 +112,10 @@ intergenic & variant does not overlap \emph{any} portion of a transcript \\
 \label{table:location}
 \end{table}
 
-Example of a snp from chromosome 16 in hg18 dbSNP file aligned to 
-different chromosome locations for different assemblies. Each alignment is 
-entered as a separate row in the \Rcode{singleSNP} object. 
+Multiple alignments for a single variant should be entered as separate rows in
+the \Rcode{query} object. Below is an example of a snp from the hg18 dbSNP file 
+which is aligned to different chromosome locations for different 
+assemblies. Each alignment is entered as a separate row in the \Rcode{singleSNP} object. 
 
 <<singleSNP>>=
 singleSNP <- GRanges(seqnames="chr16",
@@ -132,7 +136,7 @@ in the 3' UTR region.
 locateVariants(singleSNP, txdb)
 @
 
-\section{Amino Acid Coding Changes}
+\section{Amino Acid Coding}
 
 Amino acid coding changes can be determined for non-synonymous
 variants with \Rfunction{predictCoding}. This function identifies overlaps 
@@ -205,39 +209,42 @@ aaCoding[width(aaCoding$varAA) == 0,]
 \section{Filtering Variants}
 
 Identifying subsets of variants that meet a specific criteria can be
-accomplished using the filter functions in the \Rpackage{VariantAnnotaion} package.
-Filters are first created with the appropriate reference to construct the 
+accomplished using the filter functions provided in \Rpackage{VariantAnnotation}.
+Filters are first created with the appropriate reference object needed to construct the 
 filter, either a dbSNP package or \Robject{TranscriptDb} object. 
 
 <<createFilters>>=
 library("SNPlocs.Hsapiens.dbSNP.20090506")
-# variants present in dbSNP 
+## create a filter to identify variants present in dbSNP 
 snpFilt <- dbSNPFilter("SNPlocs.Hsapiens.dbSNP.20090506")
-snpFilt
 
-# variants present in coding regions 
-regionFilt <- regionFilter(txdb, region="coding")
+## create a filter to identify variants present in introns 
+regionFilt <- regionFilter(txdb, region="intron")
+
+## see the filter
 regionFilt
 @
 
 When applying a filter to the data, the optional argument \Rcode{subset}
-can be specified. If \Rcode{subset=TRUE} (the default), a \Robject{GRanges} 
-object of subset data is returned. The filter name and number of 
-records filtered are included in the object metadata. When \Rcode{subset=FALSE}
-a \Robject{VAFilterResult} object is returned which contains a logical
-vector indicating which records passed the filter.
+can be specified. If \Rcode{subset=TRUE} (the default), the subset of 
+records that passed the filter are returned in a \Rcode{GRanges} object. 
+The filter name and number of records filtered are included in the object 
+metadata. When \Rcode{subset=FALSE} a \Robject{VAFilterResult} object is 
+returned which contains a logical vector indicating which records passed the filter.
 
 <<filtering>>=
-## return a subset of records passing the filter
+## return the subset of records that passed the filter
 snpResult <- snpFilt(variants)
 snpResult 
 metadata(snpResult)
 
-# return a VAFilterResult object
+## return a VAFilterResult object
 snpFilt(variants, subset=FALSE)
+@
 
-
-# return a subset of data passing both filters
+Filters can be combined to act in unison,
+<<filtering_compose>>=
+## return a subset of data passing both filters
 combofilt <- compose(snpFilt, regionFilt)
 combofilt(variants)
 @
@@ -245,38 +252,43 @@ combofilt(variants)
 
 \section{Variant Call Format (VCF) files}
 
-The \Rcode{readVcf} function can be used to read VCF files into a 
-\Rcode{SummarizedExperiment} object. Here we read in a 1000 Genomes 
-pilot study data that contains the variant calls
-made on the ~700 individuals which had exon targeted sequencing. 
+The \Rcode{readVcf} function reads VCF files into a 
+\Rcode{SummarizedExperiment} object. If the VCF file
+has a tabix file index, a \Robject{GRanges} can be 
+used to specify a subset of ranges to read in.
 
-If \Rcode{raw} = TRUE, the ranges and alleles in the
-\Rcode{SummarizedExperiment} are returned exactly as they
-appear in the VCF file. If the file has a tabix index, we
-can read in select ranges by specifying a \Rcode{GRanges}
-for the \Rcode{param} argument. 
+<<readVCF, eval=FALSE>>=
+## read in specific ranges from a compressed vcf file 
+vcfFile <- system.file("extdata", "ex1.vcf", package="VariantAnnotation")
+from <- vcfFile
+to <- tempfile()
+compressVcf <- bgzip(from, to)
+idx <- indexTabix(compressVcf, "vcf")
+tab <- TabixFile(compressVcf, idx)
+head <- headerTabix(tab)
 
-<<readVCF_raw, eval=FALSE>>=
-
-## create a TabixFile instance 
-fl <- "pathToFile/CEU.exon.2010_03.sites.vcf.gz"
-tab <- TabixFile(fl)
-scanHeaderTabix(fl)
-
-## select ranges  
-gr <- GRanges(seqnames="21",
+## ranges to be read in  
+gr <- GRanges(seqnames="1",
               ranges=IRanges(start=0, end=100000))
+@
 
 
+The VCF standard is to include the nucleotide immediately preceding 
+an indel in the reference sequence. This results in the start
+location being one less than the position where the variation
+(i.e., substitution, insertion, or deletion) takes place.
+When \Rcode{raw = TRUE}, the ranges and alleles in the
+\Rcode{SummarizedExperiment} are returned exactly as they
+appear in the VCF file. 
+
+<<readVCF_rawTRUE, eval=FALSE>>=
+## return alleles and ranges exactly as represented in the VCF file
 vcf_raw <- readVcf(tab, param=gr, raw=TRUE)
-values(rowData(vcf_raw))[["ref"]]
-values(rowData(vcf_raw))[["alt"]]
+
+vcf_raw
 @ 
 
-The VCF standard is to include the nucleotide 
-immediately preceding an indel in the reference sequence. 
-The start location is one less than the true position of the variation.
-When \Rcode{raw} = FALSE, additional ranges are supplied
+When \Rcode{raw = FALSE}, additional ranges are supplied
 that reflect the \Rcode{Bioconductor} standards for
 representing ranges. Additionally, the alleles are modified to retain only 
 the basepairs involved in the variation. These modifications
@@ -284,10 +296,12 @@ are made to provide compatibility with existing methods.
 The modified ranges and alleles are in a \Rcode{DataFrame} in 
 the `alt' field of the metadata. 
 
-<<readVCF, eval=FALSE>>=
+<<readVCF_rawFALSE, eval=FALSE>>=
 vcf <- readVcf(tab, param=gr, raw=FALSE)
-values(rowData(vcf))[["ref"]]
-values(rowData(vcf))[["alt"]]
+
+## compare reference alleles 
+cbind(as.character(values(rowData(vcf_raw))[["ref"]]), 
+    as.character(values(rowData(vcf))[["ref"]]))
 @
 
 \section{References}

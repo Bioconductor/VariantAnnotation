@@ -33,9 +33,9 @@
   \item{seqSource}{A \code{\link[BSgenome]{BSgenome}} instance or an \link{FaFile}
     to be used for sequence extraction.
   }
-  \item{varAllele}{A character representing the name of the column 
-    in \code{query} that contains the variant alleles. The
-    data in the column should be a DNAStringSet. Insertions and
+  \item{varAllele}{A character representing the name of 
+    the column in \code{query} that contains the variant alleles. The
+    data in the column should be a \link[Biostrings]{DNAStringSet}. Insertions and
     deletions are represented by a missing value.
   }
   \item{\dots}{Additional arguments

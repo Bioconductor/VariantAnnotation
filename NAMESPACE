@@ -20,7 +20,7 @@ importMethodsFrom(IRanges, "%in%", append, as.matrix, as.vector,
                   substring, unique, unlist, values, "values<-", which,
                   width)
 importMethodsFrom(Rsamtools, scanBcf, ScanBcfParam, scanFaIndex,
-                  scanTabix)
+                  scanTabix, headerTabix)
 
 importFrom(Biobase, mkScalar, selectSome)
 importFrom(GenomicFeatures, extractTranscriptsFromGenome)

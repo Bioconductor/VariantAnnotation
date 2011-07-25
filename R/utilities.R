@@ -25,6 +25,7 @@
     }
 
     dataType <- sapply(tmpl, typeof)
+    ## FIXME : warning thrown when coerce character to double (QUAL)
     req <- lapply(seq_len(fill), function(x, mat, dataType) {
         xx <- mat[,x]
         mode(xx) <- dataType[x]
@@ -49,6 +50,7 @@
     tmpl
 }
 
+## FIXME : length(vcf$GENO) > 0 but no data
 
 .VcfToSummarizedExperiment <- function(vcf, raw=FALSE, ...)
 {

@@ -33,10 +33,12 @@
 
 
 \seealso{
+\code{getTranscriptSeqs}
+\link[GenomicFeatres]{transcriptLocs2refLocs}
+\link[GenomicFeatres]{extractTranscriptsFromGenome}
 }
 
 \examples{
 }
 
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{manip}

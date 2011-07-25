@@ -15,7 +15,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
 
         ## findOverlaps won't find negative widths
         ## adjust query with width=0 :
-        ## - increment end to equal start value 
+        ## de-increment start to equal end value 
         if (any(width(query) == 0)) {
             insertion <- width(query) == 0
             queryAdj <- query

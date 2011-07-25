@@ -1,9 +1,9 @@
 \name{VAUtil-class}
 \docType{class}
-\alias{.SRUtil-class}
+\alias{.VAUtil-class}
 
 
-\title{".SRUtil" and potentially other related classes}
+\title{".VAUtil" and potentially other related classes - in progress}
 \description{
   These classes provide important utility functions in the
   \pkg{VariantAnnotation} package, but may occasionally be seen by the user and
@@ -14,7 +14,7 @@
   Utility classes include:
 
   \itemize{
-    \item \code{.SRUtil-class} a virtual base class from which all
+    \item \code{.VAUtil-class} a virtual base class from which all
     utility classes are derived.
   }
 
@@ -23,7 +23,7 @@
 \author{Valerie Obenchain}
 
 \examples{
-getClass(".SRUtil", where=getNamespace("VariantAnnotation"))
+getClass(".VAUtil", where=getNamespace("VariantAnnotation"))
 }
 
 \keyword{classes}
