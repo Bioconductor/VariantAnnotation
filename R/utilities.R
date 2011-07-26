@@ -24,14 +24,9 @@
         fill <- reqfields
     }
 
-    dataType <- sapply(tmpl, typeof)
-    ## FIXME : warning thrown when coerce character to double (QUAL)
-    req <- lapply(seq_len(fill), function(x, mat, dataType) {
-        xx <- mat[,x]
-        mode(xx) <- dataType[x]
-        xx 
-    }, mat, dataType)
-    tmpl[1:fill] <- req
+    ## FIXME : datatypes
+    tmpl[1:fill] <- lapply(seq_len(fill), function(x, mat) mat[,x], mat)
+    tmpl[["POS"]] <- as.numeric(tmpl[["POS"]])
 
     ## geno
     if (nfields > reqfields) {
@@ -46,17 +41,21 @@
         names(genolst) <- idx
         tmpl[["GENO"]][idx] <- genolst[idx]
         tmpl[["GENO"]] <- tmpl[["GENO"]][idx]
+    } else { 
+        tmpl <- tmpl[1:fill] 
     }
+
     tmpl
 }
 
-## FIXME : length(vcf$GENO) > 0 but no data
 
 .VcfToSummarizedExperiment <- function(vcf, raw=FALSE, ...)
 {
-    # assays 
-    if (length(vcf$GENO) > 0)
+    # assays
+    if (!is.null(vcf$GENO))
         geno <- lapply(vcf$GENO, as.matrix)
+    else
+        geno <- list() 
 
     # rowdata
     lst <- as.list(vcf$ALT)
@@ -105,7 +104,7 @@
     names(rowdata) <- vcf$ID
 
     ## colData
-    if (length(vcf$GENO) > 0) {
+    if (!is.null(vcf$GENO)) {
         samples <- ncol(do.call(rbind, geno))
         coldata <- DataFrame(Samples=seq_len(samples),
             row.names=LETTERS[1:samples])

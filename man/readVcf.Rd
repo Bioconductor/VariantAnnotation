@@ -13,7 +13,7 @@
 
 \usage{
 \S4method{readVcf}{character,ANY}(file, index=paste(file, "tbi", sep = "."),
-..., param=NULL, raw=FALSE)
+..., param, raw=FALSE)
 \S4method{readVcf}{character,missing}(file, ..., param, raw=FALSE)
 \S4method{readVcf}{TabixFile,GRanges}(file, ..., param, raw=FALSE)
 \S4method{readVcf}{TabixFile,RangedData}(file, ..., param, raw=FALSE)
@@ -121,7 +121,7 @@
 
 \examples{
 
-## read entire VCF file
+## read entire VCF file (not compressed)
 vcfFile <- system.file("extdata", "ex1.vcf", package="VariantAnnotation") 
 vcf <- readVcf(vcfFile, index=character(0))
 values(rowData(vcf))[["ref"]][2:5]

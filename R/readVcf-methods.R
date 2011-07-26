@@ -16,10 +16,10 @@ setMethod("readVcf", c(file="character", param="missing"),
 })
 
 setMethod("readVcf", c(file="character", param="ANY"),
-    function(file, index=paste(file, "tbi", sep="."), ..., param=NULL, raw=FALSE)
+    function(file, index=paste(file, "tbi", sep="."), ..., param, raw=FALSE)
 {
-    tf <- TabixFile(file, index)
-    callGeneric(file=tf, param=param, raw=raw)
+    tf <- TabixFile(file, index=paste(file, "tbi", sep="."))
+    callGeneric(tf, param=param, raw=raw)
 })
 
 setMethod("readVcf", c(file="TabixFile", param="GRanges"),
