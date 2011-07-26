@@ -44,8 +44,8 @@ In this vignette we introduce methods in the \VariantAnnotation
 package for the annotation and filtering of genetic variants. Functions are 
 available for identifying location with respect to gene function as well as 
 amino acid coding changes for variants that fall in coding regions. 
-Subsetting variants based on location and presence in dbSNP can be performed
-with provided filters. Additionally, a function for reading in Variant Call Format 
+Variants can be subset on location and for presence in dbSNP 
+with the built-in filters. Additionally, a function for reading in Variant Call Format 
 (VCF) files into a \Robject{SummarizedExperiment} object is provided. 
 
 \section{Variant Location}
@@ -56,7 +56,7 @@ variation. A single basepair replacement
 (SNP) has equal start and end positions and a width of length 1. A deletion 
 or substitution will have a width of 1 or greater depending on the number of 
 basepairs being deleted or substituted. Insertions are represented with 
-start = end - 1 which results in a width of length 0. 
+start = end + 1 which results in a width of length 0. 
 
 The reference and variant alleles are contained in the \Robject{refAllele} and 
 \Robject{varAllele} columns as \Robject{DNAStringSet}s. An insertion 
@@ -221,10 +221,10 @@ filter, either a dbSNP package or \Robject{TranscriptDb} object.
 
 <<createFilters>>=
 library("SNPlocs.Hsapiens.dbSNP.20090506")
-## create a filter to identify variants present in dbSNP 
+## create filter to identify variants present in dbSNP 
 snpFilt <- dbSNPFilter("SNPlocs.Hsapiens.dbSNP.20090506")
 
-## create a filter to identify variants present in introns 
+## create filter to identify variants present in introns 
 regionFilt <- regionFilter(txdb, region="intron")
 regionFilt
 @

@@ -41,13 +41,15 @@ setMethod("predictCoding", c("GRanges", "GRangesList"),
  
         fo <- findOverlaps(queryAdj, subject, type = "within")
         if (length(fo) == 0)
-            stop("there is no overlap between the query and subject")
+        return(DataFrame(queryHits=character(0), txID=character(0),
+               refSeq=DNAStringSet(), varSeq=DNAStringSet(), 
+               refAA=AAStringSet(), varAA=AAStringSet(), 
+               Consequence=character(0))) 
 
         subject <- subject[unique(subjectHits(fo))]
         txSeqs <- getTranscriptSeqs(subject, seqSource)
         txLocal <- globalToLocal(queryAdj, subject)
         xCoding <- query[txLocal$globalInd]
-
  
         ## original sequences 
         originalWidth <- width(xCoding)
@@ -77,11 +79,11 @@ setMethod("predictCoding", c("GRanges", "GRangesList"),
         varAA <- AAStringSet(rep("", length(queryHits))) 
         varAA[translateIdx] <- translate(varSeq[translateIdx])
  
-        ## FIXME : better check for equality
         nonsynonymous <- as.character(refAA) != as.character(varAA) 
         Consequence <- rep("synonymous", length(xCoding))
         Consequence[nonsynonymous] <- "nonsynonymous" 
         Consequence[!translateIdx] <- "frameshift" 
+        Consequence <- factor(Consequence) 
  
         DataFrame(queryHits, txID, refSeq, varSeq, 
             refAA, varAA, Consequence, fromSubject) 

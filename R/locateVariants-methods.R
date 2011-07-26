@@ -87,6 +87,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
            Location=rep("intergenic", length(which(intergenic))))
 
        ans <- rbind(dat1, dat2)
+       ans$Location <- factor(ans$Location)
        ans[order(ans$queryHits), ]
     }
 )

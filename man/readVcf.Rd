@@ -114,9 +114,10 @@
 \author{Valerie Obenchain <vobencha@fhcrc.org>}
 
 \seealso{
+  \code{\link{indexTabix}}
+  \code{\link{TabixFile}}
+  \code{\link{scanTabix}}
   \code{\link{scanBcf}}
-  \code{\link{scanBcfHeader}}
-  \code{\link{ScanBcfParam}}
 }
 
 \examples{

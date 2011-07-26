@@ -29,7 +29,7 @@
   the reference basepairs being substituted or deleted. The width will be the
   same as the number of basepairs being substituted or deleted. For insertions,
   the width is negative and the range is represented as \code{start} =
-  \code{end} - 1. For examples of how different variant types should
+  \code{end} + 1. For examples of how different variant types should
   be represented see the \code{variants} sample data in the package.
  
 
