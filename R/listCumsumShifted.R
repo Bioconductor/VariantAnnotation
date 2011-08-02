@@ -1,6 +1,5 @@
-## TODO : move to IRanges
 
-listCumsumShifted <- function(x) 
+.listCumsumShifted <- function(x) 
 {
     cs <- listCumsum(x)
     shifted <- c(0L, head(cs, -1))

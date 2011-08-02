@@ -7,7 +7,7 @@ globalToLocal <- function(global, ranges)
     qhits <- queryHits(ol)
     local <- ranges(global)[qhits]
     bounds <- ranges(gr)[shits]
-  
+ 
     ## location wrt start of coding region 
     neg <- as.vector(strand(gr)[shits] == "-")
     local[!neg] <- shift(local[!neg], - start(bounds)[!neg])
@@ -15,7 +15,8 @@ globalToLocal <- function(global, ranges)
         width = width(local)[neg])
 
     ## location wrt transcript 
-    local <- shift(local, 1L + listCumsumShifted(width(ranges))[shits])
+    cumsums <- .listCumsumShifted(width(ranges))
+    local <- shift(local, 1L + cumsums[shits])
 
     rangesInd <- rep(seq(length(ranges)), elementLengths(ranges))[shits]
     DataFrame(globalInd = qhits, rangesInd, local)
