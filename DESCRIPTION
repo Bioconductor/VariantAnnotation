@@ -1,13 +1,15 @@
 Package: VariantAnnotation 
 Type: Package
 Title: Annotation of Genetic Variants 
-Description: Annotate variants with respect to gene functionality, selectively filter based on multiple criteria 
-Version: 0.99.7
+Description: Annotate variants with respect to location and amino acid coding 
+Version: 0.99.8
 Author: Michael Lawrence and Valerie Obenchain 
 Maintainer: Valerie Obenchain <vobencha@fhcrc.org> 
 License: Artistic-2.0 
-biocViews: Sequencing, HighThroughputSequencing, SNP
+biocViews: DataImport, Sequencing, HighThroughputSequencing, SNP
 Depends: R (>= 2.8.0), methods, GenomicFeatures, GenomicRanges, Biostrings, Rsamtools 
 Imports: methods, GenomicRanges, Biostrings, GenomicFeatures, IRanges, Biobase, Rsamtools, BSgenome
-Suggests: RUnit, BSgenome.Hsapiens.UCSC.hg18, TxDb.Hsapiens.UCSC.hg18.knownGene, SNPlocs.Hsapiens.dbSNP.20090506
+Suggests: RUnit, BSgenome.Hsapiens.UCSC.hg18, TxDb.Hsapiens.UCSC.hg18.knownGene, 
+          SNPlocs.Hsapiens.dbSNP.20090506, TxDb.Dmelanogaster.UCSC.dm3.ensGene, 
+          BSgenome.Dmelanogaster.UCSC.dm3
 LazyLoad: yes

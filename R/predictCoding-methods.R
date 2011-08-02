@@ -1,32 +1,36 @@
-setMethod("predictCoding",  c("Ranges", "TranscriptDb"),
+setMethod("predictCoding",  signature(query="Ranges", subject="TranscriptDb", 
+          seqSource="ANY", varAllele="character"),
     function(query, subject, seqSource, varAllele, ...)
     {
         cdsByTx <- cdsBy(subject)
         x <- as(query, "GRanges")
-        callGeneric(query=x, subject=cdsByTx, seqSource=seqSource, 
-            varAllele=varAllele, ...) 
+        callGeneric(query=x, subject=cdsByTx, seqSource, 
+            varAllele, ...) 
     }
 )
 
-setMethod("predictCoding",  c("GRanges", "TranscriptDb"),
-    function(query, subject, seqSource, ...)
+setMethod("predictCoding",  signature(query="GRanges", subject="TranscriptDb", 
+          seqSource="ANY", varAllele="character"),
+    function(query, subject, seqSource, varAllele, ...)
     {
         cdsByTx <- cdsBy(subject)
-        callGeneric(query=query, subject=cdsByTx, seqSource=seqSource, 
-            varAllele=varAllele, ...) 
+        callGeneric(query=query, subject=cdsByTx, seqSource, 
+            varAllele, ...) 
     }
 )
 
-setMethod("predictCoding", c("Ranges", "GRangesList"),
-    function(query, subject, seqSource, ...)
+setMethod("predictCoding", signature(query="Ranges", subject="GRangesList", 
+          seqSource="ANY", varAllele="character"),
+    function(query, subject, seqSource, varAllele, ...)
     {
         x <- as(query, "GRanges")
         callGeneric(query=x, subject=subject, seqSource=seqSource, 
-             ...) 
+             varAllele=varAllele, ...) 
     }
 )
 
-setMethod("predictCoding", c("GRanges", "GRangesList"),
+setMethod("predictCoding", signature(query="GRanges", subject="GRangesList", 
+          seqSource="ANY", varAllele="character"),
     function(query, subject, seqSource, varAllele, ...)
     {
         ## FIXME : findOverlaps is done here, globalToLocal and locateVariants
@@ -38,6 +42,9 @@ setMethod("predictCoding", c("GRanges", "GRangesList"),
             start(queryAdj[width(query) == 0]) <- 
                 start(query)[width(query) == 0] - 1
         } else queryAdj <- query
+ 
+        if (is.null(values(query)[[varAllele]]))
+            stop("varAllele column not present in query")
  
         fo <- findOverlaps(queryAdj, subject, type = "within")
         if (length(fo) == 0)
@@ -60,7 +67,7 @@ setMethod("predictCoding", c("GRanges", "GRangesList"),
             codonStart, codonEnd))
 
         ## variant sequences 
-        varWidth <- width(values(xCoding)[[varAllele]]) 
+        varWidth <- width(values(xCoding)[[varAllele]])
         varPosition <- (start(txLocal$local) - 1L) %% 3L + 1L
         indels <- originalWidth == 0 | varWidth == 0 
         translateIdx <- abs(varWidth - originalWidth) %% 3 == 0 

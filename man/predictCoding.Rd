@@ -1,11 +1,9 @@
 \name{predictCoding}
 \alias{predictCoding}
-\alias{predictCoding,Ranges,TranscriptDb-method}
-\alias{predictCoding,Ranges,character-method}
-\alias{predictCoding,GRanges,TranscriptDb-method}
-\alias{predictCoding,GRanges,character-method}
-\alias{predictCoding,Ranges,GRangesList-method}
-\alias{predictCoding,GRanges,GRangesList-method}
+\alias{predictCoding,Ranges,TranscriptDb,ANY,character-method}
+\alias{predictCoding,GRanges,TranscriptDb,ANY,character-method}
+\alias{predictCoding,Ranges,GRangesList,ANY,character-method}
+\alias{predictCoding,GRanges,GRangesList,ANY,character-method}
 
 \title{Predict amino acid coding changes for variants}
 
@@ -14,8 +12,8 @@
 }
 
 \usage{
-  \S4method{predictCoding}{GRanges,GRangesList}(query, subject, seqSource,
-    varAllele, ...)
+  \S4method{predictCoding}{GRanges,GRangesList,ANY,character}(query, subject, 
+    seqSource, varAllele, ...)
 }
 
 \arguments{
