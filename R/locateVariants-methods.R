@@ -62,37 +62,47 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
         dat1 <- DataFrame(queryHits=queryHits, txID, geneID, Location)
 
         ## intergenic :
-        ## FIXME : need to simplify
         if (any(txCO == 0)) {
             intergenic <- txCO == 0
-            intvar <- query[txCO == 0]
-            flankGenes <- lapply(seq_len(length(intvar)), 
-                function(x, tx, intvar) {
-                    pre <- fol <- intvar[x,]
-                    pregene <- values(tx[precede(pre, tx)])["gene_id"] 
-                    while (length(pregene$gene_id[[1]]) == 0 && 
-                           (typeof(pregene$gene_id[[1]]) == "character")){
-                            pre <- precede(pre, tx)
-                            pregene <- values(tx[precede(pre, tx)])["gene_id"] 
-                    }
+            intvar <- queryAdj[txCO == 0]
+            geneWidth <- width(values(tx)[["gene_id"]]@partitioning) 
+            txWithGeneID <- tx[geneWidth != 0]
+            genes <- values(txWithGeneID)[["gene_id"]]
 
-                    folgene <- values(tx[follow(fol, tx)])["gene_id"] 
-                    while (length(folgene$gene_id[[1]]) == 0 && 
-                           (typeof(folgene$gene_id[[1]]) == "character")){
-                            fol <- tx[follow(fol, tx)]
-                            folgene <- values(tx[follow(fol, tx)])["gene_id"] 
-                    }
-                c(pregene$gene_id[[1]], folgene$gene_id[[1]])
-                }, tx, intvar)
+            nearestIdx <- nearest(intvar, txWithGeneID)
+            isPreceding <- (end(txWithGeneID[nearestIdx]) - start(intvar)) < 0
+            isFirst <- nearestIdx == 1
+            isLast <- nearestIdx == length(txWithGeneID) 
+
+            ## nearest is preceding
+            precedeIdx <- nearestIdx
+            followIdx <- precedeIdx + 1
+            ## nearest is following 
+            precedeIdx[!isPreceding & !isFirst] <- 
+                precedeIdx[!isPreceding & !isFirst] - 1 
+            followIdx[!isPreceding & !isFirst] <- 
+                followIdx[!isPreceding & !isFirst] - 1 
+
+            ## edge cases where nearest is first or last 
+            ## (ie, one flanking gene)
+            p <- genes[precedeIdx]
+            f <- genes[followIdx]
+            if (any(isPreceding & isLast)) 
+                f[isPreceding & isLast] <- "no following" 
+            if (any(!isPreceding & isFirst)) 
+                p[!isPreceding & isFirst] <- "no preceding" 
+
+            flankGenes <- CharacterList(lapply(seq_len(length(p)), 
+                function(i, p, f) c(p[i], f[i]),
+                    as.vector(p),as.vector(f))) 
             dat2 <- DataFrame(queryHits=which(intergenic), 
                 txID=rep(NA, length(which(intergenic))), 
-                geneID=CharacterList(flankGenes), 
+                geneID=flankGenes, 
                 Location=rep("intergenic", length(which(intergenic))))
         } else {
             dat2 <- DataFrame(queryHits=integer(), txID=character(), 
                 geneID=CharacterList(), Location=character())
         }
-
 
        ans <- rbind(dat1, dat2)
        ans$Location <- factor(ans$Location)
