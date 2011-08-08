@@ -15,7 +15,7 @@ globalToLocal <- function(global, ranges)
         width = width(local)[neg])
 
     ## location wrt transcript 
-    cumsums <- .listCumsumShifted(width(ranges))
+    cumsums <- .cumsumShifted(width(ranges))
     local <- shift(local, 1L + cumsums[shits])
 
     rangesInd <- rep(seq(length(ranges)), elementLengths(ranges))[shits]

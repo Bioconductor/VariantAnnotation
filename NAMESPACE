@@ -18,7 +18,7 @@ importMethodsFrom(IRanges, "%in%", append, as.matrix, as.vector,
                   queryHits, rbind, rev, Rle, runValue, sapply, shift,
                   split, start, "start<-", subjectHits, "subseq<-",
                   substring, unique, unlist, values, "values<-", which,
-                  width, listCumsum)
+                  width)
 importMethodsFrom(Rsamtools, scanBcf, ScanBcfParam, scanFaIndex,
                   scanTabix, headerTabix)
 
