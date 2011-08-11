@@ -49,10 +49,11 @@
 }
 
 
-.VcfToSummarizedExperiment <- function(vcf, raw=FALSE, ...)
+.VcfToSummarizedExperiment <- function(vcf, sampleID, raw=FALSE, ...)
 {
     # assays
-    if (!is.null(vcf$GENO))
+    #if (!is.null(vcf$GENO))
+    if (length(vcf$GENO) > 0)
         geno <- lapply(vcf$GENO, as.matrix)
     else
         geno <- list() 
@@ -63,9 +64,14 @@
     lstSplit[lstSplit == 0] <- 1
     df <- DataFrame(pos=vcf$POS, qual=vcf$QUAL, filter=vcf$FILTER,
         info=vcf$INFO)
-    reference <- DNAStringSet(gsub("\\.", "", vcf$REF))
+    reference <- gsub("\\.", "", vcf$REF)
+    reference[is.na(reference)] <- ""
+    reference <- DNAStringSet(reference)
+
     alt <- unlist(strsplit(vcf$ALT, ","))
-    alt <- DNAStringSet(gsub("\\.", "", alt))
+    alt <- gsub("\\.", "", alt)
+    alt[is.na(alt)] <- ""
+    alt <- DNAStringSet(alt)
 
     if (raw) {
         alt <- DataFrame(alt)
@@ -104,22 +110,30 @@
     names(rowdata) <- vcf$ID
 
     ## colData
-    if (!is.null(vcf$GENO)) {
+    if (length(vcf$GENO) > 0) {
         samples <- ncol(do.call(rbind, geno))
         coldata <- DataFrame(Samples=seq_len(samples),
-            row.names=LETTERS[1:samples])
+            row.names=sampleID)
+       ## FIXME : handle no samples but need colData
        } else coldata <- DataFrame(Samples=1, row.names=LETTERS[1])
 
     SummarizedExperiment(assays=geno, colData=coldata, rowData=rowdata)
 }
 
 
-.cumsumShifted <- function(x) 
-{
-    cs <- unlist(cumsum(x))
-    shifted <- c(0L, head(cs, -1))
-    shifted[start(PartitioningByWidth(elementLengths(x)))] <- 0L
-    shifted
+.listCumsum <- function(x) {
+  x_unlisted <- unlist(x, use.names=FALSE)
+  x_cumsum <- cumsum(x_unlisted)
+  x_part <- PartitioningByWidth(elementLengths(x))
+  x_cumsum - rep(x_cumsum[start(x_part)] - x_unlisted[start(x_part)],
+                 width(x_part))
+}
+
+.listCumsumShifted <- function(x) {
+  cs <- .listCumsum(x)
+  shifted <- c(0L, head(cs, -1))
+  shifted[start(PartitioningByWidth(elementLengths(x)))] <- 0L
+  shifted
 }
 
 

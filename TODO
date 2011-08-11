@@ -1,0 +1,52 @@
+
+Short term
+-------------------
+
+- Michael's vectorized cum* methods in IRanges
+
+
+- readVcf :
+
+  o parse header of VCF files, use INFO to designate data types
+
+  o deal with "imprecise" variants ALT field that contain descriptive alleles,
+    should be marked by 'imprecise' flag in INFO
+
+  o pick up strand bias in INFO$sb? 
+
+  o if user does not supply a param :
+    (i) if not compressed -> ok
+    (ii) if compressed -> warning 
+
+ 
+- locateVariants  :
+
+  o findOverlaps needs zero-width implementation :
+
+    (i) the only possible type of overlap between a zero-width and non-zero width
+    interval is "within"
+ 
+    (ii) overlap is defined as
+ 
+        (x2 <= x1 <= y2) && (x2 <= y1 <= y2)
+ 
+    where in this example I1 is found to be "within" I2.
+ 
+    (iii) Herve's def2_truth table summarizes the expected hits
+
+    ANY END START WITHIN EQUAL
+    A 1 0 0 1 0
+    B 1 0 0 1 0
+    C 0 0 0 0 0
+    D 0 0 0 0 0 
+
+
+  o findOverlaps(type="within", ...) for all matches? NOTE : predictCoding
+    uses type="within"
+
+
+
+
+Long term
+-------------------
+

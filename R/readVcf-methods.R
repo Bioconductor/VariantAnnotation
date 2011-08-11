@@ -1,18 +1,9 @@
-## TODO :
-## imprecise variants ALT field may contain descriptive alleles
-## imprecise should be marked by imprecise flag in INFO field
-## strand bias in INFO$sb
-
-## FIXME : if user does not supply param, either 
-##         (1) make a default param for scanTabix such that
-##             all records are brought over
-##         (2) use scanBcf(file, character(0))
-
 setMethod("readVcf", c(file="character", param="missing"),
     function(file, ..., param, raw=FALSE)
 {
     vcf <- scanBcf(file, character(0))
-    .VcfToSummarizedExperiment(vcf, raw=raw)
+    sampleID <- scanBcfHeader(file)[[1]]$Sample
+    .VcfToSummarizedExperiment(vcf, sampleID, raw=raw)
 })
 
 setMethod("readVcf", c(file="character", param="ANY"),
@@ -45,5 +36,32 @@ setMethod("readVcf", c(file="TabixFile", param="RangesList"),
 {
     tbx <- scanTabix(file, param=param)
     vcf <- .parseTabix(tbx, param=param)
-    .VcfToSummarizedExperiment(vcf, raw=raw)
+    sampleID <- scanBcfHeader(path(file))[[1]]$Sample
+    .VcfToSummarizedExperiment(vcf, sampleID, raw=raw)
 }
+
+
+MatrixToSnpMatrix <- function(callMatrix, ...)
+{
+    nsnps <- nrow(callMatrix)
+    nsamples <- ncol(callMatrix)
+    mat = matrix(as.raw(0), nrow=nsamples, ncol=nsnps)
+
+    ## 0 = missing
+    ## 1 = homozyg ref
+    ## 2 = heterozyg ref
+    ## 3 = homozyg no ref
+    nalt = strsplit(callMatrix, "")
+    alts <- do.call(rbind, nalt)[, c(1,3)]
+    alts[alts == "."] <- NA
+    nalt <- 2 - ((alts[,1] == 0) + (alts[,2] == 0))
+    nalt[is.na(nalt)] <- -1
+    nalt = as.raw(nalt+1)
+    naltList <- split(nalt, rep(seq(1:nsnps), nsamples))
+    for (i in 1:nsnps) mat[,i] = naltList[[i]]
+    rownames(mat) = colnames(callMatrix)
+    colnames(mat) = rownames(callMatrix)
+    new("SnpMatrix", mat)
+}
+
+

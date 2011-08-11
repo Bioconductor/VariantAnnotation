@@ -33,7 +33,6 @@ setMethod("predictCoding", signature(query="GRanges", subject="GRangesList",
           seqSource="ANY", varAllele="character"),
     function(query, subject, seqSource, varAllele, ...)
     {
-        ## FIXME : findOverlaps is done here, globalToLocal and locateVariants
         ## findOverlaps won't find negative widths
         ## adjust query with width=0 :
         ## de-increment start to equal end value 

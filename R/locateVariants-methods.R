@@ -1,10 +1,3 @@
-## TODO : (1) Currently overlaps all type=within.
-##            type=any and list all matches?
-##            Note that predictCoding uses type=any
-##        (2) Simplify flanking genes search for intergenic
-##        (3) need findOverlaps() method for decimal location 
-##            (ie, 3.4 is insertion location btn 3 and 4)
-
 setMethod("locateVariants", c("GRanges", "TranscriptDb"),
     function(query, subject, ...)
     {
@@ -12,9 +5,6 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
         isActiveSeq(subject)[!names(isActiveSeq(subject)) %in% chrom] <- FALSE 
         tx <- transcripts(subject, columns=c("exon_id", "tx_id", "gene_id"))
         cdsByTx <- cdsBy(subject)
-        #tx <- transcripts(subject, vals=list(exon_chrom=chrom),
-        #   columns=c("exon_id", "tx_id", "gene_id"))
-
 
         ## findOverlaps won't find negative widths
         ## adjust query with width=0 :
