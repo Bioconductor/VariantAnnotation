@@ -66,10 +66,15 @@
 
 
 \details{
-  The \code{readVcf} function parses VCF and compressed VCF files into a
-  \code{\linkS4class{SummarizedExperiment}} object.  \code{readVcf}
-  calls \code{Rsamtools} \code{link{scanBcf}} and \code{link{scanTabix}}
-  functions, the details of which can be found on their respective help pages. 
+  \code{readVcf} imports records from a VCF file into a 
+  \code{\linkS4class{SummarizedExperiment}} object.  Currently 
+  \code{readVcf} imports all records from uncompressed VCF files. 
+  The \code{param} argument can be used to select a subset of
+  records when reading from compressed (bgzip) VCF files.
+
+  The function calls \code{Rsamtools} \code{link{scanBcf}} and 
+  \code{link{scanTabix}} functions, the details of which can be found on 
+  their respective help pages. 
 }
 
 \value{
@@ -122,14 +127,14 @@
 
 \examples{
 
-## read entire VCF file (not compressed)
+## read in all records of uncompressed VCF 
 vcfFile <- system.file("extdata", "ex1.vcf", package="VariantAnnotation") 
 vcf <- readVcf(vcfFile, index=character(0))
 values(rowData(vcf))[["ref"]][2:5]
 values(rowData(vcf))[["alt"]][2:5]
 
 
-## read a portion of a compressed VCF file
+## read a portion of compressed VCF
 gr <- GRanges(seqnames="1",
               ranges=IRanges(start=0, end=100000))
 from <- vcfFile 

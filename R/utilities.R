@@ -1,123 +1,186 @@
-## TODO : - Modify scanTabix/scanBcf to pull over 
-##          HQ and FT from INFO and sample names
-##        - Make scanTabix work with ScanBcfParam 
-
-.parseTabix <- function(tbx, param, ...)
+.parseTabix <- function(tbx, header, param, ...)
 {
-    ## currently returning all fields in ScanBcfParam
+    ## currently return all fields in ScanBcfParam
     tmpl <- Rsamtools:::.bcf_template(param=ScanBcfParam())
-    ulst <- unlist(tbx, use.names=FALSE)
-    strings <- strsplit(ulst, "\t", fixed=TRUE)
-    elt <- elementLengths(tbx)
+    tmpl$RecordsPerRange <- sum(elementLengths(tbx)) 
+    strings <- strsplit(unlist(tbx, use.names=FALSE), "\t", fixed=TRUE)
     nfields <- length(strings[[1]]) 
-    tmpl$RecordsPerRange <- sum(elt) 
-
     mat <- matrix(unlist(strings, use.names=FALSE), ncol=nfields, byrow=TRUE)
-
-    ## 8 required fields
-    reqfields <- 8
-    if (nfields > reqfields) {
-        nsamples <- nfields - (reqfields + 1)
-        fill <- reqfields + 1
-    } else {
+    if (!is.null(header[[1]]$Sample))
+        nsamples <- length(header[[1]]$Sample)
+    else 
         nsamples <- 0
-        fill <- reqfields
-    }
 
-    ## FIXME : datatypes
-    tmpl[1:fill] <- lapply(seq_len(fill), function(x, mat) mat[,x], mat)
+    ## required fields 
+    tmpl[1:8] <- lapply(seq_len(8), function(x, mat) mat[,x], mat)
     tmpl[["POS"]] <- as.numeric(tmpl[["POS"]])
+    tmpl[["QUAL"]] <- gsub(".", "", tmpl[["QUAL"]])
+    tmpl[["QUAL"]] <- as.numeric(tmpl[["QUAL"]])
+    #if (all(tmpl[["INFO"]] == ".")) 
+    #    tmpl[["INFO"]] <- rep(NA, length(tmpl[["INFO"]]))
 
-    ## geno
-    if (nfields > reqfields) {
-        nsamples <- nfields - (reqfields + 1) 
-        samples <- mat[,c((reqfields + 2):nfields)]
-        idx <- unlist(strsplit(tmpl[["FORMAT"]][1], ":"))
-        ss <- strsplit(samples, ":", fixed=TRUE)
-        genomat <- matrix(unlist(ss, use.names=FALSE), ncol=length(idx), byrow=TRUE)
-        genolst <- lapply(seq_len(length(idx)), function(x, genomat){
-            matrix(genomat[,x], ncol=nsamples)
-        }, genomat)
-        names(genolst) <- idx
-        tmpl[["GENO"]][idx] <- genolst[idx]
-        tmpl[["GENO"]] <- tmpl[["GENO"]][idx]
-    } else { 
-        tmpl <- tmpl[1:fill] 
+    ## optional fields 
+    if (nsamples > 0) {
+        tmpl[["FORMAT"]] <- mat[,9]
+        samples <- mat[,-c(1:9)]
+        formats <- unlist(strsplit(tmpl[["FORMAT"]][1], ":", fixed=TRUE))
+        tmpl[["FORMAT"]] <- formats
+        tmpl[["GENO"]][formats] <- .parseGENO(tmpl, formats, samples, header)
+        tmpl[["GENO"]] <-  tmpl[["GENO"]][formats]
+    } else {
+        tmpl[["GENO"]] <- list()
     }
 
     tmpl
 }
 
 
-.VcfToSummarizedExperiment <- function(vcf, sampleID, raw=FALSE, ...)
+.VcfToSummarizedExperiment <- function(vcf, header, raw=FALSE, ...)
 {
     # assays
-    #if (!is.null(vcf$GENO))
     if (length(vcf$GENO) > 0)
-        geno <- lapply(vcf$GENO, as.matrix)
+        geno <- lapply(vcf$GENO, function(x) matrix(x, 
+           nrow=vcf$RecordsPerRange, byrow=FALSE))
     else
         geno <- list() 
 
     # rowdata
     lst <- as.list(vcf$ALT)
-    lstSplit <- sapply(lst, function(x) length(unlist(strsplit(x, ","))))
+    lstSplit <- sapply(lst, function(x) length(unlist(strsplit(x, ",", fixed=TRUE))))
     lstSplit[lstSplit == 0] <- 1
-    df <- DataFrame(pos=vcf$POS, qual=vcf$QUAL, filter=vcf$FILTER,
-        info=vcf$INFO)
+    df <- DataFrame(POS=vcf$POS, QUAL=vcf$QUAL, FILTER=vcf$FILTER)
+    info <- .parseINFO(vcf$INFO, header)
+    df <- append(df, info)
+
     reference <- gsub("\\.", "", vcf$REF)
     reference[is.na(reference)] <- ""
     reference <- DNAStringSet(reference)
 
-    alt <- unlist(strsplit(vcf$ALT, ","))
+    alt <- unlist(strsplit(vcf$ALT, ",", fixed=TRUE))
     alt <- gsub("\\.", "", alt)
     alt[is.na(alt)] <- ""
     alt <- DNAStringSet(alt)
-
-    if (raw) {
-        alt <- DataFrame(alt)
-    } else {
-        ## snp
-        ref <- rep(reference, lstSplit)
-        start <- end <- rep(vcf$POS, lstSplit)
-        ## deletion
-        deletion <- width(ref) > width(alt)
-        start[deletion] <- start[deletion] + 1
-        end[deletion] <- start[deletion] +
-            abs(width(ref) - width(alt))[deletion]
-        ## insertion
-        insertion <- width(ref) < width(alt)
-        start[insertion] <- start[insertion] + 2
-        end[insertion] <- end[insertion] + 1
-        ## block substitution 
-        blockSub <- (width(ref) == width(alt)) & (width(ref) != 1)
-        start[blockSub] <- start[blockSub] + 1
-        end[blockSub] <- start[blockSub] + width(ref)[blockSub] - 1
-
-        ## remove leading allele in all except snps and monomorphic 
-        notSNPorMONO_ext <- width(ref) > 1
-        notSNPorMONO_con <- width(reference) > 1
-        reference[notSNPorMONO_con] <- 
-            narrow(reference[notSNPorMONO_con], start=2)
-        alt[notSNPorMONO_ext] <- narrow(alt[notSNPorMONO_ext], start=2)
-        alt <- DataFrame(alt, ranges=IRanges(start, end))
+    if (raw)  {
+        allalt <- DataFrame(alt)
+        altDF <- split(allalt, rep(seq_len(length(lstSplit)), lstSplit))
+    } else { 
+        altDF <- .convertToBiocRanges(reference, alt, vcf, lstSplit)
     }
 
-    df$ref <- reference
-    df$alt <- split(alt, rep(seq_len(length(lstSplit)), lstSplit))
-    rowdata <- GRanges(seqnames=Rle(vcf$CHROM),
-                       ranges=IRanges(start=vcf$POS, width=1))
+    rowdata <- GRanges(Rle(vcf$CHROM), IRanges(vcf$POS, width=1))
+    df$REF <- reference
+    df$ALT <- altDF 
     values(rowdata) <- df
     names(rowdata) <- vcf$ID
 
     ## colData
     if (length(vcf$GENO) > 0) {
-        samples <- ncol(do.call(rbind, geno))
+        sampleID <- header[[1]]$Sample
+        samples <- length(sampleID) 
         coldata <- DataFrame(Samples=seq_len(samples),
             row.names=sampleID)
-       ## FIXME : handle no samples but need colData
-       } else coldata <- DataFrame(Samples=1, row.names=LETTERS[1])
+    } else {
+    coldata <- DataFrame(Samples=character(0))
+    }
 
     SummarizedExperiment(assays=geno, colData=coldata, rowData=rowdata)
+}
+
+
+.vcfDataTypeConversion <- function(x, ...)
+{
+    x[x == "String"] <- "character"
+    x[x == "Integer"] <- "integer"
+    x[x == "Flag"] <- "factor"
+    x[x == "Float"] <- "numeric"
+    x
+}
+
+.parseINFO <- function(rawinfo, header, ...)
+{
+    ## FIXME : handle case of > 1 value numeric, integer 
+    ## FIXME : force type=flag to factor 
+    if (all(rawinfo == ".")) 
+        return(DataFrame())
+
+    info <- strsplit(rawinfo, ";", fixed=TRUE)
+    u <-  do.call(rbind, strsplit(unlist(info), "=", fixed=TRUE))
+    u <- u[u[,1] != ".", ]
+    keys <- u[,1]
+    values <- u[,2]
+    infoHeader <- header[[1]]$Header$INFO
+    flags <- rownames(infoHeader)[infoHeader$Type == "Flag"]
+    values[values %in% flags] <- 1
+    lstvalues <- split(values, keys)
+    uniquekeys <- names(lstvalues) 
+    lstkeys <-  lapply(uniquekeys, function(x, info) grep(x, info), info)
+
+    vcfType <- infoHeader$Type[match(uniquekeys, rownames(infoHeader))]
+    RType <- .vcfDataTypeConversion(vcfType)
+
+    lst <- lapply(seq_len(length(lstkeys)), 
+        function(x, lstkeys, lstvalues, RType) {
+            new <- numeric(length(info))
+            new[lstkeys[[x]]] <- switch(RType[x], 
+                character = as.character(lstvalues[[x]]),
+                numeric = as.numeric(lstvalues[[x]]),
+                integer = as.integer(lstvalues[[x]]),
+                factor = as.factor(lstvalues[[x]]))
+            new
+        }, lstkeys, lstvalues, RType)
+
+    DF <- as(lst, "DataFrame")
+    colnames(DF) <- uniquekeys
+    DF
+}
+
+.parseGENO <- function(tmpl, formats, rawgeno, header, ...)
+{
+    ## FIXME : handle case of > 1 value for numeric, integer 
+    ## FIXME : force type=flag to factor 
+    strings <- strsplit(unlist(rawgeno, use.names=FALSE), ":", fixed=TRUE)
+    formatHeader <- header[[1]]$Header$FORMAT[formats %in%
+        rownames(header[[1]]$Header$FORMAT)]
+    vcfType <- formatHeader$Type[match(formats, rownames(formatHeader))]
+    formatType <- .vcfDataTypeConversion(vcfType)
+    mat <- matrix(unlist(strings, use.names=FALSE), ncol=length(formats), byrow=TRUE)
+    lst <- lapply(seq_len(length(formatType)), function(x, mat, formatType){
+            new <- mat[,x]
+            #mode(new) <- formatType[x]
+            matrix(new, ncol=ncol(rawgeno))
+        }, mat, formatType)
+    names(lst) <- formats
+    lst
+}
+
+
+.convertToBiocRanges <- function(reference, alt, vcf, lstSplit, ...)
+{
+    ## snp
+    ref <- rep(reference, lstSplit)
+    start <- end <- rep(vcf$POS, lstSplit)
+    ## deletion
+    deletion <- width(ref) > width(alt)
+    start[deletion] <- start[deletion] + 1
+    end[deletion] <- start[deletion] +
+        abs(width(ref) - width(alt))[deletion]
+    ## insertion
+    insertion <- width(ref) < width(alt)
+    start[insertion] <- start[insertion] + 2
+    end[insertion] <- end[insertion] + 1
+    ## block substitution 
+    blockSub <- (width(ref) == width(alt)) & (width(ref) != 1)
+    start[blockSub] <- start[blockSub] + 1
+    end[blockSub] <- start[blockSub] + width(ref)[blockSub] - 1
+
+    ## remove leading allele in all except snps and monomorphic 
+    notSNPorMONO_ext <- width(ref) > 1
+    notSNPorMONO_con <- width(reference) > 1
+    reference[notSNPorMONO_con] <-
+        narrow(reference[notSNPorMONO_con], start=2)
+    alt[notSNPorMONO_ext] <- narrow(alt[notSNPorMONO_ext], start=2)
+    res <- DataFrame(alt, ranges=IRanges(start, end))
+    split(res, rep(seq_len(length(lstSplit)), lstSplit))
 }
 
 
