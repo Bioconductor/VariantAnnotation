@@ -1,3 +1,5 @@
+useDynLib(VariantAnnotation, .registration=TRUE)
+
 import(Biostrings)
 import(GenomicRanges)
 import(methods)
