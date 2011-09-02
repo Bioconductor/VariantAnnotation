@@ -44,21 +44,50 @@ vcf_split(SEXP vcf, SEXP sample, SEXP map)
     int fmtidx, sampleidx,
         *mapidx = (int *) R_alloc(sizeof(int), map_n);
 
-    /* allocate result, set names on list, dimnames on matricies */
-    SEXP result, dimnames;
-    PROTECT(result = Rf_allocVector(VECSXP, map_n));
-    result = Rf_namesgets(result, nms);
+    /* fixed + geno fields */
+    SEXP result;
+    PROTECT(result = Rf_allocVector(VECSXP, 8 + 1));
+
+    SET_VECTOR_ELT(result, 0, Rf_allocVector(STRSXP, vcf_n));
+    SET_VECTOR_ELT(result, 1, Rf_allocVector(INTSXP, vcf_n));
+    SET_VECTOR_ELT(result, 2, Rf_allocVector(STRSXP, vcf_n));
+    SET_VECTOR_ELT(result, 3, Rf_allocVector(STRSXP, vcf_n));
+    SET_VECTOR_ELT(result, 4, Rf_allocVector(STRSXP, vcf_n));
+    SET_VECTOR_ELT(result, 5, Rf_allocVector(REALSXP, vcf_n));
+    SET_VECTOR_ELT(result, 6, Rf_allocVector(STRSXP, vcf_n));
+    SET_VECTOR_ELT(result, 7, Rf_allocVector(STRSXP, vcf_n));
+
+    SEXP eltnms = Rf_allocVector(STRSXP, 9);
+    result = Rf_namesgets(result, eltnms);
+
+    SET_STRING_ELT(eltnms, 0, mkChar("CHROM"));
+    SET_STRING_ELT(eltnms, 1, mkChar("POS"));
+    SET_STRING_ELT(eltnms, 2, mkChar("ID"));
+    SET_STRING_ELT(eltnms, 3, mkChar("REF"));
+    SET_STRING_ELT(eltnms, 4, mkChar("ALT"));
+    SET_STRING_ELT(eltnms, 5, mkChar("QUAL"));
+    SET_STRING_ELT(eltnms, 6, mkChar("FILTER"));
+    SET_STRING_ELT(eltnms, 7, mkChar("INFO"));
+    SET_STRING_ELT(eltnms, 8, mkChar("GENO"));
+
+    /* FIXME: names */
+
+    /* allocate geno, set names on list, dimnames on matricies */
+    SEXP geno, dimnames;
+    geno = Rf_allocVector(VECSXP, map_n);
+    SET_VECTOR_ELT(result, 8, geno); /* geno is 9th elt of result */
+    geno = Rf_namesgets(geno, nms);
     PROTECT(dimnames = Rf_allocVector(VECSXP, 2));
     SET_VECTOR_ELT(dimnames, 0, R_NilValue);
     SET_VECTOR_ELT(dimnames, 1, sample);
     for (j = 0; j < map_n; ++j) {
         SEXPTYPE type = TYPEOF(VECTOR_ELT(map, j));
         if (NILSXP == type) {
-            SET_VECTOR_ELT(result, j, R_NilValue);
+            SET_VECTOR_ELT(geno, j, R_NilValue);
             continue;
         }
         SEXP elt = Rf_allocMatrix(type, vcf_n, samp_n);
-        SET_VECTOR_ELT(result, j, elt);
+        SET_VECTOR_ELT(geno, j, elt);
         switch (type) {
         case INTSXP:
             for (i = 0; i < vcf_n * samp_n; ++i)
@@ -86,8 +115,26 @@ vcf_split(SEXP vcf, SEXP sample, SEXP map)
 
         record = strdup(CHAR(STRING_ELT(vcf, i)));
 
-        /* first tab-delimited string is 'FORMAT' */
-        fmt = _it_init(&it0, record, '\t');
+        /* parse 'fixed' fields 0-7 */
+        field = _it_init(&it0, record, '\t');
+        SET_STRING_ELT(VECTOR_ELT(result, 0), i, mkChar(field));
+        field = _it_next(&it0);
+        INTEGER(VECTOR_ELT(result, 1))[i] = atoi(field);
+        field = _it_next(&it0);
+        SET_STRING_ELT(VECTOR_ELT(result, 2), i, mkChar(field));
+        field = _it_next(&it0);
+        SET_STRING_ELT(VECTOR_ELT(result, 3), i, mkChar(field));
+        field = _it_next(&it0);
+        SET_STRING_ELT(VECTOR_ELT(result, 4), i, mkChar(field));
+        field = _it_next(&it0);
+        REAL(VECTOR_ELT(result, 5))[i] = atof(field);
+        field = _it_next(&it0);
+        SET_STRING_ELT(VECTOR_ELT(result, 6), i, mkChar(field));
+        field = _it_next(&it0);
+        SET_STRING_ELT(VECTOR_ELT(result, 7), i, mkChar(field));
+
+        /* next tab-delimited string is 'FORMAT' */
+        fmt = _it_next(&it0);
         for (field = _it_init(&it1, fmt, ':'), fmtidx = 0;
              '\0' != *field;
              field = _it_next(&it1), fmtidx++)
@@ -111,7 +158,7 @@ vcf_split(SEXP vcf, SEXP sample, SEXP map)
                  '\0' != *field;
                  field = _it_next(&it1), fmtidx++)
             {
-                SEXP matrix = VECTOR_ELT(result, mapidx[fmtidx]);
+                SEXP matrix = VECTOR_ELT(geno, mapidx[fmtidx]);
                 int midx = sampleidx * vcf_n + i;
                 switch (TYPEOF(matrix)) {
                 case NILSXP:
@@ -134,11 +181,11 @@ vcf_split(SEXP vcf, SEXP sample, SEXP map)
         free(record);
     }
 
-    /* remove NULL elements of result */
-    for (i = 0, j = 0; i < Rf_length(result); ++i)
-        if (R_NilValue != VECTOR_ELT(result, i))
-            SET_VECTOR_ELT(result, j++, VECTOR_ELT(result, i));
-    result = Rf_lengthgets(result, j);
+    /* remove NULL elements of geno */
+    for (i = 0, j = 0; i < Rf_length(geno); ++i)
+        if (R_NilValue != VECTOR_ELT(geno, i))
+            SET_VECTOR_ELT(geno, j++, VECTOR_ELT(geno, i));
+    geno = Rf_lengthgets(geno, j);
 
     UNPROTECT(1);
     return result;
