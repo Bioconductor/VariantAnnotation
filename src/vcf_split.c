@@ -31,6 +31,17 @@ _it_init(struct it *it, char *str, char delim)
 
 /* split 'vcf' into list of matricies based on 'map' */
 
+const struct fld_fmt {
+    const char *name;
+    SEXPTYPE type;
+} FLD_FMT[] = {
+    {"CHROM", STRSXP}, {"POS", INTSXP}, {"ID", STRSXP},
+    {"REF", STRSXP}, {"ALT", STRSXP}, {"QUAL", REALSXP},
+    {"FILTER", STRSXP}, {"INFO", STRSXP}, {"GENO", VECSXP}
+};
+
+const int N_FLDS = 9;
+
 SEXP
 vcf_split(SEXP vcf, SEXP sample, SEXP map)
 {
@@ -44,42 +55,26 @@ vcf_split(SEXP vcf, SEXP sample, SEXP map)
     int fmtidx, sampleidx,
         *mapidx = (int *) R_alloc(sizeof(int), map_n);
 
-    /* fixed + geno fields */
-    SEXP result;
-    PROTECT(result = Rf_allocVector(VECSXP, 8 + 1));
-
-    SET_VECTOR_ELT(result, 0, Rf_allocVector(STRSXP, vcf_n));
-    SET_VECTOR_ELT(result, 1, Rf_allocVector(INTSXP, vcf_n));
-    SET_VECTOR_ELT(result, 2, Rf_allocVector(STRSXP, vcf_n));
-    SET_VECTOR_ELT(result, 3, Rf_allocVector(STRSXP, vcf_n));
-    SET_VECTOR_ELT(result, 4, Rf_allocVector(STRSXP, vcf_n));
-    SET_VECTOR_ELT(result, 5, Rf_allocVector(REALSXP, vcf_n));
-    SET_VECTOR_ELT(result, 6, Rf_allocVector(STRSXP, vcf_n));
-    SET_VECTOR_ELT(result, 7, Rf_allocVector(STRSXP, vcf_n));
-
-    SEXP eltnms = Rf_allocVector(STRSXP, 9);
-    result = Rf_namesgets(result, eltnms);
-
-    SET_STRING_ELT(eltnms, 0, mkChar("CHROM"));
-    SET_STRING_ELT(eltnms, 1, mkChar("POS"));
-    SET_STRING_ELT(eltnms, 2, mkChar("ID"));
-    SET_STRING_ELT(eltnms, 3, mkChar("REF"));
-    SET_STRING_ELT(eltnms, 4, mkChar("ALT"));
-    SET_STRING_ELT(eltnms, 5, mkChar("QUAL"));
-    SET_STRING_ELT(eltnms, 6, mkChar("FILTER"));
-    SET_STRING_ELT(eltnms, 7, mkChar("INFO"));
-    SET_STRING_ELT(eltnms, 8, mkChar("GENO"));
-
-    /* FIXME: names */
-
-    /* allocate geno, set names on list, dimnames on matricies */
-    SEXP geno, dimnames;
+    /* allocate result and fixed fields */
+    SEXP result, geno, eltnms;
+    PROTECT(result = Rf_allocVector(VECSXP, N_FLDS));
+    for (i = 0; i < N_FLDS - 1; ++i)
+        SET_VECTOR_ELT(result, i,
+                       Rf_allocVector(FLD_FMT[i].type, vcf_n));
     geno = Rf_allocVector(VECSXP, map_n);
-    SET_VECTOR_ELT(result, 8, geno); /* geno is 9th elt of result */
+    SET_VECTOR_ELT(result, N_FLDS - 1, geno);
+
+    PROTECT(eltnms = Rf_allocVector(STRSXP, N_FLDS));
+    for (i = 0; i < N_FLDS; ++i)
+        SET_STRING_ELT(eltnms, i, mkChar(FLD_FMT[i].name));
+    result = Rf_namesgets(result, eltnms);
+    UNPROTECT(1);
+
+    /* allocate geno, including matricies */
     geno = Rf_namesgets(geno, nms);
-    PROTECT(dimnames = Rf_allocVector(VECSXP, 2));
-    SET_VECTOR_ELT(dimnames, 0, R_NilValue);
-    SET_VECTOR_ELT(dimnames, 1, sample);
+    PROTECT(eltnms = Rf_allocVector(VECSXP, 2));
+    SET_VECTOR_ELT(eltnms, 0, R_NilValue);
+    SET_VECTOR_ELT(eltnms, 1, sample);
     for (j = 0; j < map_n; ++j) {
         SEXPTYPE type = TYPEOF(VECTOR_ELT(map, j));
         if (NILSXP == type) {
@@ -104,37 +99,41 @@ vcf_split(SEXP vcf, SEXP sample, SEXP map)
         default:
             Rf_error("(internal) unhandled type '%s'", type2char(type));
         }
-        elt = Rf_dimnamesgets(elt, dimnames);
+        elt = Rf_dimnamesgets(elt, eltnms);
     }
     UNPROTECT(1);
 
-    /* parse each line of vcf */
+    /* parse each line */
     for (i = 0; i < vcf_n; i++) {
         struct it it0, it1;
         char *record, *sample, *fmt, *field;
 
         record = strdup(CHAR(STRING_ELT(vcf, i)));
 
-        /* parse 'fixed' fields 0-7 */
-        field = _it_init(&it0, record, '\t');
-        SET_STRING_ELT(VECTOR_ELT(result, 0), i, mkChar(field));
-        field = _it_next(&it0);
-        INTEGER(VECTOR_ELT(result, 1))[i] = atoi(field);
-        field = _it_next(&it0);
-        SET_STRING_ELT(VECTOR_ELT(result, 2), i, mkChar(field));
-        field = _it_next(&it0);
-        SET_STRING_ELT(VECTOR_ELT(result, 3), i, mkChar(field));
-        field = _it_next(&it0);
-        SET_STRING_ELT(VECTOR_ELT(result, 4), i, mkChar(field));
-        field = _it_next(&it0);
-        REAL(VECTOR_ELT(result, 5))[i] = atof(field);
-        field = _it_next(&it0);
-        SET_STRING_ELT(VECTOR_ELT(result, 6), i, mkChar(field));
-        field = _it_next(&it0);
-        SET_STRING_ELT(VECTOR_ELT(result, 7), i, mkChar(field));
+        /* 'fixed' fields */
+        for (field = _it_init(&it0, record, '\t'), j = 0;
+             j < N_FLDS - 1;
+             field = _it_next(&it0), ++j)
+        {
+            SEXP elt = VECTOR_ELT(result, j);
+            switch(TYPEOF(elt)) {
+            case INTSXP:
+                INTEGER(elt)[i] = atoi(field);
+                break;
+            case REALSXP:
+                REAL(elt)[i] = atof(field);
+                break;
+            case STRSXP:
+                SET_STRING_ELT(elt, i, mkChar(field));
+                break;
+            default:
+                Rf_error("(internal) unhandled fixed field type '%s'",
+                         type2char(TYPEOF(elt)));
+            }
+        }
 
-        /* next tab-delimited string is 'FORMAT' */
-        fmt = _it_next(&it0);
+        /* 'FORMAT' field */
+        fmt = field;
         for (field = _it_init(&it1, fmt, ':'), fmtidx = 0;
              '\0' != *field;
              field = _it_next(&it1), fmtidx++)
@@ -149,7 +148,7 @@ vcf_split(SEXP vcf, SEXP sample, SEXP map)
             mapidx[fmtidx] = j;
         }
 
-        /* process samples */
+        /* 'samples' field(s) */
         for (sample = _it_next(&it0), sampleidx = 0;
              '\0' != *sample;
              sample = _it_next(&it0), sampleidx++)
