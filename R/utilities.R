@@ -1,46 +1,9 @@
-.parseTabix <- function(tbx, header, param, ...)
-{
-    ## currently return all fields in ScanBcfParam
-    tmpl <- Rsamtools:::.bcf_template(param=ScanBcfParam())
-    tmpl$RecordsPerRange <- sum(elementLengths(tbx)) 
-    strings <- strsplit(unlist(tbx, use.names=FALSE), "\t", fixed=TRUE)
-    nfields <- length(strings[[1]]) 
-    mat <- matrix(unlist(strings, use.names=FALSE), ncol=nfields, byrow=TRUE)
-    if (!is.null(header[[1]]$Sample))
-        nsamples <- length(header[[1]]$Sample)
-    else 
-        nsamples <- 0
-
-    ## required fields 
-    tmpl[1:8] <- lapply(seq_len(8), function(x, mat) mat[,x], mat)
-    tmpl[["POS"]] <- as.numeric(tmpl[["POS"]])
-    tmpl[["QUAL"]] <- gsub(".", "", tmpl[["QUAL"]])
-    tmpl[["QUAL"]] <- as.numeric(tmpl[["QUAL"]])
-    #if (all(tmpl[["INFO"]] == ".")) 
-    #    tmpl[["INFO"]] <- rep(NA, length(tmpl[["INFO"]]))
-
-    ## optional fields 
-    if (nsamples > 0) {
-        tmpl[["FORMAT"]] <- mat[,9]
-        samples <- mat[,-c(1:9)]
-        formats <- unlist(strsplit(tmpl[["FORMAT"]][1], ":", fixed=TRUE))
-        tmpl[["FORMAT"]] <- formats
-        tmpl[["GENO"]][formats] <- .parseGENO(tmpl, formats, samples, header)
-        tmpl[["GENO"]] <-  tmpl[["GENO"]][formats]
-    } else {
-        tmpl[["GENO"]] <- list()
-    }
-
-    tmpl
-}
-
-
 .VcfToSummarizedExperiment <- function(vcf, header, raw=FALSE, ...)
 {
+    vcf <- vcf[[1]]
     # assays
     if (length(vcf$GENO) > 0)
-        geno <- lapply(vcf$GENO, function(x) matrix(x, 
-           nrow=vcf$RecordsPerRange, byrow=FALSE))
+        geno <- vcf$GENO 
     else
         geno <- list() 
 
@@ -132,25 +95,6 @@
     DF <- as(lst, "DataFrame")
     colnames(DF) <- uniquekeys
     DF
-}
-
-.parseGENO <- function(tmpl, formats, rawgeno, header, ...)
-{
-    ## FIXME : handle case of > 1 value for numeric, integer 
-    ## FIXME : force type=flag to factor 
-    strings <- strsplit(unlist(rawgeno, use.names=FALSE), ":", fixed=TRUE)
-    formatHeader <- header[[1]]$Header$FORMAT[formats %in%
-        rownames(header[[1]]$Header$FORMAT)]
-    vcfType <- formatHeader$Type[match(formats, rownames(formatHeader))]
-    formatType <- .vcfDataTypeConversion(vcfType)
-    mat <- matrix(unlist(strings, use.names=FALSE), ncol=length(formats), byrow=TRUE)
-    lst <- lapply(seq_len(length(formatType)), function(x, mat, formatType){
-            new <- mat[,x]
-            #mode(new) <- formatType[x]
-            matrix(new, ncol=ncol(rawgeno))
-        }, mat, formatType)
-    names(lst) <- formats
-    lst
 }
 
 

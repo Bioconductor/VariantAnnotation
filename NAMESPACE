@@ -6,7 +6,7 @@ importClassesFrom(Biobase, ScalarCharacter)
 importClassesFrom(BSgenome, BSgenome)
 importClassesFrom(GenomicFeatures, TranscriptDb)
 importClassesFrom(IRanges, Ranges, RangesList, RangedData)
-importClassesFrom(Rsamtools, FaFile, TabixFile)
+importClassesFrom(Rsamtools, FaFile, TabixFile, ScanVcfParam)
 importClassesFrom(snpStats, SnpMatrix)
 
 importMethodsFrom(GenomicFeatures, as.list, cdsBy, exons, transcripts,
@@ -21,7 +21,7 @@ importMethodsFrom(IRanges, "%in%", append, as.matrix, as.vector,
                   substring, unique, unlist, values, "values<-", which,
                   width)
 importMethodsFrom(Rsamtools, scanBcf, ScanBcfParam, scanFaIndex,
-                  scanTabix, headerTabix)
+                  scanTabix, headerTabix, scanVcf, scanVcfHeader, ScanVcfParam)
 
 importFrom(Biobase, mkScalar, selectSome)
 importFrom(GenomicFeatures, extractTranscriptsFromGenome)

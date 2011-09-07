@@ -1,8 +1,8 @@
 setMethod("readVcf", c(file="character", param="missing"),
     function(file, ..., param, raw=FALSE)
 {
-    vcf <- scanBcf(file, character(0))
-    header <- scanBcfHeader(file)
+    vcf <- scanVcf(file)
+    header <- scanVcfHeader(file)
     .VcfToSummarizedExperiment(vcf, header, raw=raw)
 })
 
@@ -34,9 +34,10 @@ setMethod("readVcf", c(file="TabixFile", param="RangesList"),
 
 .readVcf <- function(file, param, raw, ...)
 {
-    tbx <- scanTabix(file, param=param)
-    header <- scanBcfHeader(path(file))
-    vcf <- .parseTabix(tbx, header, param=param)
+    #tbx <- scanTabix(file, param=param)
+    header <- scanVcfHeader(path(file))
+    #vcf <- .parseTabix(tbx, header, param=param)
+    vcf <- scanVcf(file, header, param=param)
     .VcfToSummarizedExperiment(vcf, header, raw=raw)
 }
 
