@@ -18,11 +18,12 @@ setGeneric("name", function(x, ...) standardGeneric("name"))
 
 setGeneric("stats", function(x, ...) standardGeneric("stats"))
 
-setGeneric("vaFilter", function(fun, name=NA_character_, ...)
-           standardGeneric("vaFilter"),
-           signature="fun")
+setGeneric("vaFilter", signature = "fun",
+           function(fun, name=NA_character_, ...)
+           standardGeneric("vaFilter")
+)
 
 setGeneric("readVcf", signature = c("file", "param"),
-           function(file, ..., param, raw=FALSE)
+           function(file, ..., param, vcfRanges=FALSE)
            standardGeneric("readVcf")
 )

@@ -1,4 +1,4 @@
-.VcfToSummarizedExperiment <- function(vcf, header, raw=FALSE, ...)
+.VcfToSummarizedExperiment <- function(vcf, header, vcfRanges=FALSE, ...)
 {
     vcf <- vcf[[1]]
     # assays
@@ -12,7 +12,7 @@
     lstSplit <- sapply(lst, function(x) length(unlist(strsplit(x, ",", fixed=TRUE))))
     lstSplit[lstSplit == 0] <- 1
     df <- DataFrame(POS=vcf$POS, QUAL=vcf$QUAL, FILTER=vcf$FILTER)
-    info <- .parseINFO(vcf$INFO, header)
+    info <- as.data.frame(vcf$INFO) 
     df <- append(df, info)
 
     reference <- gsub("\\.", "", vcf$REF)
@@ -23,7 +23,7 @@
     alt <- gsub("\\.", "", alt)
     alt[is.na(alt)] <- ""
     alt <- DNAStringSet(alt)
-    if (raw)  {
+    if (vcfRanges)  {
         allalt <- DataFrame(alt)
         altDF <- split(allalt, rep(seq_len(length(lstSplit)), lstSplit))
     } else { 
@@ -38,7 +38,7 @@
 
     ## colData
     if (length(vcf$GENO) > 0) {
-        sampleID <- header[[1]]$Sample
+        sampleID <- colnames(vcf$GENO[[1]]) 
         samples <- length(sampleID) 
         coldata <- DataFrame(Samples=seq_len(samples),
             row.names=sampleID)
@@ -48,55 +48,6 @@
 
     SummarizedExperiment(assays=geno, colData=coldata, rowData=rowdata)
 }
-
-
-.vcfDataTypeConversion <- function(x, ...)
-{
-    x[x == "String"] <- "character"
-    x[x == "Integer"] <- "integer"
-    x[x == "Flag"] <- "factor"
-    x[x == "Float"] <- "numeric"
-    x
-}
-
-.parseINFO <- function(rawinfo, header, ...)
-{
-    ## FIXME : handle case of > 1 value numeric, integer 
-    ## FIXME : force type=flag to factor 
-    if (all(rawinfo == ".")) 
-        return(DataFrame())
-
-    info <- strsplit(rawinfo, ";", fixed=TRUE)
-    u <-  do.call(rbind, strsplit(unlist(info), "=", fixed=TRUE))
-    u <- u[u[,1] != ".", ]
-    keys <- u[,1]
-    values <- u[,2]
-    infoHeader <- header[[1]]$Header$INFO
-    flags <- rownames(infoHeader)[infoHeader$Type == "Flag"]
-    values[values %in% flags] <- 1
-    lstvalues <- split(values, keys)
-    uniquekeys <- names(lstvalues) 
-    lstkeys <-  lapply(uniquekeys, function(x, info) grep(x, info), info)
-
-    vcfType <- infoHeader$Type[match(uniquekeys, rownames(infoHeader))]
-    RType <- .vcfDataTypeConversion(vcfType)
-
-    lst <- lapply(seq_len(length(lstkeys)), 
-        function(x, lstkeys, lstvalues, RType) {
-            new <- numeric(length(info))
-            new[lstkeys[[x]]] <- switch(RType[x], 
-                character = as.character(lstvalues[[x]]),
-                numeric = as.numeric(lstvalues[[x]]),
-                integer = as.integer(lstvalues[[x]]),
-                factor = as.factor(lstvalues[[x]]))
-            new
-        }, lstkeys, lstvalues, RType)
-
-    DF <- as(lst, "DataFrame")
-    colnames(DF) <- uniquekeys
-    DF
-}
-
 
 .convertToBiocRanges <- function(reference, alt, vcf, lstSplit, ...)
 {

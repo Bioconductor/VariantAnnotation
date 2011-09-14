@@ -1,44 +1,52 @@
-setMethod("readVcf", c(file="character", param="missing"),
-    function(file, ..., param, raw=FALSE)
+setMethod(readVcf, c(file="TabixFile", param="RangesList"),
+    function(file, ..., param, vcfRanges=FALSE)
 {
-    vcf <- scanVcf(file)
-    header <- scanVcfHeader(file)
-    .VcfToSummarizedExperiment(vcf, header, raw=raw)
+    .readVcf(file, param=param, vcfRanges=vcfRanges)
 })
 
-setMethod("readVcf", c(file="character", param="ANY"),
-    function(file, index=paste(file, "tbi", sep="."), ..., param, raw=FALSE)
+setMethod(readVcf, c(file="TabixFile", param="RangedData"),
+    function(file, ..., param, vcfRanges=FALSE)
 {
-    tf <- TabixFile(file, index=paste(file, "tbi", sep="."))
-    callGeneric(tf, param=param, raw=raw)
+    .readVcf(file, param=param, vcfRanges=vcfRanges)
 })
 
-setMethod("readVcf", c(file="TabixFile", param="GRanges"),
-    function(file, ..., param, raw=FALSE)
+setMethod(readVcf, c(file="TabixFile", param="GRanges"),
+    function(file, ..., param, vcfRanges=FALSE)
 {
-    .readVcf(file, param=param, raw=raw)
+    .readVcf(file, param=param, vcfRanges=vcfRanges)
 })
 
-setMethod("readVcf", c(file="TabixFile", param="RangedData"),
-    function(file, ..., param, raw=FALSE)
+setMethod(readVcf, c(file="TabixFile", param="ScanVcfParam"), 
+    function(file, ..., param, vcfRanges=FALSE)
 {
-    .readVcf(file, param=param, raw=raw)
+    .readVcf(file, param=param, vcfRanges=vcfRanges)
 })
 
-setMethod("readVcf", c(file="TabixFile", param="RangesList"),
-    function(file, ..., param, raw=FALSE)
+setMethod(readVcf, c(file="TabixFile", param="missing"), 
+    function(file, ..., param, vcfRanges=FALSE)
 {
-    .readVcf(file, param=param, raw=raw)
+    .readVcf(file, vcfRanges=vcfRanges)
 })
 
-
-.readVcf <- function(file, param, raw, ...)
+setMethod(readVcf, c(file="character", param="missing"),
+    function(file, ..., param, vcfRanges=FALSE)
 {
-    #tbx <- scanTabix(file, param=param)
-    header <- scanVcfHeader(path(file))
-    #vcf <- .parseTabix(tbx, header, param=param)
-    vcf <- scanVcf(file, header, param=param)
-    .VcfToSummarizedExperiment(vcf, header, raw=raw)
+    .readVcf(file, vcfRanges=vcfRanges)
+})
+
+setMethod(readVcf, c(file="character", param="ANY"),
+    function(file, ..., param, vcfRanges=FALSE)
+{
+    .readVcf(file, param=param, vcfRanges=vcfRanges)
+})
+
+.readVcf <- function(file, ..., param, vcfRanges)
+{
+    if (missing(param))
+        vcf <- unpackVcf(scanVcf(file), file)
+    else
+        vcf <- unpackVcf(scanVcf(file, param=param), file)
+    .VcfToSummarizedExperiment(vcf, vcfRanges)
 }
 
 

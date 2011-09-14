@@ -298,29 +298,29 @@ The VCF standard is to include the nucleotide immediately preceding
 an indel in the reference sequence. This results in the start
 location being one less than the position where the variation
 (i.e., substitution, insertion, or deletion) takes place.
-When \Rcode{raw = TRUE}, the ranges and alleles in the
+When \Rcode{vcfRanges = TRUE}, the ranges and alleles in the
 \Rcode{SummarizedExperiment} are returned exactly as they
 appear in the VCF file. 
 
-<<readVCF_rawTRUE>>=
+<<readVCF_vcfRangesTRUE>>=
 ## return alleles and ranges exactly as represented in the VCF file
-vcf_raw <- readVcf(tab, param=gr, raw=TRUE)
+original <- readVcf(tab, param=gr, vcfRanges=TRUE)
 @ 
 
-When \Rcode{raw = FALSE}, additional ranges are supplied
-that reflect the \Rcode{Bioconductor} standards for
-representing ranges. Additionally, the alleles are modified to retain only 
+When \Rcode{vcfRanges = FALSE}, additional ranges are supplied
+that conform to the \Rcode{Bioconductor} standards for representing ranges.
+Additionally, the alleles are modified to retain only 
 the basepairs involved in the variation. These modifications
 are made to provide compatibility with existing methods. 
-The modified ranges and alleles are in a \Rcode{DataFrame} in 
-the `alt' field of the metadata. 
+The modified ranges are in a \Rcode{DataFrame} in 
+the `ALT' field of the metadata. 
 
-<<readVCF_rawFALSE>>=
-vcf <- readVcf(tab, param=gr, raw=FALSE)
+<<readVCF_vcfRangesFALSE>>=
+modified <- readVcf(tab, param=gr, vcfRanges=FALSE)
 
 ## compare reference alleles 
-cbind(as.character(values(rowData(vcf_raw))[["ref"]]), 
-    as.character(values(rowData(vcf))[["ref"]]))
+cbind(as.character(values(rowData(original))[["ref"]]), 
+    as.character(values(rowData(modified))[["ref"]]))
 @
 
 \section{References}
