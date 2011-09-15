@@ -24,6 +24,6 @@ setGeneric("vaFilter", signature = "fun",
 )
 
 setGeneric("readVcf", signature = c("file", "param"),
-           function(file, ..., param, vcfRanges=FALSE)
+           function(file, ..., param)
            standardGeneric("readVcf")
 )

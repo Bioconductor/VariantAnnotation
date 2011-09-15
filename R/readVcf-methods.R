@@ -1,52 +1,52 @@
 setMethod(readVcf, c(file="TabixFile", param="RangesList"),
-    function(file, ..., param, vcfRanges=FALSE)
+    function(file, ..., param)
 {
-    .readVcf(file, param=param, vcfRanges=vcfRanges)
+    .readVcf(file, param=param)
 })
 
 setMethod(readVcf, c(file="TabixFile", param="RangedData"),
-    function(file, ..., param, vcfRanges=FALSE)
+    function(file, ..., param)
 {
-    .readVcf(file, param=param, vcfRanges=vcfRanges)
+    .readVcf(file, param=param)
 })
 
 setMethod(readVcf, c(file="TabixFile", param="GRanges"),
-    function(file, ..., param, vcfRanges=FALSE)
+    function(file, ..., param)
 {
-    .readVcf(file, param=param, vcfRanges=vcfRanges)
+    .readVcf(file, param=param)
 })
 
 setMethod(readVcf, c(file="TabixFile", param="ScanVcfParam"), 
-    function(file, ..., param, vcfRanges=FALSE)
+    function(file, ..., param)
 {
-    .readVcf(file, param=param, vcfRanges=vcfRanges)
+    .readVcf(file, param=param)
 })
 
 setMethod(readVcf, c(file="TabixFile", param="missing"), 
-    function(file, ..., param, vcfRanges=FALSE)
+    function(file, ..., param)
 {
-    .readVcf(file, vcfRanges=vcfRanges)
+    .readVcf(file)
 })
 
 setMethod(readVcf, c(file="character", param="missing"),
-    function(file, ..., param, vcfRanges=FALSE)
+    function(file, ..., param)
 {
-    .readVcf(file, vcfRanges=vcfRanges)
+    .readVcf(file)
 })
 
 setMethod(readVcf, c(file="character", param="ANY"),
-    function(file, ..., param, vcfRanges=FALSE)
+    function(file, ..., param)
 {
-    .readVcf(file, param=param, vcfRanges=vcfRanges)
+    .readVcf(file, param=param)
 })
 
-.readVcf <- function(file, ..., param, vcfRanges)
+.readVcf <- function(file, ..., param)
 {
     if (missing(param))
         vcf <- unpackVcf(scanVcf(file), file)
     else
         vcf <- unpackVcf(scanVcf(file, param=param), file)
-    .VcfToSummarizedExperiment(vcf, vcfRanges)
+    .VcfToSummarizedExperiment(vcf)
 }
 
 

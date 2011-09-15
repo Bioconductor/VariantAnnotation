@@ -50,7 +50,7 @@
 
 ## import vcf file to SummarizedExperiment
 vcfFile <- system.file("extdata", "ex1.vcf", package="VariantAnnotation") 
-se <- readVcf(vcfFile, index=character(0))
+se <- readVcf(vcfFile)
 
 ## genotype calls are stored in the assays slot
 assays(se)

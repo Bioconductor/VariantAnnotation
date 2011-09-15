@@ -273,10 +273,9 @@ seqlengths
 The \Rcode{readVcf} function reads VCF files into a 
 \Rcode{SummarizedExperiment} object. If the compressed VCF file
 has a tabix file index, a \Robject{GRanges} can be used to specify 
-a subset of ranges to read in. We don't have a sample compressed VCF file
-in \Rcode{VariantAnnotation} so we create one on the fly as a temporary file.
-We then create a tabix index for the file and retrieve a subset of ranges
-restricted by those specified in the \Rcode{GRanges} object. 
+a subset of ranges to read in. \Rcode{VariantAnnotation} does not
+have a sample compressed VCF file so we create one on the fly,
+then create a tabix index and retrieve a subset of ranges.
 
 <<readVCF>>=
 ## compress vcf file , create index
@@ -288,40 +287,15 @@ idx <- indexTabix(compressVcf, "vcf")
 tab <- TabixFile(compressVcf, idx)
 head <- headerTabix(tab)
 
-## range restriction 
+## select ranges with param 
 gr <- GRanges(seqnames="1",
               ranges=IRanges(start=0, end=100000))
-@
-
-
-The VCF standard is to include the nucleotide immediately preceding 
-an indel in the reference sequence. This results in the start
-location being one less than the position where the variation
-(i.e., substitution, insertion, or deletion) takes place.
-When \Rcode{vcfRanges = TRUE}, the ranges and alleles in the
-\Rcode{SummarizedExperiment} are returned exactly as they
-appear in the VCF file. 
-
-<<readVCF_vcfRangesTRUE>>=
-## return alleles and ranges exactly as represented in the VCF file
-original <- readVcf(tab, param=gr, vcfRanges=TRUE)
+vcf <- readVcf(tab, param=gr)
+vcf
+names(assays(vcf)) 
 @ 
 
-When \Rcode{vcfRanges = FALSE}, additional ranges are supplied
-that conform to the \Rcode{Bioconductor} standards for representing ranges.
-Additionally, the alleles are modified to retain only 
-the basepairs involved in the variation. These modifications
-are made to provide compatibility with existing methods. 
-The modified ranges are in a \Rcode{DataFrame} in 
-the `ALT' field of the metadata. 
 
-<<readVCF_vcfRangesFALSE>>=
-modified <- readVcf(tab, param=gr, vcfRanges=FALSE)
-
-## compare reference alleles 
-cbind(as.character(values(rowData(original))[["ref"]]), 
-    as.character(values(rowData(modified))[["ref"]]))
-@
 
 \section{References}
 Wang K, Li M, Hakonarson H, (2010), ANNOVAR: functional annotation of genetic 
