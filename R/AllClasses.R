@@ -18,3 +18,8 @@ setClass("VAFilterResult",
            name="ScalarCharacter",
            stats="data.frame"))
 
+.SIFTDb <- setRefClass("SIFTDb",
+    contains = "AnnotationDb",
+)
+
+

@@ -58,4 +58,25 @@
   shifted
 }
 
+.getKcol <- function(conn)
+{
+    sql <- "SELECT value FROM metadata WHERE name='Key column'"
+    as.character(dbGetQuery(conn, sql))
+}
+
+### convert character vector into an SQL IN condition
+.sqlIn <- function(vals)
+{
+    if (length(vals) == 0L)
+        return("")
+    sql <-
+      lapply(seq_len(length(vals)), function(i) {
+               v <- vals[[i]]
+               if (!is.numeric(v))
+                 v <- paste("'", v, "'", sep="")
+                v
+            })
+    paste(unlist(sql), collapse = ",")
+}
+
 
