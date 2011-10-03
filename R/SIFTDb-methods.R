@@ -81,6 +81,8 @@ setMethod("select", c("SIFTDb", "missing", "missing"),
             nchar(as.character(x)))
         c(snp_aa, ref_aa, snp_aa, ref_aa)})
 
+    ## Replace missing values in 'prediction' column with 'not scored'
+
     dat <- raw[,-c(1:3)]
     #grp <- as.factor(sort(rep(1:4, 5)))
     grp <- list(1:5, 6:10, 11:15, 16:20)
@@ -107,5 +109,3 @@ setMethod("select", c("SIFTDb", "missing", "missing"),
     df
 }
 
-
- 

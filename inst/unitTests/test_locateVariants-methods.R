@@ -1,6 +1,6 @@
 library(TxDb.Dmelanogaster.UCSC.dm3.ensGene)
 library(BSgenome.Dmelanogaster.UCSC.dm3)
-txdb <- Dmelanogaster_UCSC_dm3_ensGene_TxDb
+txdb <- TxDb.Dmelanogaster.UCSC.dm3.ensGene 
 
 
 test_locateVariants <- function()

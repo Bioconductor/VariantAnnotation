@@ -63,12 +63,12 @@
 }
 
 \examples{
-  #library(TxDb.Hsapiens.UCSC.hg18.knownGene)
-  #library(BSgenome.Hsapiens.UCSC.hg18)
-  #data(variants)
+  library(TxDb.Hsapiens.UCSC.hg18.knownGene)
+  library(BSgenome.Hsapiens.UCSC.hg18)
+  data(variants)
  
-  #txdb <- Hsapiens_UCSC_hg18_knownGene_TxDb
-  #loc <- locateVariants(variants, txdb)
+  txdb <- TxDb.Hsapiens.UCSC.hg18.knownGene 
+  loc <- locateVariants(variants, txdb)
 }
 
 \keyword{methods}

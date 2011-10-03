@@ -35,12 +35,11 @@ exportClassPattern("^.*$")
 
 exportMethods(
     predictCoding, getTranscriptSeqs,
-    show, c, select, keys, cols)
+    show, c)
 
 export(
     locateVariants, 
     getTranscriptSeqs, globalToLocal,
-    readVcf, MatrixToSnpMatrix,
-    metadata, keys, cols, select)
+    readVcf, MatrixToSnpMatrix)
 
 exportPattern("^[^\\.]")

@@ -114,22 +114,22 @@
 \author{Valerie Obenchain <vobencha@fhcrc.org>}
 
 \examples{
-  library(SIFT.Hsapiens.dbSNP132)
-
-  ## metadata
-  metadata(SIFT.Hsapiens.dbSNP132)
-
-  ## table names, keys and cols
-  head(keys(SIFT.Hsapiens.dbSNP132))
-  cols(SIFT.Hsapiens.dbSNP132)
-
-  ## subset on keys and cols 
-  #rsids <- c("rs2142947", "NotFound", "rs17970171", "rs8692231", "rs3026284") 
-  rsids <- c("rs2142947", "NotFound", "rs3026284", "rs1009382")
-  select(SIFT.Hsapiens.dbSNP132, keys=rsids)
-
-  subst <- c("rsid", "prediction", "score")
-  select(SIFT.Hsapiens.dbSNP132, keys=rsids[c(1,3)], cols=subst)
+#  library(SIFT.Hsapiens.dbSNP132)
+#
+#  ## metadata
+#  metadata(SIFT.Hsapiens.dbSNP132)
+#
+#  ## table names, keys and cols
+#  head(keys(SIFT.Hsapiens.dbSNP132))
+#  cols(SIFT.Hsapiens.dbSNP132)
+#
+#  ## subset on keys and cols 
+#  #rsids <- c("rs2142947", "NotFound", "rs17970171", "rs8692231", "rs3026284") 
+#  rsids <- c("rs2142947", "NotFound", "rs3026284", "rs1009382")
+#  select(SIFT.Hsapiens.dbSNP132, keys=rsids)
+#
+#  subst <- c("rsid", "prediction", "score")
+#  select(SIFT.Hsapiens.dbSNP132, keys=rsids[c(1,3)], cols=subst)
 }
 
 \keyword{classes}
