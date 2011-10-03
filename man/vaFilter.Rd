@@ -103,24 +103,24 @@ regionFilter(txdb, region="coding", .name="regionFilter")
 \seealso{\code{\linkS4class{VAFilter}}.}
 
 \examples{
-data(variants)
-
-# variants present in dbSNP 
-snpFilt <- dbSNPFilter("SNPlocs.Hsapiens.dbSNP.20090506")
-# subset of variants that passed the filter
-snpFilt(variants)
-# VAFilterResult with logical vector indicating which variants passed the filter
-snpFilt(variants, subset=FALSE)
-
-# variants present in coding regions 
-library(TxDb.Hsapiens.UCSC.hg18.knownGene)
-txdb <- Hsapiens_UCSC_hg18_knownGene_TxDb
-regionFilt <- regionFilter(txdb, region="coding")
-regionFilt(variants, subset=FALSE)
-
-# subset of variants that passed both filters
-comboFilt <- compose(snpFilt, regionFilt)
-comboFilt(variants)
+#data(variants)
+#
+## variants present in dbSNP 
+#snpFilt <- dbSNPFilter("SNPlocs.Hsapiens.dbSNP.20090506")
+## subset of variants that passed the filter
+#snpFilt(variants)
+## VAFilterResult with logical vector indicating which variants passed the filter
+#snpFilt(variants, subset=FALSE)
+#
+## variants present in coding regions 
+#library(TxDb.Hsapiens.UCSC.hg18.knownGene)
+#txdb <- Hsapiens_UCSC_hg18_knownGene_TxDb
+#regionFilt <- regionFilter(txdb, region="coding")
+#regionFilt(variants, subset=FALSE)
+#
+## subset of variants that passed both filters
+#comboFilt <- compose(snpFilt, regionFilt)
+#comboFilt(variants)
 
 }
 

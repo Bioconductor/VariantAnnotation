@@ -76,13 +76,13 @@
 }
 
 \examples{
-  library(TxDb.Hsapiens.UCSC.hg18.knownGene)
-  library(BSgenome.Hsapiens.UCSC.hg18)
+  #library(TxDb.Hsapiens.UCSC.hg18.knownGene)
+  #library(BSgenome.Hsapiens.UCSC.hg18)
  
-  data(variants)
-  txdb <- Hsapiens_UCSC_hg18_knownGene_TxDb 
-  aaCoding <- predictCoding(variants, txdb, seqSource=Hsapiens,
-      varAllele="varAllele")
+  #data(variants)
+  #txdb <- Hsapiens_UCSC_hg18_knownGene_TxDb 
+  #aaCoding <- predictCoding(variants, txdb, seqSource=Hsapiens,
+  #    varAllele="varAllele")
 
   ## TODO : example for fasta
 }

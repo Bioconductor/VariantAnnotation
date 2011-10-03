@@ -51,22 +51,22 @@
 }
 
 \examples{
-library(TxDb.Hsapiens.UCSC.hg18.knownGene)
-library(BSgenome.Hsapiens.UCSC.hg18)
-
-txdb <- Hsapiens_UCSC_hg18_knownGene_TxDb
-cdsByTx <- cdsBy(txdb)
-chr20 <- keepSeqlevels(cdsByTx, "chr20")
-
-## BSgenome as sequence source
-bsSource <- getTranscriptSeqs(chr20, Hsapiens)
-
-## FASTA files as sequence source
-## FIXME : get sample FASTA 
-#fafile <- FaFile(pathToFastaFile)
-#faSource <- getTranscriptSeqs(chr20, fafile)
-
-# identical(bsSource, faSource)
+#library(TxDb.Hsapiens.UCSC.hg18.knownGene)
+#library(BSgenome.Hsapiens.UCSC.hg18)
+#
+#txdb <- Hsapiens_UCSC_hg18_knownGene_TxDb
+#cdsByTx <- cdsBy(txdb)
+#chr20 <- keepSeqlevels(cdsByTx, "chr20")
+#
+### BSgenome as sequence source
+#bsSource <- getTranscriptSeqs(chr20, Hsapiens)
+#
+### FASTA files as sequence source
+### FIXME : get sample FASTA 
+##fafile <- FaFile(pathToFastaFile)
+##faSource <- getTranscriptSeqs(chr20, fafile)
+#
+## identical(bsSource, faSource)
 
 }
 

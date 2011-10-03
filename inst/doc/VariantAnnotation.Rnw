@@ -64,9 +64,9 @@ will have a missing value in the \Robject{refAllele} column and a deletion
 will have a missing value in the \Robject{varAllele} column.
  
 <<data>>=
-library(VariantAnnotation)
-data(variants)
-head(variants)
+#library(VariantAnnotation)
+#data(variants)
+#head(variants)
 @
 
 \Rfunction{locateVariants} returns a \Robject{DataFrame} with
@@ -78,10 +78,10 @@ Intergenic variants have two gene ID's, representing the genes preceding and fol
 the variant. 
 
 <<location>>=
-library(TxDb.Hsapiens.UCSC.hg18.knownGene)
-txdb <- Hsapiens_UCSC_hg18_knownGene_TxDb
-loc <- locateVariants(variants, txdb)
-head(loc)
+#library(TxDb.Hsapiens.UCSC.hg18.knownGene)
+#txdb <- Hsapiens_UCSC_hg18_knownGene_TxDb
+#loc <- locateVariants(variants, txdb)
+#head(loc)
 @
 
 \begin{table}[ht]
@@ -116,13 +116,13 @@ file which is aligned to different locations for different assemblies. Each
 alignment is entered as a separate row in the \Rcode{singleSNP} object. 
 
 <<singleSNP>>=
-singleSNP <- GRanges(seqnames="chr16",
-        ranges=IRanges(start=c(23004226, 22316999, 24133766),
-               width=c(1,1,1)),
-        varAllele=DNAStringSet("T"),
-        comments=c("Celera assembly", "HuRef assembly", "reference assembly"))
-
-singleSNP
+#singleSNP <- GRanges(seqnames="chr16",
+#        ranges=IRanges(start=c(23004226, 22316999, 24133766),
+#               width=c(1,1,1)),
+#        varAllele=DNAStringSet("T"),
+#        comments=c("Celera assembly", "HuRef assembly", "reference assembly"))
+#
+#singleSNP
 @
 
 The result from \Rfunction{locateVariants} shows the Celera assembly
@@ -182,13 +182,13 @@ retain only the chromosomes of interest for the \Robject{subject}. Alternatively
 we could have used the full \Robject{TranscriptDb}.
 
 <<aacoding>>=
-library(BSgenome.Hsapiens.UCSC.hg18)
-cdsByTx <- cdsBy(txdb)
-grl <- keepSeqlevels(cdsByTx, c("chr1", "chr2", "chr16"))
-
-aaCoding <- predictCoding(variants, grl, seqSource=Hsapiens,
-    varAllele="varAllele")
-head(aaCoding)
+#library(BSgenome.Hsapiens.UCSC.hg18)
+#cdsByTx <- cdsBy(txdb)
+#grl <- keepSeqlevels(cdsByTx, c("chr1", "chr2", "chr16"))
+#
+#aaCoding <- predictCoding(variants, grl, seqSource=Hsapiens,
+#    varAllele="varAllele")
+#head(aaCoding)
 @
 
 Our result is a \Robject{DataFrame} containing only the variants that
@@ -208,7 +208,7 @@ variants for which the codons could be translated. If translation was not
 possible the Consequence was considered a `frameshift'. Variants for which no 
 amino acid codes were computed have a missing in value in the varAA column. 
 <<aacodingResultOneVariant>>= 
-aaCoding[width(aaCoding$varAA) == 0,] 
+#aaCoding[width(aaCoding$varAA) == 0,] 
 @
 
 
@@ -220,13 +220,13 @@ Filters are first created with the appropriate reference object needed to constr
 filter, either a dbSNP package or \Robject{TranscriptDb} object. 
 
 <<createFilters>>=
-library("SNPlocs.Hsapiens.dbSNP.20090506")
-## create filter to identify variants present in dbSNP 
-snpFilt <- dbSNPFilter("SNPlocs.Hsapiens.dbSNP.20090506")
-
-## create filter to identify variants present in introns 
-regionFilt <- regionFilter(txdb, region="intron")
-regionFilt
+#library("SNPlocs.Hsapiens.dbSNP.20090506")
+### create filter to identify variants present in dbSNP 
+#snpFilt <- dbSNPFilter("SNPlocs.Hsapiens.dbSNP.20090506")
+#
+### create filter to identify variants present in introns 
+#regionFilt <- regionFilter(txdb, region="intron")
+#regionFilt
 @
 
 When applying a filter to the data, the optional argument \Rcode{subset}
@@ -237,13 +237,13 @@ metadata. When \Rcode{subset=FALSE} a \Robject{VAFilterResult} object is
 returned which contains a logical vector indicating which records passed the filter.
 
 <<filtering>>=
-## return the subset of records that passed the filter
-snpResult <- snpFilt(variants)
-snpResult 
-metadata(snpResult)
-
-## return a VAFilterResult object
-snpFilt(variants, subset=FALSE)
+### return the subset of records that passed the filter
+#snpResult <- snpFilt(variants)
+#snpResult 
+#metadata(snpResult)
+#
+### return a VAFilterResult object
+#snpFilt(variants, subset=FALSE)
 @
 
 Filters can be combined to act in unison,
@@ -278,21 +278,21 @@ have a sample compressed VCF file so we create one on the fly,
 then create a tabix index and retrieve a subset of ranges.
 
 <<readVCF>>=
-## compress vcf file , create index
-vcfFile <- system.file("extdata", "ex1.vcf", package="VariantAnnotation")
-from <- vcfFile
-to <- tempfile()
-compressVcf <- bgzip(from, to)
-idx <- indexTabix(compressVcf, "vcf")
-tab <- TabixFile(compressVcf, idx)
-head <- headerTabix(tab)
-
-## select ranges with param 
-gr <- GRanges(seqnames="1",
-              ranges=IRanges(start=0, end=100000))
-vcf <- readVcf(tab, param=gr)
-vcf
-names(assays(vcf)) 
+### compress vcf file , create index
+#vcfFile <- system.file("extdata", "ex1.vcf", package="VariantAnnotation")
+#from <- vcfFile
+#to <- tempfile()
+#compressVcf <- bgzip(from, to)
+#idx <- indexTabix(compressVcf, "vcf")
+#tab <- TabixFile(compressVcf, idx)
+#head <- headerTabix(tab)
+#
+### select ranges with param 
+#gr <- GRanges(seqnames="1",
+#              ranges=IRanges(start=0, end=100000))
+#vcf <- readVcf(tab, param=gr)
+#vcf
+#names(assays(vcf)) 
 @ 
 
 
