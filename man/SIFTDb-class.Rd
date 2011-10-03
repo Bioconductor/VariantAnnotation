@@ -128,7 +128,7 @@
   rsids <- c("rs2142947", "NotFound", "rs3026284", "rs1009382")
   select(SIFT.Hsapiens.dbSNP132, keys=rsids)
 
-  subst <- "rsid", "prediction", "score")
+  subst <- c("rsid", "prediction", "score")
   select(SIFT.Hsapiens.dbSNP132, keys=rsids[c(1,3)], cols=subst)
 }
 
