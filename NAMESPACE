@@ -1,6 +1,7 @@
+import(methods)
 import(Biostrings)
 import(GenomicRanges)
-import(methods)
+import(Rsamtools)
 
 importClassesFrom(AnnotationDbi, AnnotationDb)
 importMethodsFrom(AnnotationDbi, as.list, colnames, cols,
@@ -30,11 +31,11 @@ importMethodsFrom(IRanges, "%in%", append, as.matrix, as.vector,
 importFrom(IRanges, CharacterList, DataFrame, IRanges,
            PartitioningByWidth, successiveViews)
 
-importClassesFrom(Rsamtools, FaFile, TabixFile, ScanVcfParam)
-importMethodsFrom(Rsamtools, scanBcf, ScanBcfParam, scanFaIndex,
-                  scanTabix, headerTabix, scanVcf, unpackVcf, scanVcfHeader, 
-                  ScanVcfParam)
-importFrom(Rsamtools, bgzip, TabixFile, indexTabix)
+#importClassesFrom(Rsamtools, FaFile, TabixFile, ScanVcfParam)
+#importMethodsFrom(Rsamtools, scanBcf, ScanBcfParam, scanFaIndex,
+#                  scanTabix, headerTabix, scanVcf, unpackVcf, scanVcfHeader, 
+#                  ScanVcfParam)
+#importFrom(Rsamtools, bgzip, TabixFile, indexTabix)
 
 importMethodsFrom(DBI, dbCommit, dbConnect,
                   dbDisconnect, dbExistsTable, dbGetQuery,
