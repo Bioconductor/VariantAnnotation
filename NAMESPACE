@@ -1,18 +1,24 @@
 import(Biostrings)
-import(AnnotationDbi)
 import(GenomicRanges)
 import(methods)
 
+importClassesFrom(AnnotationDbi, AnnotationDb)
+importMethodsFrom(AnnotationDbi, as.list, colnames, cols,
+                  head, keys, ncol, nrow, select)
+
 importClassesFrom(Biobase, ScalarCharacter)
+importFrom(Biobase, mkScalar, selectSome)
+
 importClassesFrom(BSgenome, BSgenome)
-importClassesFrom(GenomicFeatures, TranscriptDb)
-importClassesFrom(IRanges, Ranges, RangesList, RangedData)
-importClassesFrom(Rsamtools, FaFile, TabixFile, ScanVcfParam)
 importClassesFrom(snpStats, SnpMatrix)
 
+importClassesFrom(GenomicFeatures, TranscriptDb)
 importMethodsFrom(GenomicFeatures, as.list, cdsBy, exons, transcripts,
                   fiveUTRsByTranscript, threeUTRsByTranscript,
                   isActiveSeq, "isActiveSeq<-")
+importFrom(GenomicFeatures, extractTranscriptsFromGenome)
+
+importClassesFrom(IRanges, Ranges, RangesList, RangedData)
 importMethodsFrom(IRanges, "%in%", append, as.matrix, as.vector,
                   countOverlaps, elementLengths, end, eval,
                   findOverlaps, follow, gsub, head, lapply, match,
@@ -21,25 +27,30 @@ importMethodsFrom(IRanges, "%in%", append, as.matrix, as.vector,
                   split, start, "start<-", subjectHits, "subseq<-",
                   substring, unique, unlist, values, "values<-", which,
                   width)
-importMethodsFrom(Rsamtools, scanBcf, ScanBcfParam, scanFaIndex,
-                  scanTabix, headerTabix, scanVcf, scanVcfHeader, ScanVcfParam)
-
-importFrom(Biobase, mkScalar, selectSome)
-importFrom(GenomicFeatures, extractTranscriptsFromGenome)
 importFrom(IRanges, CharacterList, DataFrame, IRanges,
            PartitioningByWidth, successiveViews)
-importFrom(Rsamtools, TabixFile)
 
+importClassesFrom(Rsamtools, FaFile, TabixFile, ScanVcfParam)
+importMethodsFrom(Rsamtools, scanBcf, ScanBcfParam, scanFaIndex,
+                  scanTabix, headerTabix, scanVcf, unpackVcf, scanVcfHeader, 
+                  ScanVcfParam)
+importFrom(Rsamtools, bgzip, TabixFile, indexTabix)
+
+importMethodsFrom(DBI, dbCommit, dbConnect,
+                  dbDisconnect, dbExistsTable, dbGetQuery,
+                  dbReadTable, dbWriteTable, dbListTables, dbListFields)
 
 exportClassPattern("^.*$")
 
 exportMethods(
     predictCoding, getTranscriptSeqs,
-    show, c)
+    show, c, 
+    keys, cols, select)
 
 export(
     locateVariants, 
     getTranscriptSeqs, globalToLocal,
-    readVcf, MatrixToSnpMatrix)
+    readVcf, MatrixToSnpMatrix,
+    keys, cols, select)
 
 exportPattern("^[^\\.]")

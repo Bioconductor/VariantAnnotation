@@ -50,7 +50,7 @@ regionFilter(txdb, region="coding", .name="regionFilter")
     to be used. The default (\code{character(0)})
     performs no filtering
   }
-  \item{txdb}{The \code{\linkS4class{TranscriptDb}} object used
+  \item{txdb}{The \link[GenomicFeatures]{TranscriptDb} object used
     to identifying gene regions.
   }
   \item{region}{A \code{character(1)} object specifying the region
@@ -100,7 +100,9 @@ regionFilter(txdb, region="coding", .name="regionFilter")
 
 \author{Valerie Obenchain <vobencha@fhcrc.org>}
 
-\seealso{\code{\linkS4class{VAFilter}}.}
+\seealso{
+  \code{\linkS4class{VAFilter}}
+}
 
 \examples{
 data(variants)

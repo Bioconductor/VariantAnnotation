@@ -21,11 +21,13 @@
     containing the variants to be annotated. If a \link[IRanges]{Ranges}
     instance is provided it will be coerced to a \link{GRanges}.
   }
-  \item{subject}{A \link{GRangesList} or a \link{TranscriptDb} instance. 
+  \item{subject}{A \link{GRangesList} or a \link[GenomicFeatures]{TranscriptDb} 
+    instance. 
 
     When \code{subject} is provided as a \link{GRangesList} 
     it is assumed that it was created with the 'cdsBy' function 
-    on a \link{TranscriptDb}. If \code{subject} is a \link{TranscriptDb}, the coding
+    on a \link[GenomicFeatures]{TranscriptDb}. If \code{subject} is a 
+    \link[GenomicFeatures]{TranscriptDb}, the coding
     regions will be identified using the 'cdsBy' function on this object. 
   } 
   \item{seqSource}{A \code{\link[BSgenome]{BSgenome}} instance or an \link{FaFile}
