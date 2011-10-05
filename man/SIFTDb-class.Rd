@@ -23,7 +23,6 @@
 
 \section{Methods}{
   In the code below, \code{x} and \code{db} are a \code{SIFTDb} object.
-
   \describe{
     \item{}{
       \code{metadata(x)}:
@@ -119,17 +118,17 @@
 #  ## metadata
 #  metadata(SIFT.Hsapiens.dbSNP132)
 #
-#  ## table names, keys and cols
+#  ## available rsid's 
 #  head(keys(SIFT.Hsapiens.dbSNP132))
+#
+#  ## for column descriptions see ?SIFTDbColumns
 #  cols(SIFT.Hsapiens.dbSNP132)
 #
 #  ## subset on keys and cols 
-#  #rsids <- c("rs2142947", "NotFound", "rs17970171", "rs8692231", "rs3026284") 
-#  rsids <- c("rs2142947", "NotFound", "rs3026284", "rs1009382")
-#  select(SIFT.Hsapiens.dbSNP132, keys=rsids)
-#
+#  rsids <- c("rs2142947", "NotFound", "rs17970171", "rs8692231", "rs3026284") 
 #  subst <- c("rsid", "prediction", "score")
-#  select(SIFT.Hsapiens.dbSNP132, keys=rsids[c(1,3)], cols=subst)
+#  select(SIFT.Hsapiens.dbSNP132, keys=rsids, cols=subst)
+#  select(SIFT.Hsapiens.dbSNP132, keys=rsids[,c(1,3)])
 }
 
 \keyword{classes}

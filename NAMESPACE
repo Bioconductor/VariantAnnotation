@@ -2,10 +2,10 @@ import(methods)
 import(Biostrings)
 import(GenomicRanges)
 import(Rsamtools)
+import(AnnotationDbi)
 
-importClassesFrom(AnnotationDbi, AnnotationDb)
-importMethodsFrom(AnnotationDbi, as.list, colnames, cols,
-                  head, keys, ncol, nrow, select)
+#importClassesFrom(AnnotationDbi, AnnotationDb)
+#importMethodsFrom(AnnotationDbi, cols, keys, select)
 
 importClassesFrom(Biobase, ScalarCharacter)
 importFrom(Biobase, mkScalar, selectSome)
@@ -22,8 +22,8 @@ importFrom(GenomicFeatures, extractTranscriptsFromGenome)
 importClassesFrom(IRanges, Ranges, RangesList, RangedData)
 importMethodsFrom(IRanges, "%in%", append, as.matrix, as.vector,
                   countOverlaps, elementLengths, end, eval,
-                  findOverlaps, follow, gsub, head, lapply, match,
-                  "metadata<-", narrow, ncol, order, paste, precede,
+                  findOverlaps, follow, gsub, lapply, match,
+                  "metadata<-", narrow, order, paste, precede,
                   queryHits, rbind, rev, Rle, runValue, sapply, shift,
                   split, start, "start<-", subjectHits, "subseq<-",
                   substring, unique, unlist, values, "values<-", which,
@@ -52,6 +52,7 @@ export(
     locateVariants, 
     getTranscriptSeqs, globalToLocal,
     readVcf, MatrixToSnpMatrix,
-    keys, cols, select)
+    keys, cols, select,
+    dbFileConnect)
 
 exportPattern("^[^\\.]")

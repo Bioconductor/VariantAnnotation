@@ -22,8 +22,8 @@ setClass("VAFilterResult",
     contains = "AnnotationDb",
 )
 
-#.PolyPhenDb <- setRefClass("PolyPhenDb",
-#    contains = "AnnotationDb",
-#)
+.PolyPhenDb <- setRefClass("PolyPhenDb",
+    contains = "AnnotationDb",
+)
 
 

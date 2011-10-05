@@ -14,8 +14,8 @@ setMethod("keys", "SIFTDb",
 setMethod("cols", "SIFTDb",
     function(x)
     {
-        c("rsID", "proteinID", "aaChange", "method", "aa", "prediction",
-          "score", "median", "positionSeqs", "totalSeqs") 
+        c("rsis", "protein_id", "aa_change", "method", "aa", "prediction",
+          "score", "median", "position_seqs", "total_seqs") 
     }
 ) 
 
@@ -26,7 +26,7 @@ setMethod("select", c("SIFTDb", "character", "character"),
         sql <- paste("SELECT * FROM siftdata WHERE rsid
           IN (", fmtkeys, ")", sep="")
         raw <- dbGetQuery(db$conn, sql)
-        .formatSelect(raw, keys=keys, cols=cols)
+        .formatSIFTDbSelect(raw, keys=keys, cols=cols)
     }
 )
 
@@ -35,7 +35,7 @@ setMethod("select", c("SIFTDb", "missing", "character"),
     {
         sql <- paste("SELECT * FROM siftdata", sep="")
         raw <- dbGetQuery(db$conn, sql)
-        .formatSelect(raw, cols=cols)
+        .formatSIFTDbSelect(raw, cols=cols)
     }
 )
 
@@ -46,7 +46,7 @@ setMethod("select", c("SIFTDb", "character", "missing"),
         sql <- paste("SELECT * FROM siftdata WHERE rsid IN (",
             fmtkeys, ")", sep="")
         raw <- dbGetQuery(db$conn, sql)
-        .formatSelect(raw, keys=keys)
+        .formatSIFTDbSelect(raw, keys=keys)
     }
 )
 
@@ -54,7 +54,7 @@ setMethod("select", c("SIFTDb", "missing", "missing"),
     function(db, keys = NULL, cols = NULL, ...)
     {
         raw <- dbGetQuery(db$conn, "SELECT * FROM siftdata")
-        .formatSelect(raw)
+        .formatSIFTDbSelect(raw)
     }
 )
 
@@ -63,7 +63,7 @@ setMethod("select", c("SIFTDb", "missing", "missing"),
     gsub("rs", "", rsid, fixed=TRUE)
 }
 
-.formatSelect <- function(raw, keys = NULL, cols = NULL)
+.formatSIFTDbSelect <- function(raw, keys = NULL, cols = NULL)
 {
     ## restore order
     if (!is.null(keys)) {
@@ -71,10 +71,10 @@ setMethod("select", c("SIFTDb", "missing", "missing"),
         missing <- (!fmtkeys %in% as.character(raw$rsid))
         if (any(missing))
             warning(paste("keys not found in database : ", keys[missing], 
-                sep="")) 
-        reorder <- match(as.character(raw$rsid), fmtkeys[!missing])
+                "\n", sep="")) 
+        reorder <- match(fmtkeys[!missing], as.character(raw$rsid))
         raw <- raw[reorder, ]
-
+    }
     ## format common columns 
     repfactor <- nrow(raw)*4
     id <- lapply(as.list(raw$rsid), function(x) rep(x, 4))
@@ -91,7 +91,6 @@ setMethod("select", c("SIFTDb", "missing", "missing"),
             nchar(as.character(x)))
         c(snp_aa, ref_aa, snp_aa, ref_aa)})
 
-
     ## partition and stack rows 
     dat <- raw[,-c(1:3)]
     grp <- list(1:5, 6:10, 11:15, 16:20)
@@ -99,14 +98,15 @@ setMethod("select", c("SIFTDb", "missing", "missing"),
             do.call(rbind, split(dat[i,], sort(rep(1:4, 5))))}, 
             dat=as.matrix(dat))
     res <- data.frame(do.call(rbind, lst), row.names=NULL)
-    colnames(res) <- c("prediction", "score", "median", "positionSeqs",
-        "totalSeqs")
+    colnames(res) <- c("prediction", "score", "median", "position_seqs",
+        "total_seqs")
  
-    df <- data.frame(rsID=unlist(rsid), proteinID=unlist(protein_id), 
-            aaChange=unlist(aa_change), method=method, aa=unlist(aa),
+    df <- data.frame(rsid=unlist(rsid), protein_id=unlist(protein_id), 
+            aa_change=unlist(aa_change), method=method, aa=unlist(aa),
             res, row.names=NULL)
-    if (!is.null(cols))
-        df <- df[,colnames(df) %in% cols] 
+    if (!is.null(cols)) {
+      if (!"rsid" %in% cols) cols <- c("rsid", cols)
+      df <- df[,colnames(df) %in% cols] 
     }
     df
 }

@@ -79,30 +79,32 @@
     paste(unlist(sql), collapse = ",")
 }
 
-#duplicateRSID <- function(db, keys, ...)
-#{
-#    fmtrsid <- .sqlIn(keys)
-#    sql <- paste("SELECT * FROM duplicates WHERE rsid IN (",
-#        fmtrsid, ")", sep="")
-#    q1 <- dbGetQuery(db$conn, sql)
-#
-#    fmtgp <- .sqlIn(unique(q1$duplicate_group))
-#    gpsql <- paste("SELECT * FROM duplicates WHERE duplicate_group IN (",
-#        fmtgp, ")", sep="")
-#    q2 <- dbGetQuery(db$conn, gpsql)
-#
-#    matchedKeys <- q2[!q2$rsid %in% keys, ]
-#    missing <- !keys %in% q2$rsid
-#    if (any(missing)) {
-#        md <- data.frame(matrix(NA, ncol=ncol(q1), nrow=sum(missing),
-#            dimnames=list(NULL, colnames(q1))))
-#        md$rsid <- keys[missing]
-#        dat <- rbind(q1, md)
-#    }
-#    gplst <- split(dat$duplicate_group, dat$rsid)
-#    gplst <- gplst[order(match(names(gplst), keys))]
-#    lapply(gplst, function(x, matchedKeys) {
-#        unique(matchedKeys$rsid[matchedKeys$duplicate_group %in% x])},
-#matchedKeys)
-#}
+duplicateRSID <- function(db, keys, ...)
+{
+    fmtrsid <- .sqlIn(keys)
+    sql <- paste("SELECT * FROM duplicates WHERE rsid IN (",
+        fmtrsid, ")", sep="")
+    q1 <- dbGetQuery(db$conn, sql)
+
+    fmtgp <- .sqlIn(unique(q1$duplicate_group))
+    gpsql <- paste("SELECT * FROM duplicates WHERE duplicate_group IN (",
+        fmtgp, ")", sep="")
+    q2 <- dbGetQuery(db$conn, gpsql)
+
+    matchedKeys <- q2[!q2$rsid %in% keys, ]
+    missing <- !keys %in% q2$rsid
+    if (any(missing)) {
+        warning(paste("keys not found in database : ", keys[missing],
+                sep=""))
+        md <- data.frame(matrix(NA, ncol=ncol(q1), nrow=sum(missing),
+            dimnames=list(NULL, colnames(q1))))
+        md$rsid <- keys[missing]
+        dat <- rbind(q1, md)
+    }
+    gplst <- split(dat$duplicate_group, dat$rsid)
+    gplst <- gplst[order(match(names(gplst), keys))]
+    lapply(gplst, function(x, matchedKeys) {
+        unique(matchedKeys$rsid[matchedKeys$duplicate_group %in% x])},
+        matchedKeys)
+}
 
