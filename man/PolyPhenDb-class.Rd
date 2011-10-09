@@ -23,7 +23,7 @@
 }
 
 \section{Methods}{
-  In the code below, \code{x} and \code{db} are a \code{PolyPhenDb} object.
+  In the code below, \code{x} is a \code{PolyPhenDb} object.
   \describe{
     \item{}{
       \code{metadata(x)}:
@@ -40,7 +40,7 @@
       data rows. The \code{keys} values are the rsid's.
     }
     \item{}{
-      \code{select(db, keys, cols, ...)}:
+      \code{select(x, keys, cols, ...)}:
       Returns a subset of data defined by the character vectors \code{keys} 
       and \code{cols}. If no \code{keys} are supplied, all rows are
       returned. If no \code{cols} are supplied, all columns

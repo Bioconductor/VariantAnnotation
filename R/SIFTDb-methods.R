@@ -20,40 +20,40 @@ setMethod("cols", "SIFTDb",
 ) 
 
 setMethod("select", c("SIFTDb", "character", "character"),
-    function(db, keys, cols, ...)
+    function(x, keys, cols, ...)
     { 
         fmtkeys <- .sqlIn(.formatRSID(keys))
         sql <- paste("SELECT * FROM siftdata WHERE rsid
           IN (", fmtkeys, ")", sep="")
-        raw <- dbGetQuery(db$conn, sql)
+        raw <- dbGetQuery(x$conn, sql)
         .formatSIFTDbSelect(raw, keys=keys, cols=cols)
     }
 )
 
 setMethod("select", c("SIFTDb", "missing", "character"),
-    function(db, keys = NULL, cols, ...)
+    function(x, keys = NULL, cols, ...)
     {
         sql <- paste("SELECT * FROM siftdata", sep="")
-        raw <- dbGetQuery(db$conn, sql)
+        raw <- dbGetQuery(x$conn, sql)
         .formatSIFTDbSelect(raw, cols=cols)
     }
 )
 
 setMethod("select", c("SIFTDb", "character", "missing"),
-    function(db, keys, cols = NULL, ...)
+    function(x, keys, cols = NULL, ...)
     {
         fmtkeys <- .sqlIn(.formatRSID(keys)) 
         sql <- paste("SELECT * FROM siftdata WHERE rsid IN (",
             fmtkeys, ")", sep="")
-        raw <- dbGetQuery(db$conn, sql)
+        raw <- dbGetQuery(x$conn, sql)
         .formatSIFTDbSelect(raw, keys=keys)
     }
 )
 
 setMethod("select", c("SIFTDb", "missing", "missing"),
-    function(db, keys = NULL, cols = NULL, ...)
+    function(x, keys = NULL, cols = NULL, ...)
     {
-        raw <- dbGetQuery(db$conn, "SELECT * FROM siftdata")
+        raw <- dbGetQuery(x$conn, "SELECT * FROM siftdata")
         .formatSIFTDbSelect(raw)
     }
 )

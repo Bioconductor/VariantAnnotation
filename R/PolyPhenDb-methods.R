@@ -18,7 +18,7 @@ setMethod("cols", "PolyPhenDb",
 ) 
 
 setMethod("select", c("PolyPhenDb", "character", "character"),
-    function(db, keys, cols, ...)
+    function(x, keys, cols, ...)
     {
         fmtkeys <- .sqlIn(keys)
         if (!"rsid" %in% cols)
@@ -26,37 +26,37 @@ setMethod("select", c("PolyPhenDb", "character", "character"),
         fmtcols <- paste(cols, collapse=",") 
         sql <- paste("SELECT ", fmtcols, " FROM ppdata WHERE rsid
           IN (", fmtkeys, ")", sep="")
-        raw <- dbGetQuery(db$conn, sql)
+        raw <- dbGetQuery(x$conn, sql)
         .formatPPDbSelect(raw, keys=keys) 
     }
 )
 
 setMethod("select", c("PolyPhenDb", "missing", "character"),
-    function(db, keys = NULL, cols, ...)
+    function(x, keys = NULL, cols, ...)
     {
         if (!"rsid" %in% cols)
             cols <- c("rsid", cols) 
         fmtcols <- paste(cols, collapse=",") 
         sql <- paste("SELECT ", fmtcols, " FROM ppdata", sep="")
-        dbGetQuery(db$conn, sql)
+        dbGetQuery(x$conn, sql)
     }
 )
 
 setMethod("select", c("PolyPhenDb", "character", "missing"),
-    function(db, keys, cols = NULL, ...)
+    function(x, keys, cols = NULL, ...)
     {
         fmtkeys <- .sqlIn(keys) 
         sql <- paste("SELECT * FROM ppdata WHERE rsid IN (",
             fmtkeys, ")", sep="")
-        raw <- dbGetQuery(db$conn, sql)
+        raw <- dbGetQuery(x$conn, sql)
         .formatPPDbSelect(raw, keys=keys) 
     }
 )
 
 setMethod("select", c("PolyPhenDb", "missing", "missing"),
-    function(db, keys = NULL, cols = NULL, ...)
+    function(x, keys = NULL, cols = NULL, ...)
     {
-        dbGetQuery(db$conn, "SELECT * FROM ppdata")
+        dbGetQuery(x$conn, "SELECT * FROM ppdata")
     }
 )
 
