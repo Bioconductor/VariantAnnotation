@@ -39,6 +39,34 @@
 }
 
 \examples{
+## under construction
+
+#library(BSgenome.Hsapiens.UCSC.hg19)
+#library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+#
+### snps from dbsnp132
+#snvs <- GRanges(seqnames=c("chr6", "chr10", "chr16"), 
+#ranges = IRanges(start=c(88375601, 115912481, 69875501), width=c(1,2,2)))
+#
+#txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene 
+#genes <- transcriptsBy(txdb, "gene")
+#rgs <- reduce(genes[subjectHits(fo), ])
+#fo <- findOverlaps(snps, rgs)
+#txseqs <- extractTranscriptsFromGenome(Hsapiens, rgs)
+#
+#txLocal <- globalToLocal(snvs, rgs[subjectHits(fo), ])
+#
+### retrieve reference sequences 
+### reference coordinates
+#rlocs <- transcriptLocs2refLocs(tlocs, start(exbytx), end(exbytx),
+#             tx_strand, reorder.exons.on.minus.strand=TRUE)
+#
+# subject <- subject[unique(subjectHits(fo))]
+#        txSeqs <- getTranscriptSeqs(subject, seqSource)
+#        xCoding <- query[txLocal$globalInd]
+#
+# back to reference coordinates
+
 }
 
 \keyword{manip}

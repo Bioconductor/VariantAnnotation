@@ -55,6 +55,7 @@ setMethod("predictCoding", signature(query="GRanges", subject="GRangesList",
         subject <- subject[unique(subjectHits(fo))]
         txSeqs <- getTranscriptSeqs(subject, seqSource)
         txLocal <- globalToLocal(queryAdj, subject)
+        ## FIXME : queryAdj ?
         xCoding <- query[txLocal$globalInd]
  
         ## original sequences 

@@ -12,7 +12,6 @@
   These column names are displayed when \code{cols} is called on a
   \code{SIFTDb} object.
 
-  \describe{
     \itemize{
       \item rsid : rsid
       \item protein_id : NCBI RefSeq protein ID
@@ -36,7 +35,6 @@
                            position of prediction
       \item total_seqs : total number of sequences in alignment
     }
-  }
 }
 
 \seealso{
