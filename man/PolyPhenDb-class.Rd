@@ -10,10 +10,7 @@
 \alias{metadata,PolyPhenDb-method}
 \alias{cols,PolyPhenDb-method}
 \alias{keys,PolyPhenDb-method}
-\alias{select,PolyPhenDb,missing,missing-method}
-\alias{select,PolyPhenDb,character,character-method}
-\alias{select,PolyPhenDb,missing,character-method}
-\alias{select,PolyPhenDb,character,missing-method}
+\alias{select,PolyPhenDb-method}
 
 \title{PolyPhenDb objects}
 
@@ -40,7 +37,7 @@
       data rows. The \code{keys} values are the rsid's.
     }
     \item{}{
-      \code{select(x, keys, cols, ...)}:
+      \code{select(x, keys = NULL, cols = NULL, ...)}:
       Returns a subset of data defined by the character vectors \code{keys} 
       and \code{cols}. If no \code{keys} are supplied, all rows are
       returned. If no \code{cols} are supplied, all columns
@@ -107,32 +104,32 @@
 \author{Valerie Obenchain <vobencha@fhcrc.org>}
 
 \examples{
-#  library(PolyPhen.Hsapiens.dbSNP131)
-#
-#  ## metadata
-#  metadata(PolyPhen.Hsapiens.dbSNP131)
-#
-#  ## available rsid's 
-#  head(keys(PolyPhen.Hsapiens.dbSNP131))
-#
-#  ## column descriptions found at ?PolyPhenDbColumns
-#  cols(PolyPhen.Hsapiens.dbSNP131)
-#
-#  ## subset on keys and cols 
-#  subst <- c("aa1", "aa2", "prediction")
-#  rsids <- c("rs2142947", "NotFound", "rs4995127", "rs3026284")
-#  select(PolyPhen.Hsapiens.dbSNP131, keys=rsids, cols=subst)
-#
-#  ## retrieve substitution scores 
-#  subst <- c("IdPmax", "IdPSNP", "IdQmin")
-#  select(PolyPhen.Hsapiens.dbSNP131, keys=rsids, cols=subst)
-#
-#  ## retrieve the PolyPhen-2 classifiers 
-#  subst <- c("pph2_class", "pph2_prob", "pph2_FPR", "pph2_TRP", "pph2_FDR")
-#  select(PolyPhen.Hsapiens.dbSNP131, keys=rsids, cols=subst)
-#
-#  ## duplicate groups of rsid's
-#  duplicateRSID(PolyPhen.Hsapiens.dbSNP131, rsids)
+library(PolyPhen.Hsapiens.dbSNP131)
+
+## metadata
+metadata(PolyPhen.Hsapiens.dbSNP131)
+
+## available rsid's 
+head(keys(PolyPhen.Hsapiens.dbSNP131))
+
+## column descriptions found at ?PolyPhenDbColumns
+cols(PolyPhen.Hsapiens.dbSNP131)
+
+## subset on keys and cols 
+subst <- c("aa1", "aa2", "prediction")
+rsids <- c("rs2142947", "rs4995127", "rs3026284")
+select(PolyPhen.Hsapiens.dbSNP131, keys=rsids, cols=subst)
+
+## retrieve substitution scores 
+subst <- c("IdPmax", "IdPSNP", "IdQmin")
+select(PolyPhen.Hsapiens.dbSNP131, keys=rsids, cols=subst)
+
+## retrieve the PolyPhen-2 classifiers 
+subst <- c("pph2_class", "pph2_prob", "pph2_FPR", "pph2_TPR", "pph2_FDR")
+select(PolyPhen.Hsapiens.dbSNP131, keys=rsids, cols=subst)
+
+## duplicate groups of rsid's
+duplicateRSID(PolyPhen.Hsapiens.dbSNP131, rsids)
 
 }
 

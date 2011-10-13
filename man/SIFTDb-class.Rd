@@ -9,10 +9,7 @@
 \alias{metadata,SIFTDb-method}
 \alias{cols,SIFTDb-method}
 \alias{keys,SIFTDb-method}
-\alias{select,SIFTDb,missing,missing-method}
-\alias{select,SIFTDb,character,character-method}
-\alias{select,SIFTDb,missing,character-method}
-\alias{select,SIFTDb,character,missing-method}
+\alias{select,SIFTDb-method}
 
 \title{SIFTDb objects}
 
@@ -39,7 +36,7 @@
       data rows. The \code{keys} values are the rsid's.
     }
     \item{}{
-      \code{select(x, keys, cols, ...)}:
+      \code{select(x, keys = NULL, cols = NULL, ...)}:
       Returns a subset of data defined by the character vectors \code{keys} 
       and \code{cols}. If no \code{keys} are supplied, all rows are
       returned. If no \code{cols} are supplied, all columns
@@ -113,22 +110,22 @@
 \author{Valerie Obenchain <vobencha@fhcrc.org>}
 
 \examples{
-#  library(SIFT.Hsapiens.dbSNP132)
-#
-#  ## metadata
-#  metadata(SIFT.Hsapiens.dbSNP132)
-#
-#  ## available rsid's 
-#  head(keys(SIFT.Hsapiens.dbSNP132))
-#
-#  ## for column descriptions see ?SIFTDbColumns
-#  cols(SIFT.Hsapiens.dbSNP132)
-#
-#  ## subset on keys and cols 
-#  rsids <- c("rs2142947", "NotFound", "rs17970171", "rs8692231", "rs3026284") 
-#  subst <- c("rsid", "prediction", "score")
-#  select(SIFT.Hsapiens.dbSNP132, keys=rsids, cols=subst)
-#  select(SIFT.Hsapiens.dbSNP132, keys=rsids[,c(1,3)])
+library(SIFT.Hsapiens.dbSNP132)
+
+## metadata
+metadata(SIFT.Hsapiens.dbSNP132)
+
+## available rsid's 
+head(keys(SIFT.Hsapiens.dbSNP132))
+
+## for column descriptions see ?SIFTDbColumns
+cols(SIFT.Hsapiens.dbSNP132)
+
+## subset on keys and cols 
+rsids <- c("rs2142947", "rs17970171", "rs8692231", "rs3026284") 
+subst <- c("rsid", "prediction", "score")
+select(SIFT.Hsapiens.dbSNP132, keys=rsids, cols=subst)
+select(SIFT.Hsapiens.dbSNP132, keys=rsids[1:2])
 }
 
 \keyword{classes}
