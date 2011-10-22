@@ -212,7 +212,7 @@ aaCoding[width(aaCoding$varAA) == 0,]
 @
 
 
-\section{Filtering Variants}
+\section{Filtering}
 
 Identifying subsets of variants that meet a specific criteria can be
 accomplished using the filter functions provided in \Rpackage{VariantAnnotation}.
@@ -295,6 +295,49 @@ vcf
 names(assays(vcf)) 
 @ 
 
+
+\section{SIFT and PolyPhen Databases}
+
+SIFT (Sorting Intolerant From Tolerant) and PolyPhen (Polymorphism Phenotyping)
+are methods for predicting the impact of amino acid substitution on a
+human protein. The SIFT method uses sequence homology and the physical properties 
+of amino acids to make predictions about protein function. PolyPhen uses 
+sequence-based features and structural information characterizing the substitution 
+to make predicitons about the structure and function of the protein. 
+
+Both methods offer interactive tools and documentation on their web sites,
+
+\noindent
+\url{http://sift.bii.a-star.edu.sg/}
+\noindent
+\url{http://genetics.bwh.harvard.edu/pph2/}
+
+Collated predictions for specific dbSNP builds are available as downloads from 
+the SIFT and PolyPhen web sites. These results have been stored as sqlite
+databases and made available through the \Rcode{Bioconductor} packages 
+\Rpackage{SIFT.Hsapiens.dbSNP132.db} and \Rpackage{PolyPhen.Hapiens.dbSNP131.db}.
+The packages are designed to be serached by rsid.
+
+<<SIFT_and_PP>>=
+library(SIFT.Hsapiens.dbSNP132)
+library(PolyPhen.Hsapiens.dbSNP131)
+
+## rsids in the package 
+head(keys(SIFT.Hsapiens.dbSNP132))
+
+## list available columns
+cols(SIFT.Hsapiens.dbSNP132)
+
+rsids <- c("rs2142947", "rs8692231", "rs3026284")
+subst <- c("rsid", "prediction", "score", "aa_change", "protein_id")
+select(SIFT.Hsapiens.dbSNP132, keys=rsids, cols=subst)
+
+select(PolyPhen.Hsapiens.dbSNP131, keys="rs3026284", 
+    cols=c("training_set", "prediction", "pph2_prob", "pph2_FPR", "pph2_FDR"))
+@
+
+Due to the large number of columns in the PolyPhen database, detailed
+descriptions were included on a separate man page. See ?PolyPhenDbColumns.
 
 
 \section{References}

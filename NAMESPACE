@@ -52,7 +52,6 @@ export(
     locateVariants, 
     getTranscriptSeqs, globalToLocal,
     readVcf, MatrixToSnpMatrix,
-    keys, cols, select,
-    dbFileConnect)
+    keys, cols, select)
 
 exportPattern("^[^\\.]")
