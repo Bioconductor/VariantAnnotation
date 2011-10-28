@@ -5,7 +5,7 @@
 setMethod("keys", "PolyPhenDb",
     function(x)
     {
-        sql <- paste("SELECT rsid FROM ppdata ", sep="") 
+        sql <- paste("SELECT RSID FROM ppdata ", sep="") 
         unique(dbGetQuery(x$conn, sql))[,1] 
     }
 ) 
@@ -24,21 +24,21 @@ setMethod("select", "PolyPhenDb",
             sql <- "SELECT * FROM ppdata"
         }
         if (!missing(keys) & !missing(cols)) {
-            if (!"rsid" %in% cols)
-                cols <- c("rsid", cols) 
+            if (!"RSID" %in% cols)
+                cols <- c("RSID", cols) 
             fmtcols <- paste(cols, collapse=",") 
             fmtkeys <- .sqlIn(keys)
-            sql <- paste("SELECT ", fmtcols, " FROM ppdata WHERE rsid
-                IN (", fmtkeys, ")", sep="")
+            sql <- paste("SELECT ", fmtcols, " FROM ppdata WHERE RSID 
+                         IN (", fmtkeys, ")", sep="")
         } 
         if (!missing(keys) & missing(cols)) {
             fmtkeys <- .sqlIn(keys)
-            sql <- paste("SELECT * FROM ppdata WHERE rsid IN (",
-                fmtkeys, ")", sep="")
+            sql <- paste("SELECT * FROM ppdata WHERE RSID IN (",
+                         fmtkeys, ")", sep="")
         }
         if (missing(keys) & !missing(cols)) {
-            if (!"rsid" %in% cols)
-                cols <- c("rsid", cols) 
+            if (!"RSID" %in% cols)
+                cols <- c("RSID", cols) 
             fmtcols <- paste(cols, collapse=",") 
             sql <- paste("SELECT ", fmtcols, " FROM ppdata", sep="")
         }
@@ -51,18 +51,18 @@ setMethod("select", "PolyPhenDb",
     }
 )
 
-
 .formatPPDbSelect <- function(raw, keys)
 {
     ## restore order
-    missing <- (!keys %in% as.character(raw$rsid))
+    missing <- (!keys %in% as.character(raw$RSID))
     if (any(missing))
         warning(paste("keys not found in database : ", keys[missing],
-            "\n", sep=""))
+                      "\n", sep=""))
 
-    lst <- lapply(keys[!missing], function(x, raw) {
-        raw[raw$rsid %in% x, ]
-    }, raw=raw)
+    lst <- lapply(keys[!missing], 
+             function(x, raw) {
+               raw[raw$RSID %in% x, ]
+             }, raw=raw)
     do.call(rbind, lst)
 }
 

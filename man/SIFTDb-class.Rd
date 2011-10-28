@@ -40,30 +40,7 @@
       Returns a subset of data defined by the character vectors \code{keys} 
       and \code{cols}. If no \code{keys} are supplied, all rows are
       returned. If no \code{cols} are supplied, all columns
-      are returned.
-      \itemize{
-        \item rsid : rsid
-        \item proteinID : NCBI RefSeq protein ID
-        \item aaChange : amino acid substitution; reference aa is preceeding,
-                         followed by the position and finally the snp aa
-        \item method : method of obtaining related sequences using PSI-BLAST
-        \item aa : either the reference or snp residue amino acid
-        \item prediction : SIFT prediction
-        \item score : SIFT score (range 0 to 1)
-          \itemize{
-            \item TOLERATED : score is greater than 0.05
-            \item DAMAGING : score is less than or equal to 0.05
-            \item NOT SCORED : no prediction is made if there are less than 2 homologous 
-                               sequences that have an amino acid at the position
-                               of the given SNP or if the SIFT prediction is not
-                               available
-         } 
-        \item median : diversity measurement of the sequences used for 
-                       prediction (range 0 to 4.32) 
-        \item positionSeqs : number of sequences with an amino acide at the 
-                             position of prediction
-        \item totalSeqs : total number of sequences in alignment
-      }
+      are returned. For column descriptions see \code{?SIFTDbColumns}.
     }
   }
 }
@@ -123,7 +100,7 @@ cols(SIFT.Hsapiens.dbSNP132)
 
 ## subset on keys and cols 
 rsids <- c("rs2142947", "rs17970171", "rs8692231", "rs3026284") 
-subst <- c("rsid", "prediction", "score")
+subst <- c("RSID", "PREDICTION", "SCORE")
 select(SIFT.Hsapiens.dbSNP132, keys=rsids, cols=subst)
 select(SIFT.Hsapiens.dbSNP132, keys=rsids[1:2])
 }

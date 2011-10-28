@@ -1,3 +1,6 @@
+### =========================================================================
+### getTranscriptSeqs methods 
+### =========================================================================
 
 setMethod("getTranscriptSeqs",  c("GRangesList", "BSgenome"),
     function(query, subject, ...)

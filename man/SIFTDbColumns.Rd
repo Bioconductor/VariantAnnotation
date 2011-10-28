@@ -13,14 +13,14 @@
   \code{SIFTDb} object.
 
     \itemize{
-      \item rsid : rsid
-      \item protein_id : NCBI RefSeq protein ID
-      \item aa_change : amino acid substitution; reference aa is preceeding,
+      \item RSID : rsid
+      \item PROTEINID : NCBI RefSeq protein ID
+      \item AACHANGE : amino acid substitution; reference aa is preceeding,
                        followed by the position and finally the snp aa
-      \item method : method of obtaining related sequences using PSI-BLAST
-      \item aa : either the reference or snp residue amino acid
-      \item prediction : SIFT prediction
-      \item score : SIFT score (range 0 to 1)
+      \item METHOD : method of obtaining related sequences using PSI-BLAST
+      \item AA : either the reference or snp residue amino acid
+      \item PREDICTION : SIFT prediction
+      \item SCORE : SIFT score (range 0 to 1)
         \itemize{
           \item TOLERATED : score is greater than 0.05
           \item DAMAGING : score is less than or equal to 0.05
@@ -29,11 +29,11 @@
                              at the position of the given SNP or if the SIFT 
                              prediction is not available
        } 
-      \item median : diversity measurement of the sequences used for 
+      \item MEDIAN : diversity measurement of the sequences used for 
                      prediction (range 0 to 4.32) 
-      \item position_seqs : number of sequences with an amino acide at the 
+      \item POSITIONSEQS : number of sequences with an amino acide at the 
                            position of prediction
-      \item total_seqs : total number of sequences in alignment
+      \item TOTALSEQS : total number of sequences in alignment
     }
 }
 

@@ -1,4 +1,6 @@
-## TODO : multicore in compose
+### =========================================================================
+### vaFilter methods 
+### =========================================================================
 
 setMethod(.vaValidity, "VAFilter", function (object) {
     msg <- NULL
@@ -100,18 +102,3 @@ compose <-
     }, name = .name)
 }
 
-#setAs("VAFilter", "FilterRules", function(from) {
-#    exprs <- list(from)
-#    names(exprs) <- name(from)
-#    FilterRules(exprs)
-#})
-#
-#setMethod(c, "VAFilter", function (x, ..., recursive = FALSE) {
-#    if (missing(x))
-#        args <- unname(list(...))
-#    else
-#        args <- unname(list(x, ...))
-#    args <- list(x, ...)
-#    rules <- lapply(args, as, "FilterRules")
-#    do.call(c, c(rules, recursive = recursive))
-#})

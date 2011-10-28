@@ -1,3 +1,7 @@
+### =========================================================================
+### predictCoding methods 
+### =========================================================================
+
 setMethod("predictCoding",  signature(query="Ranges", subject="TranscriptDb", 
           seqSource="ANY", varAllele="character"),
     function(query, subject, seqSource, varAllele, ...)

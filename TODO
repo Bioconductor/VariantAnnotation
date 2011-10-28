@@ -1,24 +1,9 @@
 
-Short term
--------------------
+Short term (next devel cycle)
+--------------------------------------
 
-- Michael's vectorized cum* methods in IRanges
+- multicore/parallel in compose for vaFilters 
 
-
-- readVcf :
-
-  o parse header of VCF files, use INFO to designate data types
-
-  o deal with "imprecise" variants ALT field that contain descriptive alleles,
-    should be marked by 'imprecise' flag in INFO
-
-  o pick up strand bias in INFO$sb? 
-
-  o if user does not supply a param :
-    (i) if not compressed -> ok
-    (ii) if compressed -> warning 
-
- 
 - locateVariants  :
 
   o findOverlaps needs zero-width implementation :
@@ -43,7 +28,6 @@ Short term
 
   o findOverlaps(type="within", ...) for all matches? NOTE : predictCoding
     uses type="within"
-
 
 
 

@@ -1,3 +1,6 @@
+### =========================================================================
+### VAFilterResult methods 
+### =========================================================================
 
 VAFilterResult <-
     function(data=GRanges(), x=logical(), name=NA_character_,
@@ -16,6 +19,7 @@ VAFilterResult <-
 }
 
 setMethod(name, "VAFilterResult", function(x, ...) slot(x, "name"))
+
 setMethod(stats, "VAFilterResult", function(x, ...) slot(x, "stats"))
 
 setMethod("Logic", c("VAFilterResult", "VAFilterResult"),
@@ -37,8 +41,8 @@ setMethod("!", "VAFilterResult",
     name <- sprintf("!(%s)", name(x))
     y <- callNextMethod()
     s <- rbind(stats(x),
-               data.frame(Name=name, Input=length(y), Passing=sum(y),
-                          Op="!", stringsAsFactors=FALSE))
+           data.frame(Name=name, Input=length(y), Passing=sum(y),
+                      Op="!", stringsAsFactors=FALSE))
     VAFilterResult(y, s$Name, s$Input, s$Passing, s$Op)
 })
 

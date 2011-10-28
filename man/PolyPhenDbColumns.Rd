@@ -17,112 +17,112 @@
     }
     Original query :
     \itemize{
-      \item o_snp_id : original SNP identifier from user input
-      \item o_acc : original protein identifier from user input
-      \item o_pos : original substitution position in the protein sequence
+      \item OSNPID : original SNP identifier from user input
+      \item OSNPACC : original protein identifier from user input
+      \item OPOS : original substitution position in the protein sequence
                     from user input
-      \item o_aa1 : original wild type (reference) aa residue from user input 
-      \item o_aa2 : original mutant (reference) aa residue from user input 
+      \item OAA1 : original wild type (reference) aa residue from user input 
+      \item OAA2 : original mutant (reference) aa residue from user input 
     }
     Mapped query :
     \itemize{
-      \item snp_id : SNP identifier mapped to dbSNP rsID if available,
+      \item SNPID : SNP identifier mapped to dbSNP rsID if available,
                      otherwise same as o_snp_id. This value was used as the 
                      rsid column 
-      \item acc : protein UniProtKB accession if known protein, otherwise
+      \item ACC : protein UniProtKB accession if known protein, otherwise
                   same as o_acc 
-      \item pos : substitution position mapped to UniProtKB protein sequence
+      \item POS : substitution position mapped to UniProtKB protein sequence
                   if known, otherwise same as o_pos 
-      \item aa1 : wild type aa residue 
-      \item aa2 : mutant aa residue 
-      \item nt1 : wild type allele nucleotide 
-      \item nt2 : mutant allele nucleotide 
+      \item AA1 : wild type aa residue 
+      \item AA2 : mutant aa residue 
+      \item NT1 : wild type allele nucleotide 
+      \item NT2 : mutant allele nucleotide 
     }
     PolyPhen-2 prediction :
     \itemize{
-      \item prediction : qualitative ternary classification FPR thresholds 
+      \item PREDICTION : qualitative ternary classification FPR thresholds 
     }
     PolyPhen-1 prediction :
     \itemize{
-      \item based_on : prediction basis 
-      \item effect : predicted substitution effect on the protein structure or
+      \item BASEDON : prediction basis 
+      \item EFFECT : predicted substitution effect on the protein structure or
                      function
     }
     PolyPhen-2 classifiers : 
     \itemize{
-      \item pph2_class : binary classifier outcome ("damaging" or "neutral") 
-      \item pph2_prob : probability of the variation being dammaging 
-      \item pph2_FPR : false positive rate at the pph2_prob level 
-      \item pph2_TPR : true positive rate at the pph2_prob level 
-      \item pph2_FDR : false discovery rate at the pph2_prob level 
+      \item PPH2CLASS : binary classifier outcome ("damaging" or "neutral") 
+      \item PPH2PROB : probability of the variation being dammaging 
+      \item PPH2FPR : false positive rate at the pph2_prob level 
+      \item PPH2TPR : true positive rate at the pph2_prob level 
+      \item PPH2FDR : false discovery rate at the pph2_prob level 
     }
     UniProtKB-SwissProt derived protein sequence annotations :
     \itemize{
-      \item site : substitution SITE annotation 
-      \item region : substitution REGION annotation 
+      \item SITE : substitution SITE annotation 
+      \item REGION : substitution REGION annotation 
       \item PHAT : PHAT matrix element for substitution in the 
                     TRANSMEM region 
     }
     Multiple sequence alignment scores :
     \itemize{
-      \item dScore : difference of PSIC scores for two aa variants 
+      \item DSCORE : difference of PSIC scores for two aa variants 
                      (Score1 - Score2) 
-      \item Score1 : PSIC score for wild type aa residue (aa1) 
-      \item Score2 : PSIC score for mutant aa residue (aa2) 
-      \item Nobs : number of residues observed at the substitution position
+      \item SCORE1 : PSIC score for wild type aa residue (aa1) 
+      \item SCORE2 : PSIC score for mutant aa residue (aa2) 
+      \item NOBS : number of residues observed at the substitution position
                    in the multiple alignment (sans gaps)
     }
     Protein 3D structure features : 
     \itemize{
-      \item Nstruct : initial number of BLAST hits to similar proteins with
+      \item NSTRUCT : initial number of BLAST hits to similar proteins with
                       3D structures in PDB 
-      \item Nfilt : number of 3D BLAST hits after identity threshold filtering 
-      \item PDB_id : protein structure identifier from PDB 
-      \item PDB_pos : position of substitution in PDB protein sequence 
-      \item PDB_ch : PDB polypeptide chain identifier 
-      \item ident : sequence identity between query and aligned PDB sequences 
-      \item length : PDB sequence alignment length 
-      \item NormAcc : normalized accessible surface 
-      \item SecStr : DSSP secondary structure assignment 
-      \item MapReg : region of the phi-psi (Ramachandran) map derived from the
+      \item NFILT : number of 3D BLAST hits after identity threshold filtering 
+      \item PDBID : protein structure identifier from PDB 
+      \item PDBPOS : position of substitution in PDB protein sequence 
+      \item PDBCH : PDB polypeptide chain identifier 
+      \item IDENT : sequence identity between query and aligned PDB sequences 
+      \item LENGTH : PDB sequence alignment length 
+      \item NORMACC : normalized accessible surface 
+      \item SECSTR : DSSP secondary structure assignment 
+      \item MAPREG : region of the phi-psi (Ramachandran) map derived from the
                      residue dihedral angles 
-      \item dVol : change in residue side chain volume 
-      \item dProp : change in solvent accessible surface propensity resulting
+      \item DVOL : change in residue side chain volume 
+      \item DPROP : change in solvent accessible surface propensity resulting
                     from the substitution 
-      \item B_fact : normalized B-factor (temperature factor) for the residue
-      \item H_bonds : number of hydrogen sidechain-sidechain and
+      \item BFACT : normalized B-factor (temperature factor) for the residue
+      \item HBONDS : number of hydrogen sidechain-sidechain and
                       sidechain-mainchain bonds formed by the residue 
-      \item AveNHet : average number of contacts with heteroatoms per residue 
-      \item MinDHet : closest contact with heteroatom 
-      \item AveNInt : average number of contacts with other chains per residue 
-      \item MinDInt : closest contact with other chain 
-      \item AveNSit : average number of contacts with critical sites per
+      \item AVENHET : average number of contacts with heteroatoms per residue 
+      \item MINDHET : closest contact with heteroatom 
+      \item AVENINT : average number of contacts with other chains per residue 
+      \item MINDINT : closest contact with other chain 
+      \item AVENSIT : average number of contacts with critical sites per
                       residue 
-      \item MinDSit : closest contact with a critical site
+      \item MINDSIT : closest contact with a critical site
     }
     Nucleotide sequence features (CpG/codon/exon junction) :
     \itemize{
-      \item Transv : whether substitution is a transversion 
-      \item CodPos : position of the substitution within the codon 
-      \item CpG : whether or not the substitution changes CpG context
-      \item MinDJnc : substitution distance from exon/intron junction 
+      \item TRANSV : whether substitution is a transversion 
+      \item CODPOS : position of the substitution within the codon 
+      \item CPG : whether or not the substitution changes CpG context
+      \item MINDJNC : substitution distance from exon/intron junction 
     }
     Pfam protein family :
     \itemize{
-      \item PfamHit : Pfam identifier of the query protein
+      \item PFAMHIT : Pfam identifier of the query protein
     }
     Substitution scores : 
     \itemize{
-      \item IdPmax : maximum congruency of the mutant aa residue to all 
+      \item IDPMAX : maximum congruency of the mutant aa residue to all 
                      sequences in multiple alignment 
-      \item IdPSNP : maximum congruency of the mutant aa residue to the
+      \item IDPSNP : maximum congruency of the mutant aa residue to the
                      sequence in alignment with the mutant residue 
-      \item IdQmin : query sequence identity with the closest homologue
+      \item IDQMIN : query sequence identity with the closest homologue
                      deviating from the wild type aa residue
     }
     Comments : 
     \itemize{
-      \item Comments : Optional user comments 
+      \item COMMENTS : Optional user comments 
     }
   }
 

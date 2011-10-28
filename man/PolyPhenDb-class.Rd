@@ -116,20 +116,20 @@ head(keys(PolyPhen.Hsapiens.dbSNP131))
 cols(PolyPhen.Hsapiens.dbSNP131)
 
 ## subset on keys and cols 
-subst <- c("aa1", "aa2", "prediction")
+subst <- c("AA1", "AA2", "PREDICTION")
 rsids <- c("rs2142947", "rs4995127", "rs3026284")
 select(PolyPhen.Hsapiens.dbSNP131, keys=rsids, cols=subst)
 
 ## retrieve substitution scores 
-subst <- c("IdPmax", "IdPSNP", "IdQmin")
+subst <- c("IDPMAX", "IDPSNP", "IDQMIN")
 select(PolyPhen.Hsapiens.dbSNP131, keys=rsids, cols=subst)
 
 ## retrieve the PolyPhen-2 classifiers 
-subst <- c("pph2_class", "pph2_prob", "pph2_FPR", "pph2_TPR", "pph2_FDR")
+subst <- c("PPH2CLASS", "PPH2PROB", "PPH2FPR", "PPH2TPR", "PPH2FDR")
 select(PolyPhen.Hsapiens.dbSNP131, keys=rsids, cols=subst)
 
 ## duplicate groups of rsid's
-duplicateRSID(PolyPhen.Hsapiens.dbSNP131, rsids)
+duplicateRSID(PolyPhen.Hsapiens.dbSNP131, c("rs71225486", "rs1063796"))
 
 }
 
