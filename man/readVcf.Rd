@@ -43,7 +43,7 @@
   The \code{param} argument can be used to select a subset of
   records when reading from compressed (bgzip) VCF files.
 
-  The function calls \code{Rsamtools} \code{link{scanVcf}}, the 
+  The function calls \code{Rsamtools} \code{\link{scanVcf}}, the 
   details of which can be found with \code{?scanVcf}. 
 }
 
