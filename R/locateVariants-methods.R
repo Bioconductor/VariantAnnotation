@@ -49,15 +49,6 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
         utr5 <- countOverlaps(queryAdj, fiveUTR, type="within") > 0
         utr3 <- countOverlaps(queryAdj, threeUTR, type="within") > 0
 
-
-        Location <- rep("unknown", length(queryHits))
-        Location[queryHits %in% which(intron)] <- "intron"
-        Location[queryHits %in% which(utr5)] <- "5'UTR"
-        Location[queryHits %in% which(utr3)] <- "3'UTR"
-        Location[queryHits %in% which(coding)] <- "coding"
-
-        dat1 <- DataFrame(queryHits=queryHits, txID, geneID, Location)
-
         ## intergenic :
         if (any(txCO == 0)) {
             intergenic <- txCO == 0
@@ -89,23 +80,28 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
             if (any(!isPreceding & isFirst)) 
                 p[!isPreceding & isFirst] <- "no preceding" 
 
-            flankGenes <- CharacterList(lapply(seq_len(length(p)), 
-                function(i, p, f) {
-                    c(p[i], f[i])
-                }, p=unlist(p), f=unlist(f))) 
-            dat2 <- DataFrame(
-                      queryHits=which(intergenic), 
-                      txID=rep(NA, length(which(intergenic))), 
-                      geneID=flankGenes, 
-                      Location=rep("intergenic", length(which(intergenic))))
+            ## assuming a transcript can fall in only 1 gene 
+            flankGenes <- CharacterList(data.frame(rbind(unlist(p), unlist(f))))
+            dat2 <- 
+              DataFrame(queryHits=which(intergenic), 
+                        txID=rep(NA, length(which(intergenic))), 
+                        geneID=flankGenes, 
+                        Location=rep("intergenic", length(which(intergenic))))
         } else {
-            dat2 <- DataFrame(queryHits=integer(), txID=character(), 
-                      geneID=CharacterList(), Location=character())
+            dat2 <- 
+              DataFrame(queryHits=integer(), txID=character(), 
+                        geneID=CharacterList(), Location=character())
         }
 
-       ans <- rbind(dat1, dat2)
-       ans$Location <- factor(ans$Location)
-       ans[order(ans$queryHits), ]
+        Location <- rep("unknown", length(queryHits))
+        Location[queryHits %in% which(intron)] <- "intron"
+        Location[queryHits %in% which(utr5)] <- "5'UTR"
+        Location[queryHits %in% which(utr3)] <- "3'UTR"
+        Location[queryHits %in% which(coding)] <- "coding"
+        dat1 <- DataFrame(queryHits=queryHits, txID, geneID, Location)
+        ans <- rbind(dat1, dat2)
+        ans$Location <- factor(ans$Location)
+        ans[order(ans$queryHits), ]
     }
 )
 

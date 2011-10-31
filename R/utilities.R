@@ -9,7 +9,8 @@
 
     ## rowdata
     lst <- as.list(vcf$ALT)
-    lstSplit <- sapply(lst, function(x) length(unlist(strsplit(x, ",", fixed=TRUE))))
+    lstSplit <- sapply(lst, function(x) {
+                  length(unlist(strsplit(x, ",", fixed=TRUE)))})
     lstSplit[lstSplit == 0] <- 1
     ref <- .toDNAStringSet(vcf$REF)
     alt <- DataFrame(.toDNAStringSet(vcf$ALT))
@@ -29,7 +30,7 @@
         colData <- DataFrame(Samples=seq_len(samples),
             row.names=sampleID)
     } else {
-    colData <- DataFrame(Samples=character(0))
+        colData <- DataFrame(Samples=character(0))
     }
 
     SummarizedExperiment(assays=geno, colData=colData, rowData=rowData)
