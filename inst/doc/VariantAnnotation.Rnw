@@ -321,22 +321,22 @@ databases and made available through the \Rcode{Bioconductor} packages
 \Rpackage{SIFT.Hsapiens.dbSNP132.db} and \Rpackage{PolyPhen.Hapiens.dbSNP131.db}.
 The packages are designed to be serached by rsid.
 
-<<SIFT_and_PP>>=
-library(SIFT.Hsapiens.dbSNP132)
-library(PolyPhen.Hsapiens.dbSNP131)
-
-## rsids in the package 
-head(keys(SIFT.Hsapiens.dbSNP132))
-
-## list available columns
-cols(SIFT.Hsapiens.dbSNP132)
-
-rsids <- c("rs2142947", "rs8692231", "rs3026284")
-subst <- c("RSID", "PREDICTION", "SCORE", "AACHANGE", "PROTEINID")
-select(SIFT.Hsapiens.dbSNP132, keys=rsids, cols=subst)
-
-select(PolyPhen.Hsapiens.dbSNP131, keys="rs3026284", 
-    cols=c("TRAININGSET", "PREDICTION", "PPH2PROB", "PPH2FPR", "PPH2FDR"))
+<<SIFT_and_PP, eval=FALSE>>=
+#library(SIFT.Hsapiens.dbSNP132)
+#library(PolyPhen.Hsapiens.dbSNP131)
+#
+### rsids in the package 
+#head(keys(SIFT.Hsapiens.dbSNP132))
+#
+### list available columns
+#cols(SIFT.Hsapiens.dbSNP132)
+#
+#rsids <- c("rs2142947", "rs8692231", "rs3026284")
+#subst <- c("RSID", "PREDICTION", "SCORE", "AACHANGE", "PROTEINID")
+#select(SIFT.Hsapiens.dbSNP132, keys=rsids, cols=subst)
+#
+#select(PolyPhen.Hsapiens.dbSNP131, keys="rs3026284", 
+#    cols=c("TRAININGSET", "PREDICTION", "PPH2PROB", "PPH2FPR", "PPH2FDR"))
 @
 
 Detailed column descriptions can be found at ?SIFTDbColumns and
