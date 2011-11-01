@@ -6,6 +6,7 @@ import(AnnotationDbi)
 
 #importClassesFrom(AnnotationDbi, AnnotationDb)
 #importMethodsFrom(AnnotationDbi, cols, keys, select)
+importMethodsFrom(AnnotationDbi, as.list)
 
 importClassesFrom(Biobase, ScalarCharacter)
 importFrom(Biobase, mkScalar, selectSome)
@@ -14,7 +15,7 @@ importClassesFrom(BSgenome, BSgenome)
 importClassesFrom(snpStats, SnpMatrix)
 
 importClassesFrom(GenomicFeatures, TranscriptDb)
-importMethodsFrom(GenomicFeatures, as.list, cdsBy, exons, transcripts,
+importMethodsFrom(GenomicFeatures, cdsBy, exons, transcripts,
                   fiveUTRsByTranscript, threeUTRsByTranscript,
                   isActiveSeq, "isActiveSeq<-")
 importFrom(GenomicFeatures, extractTranscriptsFromGenome)
