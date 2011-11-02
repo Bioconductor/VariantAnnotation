@@ -321,7 +321,7 @@ databases and made available through the \Rcode{Bioconductor} packages
 \Rpackage{SIFT.Hsapiens.dbSNP132.db} and \Rpackage{PolyPhen.Hapiens.dbSNP131.db}.
 The packages are designed to be serached by rsid.
 
-<<SIFT_and_PP, eval=FALSE>>=
+<<SIFT_and_PP>>=
 library(SIFT.Hsapiens.dbSNP132)
 library(PolyPhen.Hsapiens.dbSNP131)
 

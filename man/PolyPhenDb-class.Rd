@@ -104,33 +104,33 @@
 \author{Valerie Obenchain <vobencha@fhcrc.org>}
 
 \examples{
-#library(PolyPhen.Hsapiens.dbSNP131)
-#
-### metadata
-#metadata(PolyPhen.Hsapiens.dbSNP131)
-#
-### available rsid's 
-#head(keys(PolyPhen.Hsapiens.dbSNP131))
-#
-### column descriptions found at ?PolyPhenDbColumns
-#cols(PolyPhen.Hsapiens.dbSNP131)
-#
-### subset on keys and cols 
-#subst <- c("AA1", "AA2", "PREDICTION")
-#rsids <- c("rs2142947", "rs4995127", "rs3026284")
-#select(PolyPhen.Hsapiens.dbSNP131, keys=rsids, cols=subst)
-#
-### retrieve substitution scores 
-#subst <- c("IDPMAX", "IDPSNP", "IDQMIN")
-#select(PolyPhen.Hsapiens.dbSNP131, keys=rsids, cols=subst)
-#
-### retrieve the PolyPhen-2 classifiers 
-#subst <- c("PPH2CLASS", "PPH2PROB", "PPH2FPR", "PPH2TPR", "PPH2FDR")
-#select(PolyPhen.Hsapiens.dbSNP131, keys=rsids, cols=subst)
-#
-### duplicate groups of rsid's
-#duplicateRSID(PolyPhen.Hsapiens.dbSNP131, c("rs71225486", "rs1063796"))
-#
+library(PolyPhen.Hsapiens.dbSNP131)
+
+## metadata
+metadata(PolyPhen.Hsapiens.dbSNP131)
+
+## available rsid's 
+head(keys(PolyPhen.Hsapiens.dbSNP131))
+
+## column descriptions found at ?PolyPhenDbColumns
+cols(PolyPhen.Hsapiens.dbSNP131)
+
+## subset on keys and cols 
+subst <- c("AA1", "AA2", "PREDICTION")
+rsids <- c("rs2142947", "rs4995127", "rs3026284")
+select(PolyPhen.Hsapiens.dbSNP131, keys=rsids, cols=subst)
+
+## retrieve substitution scores 
+subst <- c("IDPMAX", "IDPSNP", "IDQMIN")
+select(PolyPhen.Hsapiens.dbSNP131, keys=rsids, cols=subst)
+
+## retrieve the PolyPhen-2 classifiers 
+subst <- c("PPH2CLASS", "PPH2PROB", "PPH2FPR", "PPH2TPR", "PPH2FDR")
+select(PolyPhen.Hsapiens.dbSNP131, keys=rsids, cols=subst)
+
+## duplicate groups of rsid's
+duplicateRSID(PolyPhen.Hsapiens.dbSNP131, c("rs71225486", "rs1063796"))
+
 }
 
 \keyword{classes}

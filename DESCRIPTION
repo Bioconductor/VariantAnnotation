@@ -14,5 +14,6 @@ Imports:     AnnotationDbi, Biobase, BSgenome, GenomicFeatures, IRanges (>= 1.11
              snpStats, DBI
 Suggests:    RUnit, BSgenome.Hsapiens.UCSC.hg18, TxDb.Hsapiens.UCSC.hg18.knownGene, 
              SNPlocs.Hsapiens.dbSNP.20090506, TxDb.Dmelanogaster.UCSC.dm3.ensGene, 
-             BSgenome.Dmelanogaster.UCSC.dm3
+             BSgenome.Dmelanogaster.UCSC.dm3, PolyPhen.Hsapiens.dbSNP131,
+             SIFT.Hsapiens.dbSNP132
 LazyLoad:    yes
