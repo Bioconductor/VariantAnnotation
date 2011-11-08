@@ -1,6 +1,7 @@
-.VcfToSummarizedExperiment <- function(vcf, ...)
+.VcfToSummarizedExperiment <- function(vcf, file, ...)
 {
     vcf <- vcf[[1]]
+
     ## assays
     if (length(vcf$GENO) > 0) {
        geno <- lapply(vcf$GENO, function(elt) {
@@ -23,13 +24,13 @@
     info <- data.frame(vcf$INFO) 
     if (is.null(names(vcf$INFO)))
         colnames(info) <- "INFO"
-    df <- DataFrame(REF=ref, ALT=NA, QUAL=vcf$QUAL, 
+    DF <- DataFrame(REF=ref, ALT=NA, QUAL=vcf$QUAL, 
                     FILTER=vcf$FILTER, data.frame(info))
-    df$ALT <- split(alt, rep(seq_len(length(lstSplit)), lstSplit))
+    DF$ALT <- split(alt, rep(seq_len(length(lstSplit)), lstSplit))
 
     rowData <- GRanges(Rle(vcf$CHROM), 
                        IRanges(start=vcf$POS, width=width(ref)))
-    values(rowData) <- df
+    values(rowData) <- DF 
     names(rowData) <- vcf$ID
 
     ## colData
@@ -42,7 +43,11 @@
         colData <- DataFrame(Samples=character(0))
     }
 
-    SummarizedExperiment(assays=geno, colData=colData, rowData=rowData)
+    ## exptData
+    header <- scanVcfHeader(file)[[1]][["Header"]]
+
+    SummarizedExperiment(assays=geno, exptData=SimpleList(HEADER=header),
+                         colData=colData, rowData=rowData)
 }
 
 .toDNAStringSet <- function(x)

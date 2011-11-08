@@ -50,6 +50,6 @@ setMethod(readVcf, c(file="character", param="ANY"),
         vcf <- unpackVcf(scanVcf(file), file)
     else
         vcf <- unpackVcf(scanVcf(file, param=param), file)
-    .VcfToSummarizedExperiment(vcf)
+    .VcfToSummarizedExperiment(vcf, file)
 }
 
