@@ -2,10 +2,16 @@
 {
     vcf <- vcf[[1]]
     ## assays
-    if (length(vcf$GENO) > 0)
-        geno <- vcf$GENO 
-    else
+    if (length(vcf$GENO) > 0) {
+       geno <- lapply(vcf$GENO, function(elt) {
+           if (is.list(elt))
+               matrix(unlist(elt, recursive=FALSE), ncol=1) 
+           else
+               elt
+       })
+    } else {
         geno <- list() 
+    }
 
     ## rowdata
     lst <- as.list(vcf$ALT)
@@ -14,8 +20,11 @@
     lstSplit[lstSplit == 0] <- 1
     ref <- .toDNAStringSet(vcf$REF)
     alt <- DataFrame(.toDNAStringSet(vcf$ALT))
+    info <- data.frame(vcf$INFO) 
+    if (is.null(names(vcf$INFO)))
+        colnames(info) <- "INFO"
     df <- DataFrame(REF=ref, ALT=NA, QUAL=vcf$QUAL, 
-                    FILTER=vcf$FILTER, data.frame(vcf$INFO))
+                    FILTER=vcf$FILTER, data.frame(info))
     df$ALT <- split(alt, rep(seq_len(length(lstSplit)), lstSplit))
 
     rowData <- GRanges(Rle(vcf$CHROM), 
