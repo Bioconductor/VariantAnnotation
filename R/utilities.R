@@ -20,14 +20,15 @@
                   length(unlist(strsplit(x, ",", fixed=TRUE)))})
     lstSplit[lstSplit == 0] <- 1
     ref <- .toDNAStringSet(vcf$REF)
-    alt <- DataFrame(.toDNAStringSet(vcf$ALT))
+    alt <- .toDNAStringSet(vcf$ALT)
     info <- data.frame(vcf$INFO) 
     if (is.null(names(vcf$INFO)))
         colnames(info) <- "INFO"
     DF <- DataFrame(REF=ref, ALT=NA, QUAL=vcf$QUAL, 
                     FILTER=vcf$FILTER, data.frame(info))
-    DF$ALT <- split(alt, rep(seq_len(length(lstSplit)), lstSplit))
-
+    pbw <- PartitioningByWidth(lstSplit)
+    DF$ALT <- new("DNAStringSetList", unlisted=alt,
+                  partitioning=PartitioningByEnd(end(pbw)))
     rowData <- GRanges(Rle(vcf$CHROM), 
                        IRanges(start=vcf$POS, width=width(ref)))
     values(rowData) <- DF 

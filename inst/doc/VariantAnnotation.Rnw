@@ -121,11 +121,14 @@ aligned to different locations for different assemblies. Each alignment is
 entered as a separate row in the \Rcode{singleSNP} object. 
 
 <<singleSNP>>=
-singleSNP <- GRanges(seqnames="chr16",
-        ranges=IRanges(start=c(23004226, 22316999, 24133766),
-               width=c(1,1,1)),
-        varAllele=DNAStringSet("T"),
-        comments=c("Celera assembly", "HuRef assembly", "reference assembly"))
+singleSNP <- GRanges(
+    seqnames="chr16",
+    ranges=IRanges(start=c(23004226, 22316999, 24133766),
+                   width=c(1,1,1)),
+                   varAllele=DNAStringSet("T"),
+                   comments=c("Celera assembly", "HuRef assembly", 
+                              "reference assembly")
+)
 
 singleSNP
 @

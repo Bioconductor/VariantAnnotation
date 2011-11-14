@@ -17,32 +17,30 @@ importClassesFrom(BSgenome, BSgenome)
 importClassesFrom(snpStats, SnpMatrix)
 
 importClassesFrom(GenomicFeatures, TranscriptDb)
-importMethodsFrom(GenomicFeatures, cdsBy, exons, transcripts,
-                  fiveUTRsByTranscript, threeUTRsByTranscript,
-                  isActiveSeq, "isActiveSeq<-")
+importMethodsFrom(
+    GenomicFeatures, cdsBy, exons, transcripts,
+    fiveUTRsByTranscript, threeUTRsByTranscript,
+    isActiveSeq, "isActiveSeq<-")
 importFrom(GenomicFeatures, extractTranscriptsFromGenome)
 
 importClassesFrom(IRanges, Ranges, RangesList, RangedData)
-importMethodsFrom(IRanges, "%in%", append, as.matrix, as.vector,
-                  countOverlaps, elementLengths, end, eval,
-                  findOverlaps, follow, gsub, lapply, match,
-                  "metadata<-", narrow, order, precede,
-                  queryHits, rev, Rle, runValue, sapply, shift,
-                  split, start, "start<-", subjectHits, "subseq<-",
-                  substring, unique, unlist, values, "values<-", which,
-                  width)
-importFrom(IRanges, CharacterList, DataFrame, IRanges,
-           PartitioningByWidth, successiveViews)
+importMethodsFrom(
+    IRanges, "%in%", append, as.matrix, as.vector,
+    countOverlaps, elementLengths, end, eval,
+    findOverlaps, follow, gsub, lapply, match,
+    "metadata<-", narrow, order, precede,
+    queryHits, rev, Rle, runValue, sapply, shift,
+    split, start, "start<-", subjectHits, "subseq<-",
+    substring, unique, unlist, values, "values<-", which,
+    width)
+importFrom(
+    IRanges, CharacterList, DataFrame, IRanges,
+    PartitioningByWidth, successiveViews)
 
-#importClassesFrom(Rsamtools, FaFile, TabixFile, ScanVcfParam)
-#importMethodsFrom(Rsamtools, scanBcf, ScanBcfParam, scanFaIndex,
-#                  scanTabix, headerTabix, scanVcf, unpackVcf, scanVcfHeader, 
-#                  ScanVcfParam)
-#importFrom(Rsamtools, bgzip, TabixFile, indexTabix)
-
-importMethodsFrom(DBI, dbCommit, dbConnect,
-                  dbDisconnect, dbExistsTable, dbGetQuery,
-                  dbReadTable, dbWriteTable, dbListTables, dbListFields)
+importMethodsFrom(
+    DBI, dbCommit, dbConnect,
+    dbDisconnect, dbExistsTable, dbGetQuery,
+    dbReadTable, dbWriteTable, dbListTables, dbListFields)
 
 exportClassPattern("^.*$")
 

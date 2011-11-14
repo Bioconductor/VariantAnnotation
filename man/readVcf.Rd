@@ -111,6 +111,9 @@ compressVcf <- bgzip(vcfFile, tempfile())
 idx <- indexTabix(compressVcf, "vcf")
 tab <- TabixFile(compressVcf, idx)
 vcf <- readVcf(tab, param=rngs)
+
+## vcf file header information
+exptData(vcf)$HEADER
 }
 
 
