@@ -11,7 +11,7 @@ biocViews:   DataImport, Sequencing, HighThroughputSequencing, SNP,
 Depends:     methods, R (>= 2.8.0), GenomicRanges, Biostrings, AnnotationDbi,
              Rsamtools
 Imports:     AnnotationDbi, Biobase, BSgenome, GenomicFeatures, IRanges (>= 1.11.17), 
-             snpStats, DBI
+             snpStats, DBI, BiocGenerics
 Suggests:    RUnit, BSgenome.Hsapiens.UCSC.hg18, TxDb.Hsapiens.UCSC.hg18.knownGene, 
              SNPlocs.Hsapiens.dbSNP.20090506, TxDb.Dmelanogaster.UCSC.dm3.ensGene, 
              BSgenome.Dmelanogaster.UCSC.dm3, PolyPhen.Hsapiens.dbSNP131,

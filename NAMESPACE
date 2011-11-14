@@ -4,6 +4,8 @@ import(GenomicRanges)
 import(Rsamtools)
 import(AnnotationDbi)
 
+importMethodsFrom(BiocGenerics, rbind, paste)
+
 #importClassesFrom(AnnotationDbi, AnnotationDb)
 #importMethodsFrom(AnnotationDbi, cols, keys, select)
 importMethodsFrom(AnnotationDbi, as.list)
@@ -24,8 +26,8 @@ importClassesFrom(IRanges, Ranges, RangesList, RangedData)
 importMethodsFrom(IRanges, "%in%", append, as.matrix, as.vector,
                   countOverlaps, elementLengths, end, eval,
                   findOverlaps, follow, gsub, lapply, match,
-                  "metadata<-", narrow, order, paste, precede,
-                  queryHits, rbind, rev, Rle, runValue, sapply, shift,
+                  "metadata<-", narrow, order, precede,
+                  queryHits, rev, Rle, runValue, sapply, shift,
                   split, start, "start<-", subjectHits, "subseq<-",
                   substring, unique, unlist, values, "values<-", which,
                   width)
