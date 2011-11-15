@@ -121,14 +121,11 @@ aligned to different locations for different assemblies. Each alignment is
 entered as a separate row in the \Rcode{singleSNP} object. 
 
 <<singleSNP>>=
-singleSNP <- GRanges(
-    seqnames="chr16",
-    ranges=IRanges(start=c(23004226, 22316999, 24133766),
-                   width=c(1,1,1)),
-                   varAllele=DNAStringSet("T"),
-                   comments=c("Celera assembly", "HuRef assembly", 
-                              "reference assembly")
-)
+singleSNP <- GRanges(seqnames="chr16",
+        ranges=IRanges(start=c(23004226, 22316999, 24133766),
+               width=c(1,1,1)),
+        varAllele=DNAStringSet("T"),
+        comments=c("Celera assembly", "HuRef assembly", "reference assembly"))
 
 singleSNP
 @
@@ -297,10 +294,46 @@ head <- headerTabix(tab)
 gr <- GRanges(seqnames="1",
               ranges=IRanges(start=0, end=100000))
 vcf <- readVcf(tab, param=gr)
-vcf
-names(assays(vcf)) 
-@ 
+@
 
+All data are parsed according to the header information in the VCF
+file. The header is stored as a \Rcode{SimpleList} in the 
+\Rcode{exptData} slot and can be viewed by querying the elements
+of the list.
+
+<<readVCF_show>>=
+vcf
+
+exptData(vcf)[["HEADER"]]
+
+exptData(vcf)[["HEADER"]][["META"]]
+@
+
+The eight required fields of the VCF file are parsed into a \Rcode{GRanges}
+object in the \Rcode{rowData} slot. The \Rcode{ALT} alleles are provided as 
+a \Rcode{DNAStringSetList} to accomodate for multiple values per variant. 
+All fields in the \Rcode{INFO} column are parsed into individual elementMetadata 
+columns.
+
+<< readVCF_rowData>>=
+exptData(vcf)[["HEADER"]][["FILTER"]]
+exptData(vcf)[["HEADER"]][["INFO"]]
+
+rowData(vcf)
+
+## ALT as a DNAStringSetList
+head(as.list(values(rowData(vcf))[["ALT"]]), 4)
+@
+
+The genotype data described in the \Rcode{FORMAT} fields are parsed into 
+matrices in the \Rcode{assays} slot.
+<<readVCF_assays>>=
+exptData(vcf)[["HEADER"]][["FORMAT"]]
+
+assays(vcf)
+
+head(assays(vcf)$GT)
+@
 
 \section{SIFT and PolyPhen Databases}
 

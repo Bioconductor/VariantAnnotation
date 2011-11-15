@@ -112,8 +112,21 @@ idx <- indexTabix(compressVcf, "vcf")
 tab <- TabixFile(compressVcf, idx)
 vcf <- readVcf(tab, param=rngs)
 
-## vcf file header information
-exptData(vcf)$HEADER
+## VCF header information 
+vcf
+exptData(vcf)[["HEADER"]]
+exptData(vcf)[["HEADER"]][["META"]]
+
+## the 8 required VCF fields are parsed into the rowData slot
+exptData(vcf)[["HEADER"]][["FILTER"]]
+exptData(vcf)[["HEADER"]][["INFO"]]
+rowData(vcf)
+
+## genotype data described in FORMAT are parsed into the assays slot 
+exptData(vcf)[["HEADER"]][["FORMAT"]]
+assays(vcf)
+head(assays(vcf)$GT)
+
 }
 
 
