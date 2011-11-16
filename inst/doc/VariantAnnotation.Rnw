@@ -311,7 +311,7 @@ exptData(vcf)[["HEADER"]][["META"]]
 
 The eight required fields of the VCF file are parsed into a \Rcode{GRanges}
 object in the \Rcode{rowData} slot. The \Rcode{ALT} alleles are provided as 
-a \Rcode{DNAStringSetList} to accomodate for multiple values per variant. 
+a \Rcode{DataFrameList} to accomodate for multiple values per variant. 
 All fields in the \Rcode{INFO} column are parsed into individual elementMetadata 
 columns.
 

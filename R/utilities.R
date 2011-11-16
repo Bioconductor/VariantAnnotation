@@ -16,21 +16,28 @@
 
     ## rowdata
     lst <- as.list(vcf$ALT)
-    lstSplit <- sapply(lst, function(x) {
-                  length(unlist(strsplit(x, ",", fixed=TRUE)))})
-    lstSplit[lstSplit == 0] <- 1
+    ismissing <- grep(".", lst, fixed=TRUE)
+    eltlen <- 
+        sapply(lst, function(x) {
+            length(unlist(strsplit(x, ",", fixed=TRUE)))
+        })
+    #eltlen[eltlen == 0] <- 1
+    eltsplit <- rep(seq_len(length(eltlen)), eltlen)
+
     ref <- .toDNAStringSet(vcf$REF)
-    alt <- .toDNAStringSet(vcf$ALT)
+    alt <- DataFrame(ALT=.toDNAStringSet(vcf$ALT))
+    altsplit <-  split(alt, eltsplit)
+    altsplit[[ismissing]] <- DataFrame() 
     info <- data.frame(vcf$INFO) 
     if (is.null(names(vcf$INFO)))
         colnames(info) <- "INFO"
     DF <- DataFrame(REF=ref, ALT=NA, QUAL=vcf$QUAL, 
                     FILTER=vcf$FILTER, data.frame(info))
-    pbw <- PartitioningByWidth(lstSplit)
-    DF$ALT <- new("DNAStringSetList", unlisted=alt,
-                  partitioning=PartitioningByEnd(end(pbw)))
+    DF$ALT <- altsplit 
+
     rowData <- GRanges(Rle(vcf$CHROM), 
-                       IRanges(start=vcf$POS, width=width(ref)))
+                       IRanges(start=vcf$POS, 
+                       width=width(ref)))
     values(rowData) <- DF 
     names(rowData) <- vcf$ID
 

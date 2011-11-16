@@ -5,7 +5,7 @@ test_readVcf <- function()
 {
     vcf <- readVcf(f1)
     checkIdentical(names(assays(vcf)), c("GT", "GQ", "DP"))
-    checkEquals(width(rowData(vcf)), width(values(rowData(vcf))[["REF"]])) 
-    checkEquals(length(unlist(values(rowData(vcf))[["ALT"]])), 18) 
+    checkEquals(width(rowData(vcf)), width(values(rowData(vcf))[["REF"]]))
+    checkEquals(sum(elementLengths(values(rowData(vcf))[["ALT"]])), 17) 
     checkEquals(scanVcf(f1)[[1]]$POS, start(rowData(vcf))) 
 }
