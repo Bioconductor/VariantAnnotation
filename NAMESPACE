@@ -4,7 +4,7 @@ import(GenomicRanges)
 import(Rsamtools)
 import(AnnotationDbi)
 
-importMethodsFrom(BiocGenerics, rbind, paste)
+importFrom(BiocGenerics, rbind, paste, order)
 
 #importClassesFrom(AnnotationDbi, AnnotationDb)
 #importMethodsFrom(AnnotationDbi, cols, keys, select)
