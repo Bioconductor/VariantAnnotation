@@ -27,7 +27,8 @@
     ref <- .toDNAStringSet(vcf$REF)
     alt <- DataFrame(ALT=.toDNAStringSet(vcf$ALT))
     altsplit <-  split(alt, eltsplit)
-    altsplit[[ismissing]] <- DataFrame() 
+    if (any(ismissing))
+        altsplit[[ismissing]] <- DataFrame() 
     info <- data.frame(vcf$INFO) 
     if (is.null(names(vcf$INFO)))
         colnames(info) <- "INFO"
