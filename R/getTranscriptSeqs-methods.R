@@ -18,10 +18,11 @@ setMethod("getTranscriptSeqs",  c("GRangesList", "FaFile"),
 
         ## back to GRanges for getSeq method 
         widthEL <- elementLengths(query)
-        gr <- GRanges(seqnames=Rle(txlist$chrom, widthEL), 
-                      ranges=IRanges(start=unlist(txlist$exonStarts), 
-                                     end=unlist(txlist$exonEnds)), 
-                      strand=Rle(txlist$strand, widthEL))
+        gr <- GRanges(
+                seqnames=Rle(txlist$chrom, widthEL), 
+                ranges=IRanges(start=unlist(txlist$exonStarts), 
+                               end=unlist(txlist$exonEnds)), 
+                strand=Rle(txlist$strand, widthEL))
 
         seqs <- callGeneric(gr, subject, ...)
         oneseq <- unlist(seqs)

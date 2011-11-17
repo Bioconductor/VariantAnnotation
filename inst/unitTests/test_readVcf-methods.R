@@ -1,11 +1,29 @@
 f1 <- system.file("extdata", "ex1.vcf", package="VariantAnnotation")
 f2 <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
 
-test_readVcf <- function()
+test_ranges <- function()
 {
     vcf <- readVcf(f1)
-    checkIdentical(names(assays(vcf)), c("GT", "GQ", "DP"))
     checkEquals(width(rowData(vcf)), width(values(rowData(vcf))[["REF"]]))
-    checkEquals(sum(elementLengths(values(rowData(vcf))[["ALT"]])), 17) 
     checkEquals(scanVcf(f1)[[1]]$POS, start(rowData(vcf))) 
+}
+
+test_header <- function()
+{
+    vcf <- readVcf(f2)
+    checkTrue(all(rownames(exptData(vcf)[["HEADER"]][["FORMAT"]]) %in% 
+              names(assays(vcf)))) 
+    checkTrue(all(rownames(exptData(vcf)[["HEADER"]][["INFO"]]) %in% 
+              names(values(rowData(vcf))))) 
+}
+
+test_accessors <- function()
+{
+    vcf <- readVcf(f1)
+    checkTrue(class(vcf) == "SummarizedExperiment")
+    checkTrue(class(rowData(vcf)) == "GRanges")
+    checkTrue(class(assays(vcf)) == "SimpleList")
+    checkTrue(class(exptData(vcf)) == "SimpleList")
+    checkTrue(class(colData(vcf)) == "DataFrame")
+    checkEquals(sum(elementLengths(values(rowData(vcf))[["ALT"]])), 17) 
 }

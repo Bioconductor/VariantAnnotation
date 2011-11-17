@@ -6,7 +6,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
     function(query, subject, ...)
     {
         chrom <- seqlevels(query)
-        isActiveSeq(subject)[!names(isActiveSeq(subject)) %in% chrom] <- FALSE 
+        #isActiveSeq(subject)[!names(isActiveSeq(subject)) %in% chrom] <- FALSE 
         tx <- transcripts(subject, columns=c("exon_id", "tx_id", "gene_id"))
         cdsByTx <- cdsBy(subject)
 
@@ -27,10 +27,10 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
         if (sum(txCO) == 0) {
             return(
               DataFrame(queryHits=seq_len(length(query)),
-                        txID=character(length(query)),
-                        geneID=CharacterList(character(length(query))),
-                        Location=factor(rep("unknown", length(query))))
-            )
+                txID=character(length(query)),
+                geneID=CharacterList(character(length(query))),
+                Location=factor(rep("unknown", length(query))))
+           )
         }
 
         queryHits <- queryHits(txFO)
@@ -52,12 +52,23 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
         ## intergenic :
         if (any(txCO == 0)) {
             intergenic <- txCO == 0
-            intvar <- queryAdj[txCO == 0]
-            geneWidth <- width(values(tx)[["gene_id"]]@partitioning) 
+            geneWidth <- elementLengths(values(tx)[["gene_id"]]) 
             txWithGeneID <- tx[geneWidth != 0]
             genes <- values(txWithGeneID)[["gene_id"]]
 
-            nearestIdx <- nearest(intvar, txWithGeneID)
+            ## variants with no nearest gene
+            intvar <- queryAdj[txCO == 0]
+            nst <- nearest(intvar, txWithGeneID)
+            if (any(is.na(nst))) {
+                nonearestIdx <- which(intergenic == TRUE)[is.na(nst)] 
+                nonearest <- rep(FALSE, length(intergenic))
+                nonearest[nonearestIdx] <- TRUE
+                intergenic[nonearestIdx] <- FALSE
+                intvar <- queryAdj[intergenic == TRUE] 
+                nearestIdx <- nearest(intvar, txWithGeneID)
+            } else {
+                nearestIdx <- nearest(intvar, txWithGeneID)
+            }
             isPreceding <- (end(txWithGeneID[nearestIdx]) - start(intvar)) < 0
             isFirst <- nearestIdx == 1
             isLast <- nearestIdx == length(txWithGeneID) 
@@ -82,15 +93,26 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
 
             ## assuming a transcript can fall in only 1 gene 
             flankGenes <- CharacterList(data.frame(rbind(unlist(p), unlist(f))))
-            dat2 <- 
-              DataFrame(queryHits=which(intergenic), 
-                        txID=rep(NA, length(which(intergenic))), 
-                        geneID=flankGenes, 
-                        Location=rep("intergenic", length(which(intergenic))))
+
+            queryhits <- which(intergenic)
+            txid <- rep(NA, length(which(intergenic)))
+            geneid <- flankGenes
+            location <- rep("intergenic", length(which(intergenic)))
+            if (any(is.na(nst))) {
+                queryhits <- c(queryhits, which(nonearest))
+                txid <- c(txid, rep(NA, length(which(nonearest))))
+                geneid <- c(flankGenes, 
+                    CharacterList(as.list(rep(NA, length(which(nonearest)))))) 
+                location <- c(location, rep("noGeneMatch",
+                    length(which(nonearest))))
+            }
+            dat2 <- DataFrame(
+                      queryHits=queryhits, txID=txid, geneID=geneid, 
+                      Location=location)
         } else {
-            dat2 <- 
-              DataFrame(queryHits=integer(), txID=character(), 
-                        geneID=CharacterList(), Location=character())
+            dat2 <- DataFrame(
+                      queryHits=integer(), txID=character(), 
+                      geneID=CharacterList(), Location=character())
         }
 
         Location <- rep("unknown", length(queryHits))

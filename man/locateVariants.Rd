@@ -64,7 +64,6 @@
 
 \examples{
   library(TxDb.Hsapiens.UCSC.hg18.knownGene)
-  library(BSgenome.Hsapiens.UCSC.hg18)
   data(variants)
  
   txdb <- TxDb.Hsapiens.UCSC.hg18.knownGene 

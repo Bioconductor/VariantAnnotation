@@ -51,10 +51,12 @@ setMethod("predictCoding", signature(query="GRanges", subject="GRangesList",
  
         fo <- findOverlaps(queryAdj, subject, type = "within")
         if (length(fo) == 0)
-        return(DataFrame(queryHits=character(0), txID=character(0),
-               refSeq=DNAStringSet(), varSeq=DNAStringSet(), 
-               refAA=AAStringSet(), varAA=AAStringSet(), 
-               Consequence=character(0))) 
+        return(
+            DataFrame(
+              queryHits=character(0), txID=character(0),
+              refSeq=DNAStringSet(), varSeq=DNAStringSet(), 
+              refAA=AAStringSet(), varAA=AAStringSet(), 
+              Consequence=character(0))) 
 
         subject <- subject[unique(subjectHits(fo))]
         txSeqs <- getTranscriptSeqs(subject, seqSource)

@@ -84,7 +84,8 @@ regionFilter(txdb, region="coding", .name="regionFilter")
   filter.
 
   \code{dbSNPFilter} selects elements present in the specified dbSNP
-   package 
+   package. This filter identifies ranges of width = 1 in the \code{GRanges} 
+   input that overlap with locations in the dbSNP package.
 
   \code{regionFilter} selects elements present in the region specified.
 }

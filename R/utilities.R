@@ -32,22 +32,25 @@
     info <- data.frame(vcf$INFO) 
     if (is.null(names(vcf$INFO)))
         colnames(info) <- "INFO"
-    DF <- DataFrame(REF=ref, ALT=NA, QUAL=vcf$QUAL, 
-                    FILTER=vcf$FILTER, data.frame(info))
-    DF$ALT <- altsplit 
 
-    rowData <- GRanges(Rle(vcf$CHROM), 
-                       IRanges(start=vcf$POS, 
-                       width=width(ref)))
-    values(rowData) <- DF 
+    meta <- DataFrame(
+            REF=ref, ALT=NA, QUAL=vcf$QUAL, 
+            FILTER=vcf$FILTER, data.frame(info))
+    meta$ALT <- altsplit 
+
+    rowData <- GRanges(
+                 seqnames=Rle(vcf$CHROM), 
+                 ranges=IRanges(start=vcf$POS, width=width(ref)))
+    values(rowData) <- meta 
     names(rowData) <- vcf$ID
 
     ## colData
     if (length(vcf$GENO) > 0) {
         sampleID <- colnames(vcf$GENO[[1]]) 
         samples <- length(sampleID) 
-        colData <- DataFrame(Samples=seq_len(samples),
-            row.names=sampleID)
+        colData <- DataFrame(
+                     Samples=seq_len(samples),
+                     row.names=sampleID)
     } else {
         colData <- DataFrame(Samples=character(0))
     }
@@ -55,8 +58,9 @@
     ## exptData
     header <- scanVcfHeader(file)[[1]][["Header"]]
 
-    SummarizedExperiment(assays=geno, exptData=SimpleList(HEADER=header),
-                         colData=colData, rowData=rowData)
+    SummarizedExperiment(
+      assays=geno, exptData=SimpleList(HEADER=header),
+      colData=colData, rowData=rowData)
 }
 
 .toDNAStringSet <- function(x)

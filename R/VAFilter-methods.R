@@ -55,8 +55,7 @@ dbSNPFilter <-
         .idx <- logical(length(x))
         index <- seq_len(length(x))
         values(x) <- append(values(x), DataFrame(index))
-        #snps <- x[width(values(x)[["refAllele"]]) &
-        snps <- x[width(x) & width(values(x)[["varAllele"]]) == 1]
+        snps <- x[width(x) == 1]
         chroms <- names(getSNPcount())[names(getSNPcount()) %in%
             runValue(seqnames(snps))]
 

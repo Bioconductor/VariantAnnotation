@@ -39,6 +39,25 @@
 options(width=72)
 @
 
+
+start <- c(22599537, 22599537,  24829521, 38483171, 45954278, 38483907)
+comments <- c("exact", "exact", "exact", "deletion", "exact", "deletion")
+rsid <- c("rs1320","rs1320", "rs4530", "rs132924", "rs2731", "rs132925")
+varalleles <- DNAStringSet("G", "A", "T", "CCCATGACA", "G", "")
+wdth <- c(1,1,1,1,1,0)
+
+rs132925, -, 38483907, deletion 
+rs1320, G, 22599537, exact
+rs1320, A, 22599537, exact  
+rs4530, T, 24829521, exact
+rs132924, CCCATGACA ,38483171, deletion
+rs2731, G, 45954278, exact
+
+gr <- GRanges(seqnames="chr22", IRanges(start=start, width=wdth), 
+              rsid=rsid, comments=comments)
+
+
+
 \section{Introduction}
 In this vignette we introduce methods in the \VariantAnnotation package for the 
 annotation and filtering of genetic variants. Variant locatation with respect 
