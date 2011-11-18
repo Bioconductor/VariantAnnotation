@@ -1,28 +1,47 @@
 \name{VAFilter-class}
 \docType{class}
+
+% Class:
 \alias{VAFilter-class}
+\alias{class:VAFilter}
+\alias{VAFilter}
+
+% Constructors:
 \alias{vaFilter,VAFilter-method}
-\alias{name}
+\alias{vaFilter,missing-method}
+\alias{vaFilter,function-method}
+\alias{vaFilter}
+\alias{dbSNPFilter}
+\alias{regionFilter}
+\alias{compose}
+
+% Other methods:
 \alias{name,VAFilter-method}
+\alias{name}
 \alias{show,VAFilter-method}
 
-\alias{c,VAFilter-method}
-\alias{coerce,VAFilter,FilterRules-method}
 
-\title{"VAFilter" for representing functions operating on genetic variants}
+\title{VAFilter objects}
 
 \description{
-  Objects of this class are functions that operate on
-  \code{\linkS4class{GRanges}} objects containing genetic variants.
-  They return logical vectors indicating which parts of the object satisfy 
-  the filter criterion and statistics describing the number of records that 
-  passed the filter.
-
+  Objects of the \code{VAFilter} class are functions for filtering variants.
+  A \code{VAFilter} instance applied to a \code{\linkS4class{GRanges}}
+  returns either a subset of the records that passed the filter or a 
+  \code{\linkS4class{VAFilterResult}} object. The \code{VAFilterResult} is a
+  logical vector indicating which records passed the filter and contains
+  summary statistics on the records that passed.
 }
 
-\section{Objects from the Class}{
-  Objects are created through calls to constructors for predefined
-  filters, as described on the \code{\link{vaFilter}} page.
+\details{
+  A \code{VAFilter} is constructed by using one of the built-in filters, 
+  \code{dbSNPFilter} or \code{regionFilter}, or a user can create their 
+  own with \code{vaFilter}. Once the filter is created it can be applied to a
+  \code{\linkS4class{GRanges}} object. The format of the output is dictated by 
+  the optional\code{subset} argument. If \code{subset=TRUE} (the default) a 
+  \code{\linkS4class{GRanges}} is returned containing only the records that 
+  passed the filter. If \code{subset=FALSE} a \code{\linkS4class{VAFilterResult}} 
+  object is returned. This object contains a logical vector indicating which 
+  records passed the filter and summary statistics on the records that passed.
 }
 
 \section{Slots}{
@@ -42,34 +61,124 @@
   }
 }
 
-\section{Methods}{
+\section{Constructors}{
+  Built-in filters :
   \describe{
-
-    \item{vaFilter}{\code{signature(fun = "VAFilter")}: Return the function
-      representing the underlying filter; this is primarily for
-      interactive use to understanding filter function; usually the
-      filter is invoked as a normal function call
+    \item{}{
+      \code{dbSNPFilter(dbSNP=character(0), name="dbSNPFilter")}:
+      Overlaps the records with a range width of 1 with snp locations in the 
+      specified SNPlocs package.
     }
-
-    \item{name}{\code{signature(x = "VAFilter")}: Return, as a
-      \code{ScalarCharacter}, the name of the function.
+    \item{}{
+      \code{regionFilter(txdb, region="coding", name="regionFilter")}:
+      Records will be filtered by the name of the region supplied. Possible
+      regions are the same as those in the \code{Location} output from
+      \code{locateVariants}: `coding', `intronic', `3UTR', `5UTR', `intergenic',
+      `noGeneMatch' and `unknown'. This regions is specified when calling the
+      filter on a \code{\linkS4class{GRanges}} object. 
     }
-
-    \item{show}{\code{signature(object = "VAFilter")}: display a brief
-      summary of the filter
+  }
+  Combining filters :
+  \describe{
+    \item{}{
+      \code{compose(filt, ..., .name)}:
+      The \code{compose} function constructs a new filter from one or more 
+      existing filters. The result is a filter that returns records that pass 
+      the criteria for all filters. If a name is not provided for the filter, a
+      name will be constructed by joining the names of all component filters
+      separated by \code{" o "}.
     }
-
+  }
+  User defined filters :
+  A user can construct their own filter using the \code{vaFilter} function. The
+  \code{fun} argument must be a function accepting a single argument \code{x}
+  and returning a logical vector indicating which records passed the filter.
+  \describe{
+    \item{}{
+      \code{vaFilter(fun="VAFilter", name=NA_character_, ...)}:
+      Returns the function representing the underlying filter. This is primarily 
+      for viewing the filter function.
+    }
+    \item{}{
+      \code{vaFilter(fun="missing", name=NA_character_, ...)}:
+      Creates a default filter that returns a vector of \code{TRUE} values with 
+      length equal to \code{length(x)}.
+    }
   }
 }
 
-\author{Valerie Obenchain}
+\section{Other Methods}{
+  \describe{
+    \item{name}{\code{signature(x = "VAFilter")}: Return, as a
+      \code{ScalarCharacter}, the name of the function.
+    }
+    \item{show}{\code{signature(object = "VAFilter")}: display a brief
+      summary of the filter
+    }
+  }
+}
+
+\arguments{
+  \item{fun}{An object of class \code{function} to be used as a
+    filter. \code{fun} must accept a single named argument \code{x}, and
+    is expected to return a logical vector such that \code{x[fun(x)]}
+    selects only those elements of \code{x} satisfying the conditions of
+    \code{fun}
+  }
+  \item{name}{A \code{character(1)} object to be used as the name of the
+    filter.  The \code{name} is useful for debugging and reference.
+  }
+  \item{filt}{A \code{\linkS4class{VAFilter}} object, to be used with
+    additional arguments to create a composite filter.
+  }
+  \item{.name}{An optional \code{character(1)} object used to over-ride
+    the name applied to default filters.
+  }
+  \item{dbSNP}{The \code{character(0)} name of the dbSNP package
+    to be used. The default (\code{character(0)})
+    performs no filtering
+  }
+  \item{txdb}{The \link[GenomicFeatures]{TranscriptDb} object used
+    to identifying gene regions.
+  }
+  \item{region}{A \code{character(1)} object specifying the region
+    on which to filter the results. Possible values are `coding',
+    `intron', `3UTR', `5UTR', `intergenic', `noGeneMatch' and
+    `unknown'. See ?\code{locateVariants} for regions descriptions.
+  }
+  \item{\dots}{Additional arguments to methods.
+  }
+}
+
+
+
+
+\author{Valerie Obenchain <vobencha@fhcrc.org>}
 
 \seealso{
-  \code{\link{vaFilter}} for predefined filters.
+  \code{\link{VAFilterResult}}
 }
 
 \examples{
-## see ?vaFilter
+  data(variants)
+
+  ## Create a filter that will identify variants present in dbSNP : 
+  snpFilt <- dbSNPFilter("SNPlocs.Hsapiens.dbSNP.20090506")
+  ## Apply the filter and control the output :
+  ## Optional subset argument is TRUE (default) 
+  snpFilt(variants)
+  ## Optional subset argument is FALSE 
+  snpFilt(variants, subset=FALSE)
+ 
+  ## Create a filter to select only records in 3'UTR : 
+  library(TxDb.Hsapiens.UCSC.hg18.knownGene)
+  txdb <- TxDb.Hsapiens.UCSC.hg18.knownGene
+  regionFilt <- regionFilter(txdb, region="3UTR")
+  regionFilt(variants, subset=FALSE)
+
+  ## Create and apply a combination filter :
+  comboFilt <- compose(snpFilt, regionFilt)
+  comboFilt(variants)
 }
 
 \keyword{classes}

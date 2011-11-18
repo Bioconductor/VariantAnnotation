@@ -23,7 +23,7 @@ setGeneric("vaFilter", signature = "fun",
            standardGeneric("vaFilter")
 )
 
-setGeneric("readVcf", signature = c("file", "param"),
-           function(file, ..., param)
+setGeneric("readVcf", signature = c("file", "genome", "param"),
+           function(file, genome, ..., param)
            standardGeneric("readVcf")
 )

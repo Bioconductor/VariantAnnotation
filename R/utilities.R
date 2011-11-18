@@ -1,4 +1,4 @@
-.VcfToSummarizedExperiment <- function(vcf, file, ...)
+.VcfToSummarizedExperiment <- function(vcf, file, genome, ...)
 {
     vcf <- vcf[[1]]
 
@@ -43,6 +43,7 @@
                  ranges=IRanges(start=vcf$POS, width=width(ref)))
     values(rowData) <- meta 
     names(rowData) <- vcf$ID
+    genome(seqinfo(rowData)) <- genome
 
     ## colData
     if (length(vcf$GENO) > 0) {

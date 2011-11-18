@@ -1,5 +1,6 @@
 \name{VAFilterResult-class}
 \docType{class}
+
 \alias{VAFilterResult-class}
 \alias{VAFilterResult}
 \alias{Logic,VAFilterResult,VAFilterResult-method}
@@ -12,25 +13,22 @@
 \title{"VAFilterResult" for VAFilter output and statistics}
 
 \description{
-
   Objects of this class are logical vectors indicating records passing
   the applied filter, with an associated data frame summarizing the
   name, input number of records, records passing filter, and logical
   operation used for all filters in which the result participated.
-  
 }
 
 \usage{
-VAFilterResult(data = GRanges(), x = logical(), name = NA_character_, 
+  VAFilterResult(data = GRanges(), x = logical(), name = NA_character_, 
    subset = TRUE, input = length(x), passing = sum(x), op = NA_character_)
-\S4method{Logic}{VAFilterResult,VAFilterResult}(e1, e2)
-\S4method{name}{VAFilterResult}(x, ...)
-stats(x, ...)
-\S4method{show}{VAFilterResult}(object)
+  \S4method{Logic}{VAFilterResult,VAFilterResult}(e1, e2)
+  \S4method{name}{VAFilterResult}(x, ...)
+  stats(x, ...)
+  \S4method{show}{VAFilterResult}(object)
 }
 
 \arguments{
-
   \item{data}{A \code{linkS4class{GRanges}} of the data to be filtered.
   }
   \item{x, object, e1, e2}{For \code{VAFilterResult}, \code{logical()}
@@ -61,15 +59,12 @@ stats(x, ...)
   \item{\dots}{Additional arguments, unused in methods documented on this
     page.
   }
-
 }
 
 \section{Objects from the Class}{
- 
   Objects can be created through \code{\link{VAFilterResult}}, but these
   are automatically created by the application of \code{\link{vaFilter}}
   instances.
-
 }
 
 \section{Slots}{
@@ -90,7 +85,6 @@ stats(x, ...)
       logical operation used for all filters in which the result
       participated. The \code{data.frame} rows correspond either to
       single filters, or to logical combinations of filters.}
-
   }
 }
 
@@ -112,17 +106,15 @@ stats(x, ...)
 
     \item{show}{\code{signature(object = "VAFilterResult")}: summary of
       filter results.}
-
   }
-
 }
 
-\author{Valerie Obenchain}
+\author{Valerie Obenchain <vobencha@fhcrc.org>}
 
-\seealso{\code{\link{vaFilter}}}
+\seealso{\code{\link{VAFilter}}}
 
 \examples{
-## see ?vaFilter
+## see ?VAFilter
 }
 
 \keyword{classes}

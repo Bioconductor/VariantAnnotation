@@ -2,54 +2,54 @@
 ### readVcf methods 
 ### =========================================================================
 
-setMethod(readVcf, c(file="TabixFile", param="RangesList"),
-    function(file, ..., param)
+setMethod(readVcf, c(file="TabixFile", genome="character", param="RangesList"),
+    function(file, genome, ..., param)
 {
-    .readVcf(file, param=param)
+    .readVcf(file, genome, param=param)
 })
 
-setMethod(readVcf, c(file="TabixFile", param="RangedData"),
-    function(file, ..., param)
+setMethod(readVcf, c(file="TabixFile", genome="character", param="RangedData"),
+    function(file, genome, ..., param)
 {
-    .readVcf(file, param=param)
+    .readVcf(file, genome, param=param)
 })
 
-setMethod(readVcf, c(file="TabixFile", param="GRanges"),
-    function(file, ..., param)
+setMethod(readVcf, c(file="TabixFile", genome="character", param="GRanges"),
+    function(file, genome, ..., param)
 {
-    .readVcf(file, param=param)
+    .readVcf(file, genome, param=param)
 })
 
-setMethod(readVcf, c(file="TabixFile", param="ScanVcfParam"), 
-    function(file, ..., param)
+setMethod(readVcf, c(file="TabixFile", genome="character", param="ScanVcfParam"), 
+    function(file, genome, ..., param)
 {
-    .readVcf(file, param=param)
+    .readVcf(file, genome, param=param)
 })
 
-setMethod(readVcf, c(file="TabixFile", param="missing"), 
-    function(file, ..., param)
+setMethod(readVcf, c(file="TabixFile", genome="character", param="missing"), 
+    function(file, genome, ..., param)
 {
-    .readVcf(file)
+    .readVcf(file, genome)
 })
 
-setMethod(readVcf, c(file="character", param="missing"),
-    function(file, ..., param)
+setMethod(readVcf, c(file="character", genome="character", param="missing"),
+    function(file, genome, ..., param)
 {
-    .readVcf(file)
+    .readVcf(file, genome)
 })
 
-setMethod(readVcf, c(file="character", param="ANY"),
-    function(file, ..., param)
+setMethod(readVcf, c(file="character", genome="character", param="ANY"),
+    function(file, genome, ..., param)
 {
-    .readVcf(file, param=param)
+    .readVcf(file, genome, param=param)
 })
 
-.readVcf <- function(file, ..., param)
+.readVcf <- function(file, genome, ..., param)
 {
     if (missing(param))
         vcf <- unpackVcf(scanVcf(file), file)
     else
         vcf <- unpackVcf(scanVcf(file, param=param), file)
-    .VcfToSummarizedExperiment(vcf, file)
+    .VcfToSummarizedExperiment(vcf, file, genome)
 }
 

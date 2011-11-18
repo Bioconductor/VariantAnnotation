@@ -312,7 +312,7 @@ head <- headerTabix(tab)
 ## select ranges with param 
 gr <- GRanges(seqnames="1",
               ranges=IRanges(start=0, end=100000))
-vcf <- readVcf(tab, param=gr)
+vcf <- readVcf(file=tab, genome="hg18", param=gr)
 @
 
 All data are parsed according to the header information in the VCF

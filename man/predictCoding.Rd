@@ -17,60 +17,61 @@
 }
 
 \arguments{
-  \item{query}{A \link{Ranges} or \link{GRanges} instance 
-    containing the variants to be annotated. If a \link[IRanges]{Ranges}
-    instance is provided it will be coerced to a \link{GRanges}.
-  }
-  \item{subject}{A \link{GRangesList} or a \link[GenomicFeatures]{TranscriptDb} 
-    instance. 
+  \item{query}{A \link{Ranges} or \link{GRanges} instance containing the 
+    variants to be annotated. If a \link[IRanges]{Ranges} is provided it will be 
+    coerced to a \link{GRanges}.
 
-    When \code{subject} is provided as a \link{GRangesList} 
-    it is assumed that it was created with the 'cdsBy' function 
-    on a \link[GenomicFeatures]{TranscriptDb}. If \code{subject} is a 
-    \link[GenomicFeatures]{TranscriptDb}, the coding
-    regions will be identified using the 'cdsBy' function on this object. 
+    A single elementMetadata column containing the variant alleles is required.
+    Others are ignored. 
+  }
+  \item{subject}{A \link{GRangesList} or a \link[GenomicFeatures]{TranscriptDb}. 
+
+    When \code{subject} is provided as a \link{GRangesList} it is assumed that
+    the outer list elements define coding regions and the individual elements
+    are ranges within that coding region. This object can be created with the 
+    'cdsBy' function on a \link[GenomicFeatures]{TranscriptDb}.
   } 
   \item{seqSource}{A \code{\link[BSgenome]{BSgenome}} instance or an \link{FaFile}
     to be used for sequence extraction.
   }
-  \item{varAllele}{A character representing the name of 
-    the column in \code{query} that contains the variant alleles. The
-    data in the column should be a \link[Biostrings]{DNAStringSet}. Insertions and
-    deletions are represented by a missing value.
+  \item{varAllele}{The character name of the elementMetadata column in 
+    \code{query} that contains the variant alleles. These data should be a 
+    \link[Biostrings]{DNAStringSet}. Deletions are represented by an empty
+    sequence of width 0.
   }
-  \item{\dots}{Additional arguments
+  \item{\dots}{Additional arguments passed to methods.
   }
 }
 
 \details{
-  Reference sequences are extracted from fasta files or a 
-  \link[BSgenome]{BSgenome} based on the ranges specified in the
-  \code{query}. Variant alleles provided in the \code{varAllele} argument
-  are substituted into the reference sequences and transcribed. Variant
-  sequences are transcribed only if the substitution, insertion or deletion 
-  results in a new sequence length divisible by 3. 
+  This function identifies the variants in coding regions and retrieves
+  the reference sequences from a fasta file or \link[BSgenome]{BSgenome}.
+  Alleles provided in the \code{varAllele} column are substituted into the 
+  reference sequences and transcribed. Variant sequences are transcribed only 
+  if the substitution, insertion or deletion results in a new sequence length 
+  divisible by 3. 
 } 
 
 \value{
-  A \link[IRanges]{DataFrame} of variants that fall within a coding 
-  region. Each row represents a variant-transcript match. 
-  If a variant matched multiple transcripts, multiple rows are returned for
-  the variant. 
+  A \link[IRanges]{DataFrame} with a row for each variant-transcript 
+  match. This includes only variants that fell in a coding regions.
 
-  Columns include \code{queryHits}, \code{txID}, \code{refSeq}, \code{varSeq}, 
-  \code{refAA}, \code{varAA}, \code{Consequence}, and any metadata that was 
-  present in the \code{subject}. \code{queryHits} provides a map to the variants 
-  in the original \code{query}. \code{refSeq} and \code{varSeq} contain the reference 
+  Columns include \code{queryHits}, \code{txID}, \code{refSeq}, 
+  \code{varSeq}, \code{refAA}, \code{varAA}, \code{Consequence}, and any 
+  metadata that was present in the \code{subject}. 
+
+  The \code{queryHits} column provides a map back to the variants in the 
+  original \code{query}. \code{refSeq} and \code{varSeq} contain the reference 
   and variant-modified DNA sequences. Reference and variant amino acid codes are
-  provided in \code{refAA} and \code{varAA}. Variant sequences are transcribed only if the 
-  substitution, insertion or deletion results in a new sequence length divisible 
-  by 3. When a sequence is not transcribed the \code{varAA} column is empty and the 
-  variant is classified as a frameshift in the \code{Consequence} column. Possible 
-  values for \code{Consequence} are synonymous, nonsynonymous, or frameshift. See 
-  the vignette for more details. 
+  provided in \code{refAA} and \code{varAA}. 
+
+  Possible values for the \code{Consequence} column are `synonymous',
+  `nonsynonymous', or `frameshift'. Variant sequences are transcribed only if they
+  are divisible by 3. When a sequence is not transcribed the \code{varAA} column 
+  will be empty and the \code{Consequence} will be a `frameshift'. 
 }
 
-\author{Michael Lawrence and Valerie Obenchain}
+\author{Michael Lawrence and Valerie Obenchain <vobencha@fhcrc.org>}
 
 \seealso{
   \link{locateVariants}
@@ -85,8 +86,6 @@
   txdb <- TxDb.Hsapiens.UCSC.hg18.knownGene 
   aaCoding <- predictCoding(variants, txdb, seqSource=Hsapiens,
       varAllele="varAllele")
-
-  # TODO : example for fasta
 }
 
 \keyword{methods}
