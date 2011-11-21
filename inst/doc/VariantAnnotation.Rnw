@@ -39,145 +39,141 @@
 options(width=72)
 @
 
-
-start <- c(22599537, 22599537,  24829521, 38483171, 45954278, 38483907)
-comments <- c("exact", "exact", "exact", "deletion", "exact", "deletion")
-rsid <- c("rs1320","rs1320", "rs4530", "rs132924", "rs2731", "rs132925")
-varalleles <- DNAStringSet("G", "A", "T", "CCCATGACA", "G", "")
-wdth <- c(1,1,1,1,1,0)
-
-rs132925, -, 38483907, deletion 
-rs1320, G, 22599537, exact
-rs1320, A, 22599537, exact  
-rs4530, T, 24829521, exact
-rs132924, CCCATGACA ,38483171, deletion
-rs2731, G, 45954278, exact
-
-gr <- GRanges(seqnames="chr22", IRanges(start=start, width=wdth), 
-              rsid=rsid, comments=comments)
-
-
-
 \section{Introduction}
-In this vignette we introduce methods in the \VariantAnnotation package for the 
-annotation and filtering of genetic variants. Variant locatation with respect 
-to gene function can be determined as well as the amino acid coding changes for 
-nonsynonymous variants. \Rpackage{VariantAnnotation} contains functions to
-access the SIFT and PolyPhen databases packages. The SIFT and PolyPhen methods
-predict the possible impact of amino acid coding changes on protein function 
-(SIFT) or function and structure (PolyPhen).
+In this vignette we demonstrate a general workflow for annotating and
+filtering genetic variants using the \VariantAnnotation  package. The sample
+data is in a Variant Call Format (VCF) file which is read in and parsed it into a
+\Rfunction{SummarizedExperiment} object. We determine if the variants
+fall in a coding, UTR, intron or intergenic region and compute the amino
+acid coding changes for the nonsynonymous variants. By querying the SIFT and 
+PolyPhen database packages we obtain predictions for the impact the amino acid 
+coding changes may have on protein function (SIFT) or on function and structure
+(PolyPhen). Filtering functions are available for subsetting the variants on 
+physical location in the gene or membership in dbSNP. 
 
-To assist with data access and managment the \Rfunction{readVcf} function 
-parses data from Variant Call Format (VCF) files into a 
-\Rclass{summarizedExperiment} object. Filtering functions are available for 
-subsetting of variants on physical location in the gene or membership in dbSNP. 
+\section{Variant Call Format (VCF) files}
+Our sample data are a subset of 1000 variants and 50 samples from chromosome 22
+downloaded from the 1000 Genomes web site,
+\url{ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20110521/}.
+If no \Robject{param} argument is supplied to \Rfunction{readVcf} the entire
+file is read in.
 
-
-\section{Variant Location}
-As sample data we use the \Robject{GRanges} object, \Robject{variants},
-that contains both real and faux variants. The ranges in \Robject{variants} 
-represent the positions in the reference sequence that are altered in the
-variation. A single basepair replacement (SNP) has equal start and end 
-positions and a width of length 1. A deletion or substitution will have a 
-width of 1 or greater depending on the number of basepairs being deleted 
-or substituted. Insertions are represented with start = end + 1 which 
-results in a width of length 0. 
-
-Reference and variant alleles are represented as \Robject{DNAStringSet}s
-in \Robject{refAllele} and \Robject{varAllele} columns. An insertion 
-will have a missing value in the \Robject{refAllele} column and a deletion
-will have a missing value in the \Robject{varAllele} column.
- 
-<<data>>=
+<<readVCF>>=
 library(VariantAnnotation)
-data(variants)
-head(variants)
+vcffile <- system.file("extdata", "chr22.vcf.gz", package="VariantAnnotation")
+vcf <- readVcf(vcffile, "hg19")
 @
 
-\Rfunction{locateVariants} returns a \Robject{DataFrame} with one row for each 
+To read in a subset of data we specify a \Rcode{GRanges} of the desired ranges 
+as the \Rcode{param}. To access a subset of ranges the VCF file must have an 
+accompying Tabix index file. See ?\Rcode{indexTabix} for help creating an index 
+file.
+
+<<readVCF_subset, eval=FALSE>>=
+rngs <- GRanges(seqnames="16", ranges=IRanges(start=0, end=1e07))
+vcf_16 <- readVcf(vcffile, "hg19", param=rngs)
+@
+
+The data are parsed into a \Rcode{SummarizedExperiment} according to the header 
+information in the VCF file. The header is stored as a \Rcode{SimpleList} in the 
+\Rcode{exptData} slot and can be viewed by querying the elements
+of the list.
+
+<<readVCF_show>>=
+vcf
+exptData(vcf)[["HEADER"]]
+exptData(vcf)[["HEADER"]][["META"]]
+@
+
+The eight required fields of the VCF file are parsed into a \Rcode{GRanges}
+object in the \Rcode{rowData} slot. The \Rcode{ALT} alleles are provided as 
+a \Rcode{DNAStringSet} inside a \Rcode{DataFrameList}. 
+
+<<readVCF_rowData>>=
+head(exptData(vcf)[["HEADER"]][["INFO"]], 3)
+rowData(vcf)[1:3,1:4]
+@
+
+The genotype data described in the \Rcode{FORMAT} fields are parsed into 
+matrices in the \Rcode{assays} slot.
+<<readVCF_assays>>=
+exptData(vcf)[["HEADER"]][["FORMAT"]]
+assays(vcf)
+assays(vcf)$GT[1:6,1:5]
+@
+
+\section{Location of variants with respect to gene function}
+The \Rcode{locateVariants} function matches the ranges in a \Robject{GRanges}
+query with the coding, intron and UTR regions in a \Robject{TranscriptDb}
+subject. Metadata columns may be present in the \Robject{GRanges} but they are
+ignored.
+
+As input to this function we use the \Robject{GRanges} object from the 
+\Rcode{rowData} slot in our \Robject{SummarizedExperiment}. Variants 
+coming from other sources will need to be put into a \Robject{GRanges} object.
+\Rcode{seqlevels} in the \Robject{GRanges} must be adjusted if they do not
+match those in the \Robject{TranscriptDb}.
+
+<<location>>=
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+txdb19 <- TxDb.Hsapiens.UCSC.hg19.knownGene 
+
+## adjust seqlevels to match the txdb19
+rd <- rowData(vcf)
+seqlevels(rd) <- paste("chr", seqlevels(rd), sep="")
+
+loc <- locateVariants(rd, txdb19)
+head(loc)
+@
+
+The return object is a \Robject{DataFrame} with one row for each 
 variant-transcript match. The queryHits column maps back to the variant
 in the original query. Location categories of `coding', `UTR5', `UTR3', `intron' 
 and `intergenic' are assigned based on the criteria in Table 
 \ref{table:location}. Intergenic variants have two gene ID's, representing the 
 genes preceding and following the variant. 
 
-<<location>>=
-library(TxDb.Hsapiens.UCSC.hg18.knownGene)
-txdb <- TxDb.Hsapiens.UCSC.hg18.knownGene 
-loc <- locateVariants(variants, txdb)
-head(loc)
-@
-
 \begin{table}[ht]
 \begin{center}
-\begin{tabular}{c|l}
+\begin{tabular}{l|l}
 \hline
 Region & Details \\
 \hline
 coding &  variant falls \emph{within} a coding region \\
-%splicing & * & variant is within 2-bp of a splicing junction \\
-%ncRNA & 2 & variant overlaps a transcript without coding annotation in the gene
-%definition \\
 UTR5 &  variant falls \emph{within} a 5' untranslated region \\
 UTR3 &  variant falls \emph{within} a 3' untranslated region \\
-intron &  variant falls \emph{within} a transcript but not
-\emph{within} a coding region \\
-%upstream & 5 &  variant overlaps 1-kb region upstream of transcription start
-%site \\
-%downstream & 5 & variant overlaps 1-kb region downtream of transcription end
-%site \\
-intergenic & variant does not fall \emph{within} a transcript \\
+intron &  variant falls \emph{within} a transcript but not \emph{within} a 
+coding region \\
+intergenic & variant does not fall \emph{within} a transcript but does have
+a nearest gene match\\
+transcript\_region & variant falls \emph{within} a transcript but does not 
+fall \emph{within} a specified region\\
+NA & variant does not fall \emph{within} a transcript and has no
+nearest gene match \\
+NA & variant is on a chromosome present in \Robject{query} but not in the 
+\Robject{subject}\\
 \hline
 \end{tabular}
 \end{center}
-\caption{Variant Location}
+\caption{Location of variants with respect to genes}
 \label{table:location}
 \end{table}
 
-Multiple alignments for a single variant should be separate rows in the 
-\Rcode{query} object. Below is an example snp from dbSNP Build 130 which is 
-aligned to different locations for different assemblies. Each alignment is 
-entered as a separate row in the \Rcode{singleSNP} object. 
-
-<<singleSNP>>=
-singleSNP <- GRanges(seqnames="chr16",
-        ranges=IRanges(start=c(23004226, 22316999, 24133766),
-               width=c(1,1,1)),
-        varAllele=DNAStringSet("T"),
-        comments=c("Celera assembly", "HuRef assembly", "reference assembly"))
-
-singleSNP
+<<explore_locateVariants>>=
+table(loc$Location)
 @
 
-The result from \Rfunction{locateVariants} shows the Celera assembly location 
-matching two transcripts in the same gene, both intron regions. The HuRef assembly 
-falls in an intergenic region. The reference assembly hits two different 
-transcripts in the same gene, both in the 3' UTR region. 
-\begin{verbatim}
-> locateVariants(singleSNP, txdb)
-DataFrame with 5 rows and 4 columns
-  queryHits        txID                    geneID    Location
-  <integer> <character> <CompressedCharacterList> <character>
-1         1       52091                     57478      intron
-2         1       52092                     57478      intron
-3         2          NA                1039,57478  intergenic
-4         3       50256                      5579       3'UTR
-5         3       50259                      5579       3'UTR
-\end{verbatim}
+\section{Amino acid coding changes}
 
-\section{Amino Acid Coding}
-
-Amino acid coding changes can be determined for non-synonymous variants with 
-\Rfunction{predictCoding}. This function identifies overlaps between the 
-variants in \Robject{query} and the coding regions of a \Robject{TranscriptDb} 
-object. Sequences for the reference codons are retrieved from either a 
-\Robject{BSgenome} or fasta file. Codon sequences for the variants are
-constructed by substituting, inserting or deleting the \Robject{varAllele} 
-values into the reference sequence. Amino acid codes are computed for the 
-resulting variant codon sequence when the length is a multiple of 3. Examples 
-of various coding situations are shown in Table \ref{table:aacoding}. Positions 
-of substitution, insertion or deletion in Table \ref{table:aacoding} are purely 
-random and were chosen for example purposes only.
+\Rfunction{predictCoding} provides amino acid coding changes for non-synonymous 
+variants. This function identifies overlaps between the variants in 
+\Robject{query} and the coding regions of a \Robject{TranscriptDb} object. 
+Sequences for the reference codons are retrieved from either a \Robject{BSgenome} 
+or fasta file. Codon sequences for the variants are constructed by substituting, 
+inserting or deleting the values in the \Robject{varAllele} column into the 
+reference sequence. Amino acid codes are computed for the resulting variant codon 
+sequence when the length is a multiple of 3. Examples of various coding 
+situations are shown in Table \ref{table:aacoding}. 
 
 \begin{table}[ht]
 \begin{center}
@@ -195,59 +191,77 @@ deletion & GGCCTA & `' & acggcctaa & aca & yes\\
 \hline
 \end{tabular}
 \end{center}
-\caption{Amino Acid Coding}
+\caption{Amino acid coding changes}
 \label{table:aacoding}
 \end{table}
 
-Variants that fall within coding regions are in chromosomes 1, 2 and 16. We 
-subset the \Robject{GRanges} of coding regions by transcripts to retain only 
-the chromosomes of interest. Alternatively one could use the full 
-\Robject{TranscriptDb}.
+Either a \Robject{TranscriptDb} or a \Robject{GRangesList} can be provided as 
+the \Rcode{subject}. Because this function is concerned with coding regions 
+only if a \Robject{GRangesList} is supplied it is assumed the outer list 
+elements define coding regions and the individual elements fall within that coding 
+region. When a \Robject{TranscriptDb} is supplied the approprate 
+\Robject{GRangesList} is created by calling the \Rfunction{cdsBy} function
+behind the scenes.
+
+In keeping with our VCF example we again use the \Robject{GRanges} from
+the \Rcode{rowData} slot as our \Robject{query} input. The one additional
+pieces of information \Rfunction{predictCoding} requires is the variant
+(or alternate) allele. The ALT column in the \Rcode{GRanges} is compressed
+because each variant may have >1 alternate allele. We flatten the 
+\Rcode{GRanges} to create one row for each alternate variant-alternate allele 
+pair.
+
+<<flatten>>=
+rdflat <- rep(rd, elementLengths(values(rd)[["ALT"]]))
+values(rdflat) <- unlist(values(rd)[["ALT"]])
+@
+
+We use a \Robject{BSgenome} as our sequence source but could have also used
+an appropriate fasta file.
 
 <<aacoding>>=
-library(BSgenome.Hsapiens.UCSC.hg18)
-cdsByTx <- cdsBy(txdb)
-grl <- keepSeqlevels(cdsByTx, c("chr1", "chr2", "chr16"))
-
-aaCoding <- predictCoding(variants, grl, seqSource=Hsapiens,
-    varAllele="varAllele")
-head(aaCoding)
+library(BSgenome.Hsapiens.UCSC.hg19)
+aacoding <- predictCoding(
+              query=rdflat, 
+              subject=txdb19, 
+              seqSource=Hsapiens, 
+              varAllele="ALT")
+head(aacoding)
 @
 
-The result is a \Robject{DataFrame} containing only the variants in coding 
-regions. Columns include queryHits, txID, refSeq, varSeq, refAA, varAA, 
-Consequence and any metadata columns that were present in the \Robject{subject}. 
+The result is a \Robject{DataFrame} with one row for each variant-transcript
+match. Only variants that fell in coding regions are included. Columns include 
+queryHits, txID, refSeq, varSeq, refAA, varAA, Consequence and any metadata 
+columns that were present in the \Robject{subject}. 
 
-The result has one row for each transcript matched by a variant. The queryHits 
-column is the map back to the variants in the original \Robject{query}. Multiple
-rows are returned for variants that match multiple transcripts. For example, the 
-variant in the sixth row of \Robject{variants} fell within a coding region and 
-matched four transcripts. The first four rows of the aaCoding result are the 
-data for this variant.
+The queryHits column is the map back to the variants in the original 
+\Robject{query}. The Consequence column indicates `synonymous' or 
+`nonsynonymous' for variants for which the codons could be translated. 
+If translation was not possible the Consequence was considered a 
+`frameshift'. Variants for which no amino acid codes were computed have 
+a missing in value in the varAA column. 
 
-The Consequence column indicates `synonymous' or `nonsynonymous' for 
-variants for which the codons could be translated. If translation was not 
-possible the Consequence was considered a `frameshift'. Variants for which no 
-amino acid codes were computed have a missing in value in the varAA column. 
 <<aacodingResultOneVariant>>= 
-aaCoding[width(aaCoding$varAA) == 0,] 
+head(aacoding[width(aacoding$varAA) == 0,], 3)
 @
-
 
 \section{Filtering}
 
-Identifying subsets of variants that meet a specific criteria can be 
-accomplished using the \Rfunction{dbSNPfilter} or \Rfunction{regionFilter}
-functions. Filters are created with the appropriate reference object 
-such as a \Robject{SNPlocs} or \Robject{TranscriptDb} object. 
+Often it is useful to identify subsets of variants that meet a specific 
+criteria. There are currently two built-in filters available in
+\Rpackage{VariantAnnotation}. The \Rfunction{dbSNPfilter} checks for membership 
+in dbSNP and \Rfunction{regionFilter} filters variants based on the locations 
+identified with\Rfunction{locateVariants}. Filters are created with the 
+appropriate reference object such as a \Robject{SNPlocs} or 
+\Robject{TranscriptDb} object. 
 
 <<createFilters>>=
-library("SNPlocs.Hsapiens.dbSNP.20090506")
 ## create filter to identify variants present in dbSNP 
-snpFilt <- dbSNPFilter("SNPlocs.Hsapiens.dbSNP.20090506")
+library("SNPlocs.Hsapiens.dbSNP.20110815")
+snpFilt <- dbSNPFilter("SNPlocs.Hsapiens.dbSNP.20110815")
 
 ## create filter to identify variants present in introns 
-regionFilt <- regionFilter(txdb, region="intron")
+regionFilt <- regionFilter(txdb19, region="intron")
 regionFilt
 @
 
@@ -255,130 +269,72 @@ When filtering data with \Rfunction{dbSNPFilter} or \Rfunction{regionsFilt} two
 options are available for the return object. If the argument \Rcode{subset=TRUE}
 (default) a \Robject{GRanges} is returned that contains only the records that
 passed the filter. If \Rcode{subset=FALSE}, the result is a 
-\Robject{VAFilterResult} object. This object contains a logical vector indicating 
-which records passed the filter and some stats on the number of records removed
-and what filter was applied. 
+\Robject{VAFilterResult} object. This object contains a logical vector 
+indicating which records passed the filter and some statistics on the number of 
+records removed and what filter was applied. 
 
+First we return the subset of variants that are in dbSNP. Again, the variant 
+seqlevels need to be adjusted to match the seqlevels of the annotation.
 <<filtering>>=
 ## return the subset of records that passed the filter
-snpResult <- snpFilt(variants)
-snpResult 
-metadata(snpResult)
+rd <- rowData(vcf)
+seqlevels(rd) <- paste("ch", seqlevels(rd), sep="")
+dbsnp <- snpFilt(rd)
+summary(dbsnp) 
+metadata(dbsnp)
 
 ## return a VAFilterResult object
-snpFilt(variants, subset=FALSE)
+snpFilt(rd, subset=FALSE)
 @
 
-Filters can be combined to act in unison,
+Next we identify the variants that fall in an intron region.
 \begin{verbatim}
-# return a subset of data passing both filters
-> combofilt <- compose(snpFilt, regionFilt)
-> combofilt(variants)
-region= intron 
-GRanges with 2 ranges and 3 elementMetadata values
-    seqnames                 ranges strand |      refAllele      varAllele
-       <Rle>              <IRanges>  <Rle> | <DNAStringSet> <DNAStringSet>
-[1]     chr1 [161003087, 161003087]      * |              C              T
-[2]     chr1 [ 84647761,  84647761]      * |              C              T
-          comments
-       <character>
-[1] rs1000050, SNP
-[2]  rs6576700 SNP
-
-seqlengths
-  chr1 chr13 chr16  chr2
-    NA    NA    NA    NA
+> rd <- rowData(vcf)
+> seqlevels(rd) <- paste("chr", seqlevels(rd), sep="")
+> intron <- regionFilt(rd)
+> summary(intron)
+ Length   Class    Mode 
+    712 GRanges      S4 
 \end{verbatim}
-
-
-\section{Variant Call Format (VCF) files}
-
-The \Rcode{readVcf} function reads VCF files and parses them into a 
-\Rcode{SummarizedExperiment} object. When the compressed VCF file has a tabix 
-file index a \Robject{GRanges} can be used to specify a subset of ranges.
-The sample VCF in \Rcode{VariantAnnotation} is not compressed so in this example 
-we compress on the fly, create a tabix index and retrieve a subset of ranges.
-
-<<readVCF>>=
-## compress vcf file , create index
-vcfFile <- system.file("extdata", "ex1.vcf", package="VariantAnnotation")
-from <- vcfFile
-to <- tempfile()
-compressVcf <- bgzip(from, to)
-idx <- indexTabix(compressVcf, "vcf")
-tab <- TabixFile(compressVcf, idx)
-head <- headerTabix(tab)
-
-## select ranges with param 
-gr <- GRanges(seqnames="1",
-              ranges=IRanges(start=0, end=100000))
-vcf <- readVcf(file=tab, genome="hg18", param=gr)
-@
-
-All data are parsed according to the header information in the VCF
-file. The header is stored as a \Rcode{SimpleList} in the 
-\Rcode{exptData} slot and can be viewed by querying the elements
-of the list.
-
-<<readVCF_show>>=
-vcf
-
-exptData(vcf)[["HEADER"]]
-
-exptData(vcf)[["HEADER"]][["META"]]
-@
-
-The eight required fields of the VCF file are parsed into a \Rcode{GRanges}
-object in the \Rcode{rowData} slot. The \Rcode{ALT} alleles are provided as 
-a \Rcode{DataFrameList} to accomodate for multiple values per variant. 
-All fields in the \Rcode{INFO} column are parsed into individual elementMetadata 
-columns.
-
-<< readVCF_rowData>>=
-exptData(vcf)[["HEADER"]][["FILTER"]]
-exptData(vcf)[["HEADER"]][["INFO"]]
-
-rowData(vcf)
-
-## ALT as a DNAStringSetList
-head(as.list(values(rowData(vcf))[["ALT"]]), 4)
-@
-
-The genotype data described in the \Rcode{FORMAT} fields are parsed into 
-matrices in the \Rcode{assays} slot.
-<<readVCF_assays>>=
-exptData(vcf)[["HEADER"]][["FORMAT"]]
-
-assays(vcf)
-
-head(assays(vcf)$GT)
-@
 
 \section{SIFT and PolyPhen Databases}
 
-SIFT (Sorting Intolerant From Tolerant) and PolyPhen (Polymorphism Phenotyping)
-are methods for predicting the impact of amino acid substitution on a human 
+From \Rfunction{predictCoding} we identified the amino acid coding 
+changes for the non-synonymous variants. For this subset of variants we
+now retrieve predictions of how dammaging these coding changes may be. SIFT 
+(Sorting Intolerant From Tolerant) and PolyPhen (Polymorphism Phenotyping)
+are methods that predict the impact of amino acid substitution on a human 
 protein. The SIFT method uses sequence homology and the physical properties of 
 amino acids to make predictions about protein function. PolyPhen uses sequence-
 based features and structural information characterizing the substitution to 
-make predicitons about the structure and function of the protein. 
-\noindent
-Both methods offer interactive tools and documentation on their web sites,
-
-\noindent
-\url{http://sift.bii.a-star.edu.sg/}
-\noindent
-\url{http://genetics.bwh.harvard.edu/pph2/}
+make predictions about the structure and function of the protein. 
 
 Collated predictions for specific dbSNP builds are available as downloads from 
-the SIFT and PolyPhen web sites. These results have been stored as sqlite
-databases and made available through the \Rcode{Bioconductor} packages 
-\Rpackage{SIFT.Hsapiens.dbSNP132.db} and \Rpackage{PolyPhen.Hapiens.dbSNP131.db}.
-The packages are designed to be serached by rsid.
+the SIFT and PolyPhen web sites. These results have been packaged in the 
+\Rcode{Bioconductor} packages \Rpackage{SIFT.Hsapiens.dbSNP132.db} and 
+\Rpackage{PolyPhen.Hapiens.dbSNP131.db}. The packages are designed to be 
+searched by rsid so we get that information first.
 
-<<SIFT_and_PP>>=
+<<nonsynonymous>>=
+nonsyn <- unique(aacoding$queryHits[aacoding$Consequence == "nonsynonymous"])
+nonsyn
+@
+
+We subset the original query on the non-synonymous variants and obtain the 
+rsids.
+<<rsids>>=
+nms <- names(rd[nonsyn])
+## remove non-rsids 
+rsids <- nms[grep("rs", nms, fixed=TRUE)]
+@
+
+%% Maybe a FIXME?
+Detailed descriptions of the database columns can be found with
+\Rcode{?SIFTDbColumns} and \Rcode{?PolyPhenDbColumns}. Because of the large 
+number of columns the results will often vary in just one column.
+When viewing a subset of the columns they may look identical. 
+<<sift>>=
 library(SIFT.Hsapiens.dbSNP132)
-library(PolyPhen.Hsapiens.dbSNP131)
 
 ## rsids in the package 
 head(keys(SIFT.Hsapiens.dbSNP132))
@@ -386,17 +342,19 @@ head(keys(SIFT.Hsapiens.dbSNP132))
 ## list available columns
 cols(SIFT.Hsapiens.dbSNP132)
 
-rsids <- c("rs2142947", "rs8692231", "rs3026284")
-subst <- c("RSID", "PREDICTION", "SCORE", "AACHANGE", "PROTEINID")
-select(SIFT.Hsapiens.dbSNP132, keys=rsids, cols=subst)
-
-select(PolyPhen.Hsapiens.dbSNP131, keys="rs3026284", 
-    cols=c("TRAININGSET", "PREDICTION", "PPH2PROB", "PPH2FPR", "PPH2FDR"))
+#subst <- c("RSID", "PREDICTION", "SCORE", "AACHANGE", "PROTEINID")
+#sift <- select(SIFT.Hsapiens.dbSNP132, keys=rsids, cols=subst)
+#head(sift)
 @
 
-Detailed column descriptions can be found at ?SIFTDbColumns and
-?PolyPhenDbColumns.
-
+Now we take a look at the PolyPhen predictions for the same variants
+and a subset of columns
+<<polyphen>>=
+library(PolyPhen.Hsapiens.dbSNP131)
+#ppp <- select(PolyPhen.Hsapiens.dbSNP131, keys=rsids, 
+#         cols=c("TRAININGSET", "PREDICTION", "PPH2PROB", "PPH2FPR", "PPH2FDR"))
+#head(pp)
+@
 
 \section{References}
 Wang K, Li M, Hakonarson H, (2010), ANNOVAR: functional annotation of genetic 
@@ -406,6 +364,10 @@ No. 16, e164.\\
 \noindent McLaren W, Pritchard B, RiosD, et. al., (2010), Deriving the consequences of
 genomic variants with the Ensembl API and SNP Effect Predictor. Bioinformatics,
 Vol. 26, No. 16, 2069-2070.
+\noindent SIFT home page :
+\url{http://sift.bii.a-star.edu.sg/}
+\noindent PolyPhen home page :
+\url{http://genetics.bwh.harvard.edu/pph2/}
 
 \section{Session Information}
 <<sessionInfo, echo=FALSE>>=

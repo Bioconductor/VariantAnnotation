@@ -1,7 +1,7 @@
 \name{readVcf}
 \alias{readVcf}
-\alias{readVcf,character,character,missing-method}
 \alias{readVcf,character,character,ANY-method}
+\alias{readVcf,character,character,missing-method}
 \alias{readVcf,TabixFile,character,GRanges-method}
 \alias{readVcf,TabixFile,character,RangedData-method}
 \alias{readVcf,TabixFile,character,RangesList-method}
@@ -108,7 +108,7 @@
 
 \examples{
   vcfFile <- system.file("extdata", "ex1.vcf", package="VariantAnnotation") 
-  vcf <- readVcf(vcfFile, "hg18")
+  vcf <- readVcf(vcfFile, "hg19")
   names(assays(vcf))
 
   ## Explore the header information 
@@ -134,7 +134,7 @@
   tab <- TabixFile(compressVcf, idx)
   ## Define a subset of ranges and read them in
   rngs <- GRanges(seqnames="1", ranges=IRanges(start=0, end=100000))
-  vcf <- readVcf(tab, "hg18", param=rngs)
+  vcf <- readVcf(tab, "hg19", param=rngs)
 }
 
 \keyword{manip}

@@ -52,10 +52,11 @@ dbSNPFilter <-
     #.check_type_and_length(regex, "character", 0:1)
     require(dbSNP, quietly=TRUE, character.only=TRUE)
     vaFilter(function(x) {
-        .idx <- logical(length(x))
-        index <- seq_len(length(x))
-        values(x) <- append(values(x), DataFrame(index))
         snps <- x[width(x) == 1]
+        values(snps) <- NULL 
+        .idx <- logical(length(snps))
+        index <- seq_len(length(snps))
+        values(snps) <- append(values(snps), DataFrame(index))
         chroms <- names(getSNPcount())[names(getSNPcount()) %in%
             runValue(seqnames(snps))]
 

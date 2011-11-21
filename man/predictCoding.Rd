@@ -79,12 +79,12 @@
 }
 
 \examples{
-  library(TxDb.Hsapiens.UCSC.hg18.knownGene)
-  library(BSgenome.Hsapiens.UCSC.hg18)
+  library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+  library(BSgenome.Hsapiens.UCSC.hg19)
  
   data(variants)
-  txdb <- TxDb.Hsapiens.UCSC.hg18.knownGene 
-  aaCoding <- predictCoding(variants, txdb, seqSource=Hsapiens,
+  txdb19 <- TxDb.Hsapiens.UCSC.hg19.knownGene 
+  aaCoding <- predictCoding(variants, txdb19, seqSource=Hsapiens,
       varAllele="varAllele")
 }
 

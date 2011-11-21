@@ -49,7 +49,7 @@
 \examples{
   ## import vcf file to SummarizedExperiment
   vcfFile <- system.file("extdata", "ex1.vcf", package="VariantAnnotation") 
-  se <- readVcf(vcfFile, "hg18")
+  se <- readVcf(vcfFile, "hg19")
   
   ## genotype calls are stored in the assays slot
   assays(se)

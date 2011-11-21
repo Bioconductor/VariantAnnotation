@@ -51,10 +51,10 @@
 }
 
 \examples{
-  library(TxDb.Hsapiens.UCSC.hg18.knownGene)
-  library(BSgenome.Hsapiens.UCSC.hg18)
+  library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+  library(BSgenome.Hsapiens.UCSC.hg19)
  
-  txdb <- TxDb.Hsapiens.UCSC.hg18.knownGene 
+  txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene 
   cdsByTx <- cdsBy(txdb)
   chr20 <- keepSeqlevels(cdsByTx, "chr20")
 

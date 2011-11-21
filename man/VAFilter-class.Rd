@@ -150,9 +150,6 @@
   }
 }
 
-
-
-
 \author{Valerie Obenchain <vobencha@fhcrc.org>}
 
 \seealso{
@@ -163,7 +160,7 @@
   data(variants)
 
   ## Create a filter that will identify variants present in dbSNP : 
-  snpFilt <- dbSNPFilter("SNPlocs.Hsapiens.dbSNP.20090506")
+  snpFilt <- dbSNPFilter("SNPlocs.Hsapiens.dbSNP.20110815")
   ## Apply the filter and control the output :
   ## Optional subset argument is TRUE (default) 
   snpFilt(variants)
@@ -171,9 +168,9 @@
   snpFilt(variants, subset=FALSE)
  
   ## Create a filter to select only records in 3'UTR : 
-  library(TxDb.Hsapiens.UCSC.hg18.knownGene)
-  txdb <- TxDb.Hsapiens.UCSC.hg18.knownGene
-  regionFilt <- regionFilter(txdb, region="3UTR")
+  library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+  txdb19 <- TxDb.Hsapiens.UCSC.hg19.knownGene
+  regionFilt <- regionFilter(txdb19, region="3UTR")
   regionFilt(variants, subset=FALSE)
 
   ## Create and apply a combination filter :

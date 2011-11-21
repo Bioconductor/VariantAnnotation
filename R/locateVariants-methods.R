@@ -24,30 +24,35 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
         txFO <- findOverlaps(queryAdj, tx, type="within")
         cdsCO <- tabulate(queryHits(cdsFO), length(query))
         txCO <- tabulate(queryHits(txFO), length(query))
+
         if (sum(txCO) == 0) {
-            return(
-              DataFrame(queryHits=seq_len(length(query)),
-                txID=character(length(query)),
-                geneID=CharacterList(character(length(query))),
-                Location=factor(rep("unknown", length(query))))
-           )
-        }
+            dat1 <- DataFrame(
+                      queryHits=integer(), txID=character(), 
+                      geneID=CharacterList(), Location=character())
+        } else {
+            queryHits <- queryHits(txFO)
+            txID <- values(tx)["tx_id"][subjectHits(txFO),]
+            geneID <- values(tx)[["gene_id"]][subjectHits(txFO)]
 
-        queryHits <- queryHits(txFO)
-        txID <- names(cdsByTx)[subjectHits(txFO)]
-        geneID <- values(tx)[["gene_id"]][subjectHits(txFO)]
+            ## coding :
+            coding <- cdsCO > 0 
 
-        ## coding :
-        coding <- cdsCO > 0 
+            ## intron :
+            intron <- txCO != 0 & cdsCO == 0
 
-        ## intron :
-        intron <- txCO != 0 & cdsCO == 0
+            ## UTRs :
+            fiveUTR <- fiveUTRsByTranscript(subject)
+            threeUTR <- threeUTRsByTranscript(subject)
+            utr5 <- countOverlaps(queryAdj, fiveUTR, type="within") > 0
+            utr3 <- countOverlaps(queryAdj, threeUTR, type="within") > 0
 
-        ## UTRs :
-        fiveUTR <- fiveUTRsByTranscript(subject)
-        threeUTR <- threeUTRsByTranscript(subject)
-        utr5 <- countOverlaps(queryAdj, fiveUTR, type="within") > 0
-        utr3 <- countOverlaps(queryAdj, threeUTR, type="within") > 0
+            Location <- rep("transcript_region", length(queryHits))
+            Location[queryHits %in% which(intron)] <- "intron"
+            Location[queryHits %in% which(utr5)] <- "5'UTR"
+            Location[queryHits %in% which(utr3)] <- "3'UTR"
+            Location[queryHits %in% which(coding)] <- "coding"
+            dat1 <- DataFrame(queryHits=queryHits, txID, geneID, Location)
+        } 
 
         ## intergenic :
         if (any(txCO == 0)) {
@@ -69,6 +74,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
             } else {
                 nearestIdx <- nearest(intvar, txWithGeneID)
             }
+
             isPreceding <- (end(txWithGeneID[nearestIdx]) - start(intvar)) < 0
             isFirst <- nearestIdx == 1
             isLast <- nearestIdx == length(txWithGeneID) 
@@ -103,8 +109,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
                 txid <- c(txid, rep(NA, length(which(nonearest))))
                 geneid <- c(flankGenes, 
                     CharacterList(as.list(rep(NA, length(which(nonearest)))))) 
-                location <- c(location, rep("noGeneMatch",
-                    length(which(nonearest))))
+                location <- c(location, rep(NA, length(which(nonearest))))
             }
             dat2 <- DataFrame(
                       queryHits=queryhits, txID=txid, geneID=geneid, 
@@ -115,12 +120,6 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
                       geneID=CharacterList(), Location=character())
         }
 
-        Location <- rep("unknown", length(queryHits))
-        Location[queryHits %in% which(intron)] <- "intron"
-        Location[queryHits %in% which(utr5)] <- "5'UTR"
-        Location[queryHits %in% which(utr3)] <- "3'UTR"
-        Location[queryHits %in% which(coding)] <- "coding"
-        dat1 <- DataFrame(queryHits=queryHits, txID, geneID, Location)
         ans <- rbind(dat1, dat2)
         ans$Location <- factor(ans$Location)
         ans[order(ans$queryHits), ]

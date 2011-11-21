@@ -6,7 +6,8 @@
     if (length(vcf$GENO) > 0) {
        geno <- lapply(vcf$GENO, function(elt) {
            if (is.list(elt))
-               matrix(unlist(elt, recursive=FALSE), ncol=1) 
+               # matrix(unlist(elt, recursive=FALSE), ncol=1) 
+               do.call(rbind, elt) 
            else
                elt
        })
