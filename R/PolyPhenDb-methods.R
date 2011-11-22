@@ -63,7 +63,11 @@ setMethod("select", "PolyPhenDb",
              function(x, raw) {
                raw[raw$RSID %in% x, ]
              }, raw=raw)
-    do.call(rbind, lst)
+    df <- do.call(rbind, lst)
+    dups <- duplicated(df)
+    if (any(dups))
+        df <- df[!dups,]
+    df
 }
 
 

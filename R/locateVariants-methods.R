@@ -6,7 +6,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
     function(query, subject, ...)
     {
         chrom <- seqlevels(query)
-        #isActiveSeq(subject)[!names(isActiveSeq(subject)) %in% chrom] <- FALSE 
+        isActiveSeq(subject)[!names(isActiveSeq(subject)) %in% chrom] <- FALSE 
         tx <- transcripts(subject, columns=c("exon_id", "tx_id", "gene_id"))
         cdsByTx <- cdsBy(subject)
 
@@ -52,7 +52,9 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
             Location[queryHits %in% which(utr3)] <- "3'UTR"
             Location[queryHits %in% which(coding)] <- "coding"
             dat1 <- DataFrame(queryHits=queryHits, txID, geneID, Location)
-        } 
+        }
+        ## restore masks on txdb
+        isActiveSeq(subject)[names(isActiveSeq(subject))] <- TRUE 
 
         ## intergenic :
         if (any(txCO == 0)) {

@@ -79,13 +79,28 @@
 }
 
 \examples{
-  library(TxDb.Hsapiens.UCSC.hg19.knownGene)
   library(BSgenome.Hsapiens.UCSC.hg19)
- 
-  data(variants)
+  library(TxDb.Hsapiens.UCSC.hg19.knownGene)
   txdb19 <- TxDb.Hsapiens.UCSC.hg19.knownGene 
-  aaCoding <- predictCoding(variants, txdb19, seqSource=Hsapiens,
-      varAllele="varAllele")
+
+  ## Read variants from a VCF file and adjust seqlevels to match the annotation 
+  fl <- system.file("extdata", "chr22.vcf.gz", package="VariantAnnotation")
+  vcf <- readVcf(fl, "hg19")
+  rd <- rowData(vcf)
+  seqlevels(rd) <- paste("chr", seqlevels(rd), sep="")
+
+  ## Expand the ALT column
+  rdflat <- rep(rd, elementLengths(values(rd)[["ALT"]]))
+  values(rdflat) <- unlist(values(rd)[["ALT"]])
+
+  aaCoding <- predictCoding(
+                query=rdflat, 
+                subject=txdb19, 
+                seqSource=Hsapiens,
+                varAllele="ALT")
+
+  ## Consequence for all variant-transcript matches
+  table(aaCoding$Consequence)
 }
 
 \keyword{methods}

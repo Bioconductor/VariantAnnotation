@@ -24,7 +24,7 @@
 }
 
 \details{
-  Range representation of variants :
+  Range representation :
 
   \code{locateVariants} accepts a \link[GenomicRanges]{GRanges} object that 
   contains the variants of interest. The ranges should reflect the position(s) 
@@ -34,26 +34,34 @@
 
   Location classification :
 
-  Variants that fall in a transcript are classified as `coding', `intron', 
-  `3UTR' or `5UTR'. All overlap operations require that variants fall
-  completely "within" one of the defined regions to be classified. Those not 
-  meeting this criteria are labeled `unknown'.
+  Variants that fall within a transcript are classified as `coding', `intron', 
+  `3'UTR' or `5'UTR'. All overlap operations require variants to fall completely 
+  "within" one of the defined regions to be classified. When a variant falls 
+  within a transcript but not completely within one of the defined regions it 
+  is classified as `transcript_region'.
 
-  Variants that do not overlap a transcript are classified as `intergenic' if 
-  flanking genes can be identified and `noGeneMatch' if not. A case where 
-  flanking genes may not be available is a \code{query} that contains variants 
-  for unassembled chromosomes.
+  Variants that do not fall in a transcript are classified as `intergenic' if 
+  flanking genes can be identified. A variant is classified as `NA' if it
+  meets one of the following conditions :
+
+  (1) the variant does not hit a transcript and no flanking genes can be
+  identified
+
+  (2) the variant was called on a chromosome present in the \code{query} but
+  not in the \code{subject}
 }
 
 \value{
   A \link[IRanges]{DataFrame} with a row for each variant-transcript match.
-  Columns include \code{queryHits}, which is a map back to the original variants
+  Columns are \code{queryHits}, which is a map back to the original variants
   in the \code{query}, \code{txID}, \code{geneID} and \code{Location}. 
 
   Variants that fall in a trancscript will have both a \code{txID} and 
-  \code{geneID}. The `intergenic' variants will have no \code{txID} and 
-  the \code{geneID} will contain identifiers for the preceding and following
-  genes. Both \code{txID} and \code{geneID} will be `NA' for `noGeneMatch'.
+  \code{geneID} if present in the annotation. The `intergenic' variants will 
+  have no \code{txID} and the \code{geneID} will contain identifiers for the 
+  preceding and following genes. Both \code{txID} and \code{geneID} will be 
+  `NA' for variants with Location classification of `transcript_region' and 
+  `NA'.
 }
 
 \author{Valerie Obenchain <vobencha@fhcrc.org>}
@@ -64,10 +72,20 @@
 
 \examples{
   library(TxDb.Hsapiens.UCSC.hg19.knownGene)
-  data(variants)
- 
   txdb19 <- TxDb.Hsapiens.UCSC.hg19.knownGene 
-  loc <- locateVariants(variants, txdb19)
+
+  ## Read variants from a VCF file and adjust seqlevels to match the annotation 
+  fl <- system.file("extdata", "ex1.vcf", package="VariantAnnotation")
+  vcf <- readVcf(fl, "hg19")
+  rd <- rowData(vcf)
+  seqlevels(rd) <- paste("chr", seqlevels(rd), sep="")
+
+  loc <- locateVariants(
+           query=rd, 
+           subject=txdb19)
+
+  ## Location for all variant-transcript matches
+  table(loc$Location)
 }
 
 \keyword{methods}

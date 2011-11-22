@@ -143,7 +143,7 @@
   }
   \item{region}{A \code{character(1)} object specifying the region
     on which to filter the results. Possible values are `coding',
-    `intron', `3UTR', `5UTR', `intergenic', `noGeneMatch' and
+    `intron', `3'UTR', `5'UTR', `intergenic', `noGeneMatch' and
     `unknown'. See ?\code{locateVariants} for regions descriptions.
   }
   \item{\dots}{Additional arguments to methods.
@@ -170,12 +170,8 @@
   ## Create a filter to select only records in 3'UTR : 
   library(TxDb.Hsapiens.UCSC.hg19.knownGene)
   txdb19 <- TxDb.Hsapiens.UCSC.hg19.knownGene
-  regionFilt <- regionFilter(txdb19, region="3UTR")
+  regionFilt <- regionFilter(txdb19, region="coding")
   regionFilt(variants, subset=FALSE)
-
-  ## Create and apply a combination filter :
-  comboFilt <- compose(snpFilt, regionFilt)
-  comboFilt(variants)
 }
 
 \keyword{classes}

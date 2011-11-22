@@ -14,17 +14,18 @@ test_locateVariants <- function()
     checkIdentical(colnames(loc), c("queryHits", "txID", "geneID", "Location"))
 }
 
-test_locateVariants_unknown <- function()
-{
-    data <- GRanges(seqnames=c("chr4", "chr4"),
-                IRanges(start=c(24050, 12), width=1),
-                alt=DNAStringSet(c("T", "A")))
-    loc <- locateVariants(data, txdb)
-    DF <- DataFrame(queryHits=seq_len(length(data)),
-        txID=character(length(data)),
-        geneID=CharacterList(character(length(data))),
-        Location=factor(rep("unknown", length(data)))) 
 
-    checkIdentical(loc, DF)
-    checkEquals(levels(DF$Location), "unknown")
-}
+#test_locateVariants_unknown <- function()
+#{
+#    data <- GRanges(seqnames=c("chr4", "chr4"),
+#                IRanges(start=c(24050, 12), width=1),
+#                alt=DNAStringSet(c("T", "A")))
+#    loc <- locateVariants(data, txdb)
+#    DF <- DataFrame(queryHits=seq_len(length(data)),
+#        txID=character(length(data)),
+#        geneID=CharacterList(character(length(data))),
+#        Location=factor(rep("unknown", length(data)))) 
+#
+#    checkIdentical(loc, DF)
+#    checkEquals(levels(DF$Location), "unknown")
+#}

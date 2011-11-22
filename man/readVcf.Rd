@@ -120,7 +120,7 @@
   exptData(vcf)[["HEADER"]][["FILTER"]]
   exptData(vcf)[["HEADER"]][["INFO"]]
   unique(genome(rowData(vcf)))
-  rowData(vcf)
+  head(rowData(vcf), 5)
 
   ## Genotype data described in FORMAT are parsed into the assays slot 
   exptData(vcf)[["HEADER"]][["FORMAT"]]
@@ -133,7 +133,7 @@
   idx <- indexTabix(compressVcf, "vcf")
   tab <- TabixFile(compressVcf, idx)
   ## Define a subset of ranges and read them in
-  rngs <- GRanges(seqnames="1", ranges=IRanges(start=0, end=100000))
+  rngs <- GRanges(seqnames="16", ranges=IRanges(start=0, end=100000))
   vcf <- readVcf(tab, "hg19", param=rngs)
 }
 

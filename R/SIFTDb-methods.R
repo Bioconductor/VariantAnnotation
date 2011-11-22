@@ -91,5 +91,8 @@ setMethod("select", "SIFTDb",
       if (!"RSID" %in% cols) cols <- c("RSID", cols)
           df <- df[,colnames(df) %in% cols] 
     }
+    dups <- duplicated(df)
+    if (any(dups))
+        df <- df[!dups,]
     df
 }
