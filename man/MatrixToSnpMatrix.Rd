@@ -48,13 +48,14 @@
 
 \examples{
   ## import vcf file to SummarizedExperiment
-  vcfFile <- system.file("extdata", "ex1.vcf", package="VariantAnnotation") 
+  vcfFile <- system.file("extdata", "chr22.vcf.gz", package="VariantAnnotation") 
   se <- readVcf(vcfFile, "hg19")
-  
+ 
   ## genotype calls are stored in the assays slot
   assays(se)
   calls <- assays(se)$GT
   snps <- MatrixToSnpMatrix(calls)
+  show(snps)
 }
 
 \keyword{manip}

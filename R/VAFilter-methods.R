@@ -52,23 +52,18 @@ dbSNPFilter <-
     #.check_type_and_length(regex, "character", 0:1)
     require(dbSNP, quietly=TRUE, character.only=TRUE)
     vaFilter(function(x) {
-        snps <- x[width(x) == 1]
-        values(snps) <- NULL 
-        .idx <- logical(length(snps))
-        index <- seq_len(length(snps))
-        values(snps) <- append(values(snps), DataFrame(index))
-        chroms <- names(getSNPcount())[names(getSNPcount()) %in%
-            runValue(seqnames(snps))]
-
-        res <- lapply(chroms, function(i, snps) {
+        .idx <- logical(length(x))
+        nms <- rep(runValue(seqnames(x)), runLength(seqnames(x)))
+        df <- data.frame(chrom=nms, start=start(x), index=seq_len(length(x)))
+        snps <- df[width(x) == 1,]
+        chr <- names(getSNPcount())[names(getSNPcount()) %in% snps$chrom]
+        res <- lapply(chr, function(i, snps) {
             s <- getSNPlocs(i)
-            q <- keepSeqlevels(snps, i)
-            dbsnp <- s[match(start(q), s$loc), ]
-            dat <- DataFrame(Index=values(q)[["index"]], dbsnp)
-            dat[!is.na(dat$loc), ]
+            q <- snps[snps$chrom %in% i,]
+            dbsnp <- q$start %in% s$loc
+            q$index[dbsnp]
         }, snps)
-
-        .idx[do.call(rbind, res)$Index] <- TRUE
+        .idx[do.call(rbind, res)] <- TRUE
         .idx
     }, name = .name)
 }

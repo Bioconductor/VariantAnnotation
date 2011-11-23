@@ -70,8 +70,8 @@ accompanying Tabix index file. See ?\Rcode{indexTabix} for help with creating an
 index file.
 
 <<readVCF_subset, eval=FALSE>>=
-rngs <- GRanges(seqnames="16", ranges=IRanges(start=0, end=1e07))
-vcf_16 <- readVcf(vcffile, "hg19", param=rngs)
+rngs <- GRanges(seqnames="22", ranges=IRanges(start=1000, end=10000))
+subst <- readVcf(vcffile, "hg19", param=rngs)
 @
 
 The data are parsed into a \Rcode{SummarizedExperiment} using to the header 
@@ -111,6 +111,7 @@ When working with snp data, a snp matrix-type of object may be useful. The
 assays(vcf)
 calls <- assays(vcf)$GT
 snps <- MatrixToSnpMatrix(calls)
+show(snps)
 @
 
 \section{Location of variants with respect to gene function}
@@ -327,7 +328,7 @@ and are designed to be searched by rsid.
 
 We identify the non-synonymous variants and obtain the rsids.
 <<nonsynonymous>>=
-nonsyn <- unique(aacoding$queryHits[aacoding$Consequence == "nonsynonymous"])
+nonsyn <- with(aacoding, unique(queryHits[Consequence == "nonsynonymous"]))
 nonsyn
 
 nms <- names(rd[nonsyn])
@@ -375,9 +376,11 @@ No. 16, e164.\\
 
 \noindent McLaren W, Pritchard B, RiosD, et. al., (2010), Deriving the consequences of
 genomic variants with the Ensembl API and SNP Effect Predictor. Bioinformatics,
-Vol. 26, No. 16, 2069-2070.
+Vol. 26, No. 16, 2069-2070.\\
+
 \noindent SIFT home page :
-\url{http://sift.bii.a-star.edu.sg/}
+\url{http://sift.bii.a-star.edu.sg/}\\
+
 \noindent PolyPhen home page :
 \url{http://genetics.bwh.harvard.edu/pph2/}
 

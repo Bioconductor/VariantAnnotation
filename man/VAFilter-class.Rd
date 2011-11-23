@@ -159,19 +159,23 @@
 \examples{
   data(variants)
 
-  ## Create a filter that will identify variants present in dbSNP : 
-  snpFilt <- dbSNPFilter("SNPlocs.Hsapiens.dbSNP.20110815")
-  ## Apply the filter and control the output :
-  ## Optional subset argument is TRUE (default) 
-  snpFilt(variants)
-  ## Optional subset argument is FALSE 
-  snpFilt(variants, subset=FALSE)
- 
-  ## Create a filter to select only records in 3'UTR : 
+  ## Create a filter to select only records in introns : 
   library(TxDb.Hsapiens.UCSC.hg19.knownGene)
   txdb19 <- TxDb.Hsapiens.UCSC.hg19.knownGene
-  regionFilt <- regionFilter(txdb19, region="coding")
+  regionFilt <- regionFilter(txdb19, region="intron")
+  ## View the filter with vaFilter() 
+  vaFilter(regionFilt)
+
   regionFilt(variants, subset=FALSE)
+
+  ## Create a filter to identify variants present in dbSNP : 
+  library("SNPlocs.Hsapiens.dbSNP.20110815")
+  snpFilt <- dbSNPFilter("SNPlocs.Hsapiens.dbSNP.20110815")
+  ## Modify the seqlevels to match the SNPlocs pacakge
+  seqlevels(variants) <- gsub("chr", "ch", seqlevels(variants), fixed=TRUE)
+  ## Apply the filter to chromosome 16 snps :
+  ## Optional subset argument is TRUE (default) 
+  snpFilt(variants[seqnames(variants) == "ch16"], subset=TRUE)
 }
 
 \keyword{classes}

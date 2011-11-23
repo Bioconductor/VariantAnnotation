@@ -1,12 +1,12 @@
 .VcfToSummarizedExperiment <- function(vcf, file, genome, ...)
 {
     vcf <- vcf[[1]]
+    HEADER <- scanVcfHeader(file)[[1]][["Header"]]
 
     ## assays
     if (length(vcf$GENO) > 0) {
        geno <- lapply(vcf$GENO, function(elt) {
            if (is.list(elt))
-               # matrix(unlist(elt, recursive=FALSE), ncol=1) 
                do.call(rbind, elt) 
            else
                elt
@@ -22,7 +22,6 @@
         sapply(lst, function(x) {
             length(unlist(strsplit(x, ",", fixed=TRUE)))
         })
-    #eltlen[eltlen == 0] <- 1
     eltsplit <- rep(seq_len(length(eltlen)), eltlen)
 
     ref <- .toDNAStringSet(vcf$REF)
@@ -30,13 +29,26 @@
     altsplit <-  split(alt, eltsplit)
     if (any(ismissing))
         altsplit[[ismissing]] <- DataFrame() 
-    info <- data.frame(vcf$INFO) 
+
+    if (length(vcf$INFO) > 0) {
+        cmb <- lapply(vcf$INFO, function(elt) {
+          if (is.list(elt))
+              CharacterList(elt)
+          else 
+              elt
+        })
+        info <- DataFrame(cmb) 
+    } else {
+        info <- DataFrame(vcf$INFO) 
+    }
     if (is.null(names(vcf$INFO)))
         colnames(info) <- "INFO"
-
+    else
+        colnames(info) <- names(vcf$INFO) 
+  
     meta <- DataFrame(
             REF=ref, ALT=NA, QUAL=vcf$QUAL, 
-            FILTER=vcf$FILTER, data.frame(info))
+            FILTER=vcf$FILTER, info)
     meta$ALT <- altsplit 
 
     rowData <- GRanges(
@@ -57,11 +69,8 @@
         colData <- DataFrame(Samples=character(0))
     }
 
-    ## exptData
-    header <- scanVcfHeader(file)[[1]][["Header"]]
-
     SummarizedExperiment(
-      assays=geno, exptData=SimpleList(HEADER=header),
+      assays=geno, exptData=SimpleList(HEADER=HEADER),
       colData=colData, rowData=rowData)
 }
 

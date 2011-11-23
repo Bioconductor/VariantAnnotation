@@ -30,18 +30,18 @@
   contains the variants of interest. The ranges should reflect the position(s) 
   of the reference allele. For snps the range will be of width 1. For range
   insertions or deletions the reference allele could be a sequences such as
-  `GGTG' in which case the width of the range should be 4. 
+  GGTG in which case the width of the range should be 4. 
 
   Location classification :
 
-  Variants that fall within a transcript are classified as `coding', `intron', 
-  `3'UTR' or `5'UTR'. All overlap operations require variants to fall completely 
-  "within" one of the defined regions to be classified. When a variant falls 
+  Variants that fall within a transcript are classified as 'coding', 'intron', 
+  '3'UTR' or '5'UTR'. All overlap operations require variants to fall completely 
+  within one of the defined regions to be classified. When a variant falls 
   within a transcript but not completely within one of the defined regions it 
-  is classified as `transcript_region'.
+  is designated 'transcript_region'.
 
-  Variants that do not fall in a transcript are classified as `intergenic' if 
-  flanking genes can be identified. A variant is classified as `NA' if it
+  Variants that do not fall in a transcript are classified as 'intergenic' if 
+  flanking genes can be identified. A variant is classified as NA if it
   meets one of the following conditions :
 
   (1) the variant does not hit a transcript and no flanking genes can be
@@ -53,15 +53,16 @@
 
 \value{
   A \link[IRanges]{DataFrame} with a row for each variant-transcript match.
-  Columns are \code{queryHits}, which is a map back to the original variants
-  in the \code{query}, \code{txID}, \code{geneID} and \code{Location}. 
+  Only variants that fall within coding regions are reported. Columns are 
+  \code{queryHits}, which is a map back to the original variants in the 
+  \code{query}, \code{txID}, \code{geneID} and \code{Location}. 
 
   Variants that fall in a trancscript will have both a \code{txID} and 
-  \code{geneID} if present in the annotation. The `intergenic' variants will 
+  \code{geneID} if present in the annotation. The 'intergenic' variants will 
   have no \code{txID} and the \code{geneID} will contain identifiers for the 
   preceding and following genes. Both \code{txID} and \code{geneID} will be 
-  `NA' for variants with Location classification of `transcript_region' and 
-  `NA'.
+  NA for variants with Location classification of 'transcript_region' and 
+  NA.
 }
 
 \author{Valerie Obenchain <vobencha@fhcrc.org>}

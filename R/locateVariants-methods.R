@@ -33,6 +33,8 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
             queryHits <- queryHits(txFO)
             txID <- values(tx)["tx_id"][subjectHits(txFO),]
             geneID <- values(tx)[["gene_id"]][subjectHits(txFO)]
+            if (any(elementLengths(geneID)) == 0)
+                geneID[elementLengths(geneID) == 0] <- NA 
 
             ## coding :
             coding <- cdsCO > 0 

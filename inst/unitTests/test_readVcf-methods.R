@@ -10,7 +10,7 @@ test_ranges <- function()
 
 test_metadata <- function()
 {
-    vcf <- readVcf(f2, "hg18")
+    vcf <- readVcf(f1, "hg18")
     checkTrue(all(rownames(exptData(vcf)[["HEADER"]][["FORMAT"]]) %in% 
               names(assays(vcf)))) 
     checkTrue(all(rownames(exptData(vcf)[["HEADER"]][["INFO"]]) %in% 
@@ -26,5 +26,5 @@ test_accessors <- function()
     checkTrue(class(assays(vcf)) == "SimpleList")
     checkTrue(class(exptData(vcf)) == "SimpleList")
     checkTrue(class(colData(vcf)) == "DataFrame")
-    #checkEquals(sum(elementLengths(values(rowData(vcf))[["ALT"]])), 17)
 }
+
