@@ -5,7 +5,10 @@
 setMethod("locateVariants", c("GRanges", "TranscriptDb"),
     function(query, subject, ...)
     {
-        chrom <- seqlevels(query)
+        queryseq <- seqlevels(query)
+        subseq <- seqlevels(subject)
+        if (!any(queryseq %in% subseq))
+            warning("none of seqlevels(query) match seqlevels(subject)")
         isActiveSeq(subject)[!names(isActiveSeq(subject)) %in% chrom] <- FALSE 
         tx <- transcripts(subject, columns=c("exon_id", "tx_id", "gene_id"))
         cdsByTx <- cdsBy(subject)
