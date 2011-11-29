@@ -91,7 +91,7 @@
 
   ## Expand the ALT column
   rdflat <- rep(rd, elementLengths(values(rd)[["ALT"]]))
-  values(rdflat) <- unlist(values(rd)[["ALT"]])
+  values(rdflat) <- DataFrame(ALT=unlist(values(rd)[["ALT"]]))
 
   aaCoding <- predictCoding(
                 query=rdflat, 

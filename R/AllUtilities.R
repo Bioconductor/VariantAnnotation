@@ -1,3 +1,5 @@
+## helpers for readVcf :
+
 .VcfToSummarizedExperiment <- function(vcf, file, genome, ...)
 {
     vcf <- vcf[[1]]
@@ -5,55 +7,26 @@
 
     ## assays
     if (length(vcf$GENO) > 0) {
-       geno <- lapply(vcf$GENO, function(elt) {
-           if (is.list(elt))
-               do.call(rbind, elt) 
-           else
-               elt
-       })
+        geno <- lapply(vcf$GENO, 
+            function(elt) {
+                if (is.list(elt))
+                    do.call(rbind, elt) 
+                else
+                    elt
+            })
     } else {
         geno <- list() 
     }
 
     ## rowdata
-    lst <- as.list(vcf$ALT)
-    ismissing <- grep(".", lst, fixed=TRUE)
-    eltlen <- 
-        sapply(lst, function(x) {
-            length(unlist(strsplit(x, ",", fixed=TRUE)))
-        })
-    eltsplit <- rep(seq_len(length(eltlen)), eltlen)
-
     ref <- .toDNAStringSet(vcf$REF)
-    alt <- DataFrame(ALT=.toDNAStringSet(vcf$ALT))
-    altsplit <-  split(alt, eltsplit)
-    if (any(ismissing))
-        altsplit[[ismissing]] <- DataFrame() 
+    alt <- .toDNAStringSetList(vcf$ALT)
+    info <- .parseINFO(vcf$INFO)
+    meta <- DataFrame(REF=ref, ALT=alt, QUAL=vcf$QUAL, 
+                      FILTER=vcf$FILTER, info)
 
-    if (length(vcf$INFO) > 0) {
-        cmb <- lapply(vcf$INFO, function(elt) {
-          if (is.list(elt))
-              CharacterList(elt)
-          else 
-              elt
-        })
-        info <- DataFrame(cmb) 
-    } else {
-        info <- DataFrame(vcf$INFO) 
-    }
-    if (is.null(names(vcf$INFO)))
-        colnames(info) <- "INFO"
-    else
-        colnames(info) <- names(vcf$INFO) 
-  
-    meta <- DataFrame(
-            REF=ref, ALT=NA, QUAL=vcf$QUAL, 
-            FILTER=vcf$FILTER, info)
-    meta$ALT <- altsplit 
-
-    rowData <- GRanges(
-                 seqnames=Rle(vcf$CHROM), 
-                 ranges=IRanges(start=vcf$POS, width=width(ref)))
+    rowData <- GRanges(seqnames=Rle(vcf$CHROM), 
+                       ranges=IRanges(start=vcf$POS, width=width(ref)))
     values(rowData) <- meta 
     names(rowData) <- vcf$ID
     genome(seqinfo(rowData)) <- genome
@@ -76,10 +49,46 @@
 
 .toDNAStringSet <- function(x)
 {
-    ulist <- unlist(strsplit(x, ",", fixed=TRUE))
-    ulist <- gsub("\\.", "", ulist)
+    xx <- unlist(strsplit(x, ",", fixed=TRUE))
+    ulist <- gsub("\\.", "", xx)
     ulist[is.na(ulist)] <- ""
     DNAStringSet(ulist)
+}
+
+.toDNAStringSetList <- function(x)
+{
+    ismissing <- grep(".", x, fixed=TRUE)
+    eltlen <- sapply(as.list(x), 
+        function(i) {
+            length(unlist(strsplit(i, ",", fixed=TRUE)))
+        })
+    eltlen[ismissing] <- 0
+    pbw <- PartitioningByWidth(eltlen)
+    unlisted <- .toDNAStringSet(x)
+    IRanges:::newCompressedList("DNAStringSetList", 
+                                unlistData=unlisted[width(unlisted) > 0], 
+                                end=end(pbw))
+}
+
+.parseINFO <- function(x)
+{
+    if (length(x) > 0) {
+        cmb <- lapply(x, 
+            function(elt) {
+                if (is.list(elt))
+                    CharacterList(elt)
+                else 
+                    elt
+            })
+        info <- DataFrame(cmb) 
+    } else {
+        info <- DataFrame(x) 
+    }
+    if (is.null(names(x)))
+        colnames(info) <- "INFO"
+    else
+        colnames(info) <- names(x)
+    info 
 }
 
 .listCumsum <- function(x) {
@@ -96,6 +105,9 @@
   shifted[start(PartitioningByWidth(elementLengths(x)))] <- 0L
   shifted
 }
+
+
+## helpers for PolyPhen and SIFT
 
 .getKcol <- function(conn)
 {

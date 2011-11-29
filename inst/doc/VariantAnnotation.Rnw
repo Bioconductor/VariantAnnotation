@@ -189,9 +189,9 @@ situations are shown in Table \ref{table:aacoding}.
 
 \begin{table}[ht]
 \begin{center}
-\begin{tabular}{c|c|c|c|c|c}
+\begin{tabular}{l|l|l|l|l|c}
 \hline
-Type & refAllele & varAllele & refSeq & varSeq & AA coding of varSeq  \\
+Type & refAllele & varAllele & refSeq & varSeq & translation possible \\
 \hline
 substitution & G & T & aag & aaT & yes\\
 substitution & G & TG & tga & tTGa & no\\
@@ -225,10 +225,10 @@ pair.
 
 <<flatten>>=
 rdflat <- rep(rd, elementLengths(values(rd)[["ALT"]]))
-values(rdflat) <- unlist(values(rd)[["ALT"]])
+values(rdflat) <- DataFrame(ALT=unlist(values(rd)[["ALT"]]))
 @
 
-Here we use a \Robject{BSgenome} as our sequence source but could have also used
+We use a \Robject{BSgenome} as our sequence source but could have also used
 an appropriate fasta file.
 
 <<aacoding>>=
@@ -253,7 +253,7 @@ missing.
 <<aacoding_notranslation>>= 
 head(aacoding, 4)
 
-## Consequence is 'frameshipt' where translation is not possible
+## Consequence is 'frameshift' where translation is not possible
 head(aacoding[width(aacoding$varAA) == 0,], 4)
 @
 
