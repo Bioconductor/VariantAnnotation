@@ -46,11 +46,8 @@ setMethod("predictCoding", signature(query="GRanges", subject="GRangesList",
             stop("varAllele column not present in query")
         if (!class(values(query)[[varAllele]]) == "DNAStringSet")
             stop("varAllele column should be a DNAStringSet")
-        if (any(width(values(query)[[varAllele]]) == 0))
-            stop("varAllele column should not have missing values")
  
-        ## findOverlaps won't find negative widths
-        ## adjust query with width=0 :
+        ## for ranges with width=0 :
         ## de-increment start to equal end value 
         if (any(width(query) == 0)) {
             queryAdj <- query
@@ -60,16 +57,22 @@ setMethod("predictCoding", signature(query="GRanges", subject="GRangesList",
 
         fo <- findOverlaps(queryAdj, subject, type = "within")
         if (length(fo) == 0)
-        return(
-            DataFrame(
-              queryHits=character(0), txID=character(0),
-              refSeq=DNAStringSet(), varSeq=DNAStringSet(), 
-              refAA=AAStringSet(), varAA=AAStringSet(), 
-              Consequence=character(0))) 
+            return(
+                DataFrame(
+                  queryHits=character(0), txID=character(0),
+                  refSeq=DNAStringSet(), varSeq=DNAStringSet(), 
+                  refAA=AAStringSet(), varAA=AAStringSet(), 
+                  Consequence=character(0))) 
 
         subject <- subject[unique(subjectHits(fo))]
         txSeqs <- getTranscriptSeqs(subject, seqSource)
         txLocal <- globalToLocal(queryAdj, subject)
+        midx <- which(width(values(query)[[varAllele]]) == 0)
+        if (length(midx) > 0) {
+            warning("ranges with missing values in the varAllele column ",
+                    "will be ignored")
+            txLocal <- txLocal[!txLocal$globalInd %in% midx, ] 
+        }
         xCoding <- query[txLocal$globalInd]
  
         ## original sequences 

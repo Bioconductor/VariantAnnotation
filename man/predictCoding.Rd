@@ -34,9 +34,9 @@
   }
   \item{varAllele}{The character name of the elementMetadata column in 
     \code{query} that contains the variant alleles. These data should be a 
-    \link[Biostrings]{DNAStringSet} with no missing values (i.e., no
-    width = 0 entries). For guidance on how to represent different variants
-    see the 1000 Genomes VCF format page (references). 
+    \link[Biostrings]{DNAStringSet} where missing values are represented by a
+    zero width empty element. Ranges with missing \code{varAllele} values will
+    be ignored. 
   }
   \item{\dots}{Additional arguments passed to methods.
   }
