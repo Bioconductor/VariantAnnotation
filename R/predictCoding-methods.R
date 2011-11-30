@@ -37,6 +37,18 @@ setMethod("predictCoding", signature(query="GRanges", subject="GRangesList",
           seqSource="ANY", varAllele="character"),
     function(query, subject, seqSource, varAllele, ...)
     {
+        queryseq <- seqlevels(query)
+        subseq <- seqlevels(subject)
+        if (!any(queryseq %in% subseq))
+            warning("none of seqlevels(query) match seqlevels(subject)")
+ 
+        if (is.null(values(query)[[varAllele]]))
+            stop("varAllele column not present in query")
+        if (!class(values(query)[[varAllele]]) == "DNAStringSet")
+            stop("varAllele column should be a DNAStringSet")
+        if (any(width(values(query)[[varAllele]]) == 0))
+            stop("varAllele column should not have missing values")
+ 
         ## findOverlaps won't find negative widths
         ## adjust query with width=0 :
         ## de-increment start to equal end value 
@@ -45,15 +57,7 @@ setMethod("predictCoding", signature(query="GRanges", subject="GRangesList",
             start(queryAdj[width(query) == 0]) <- 
                 start(query)[width(query) == 0] - 1
         } else queryAdj <- query
- 
-        if (is.null(values(query)[[varAllele]]))
-            stop("varAllele column not present in query")
 
-        queryseq <- seqlevels(query)
-        subseq <- seqlevels(subject)
-        if (!any(queryseq %in% subseq))
-            warning("none of seqlevels(query) match seqlevels(subject)")
- 
         fo <- findOverlaps(queryAdj, subject, type = "within")
         if (length(fo) == 0)
         return(

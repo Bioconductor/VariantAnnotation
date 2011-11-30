@@ -19,10 +19,8 @@
 \arguments{
   \item{query}{A \link{Ranges} or \link{GRanges} instance containing the 
     variants to be annotated. If a \link[IRanges]{Ranges} is provided it will be 
-    coerced to a \link{GRanges}.
-
-    A single elementMetadata column containing the variant alleles is required.
-    Others are ignored. 
+    coerced to a \link{GRanges}. A single elementMetadata column containing the 
+    variant alleles is required; others are ignored.
   }
   \item{subject}{A \link{GRangesList} or a \link[GenomicFeatures]{TranscriptDb}. 
 
@@ -36,20 +34,24 @@
   }
   \item{varAllele}{The character name of the elementMetadata column in 
     \code{query} that contains the variant alleles. These data should be a 
-    \link[Biostrings]{DNAStringSet}. Deletions are represented by an empty
-    sequence of width 0.
+    \link[Biostrings]{DNAStringSet} with no missing values (i.e., no
+    width = 0 entries). For guidance on how to represent different variants
+    see the 1000 Genomes VCF format page (references). 
   }
   \item{\dots}{Additional arguments passed to methods.
   }
 }
 
 \details{
-  This function identifies the variants in coding regions and retrieves
-  the reference sequences from a fasta file or \link[BSgenome]{BSgenome}.
-  Alleles provided in the \code{varAllele} column are substituted into the 
-  reference sequences and transcribed. Variant sequences are transcribed only 
-  if the substitution, insertion or deletion results in a new sequence length 
-  divisible by 3. 
+  This function returns the amino acid coding for variants that fall in
+  coding regions. The reference sequences are not required as input, rather 
+  the ranges in the \code{query} must represent the width of the reference 
+  allele. For guidance on how to represent an insertion, deletion or
+  substitution see the 1000 Genomes VCF format (references). Reference 
+  sequences are retrieved from a fasta file or \link[BSgenome]{BSgenome}. 
+  Variant alleles are required input and are substituted into the reference 
+  sequences and transcribed. Sequences are transcribed only if the substitution, 
+  insertion or deletion results in a new sequence length divisible by 3. 
 } 
 
 \value{
@@ -71,9 +73,14 @@
   will be empty and the \code{Consequence} will be a `frameshift'. 
 }
 
+\references{
+  \url{http://vcftools.sourceforge.net/specs.html}
+}
+
 \author{Michael Lawrence and Valerie Obenchain <vobencha@fhcrc.org>}
 
 \seealso{
+  \link{readVcf}
   \link{locateVariants}
   \link{getTranscriptSeqs}
 }

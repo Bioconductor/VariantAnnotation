@@ -68,6 +68,7 @@
 \author{Valerie Obenchain <vobencha@fhcrc.org>}
 
 \seealso{
+  \code{\link{readVcf}}
   \code{\link{predictCoding}}
 }
 

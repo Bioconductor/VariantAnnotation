@@ -1,44 +1,37 @@
-library(TxDb.Dmelanogaster.UCSC.dm3.ensGene)
-library(BSgenome.Dmelanogaster.UCSC.dm3)
-txdb <- TxDb.Dmelanogaster.UCSC.dm3.ensGene 
+library(BSgenome.Hsapiens.UCSC.hg19)
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
+cdsByTx <- cdsBy(txdb, "tx") 
+data <- GRanges(seqnames=rep("chr22", 3),
+            IRanges(start=c(263892,264258, 5538757), width=1),
+            alt=DNAStringSet(c("G", "T", "A")))
 
-
-test_predictCoding <- function()
+test_predictCoding_empty <- function()
 {
-    data <- GRanges(seqnames=c("chr4", "chr4", "chr2L"),
-                IRanges(start=c(263892,264258, 5538757), width=1),
-                alt=DNAStringSet(c("G", "T", "A")))
-    aa <- predictCoding(data, txdb, seqSource=Dmelanogaster,
+    aa <- predictCoding(data, cdsByTx, seqSource=Hsapiens,
         varAllele="alt")
+    checkTrue(all(colnames(aa) %in%  c("queryHits", "txID", "refSeq", "varSeq",
+        "refAA", "varAA", "Consequence")))
 
-    checkEquals(ncol(aa), 10)
-    checkIdentical(colnames(aa), c("queryHits", "txID", "refSeq", "varSeq",
-        "refAA", "varAA", "Consequence", "cds_id", "cds_name", "exon_rank"))
-}
-
-test_predictCoding_no_match <- function()
-{
-    data <- GRanges(seqnames=c("chr4", "chr2L"),
-                IRanges(start=c(264258, 5538750), width=1),
-                alt=DNAStringSet(c("T", "A")))
-    aa <- predictCoding(data, txdb, seqSource=Dmelanogaster,
-        varAllele="alt")
     emptyDF <- DataFrame(queryHits=character(0), txID=character(0),
                refSeq=DNAStringSet(), varSeq=DNAStringSet(),
                refAA=AAStringSet(), varAA=AAStringSet(),
                Consequence=character(0))
- 
     checkIdentical(aa, emptyDF)
 }
 
 test_predictCoding_varAllele <- function()
 {
-    data <- GRanges(seqnames=c("chr4", "chr2L"),
-                IRanges(start=c(264258, 5538750), width=1),
-                alt=DNAStringSet(c("T", "A")))
-
-    checkException(predictCoding(data, txdb, seqSource=Dmelanogaster,
+    checkException(predictCoding(data, cdsByTx, seqSource=Hsapiens,
         varAllele="var"), silent=TRUE)
-    checkException(predictCoding(data, txdb, seqSource=Dmelanogaster))
+
+    values(data)["alt"] <- c("G", "T", "A")
+    checkException(predictCoding(data, cdsByTx, seqSource=Hsapiens,
+        varAllele="alt"), silent=TRUE)
+
+    values(data)["alt"] <- DNAStringSet(c("G", "T", ""))
+    checkException(predictCoding(data, cdsByTx, seqSource=Hsapiens,
+        varAllele="alt"), silent=TRUE)
 }
+
 
