@@ -48,6 +48,11 @@ setMethod("predictCoding", signature(query="GRanges", subject="GRangesList",
  
         if (is.null(values(query)[[varAllele]]))
             stop("varAllele column not present in query")
+
+        queryseq <- seqlevels(query)
+        subseq <- seqlevels(subject)
+        if (!any(queryseq %in% subseq))
+            warning("none of seqlevels(query) match seqlevels(subject)")
  
         fo <- findOverlaps(queryAdj, subject, type = "within")
         if (length(fo) == 0)
