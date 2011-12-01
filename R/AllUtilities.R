@@ -3,7 +3,7 @@
 .VcfToSummarizedExperiment <- function(vcf, file, genome, ...)
 {
     vcf <- vcf[[1]]
-    HEADER <- scanVcfHeader(file)[[1]][["Header"]]
+    hdr <- scanVcfHeader(file)[[1]][["Header"]]
 
     ## assays
     if (length(vcf$GENO) > 0) {
@@ -20,7 +20,7 @@
 
     ## rowdata
     ref <- .toDNAStringSet(vcf$REF)
-    alt <- .toDNAStringSetList(vcf$ALT)
+    alt <- CharacterList(as.list(vcf$ALT))
     info <- .parseINFO(vcf$INFO)
     meta <- DataFrame(REF=ref, ALT=alt, QUAL=vcf$QUAL, 
                       FILTER=vcf$FILTER, info)
@@ -43,7 +43,7 @@
     }
 
     SummarizedExperiment(
-      assays=geno, exptData=SimpleList(HEADER=HEADER),
+      assays=geno, exptData=SimpleList(HEADER=hdr),
       colData=colData, rowData=rowData)
 }
 
@@ -72,13 +72,16 @@
 
 .parseINFO <- function(x)
 {
-    if (length(x) > 0) {
+    if (is.list(x)) {
         cmb <- lapply(x, 
             function(elt) {
-                if (is.list(elt))
-                    CharacterList(elt)
-                else 
-                    elt
+                if (is.list(elt)) {
+                    dat <- CharacterList(elt)
+                } else { 
+                    dat <- data.frame(elt)
+                    names(dat) <- seq_len(ncol(dat))
+                }
+                dat 
             })
         info <- DataFrame(cmb) 
     } else {
@@ -86,8 +89,6 @@
     }
     if (is.null(names(x)))
         colnames(info) <- "INFO"
-    else
-        colnames(info) <- names(x)
     info 
 }
 

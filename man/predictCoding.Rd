@@ -96,18 +96,18 @@
   rd <- rowData(vcf)
   seqlevels(rd) <- paste("chr", seqlevels(rd), sep="")
 
-  ## Expand the ALT column
+  ## Expand the ALT column and convert to DNAStringSet
   rdflat <- rep(rd, elementLengths(values(rd)[["ALT"]]))
-  values(rdflat) <- DataFrame(ALT=unlist(values(rd)[["ALT"]]))
+  values(rdflat) <- DataFrame(ALT=DNAStringSet(unlist(values(rd)[["ALT"]])))
 
-  aaCoding <- predictCoding(
+  aacoding <- predictCoding(
                 query=rdflat, 
                 subject=txdb19, 
                 seqSource=Hsapiens,
                 varAllele="ALT")
 
   ## Consequence for all variant-transcript matches
-  table(aaCoding$Consequence)
+  table(aacoding$Consequence)
 }
 
 \keyword{methods}

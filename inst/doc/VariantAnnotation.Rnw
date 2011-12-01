@@ -58,7 +58,7 @@ downloaded from the 1000 Genomes web site,
 If no \Robject{param} argument is supplied to \Rfunction{readVcf} the full 
 file is read in.
 
-<<readVCF>>=
+<<readVcf>>=
 library(VariantAnnotation)
 vcffile <- system.file("extdata", "chr22.vcf.gz", package="VariantAnnotation")
 vcf <- readVcf(vcffile, "hg19")
@@ -219,13 +219,15 @@ In keeping with our VCF example we again use the \Robject{GRanges} from
 the \Rcode{rowData} slot as our \Robject{query} input. The one additional
 pieces of information \Rfunction{predictCoding} requires is the variant
 (or alternate) allele. The ALT column in the \Rcode{GRanges} is compressed
-because each variant may have >1 alternate allele. We flatten the 
+as each variant may have >1 alternate allele. We create a flattened 
 \Rcode{GRanges} such that each row represents one variant-alternate allele 
-pair.
+pair and the ALT values are a DNAStringSet as required by
+\Rfunction{predictCoding}.
 
 <<flatten>>=
+## expand the ALT column and convert to DNAStringSet
 rdflat <- rep(rd, elementLengths(values(rd)[["ALT"]]))
-values(rdflat) <- DataFrame(ALT=unlist(values(rd)[["ALT"]]))
+values(rdflat) <- DataFrame(ALT=DNAStringSet(unlist(values(rd)[["ALT"]])))
 @
 
 We use a \Robject{BSgenome} as our sequence source but could have also used
