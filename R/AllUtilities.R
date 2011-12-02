@@ -27,7 +27,9 @@
 
     rowData <- GRanges(seqnames=Rle(vcf$CHROM), 
                        ranges=IRanges(start=vcf$POS, width=width(ref)))
-    values(rowData) <- meta 
+    values(rowData) <- meta
+    idx <- vcf$ID == "."
+    vcf$ID[idx] <- paste("chr", seqnames(rowData[idx]), ":", start(rowData[idx]), sep="") 
     names(rowData) <- vcf$ID
     genome(seqinfo(rowData)) <- genome
 

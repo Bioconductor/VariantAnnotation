@@ -61,8 +61,10 @@
     \item{rowData:}{
       The 8 required fields of the VCF file are parsed into a \code{GRanges} in 
       the \code{rowData} slot. CHROM, POS and ID fields are in the seqnames, 
-      ranges and rownames. QUAL, FILTER, INFO, REF and ALT are included as 
-      metadata columns. The ranges are created using the position(POS) and width 
+      ranges and rownames. If the ID is missing (i.e., '.') a colon separated
+      string of chromosome and start position will be used as the rowname.
+      QUAL, FILTER, INFO, REF and ALT are included as elementMetadata in the
+      \code{GRanges}. The ranges are created using the position(POS) and width 
       of the reference allele (REF). Genome information from the \code{genome}
       argument is stored in the seqinfo associated with the \code{GRanges} and
       can be accessed with \code{genome(rowData(readVcf(file)))}.
