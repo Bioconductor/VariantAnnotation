@@ -273,10 +273,11 @@ appropriate reference object such as a \Robject{SNPlocs} or
 ## create filter to identify variants present in dbSNP 
 library("SNPlocs.Hsapiens.dbSNP.20110815")
 snpFilt <- dbSNPFilter("SNPlocs.Hsapiens.dbSNP.20110815")
+vaFilter(snpFilt)
 
 ## create filter to identify variants present in introns 
 regionFilt <- regionFilter(txdb19, region="intron")
-regionFilt
+vaFilter(regionFilt)
 @
 
 When filtering data with \Rfunction{dbSNPFilter} or \Rfunction{regionsFilt} two 

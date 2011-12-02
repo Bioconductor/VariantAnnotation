@@ -25,8 +25,15 @@ test_readVcf_accessors <- function()
     checkTrue(class(assays(vcf)) == "SimpleList")
     checkTrue(class(exptData(vcf)) == "SimpleList")
     checkTrue(class(colData(vcf)) == "DataFrame")
-
-    vcf_st <- readVcf(f3, "hg19")
-    checkTrue(class(rowData(vcf_st)) == "GRanges")
 }
 
+test_readVcf_formats <- function()
+{
+    ## arrays in @assays 
+    vcf <- readVcf(f2, "hg19")
+    checkTrue(class(assays(vcf)$HQ) == "array")
+
+    ## structural 
+    vcf <- readVcf(f3, "hg19")
+    checkTrue(class(rowData(vcf)) == "GRanges")
+}
