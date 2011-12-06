@@ -1,3 +1,4 @@
+library(BSgenome.Hsapiens.UCSC.hg19)
 
 test_genotypesFromPinfo <- function() {
   pinfo.ds = data.frame(
@@ -13,7 +14,7 @@ test_genotypesFromPinfo <- function() {
 test_getRefBase <- function() {
   rd = RangedData(ranges=IRanges(start=c(1e6,2e6,15e6),width=1,names=letters[1:3]),space=c("1","2","2"))
   nucleotides = c("T","A","T")
-  checkEquals(nucleotides, getRefBase(rd))
+  checkEquals(nucleotides, as.character(suppressWarnings(getRefBase(rd))))
 }
 
 test_codeAlleleOptions <- function() {
@@ -43,7 +44,8 @@ test_headerLines <- function() {
     "##FORMAT=<ID=GQ,Number=1,Type=Integer,Description=\"Genotype Quality\">")
   checkEquals(lines, headerLines(format.list,"FORMAT"))
 }
-  
+ 
 test_fixNA <- function() {
   checkEquals( c("1","3","1","4",".","4","."), fixNA(c(1,3,1,4,NA,4,NA)))
 }
+

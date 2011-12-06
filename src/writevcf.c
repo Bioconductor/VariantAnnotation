@@ -1,7 +1,8 @@
 #include <R.h>
 #include <Rinternals.h>
+#include "writevcf.h"
 
-SEXP code_allele_observations( SEXP options, SEXP observed ) {
+SEXP code_allele_observations(SEXP options, SEXP observed) {
   
   /* options and observed are both vectors of character arrays where 
      each character array is a collection of alleles at that position */

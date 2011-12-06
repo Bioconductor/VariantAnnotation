@@ -2,7 +2,7 @@ Package:     VariantAnnotation
 Type:        Package
 Title:       Annotation of Genetic Variants 
 Description: Annotate variants with respect to location and amino acid coding 
-Version:     1.1.14
+Version:     1.1.15
 Author:      Michael Lawrence and Valerie Obenchain 
 Maintainer:  Valerie Obenchain <vobencha@fhcrc.org> 
 License:     Artistic-2.0 
@@ -14,5 +14,5 @@ Imports:     methods, BiocGenerics (>= 0.1.0), IRanges (>= 1.13.5), Biobase (>= 
              AnnotationDbi, BSgenome, GenomicFeatures, snpStats, DBI
 Suggests:    RUnit, BSgenome.Hsapiens.UCSC.hg19, TxDb.Hsapiens.UCSC.hg19.knownGene, 
              SNPlocs.Hsapiens.dbSNP.20110815, PolyPhen.Hsapiens.dbSNP131,
-             SIFT.Hsapiens.dbSNP132
+             SIFT.Hsapiens.dbSNP132 
 LazyLoad:    yes

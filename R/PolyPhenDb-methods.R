@@ -70,5 +70,31 @@ setMethod("select", "PolyPhenDb",
     df
 }
 
+duplicateRSID <- function(db, keys, ...)
+{
+    fmtrsid <- .sqlIn(keys)
+    sql <- paste("SELECT * FROM duplicates WHERE RSID IN (",
+                 fmtrsid, ")", sep="")
+    q1 <- dbGetQuery(db$conn, sql)
 
+    fmtgp <- .sqlIn(unique(q1$DUPLICATEGROUP))
+    gpsql <- paste("SELECT * FROM duplicates WHERE DUPLICATEGROUP IN (",
+                   fmtgp, ")", sep="")
+    q2 <- dbGetQuery(db$conn, gpsql)
+
+    matched <- q2[!q2$RSID %in% keys, ]
+    matchedlst <- split(matched$RSID, matched$DUPLICATEGROUP)
+    names(matchedlst) <- q1$RSID[match(names(matchedlst), q1$DUPLICATEGROUP)]
+
+    missing <- !keys %in% q2$RSID
+    if (any(missing)) {
+        warning(paste("keys not found in database : ", keys[missing],
+                      sep=""))
+        missinglst <- list(rep(NA, sum(missing)))
+        names(missinglst) <- keys[missing]
+        matchedlst <- c(matchedlst, missinglst)
+    }
+
+    matchedlst[order(match(names(matchedlst), keys))]
+}
 

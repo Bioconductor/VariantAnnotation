@@ -1,16 +1,16 @@
 ##### Functions to create parts of a VCF file
 
 ##' @import BSgenome.Hsapiens.UCSC.hg19 IRanges
-{}
+#{}
 ##' @importFrom Biostrings getSeq
-{}
-##' @useDynLib Rvcftools
+#{}
+##' @useDynLib Rvcftoolss
 
 ############
 ## Functions
 ############
 
-{}  # Roxygen keeps adding junk to the import list if it doesn't hit some code
+#{}  # Roxygen keeps adding junk to the import list if it doesn't hit some code
 
 ##' Read probeset info file
 ##'
@@ -86,9 +86,8 @@ getRefBase <- function(gs) {
 ##' @author Peter M. Haverty \email{phaverty@@gene.com}
 ##' @export
 codeAlleleOptions <- function(refbase, alleles) {
-  all.alleles = mapply(
-    function(x,y) {
-      return( unique( c(x,y) ) )
+  mapply(function(x, y) {
+      unique(c(x, y)) 
     },refbase, alleles, USE.NAMES=FALSE)
 }
 
@@ -128,7 +127,7 @@ codeAlleleObservations <- function( allele.options, observed) {
   if (length(allele.options) != length(observed)) {
     stop("allele.options and observed must be the same length\n")
   }
-  coded = .Call("code_allele_observations", allele.options, observed)
+  coded = .Call(.code_allele_observations, allele.options, observed)
   return(coded)
 }
 

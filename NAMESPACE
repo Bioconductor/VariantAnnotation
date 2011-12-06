@@ -1,3 +1,5 @@
+useDynLib(VariantAnnotation, .registration=TRUE)
+
 import(methods)
 import(Biostrings)
 import(GenomicRanges)
@@ -6,8 +8,6 @@ import(AnnotationDbi)
 
 importFrom(BiocGenerics, rbind, paste, order)
 
-#importClassesFrom(AnnotationDbi, AnnotationDb)
-#importMethodsFrom(AnnotationDbi, cols, keys, select)
 importMethodsFrom(AnnotationDbi, as.list)
 
 importClassesFrom(Biobase, ScalarCharacter)
@@ -56,15 +56,3 @@ export(
     keys, cols, select)
 
 exportPattern("^[^\\.]")
-import(BSgenome.Hsapiens.UCSC.hg19, IRanges)
-importFrom(Biostrings, getSeq)
-useDynLib(Rvcftools)
-export(loadPinfo)
-export(genotypesFromPinfo)
-export(getRefBase)
-export(codeAlleleOptions)
-export(makeAltColumn)
-export(codeAlleleObservations)
-export(writeVCFHeader)
-export(headerLines)
-export(fixNA)
