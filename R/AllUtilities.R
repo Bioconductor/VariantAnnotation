@@ -3,15 +3,22 @@
 ### =========================================================================
 
 
-## helpers for readVcf :
+## for readVcf :
 
-.VcfToSummarizedExperiment <- function(vcf, file, genome, ...)
+.VcfToSummarizedExperiment <- function(vcf, file, genome, ..., param)
 {
     vcf <- vcf[[1]]
     hdr <- scanVcfHeader(file)[[1]][["Header"]]
 
     ## assays
     if (length(vcf$GENO) > 0) {
+        ## geno specified in param
+        if (!is.null(param)) {
+            if (class(param) == "ScanVcfParam") {
+                if (!identical(character(), vcfGeno(param)))
+                    vcf$GENO <- vcf$GENO[names(vcf$GENO) %in% vcfGeno(param)]
+            }
+        } 
         geno <- lapply(vcf$GENO, 
             function(elt) {
                 if (is.list(elt))
@@ -26,6 +33,13 @@
     ## rowdata
     ref <- .toDNAStringSet(vcf$REF)
     alt <- CharacterList(as.list(vcf$ALT))
+    ## info specified in param
+    if (!is.null(param)) {
+        if (class(param) == "ScanVcfParam") {
+            if (!identical(character(), vcfInfo(param)))
+                vcf$INFO <- vcf$INFO[names(vcf$INFO) %in% vcfInfo(param)]
+        }
+    } 
     info <- .parseINFO(vcf$INFO)
     meta <- DataFrame(REF=ref, ALT=alt, QUAL=vcf$QUAL, 
                       FILTER=vcf$FILTER, info)
@@ -114,7 +128,7 @@
   shifted
 }
 
-## helpers for PolyPhen and SIFT :
+## for PolyPhen and SIFT :
 
 .getKcol <- function(conn)
 {
@@ -122,7 +136,7 @@
     as.character(dbGetQuery(conn, sql))
 }
 
-### convert character vector into an SQL IN condition
+## convert character vector into an SQL IN condition
 .sqlIn <- function(vals)
 {
     if (length(vals) == 0L)

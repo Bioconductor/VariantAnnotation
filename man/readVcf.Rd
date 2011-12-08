@@ -129,14 +129,34 @@
   assays(vcf)
   head(assays(vcf)$GT)
 
-  ## Reading in a subset of ranges :
-  ## To create a Tabix index the file must be compressed
+  ## Selecting elements or ranges of data :
+  ## The param argument can be used to extract subsets of ranges and/or specific
+  ## INFO or GENO (FORMAT) fields. 
+  vcfFile <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
+
+  ## Range subsets :
+  ## Range subsets can be specified in the 'which' argument to ScanVcfParam()
+  ## or as GRanges or RangedData. When ranges are specified the 'file' argument
+  ## to readVcf() must be a TabixFile object.
   compressVcf <- bgzip(vcfFile, tempfile())
   idx <- indexTabix(compressVcf, "vcf")
   tab <- TabixFile(compressVcf, idx)
-  ## Define a subset of ranges and read them in
-  rngs <- GRanges(seqnames="16", ranges=IRanges(start=0, end=100000))
+  rngs <- GRanges("20", IRanges(1110000, 1234600))
   vcf <- readVcf(tab, "hg19", param=rngs)
+
+  ## INFO or GENO subsets :
+  ## INFO and GENO subsets are specified in a ScanVcfParam object.
+  ## Either a Tabix object or the file name can be used as the 'file' 
+  ## argument to readVcf().
+  param <- ScanVcfParam(geno=c("GT", "HQ"), info=c("NS", "AF"))
+  vcf_tab <- readVcf(tab, "hg19", param=param)
+  vcf_fname <- readVcf(vcfFile, "hg19", param=param)
+  identical(vcf_tab, vcf_fname) 
+
+  ## A TabixFile must be used as the 'file' argument here because ranges are
+  ## specified. 
+  param <- ScanVcfParam(geno="HQ", info="AF", which=rngs)
+  vcf <- readVcf(tab, "hg19", param=param)
 }
 
 \keyword{manip}

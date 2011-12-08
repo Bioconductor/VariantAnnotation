@@ -38,19 +38,41 @@ test_readVcf_formats <- function()
     checkTrue(class(rowData(vcf)) == "GRanges")
 }
 
-#test_readVcf_param <- function()
-#{
-#    ## select geno
-#    param <- ScanVcfParam(geno="DP")
-#    vcf <- readVcf(f1, "hg19", param=param)
-#    checkTrue(names(assays(vcf)) == "DP")
-#
-#    ## all geno and info
-#    param <- ScanVcfParam()
-#    vcf <- readVcf(f1, "hg19", param=param)
-#    checkTrue(names(assays(vcf)) == c("GT", "GQ", "DP")
-#    checkTrue(values(vcf) %in% c()
-#}
+test_readVcf_param <- function()
+{
+    ## geno
+    param <- ScanVcfParam(geno=c("DP", "GQ"))
+    vcf <- readVcf(f2, "hg19", param=param)
+    checkTrue(length(names(assays(vcf))) == 2)
+    checkTrue(all(names(assays(vcf)) %in% c("DP", "GQ")))
+
+    param <- ScanVcfParam(geno=c("DP", "DL"))
+    vcf <- readVcf(f2, "hg19", param=param)
+    checkTrue(names(assays(vcf)) == "DP")
+
+    ## info 
+    param <- ScanVcfParam(info="NS")
+    vcf <- readVcf(f2, "hg19", param=param)
+    checkTrue("NS.1" %in% colnames(values(rowData(vcf))))
+
+    ## geno, info
+    param <- ScanVcfParam()
+    vcf_a <- readVcf(f1, "hg19", param=param)
+    vcf_b <- readVcf(f1, "hg19")
+    checkIdentical(names(assays(vcf_a)), names(assays(vcf_b))) 
+    checkIdentical(rowData(vcf_a), rowData(vcf_b))
+
+    ## info, geno, ranges
+    rngs <- GRanges("20", IRanges(1110000, 1234600))
+    param <- ScanVcfParam(geno="HQ", info="AF", which=rngs)
+    compressVcf <- bgzip(f2, tempfile())
+    idx <- indexTabix(compressVcf, "vcf")
+    tab <- TabixFile(compressVcf, idx)
+    vcf <- readVcf(tab, "hg19", param=param)
+    checkTrue("AF" %in% colnames(values(rowData(vcf))))
+    checkTrue(all(names(assays(vcf)) %in% "HQ"))
+    checkTrue(length(rowData(vcf)) == 3)
+}
 
 
 
