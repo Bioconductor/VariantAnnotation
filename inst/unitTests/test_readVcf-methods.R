@@ -37,3 +37,21 @@ test_readVcf_formats <- function()
     vcf <- readVcf(f3, "hg19")
     checkTrue(class(rowData(vcf)) == "GRanges")
 }
+
+#test_readVcf_param <- function()
+#{
+#    ## select geno
+#    param <- ScanVcfParam(geno="DP")
+#    vcf <- readVcf(f1, "hg19", param=param)
+#    checkTrue(names(assays(vcf)) == "DP")
+#
+#    ## all geno and info
+#    param <- ScanVcfParam()
+#    vcf <- readVcf(f1, "hg19", param=param)
+#    checkTrue(names(assays(vcf)) == c("GT", "GQ", "DP")
+#    checkTrue(values(vcf) %in% c()
+#}
+
+
+
+

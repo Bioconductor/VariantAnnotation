@@ -13,6 +13,5 @@ Depends:     R (>= 2.8.0), methods, GenomicRanges (>= 1.7.9), AnnotationDbi,
 Imports:     methods, BiocGenerics (>= 0.1.0), IRanges (>= 1.13.5), Biobase (>= 2.15.1),
              AnnotationDbi (>= 1.17.11), BSgenome, GenomicFeatures, snpStats, DBI
 Suggests:    RUnit, BSgenome.Hsapiens.UCSC.hg19, TxDb.Hsapiens.UCSC.hg19.knownGene, 
-             SNPlocs.Hsapiens.dbSNP.20110815, PolyPhen.Hsapiens.dbSNP131 (>= 1.0.1),
-             SIFT.Hsapiens.dbSNP132 (>= 1.0.1)
+             SNPlocs.Hsapiens.dbSNP.20110815
 LazyLoad:    yes

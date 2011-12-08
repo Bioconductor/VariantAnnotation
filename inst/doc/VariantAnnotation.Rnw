@@ -345,7 +345,7 @@ databases often contain more than one row per variant. The variant may have
 been reported by multiple sources and therefore the source will differ as well
 as some of the other variables. 
 
-<<sift>>=
+<<sift, eval=FALSE>>=
 library(SIFT.Hsapiens.dbSNP132)
 
 ## rsids in the package 
@@ -365,7 +365,7 @@ all of the variants. PolyPhen provides predictions using two different
 training datasets and has considerable information about 3D protein structure. 
 See \Rcode{?PolyPhenDbColumns} or the PolyPhen web site listed in the
 references for more details.
-<<polyphen>>=
+<<polyphen, eval=FALSE>>=
 library(PolyPhen.Hsapiens.dbSNP131)
 pp <- select(PolyPhen.Hsapiens.dbSNP131, keys=rsids, 
          cols=c("TRAININGSET", "PREDICTION", "PPH2PROB", "AA1", "AA2"))
