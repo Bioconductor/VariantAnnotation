@@ -12,13 +12,6 @@
 
     ## assays
     if (length(vcf$GENO) > 0) {
-        ## geno specified in param
-        if (!is.null(param)) {
-            if (class(param) == "ScanVcfParam") {
-                if (!identical(character(), vcfGeno(param)))
-                    vcf$GENO <- vcf$GENO[names(vcf$GENO) %in% vcfGeno(param)]
-            }
-        } 
         geno <- lapply(vcf$GENO, 
             function(elt) {
                 if (is.list(elt))
