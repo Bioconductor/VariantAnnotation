@@ -27,3 +27,8 @@ setGeneric("readVcf", signature = c("file", "genome", "param"),
            function(file, genome, ..., param)
            standardGeneric("readVcf")
 )
+
+setGeneric("MatrixToSnpMatrix", signature = c("callMatrix", "mapGRanges"),
+           function(callMatrix, mapGRanges, ...)
+           standardGeneric("MatrixToSnpMatrix")
+)

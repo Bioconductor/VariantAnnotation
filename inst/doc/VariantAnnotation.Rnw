@@ -105,13 +105,15 @@ assays(vcf)$GT[1:6,1:5]
 
 When working with snp data, a snp matrix-type of object may be useful. The
 \Rfunction{MatrixToSnpMatrix} function converts the genotype calls in the
-\Rcode{assays} slot to a snpMatrix.
+\Rcode{assays} slot to a \Robject{SnpMatrix}. The return value is a named list 
+where "genotypes" is a \Robject{SnpMatrix} and "map" is a \Robject{DataFrame}
+with snp names and alleles at the loci . 
 
 <<snpMatrix>>=
-assays(vcf)
+## Genotypes have been parsed into the "GT" matrix in the assays slot.
 calls <- assays(vcf)$GT
-snps <- MatrixToSnpMatrix(calls)
-show(snps)
+mapgr <- rowData(vcf)
+MatrixToSnpMatrix(calls, mapgr)
 @
 
 \section{Location of variants with respect to gene function}
