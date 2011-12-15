@@ -75,5 +75,19 @@ test_readVcf_param <- function()
 }
 
 
-
+test_readVcf_tabix <- function()
+{
+    ## variant of width 1 at position 101558 
+    param1 <- GRanges(seqnames="16", ranges=IRanges(start=101548, end=101558))
+    param2 <- GRanges(seqnames="16", ranges=IRanges(start=101558, end=101558))
+    param3 <- GRanges(seqnames="16", ranges=IRanges(start=101558, end=101568))
+    cmp <- bgzip(fl, tempfile())
+    idx <- indexTabix(cmp, "vcf4")
+    tbx <- TabixFile(cmp, idx)
+    
+    scn1 <- scanTabix(tbx, param=param1)
+    scn2 <- scanTabix(tbx, param=param2)
+    scn3 <- scanTabix(tbx, param=param3)
+#    checkIdentical(scn1, scn2, scn3)
+}
 
