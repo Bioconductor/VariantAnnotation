@@ -1,21 +1,184 @@
-##### Functions to create parts of a VCF file
+### =========================================================================
+### writeVcf methods 
+### =========================================================================
 
-##' @import BSgenome.Hsapiens.UCSC.hg19 IRanges
-#{}
-##' @importFrom Biostrings getSeq
-#{}
-##' @useDynLib Rvcftoolss
+setMethod(writeVcf, c("character", "SummarizedExperiment"),
+    function(file, obj, ...)
+{
+
+    hdr <- .makeVcfHeader(obj)
+    mat <- .makeVcfMatrix(obj)
+ 
+    con = file(file, open="w")
+    writeLines(hdr, con)
+    writeLines(mat, con)
+ 
+    close(con)
+})
+
+.makeVcfMatrix <- function(obj)
+{
+    rd <- rowData(obj)
+    CHROM <- as.vector(seqnames(rd))
+    POS <- start(rd)
+    ID <- .makeVcfID(names(rd))
+    REF <- as.character(values(rd)[["REF"]])
+    ALT <- unlist(values(rd)[["ALT"]])
+    QUAL <- values(rd)[["QUAL"]]
+    FILTER <- values(rd)[["FILTER"]]
+    INFO <- .makeVcfInfo(values(rd)[!colnames(values(rd)) %in% 
+      c("REF", "ALT", "QUAL", "FILTER")])
+    GENO <- .makeVcfGeno(assays(obj))
+
+    mat <- cbind(CHROM, POS, ID, REF, ALT, QUAL, FILTER, 
+             INFO, GENO)
+    dimnames(mat) <- NULL
+    mat <- gsub("NA", ".", mat)
+    apply(mat, 1, function(elt) paste(elt, collapse="\t"))
+}
+
+.makeVcfID <- function(id, ...)
+{
+    idx <- grep(":", id, fixed=TRUE)
+    id[idx] <- "."
+    id
+}
+
+.makeVcfFormat <- function(geno, ...)
+{
+    fmt <- names(geno)
+    idx <- lapply(geno, function(x) {
+             cts <- rep(0, length(unlist(x)))
+             cts[grep("NA", unlist(x), fixed=TRUE)] <- 1 
+             ctmat <- matrix(cts, ncol=ncol(x)) 
+             rowSums(ctmat) 
+           })
+    ctmat <- do.call(cbind,idx)
+    ctlog <- ctmat == 0
+    nms <- apply(ctlog, 1, function(i) fmt[i])
+    .pasteCollapse(CharacterList(nms), collapse=":")
+}
+
+.makeVcfGeno <- function(geno, ...)
+{
+    nsub <- ncol(geno[[1]])
+    nrec <- nrow(geno[[1]])
+    cls <- lapply(geno, class) 
+    ary <- which(cls == "array") 
+    arylst <- lapply(geno[ary], function(elt, geno) {
+                ilst <- sapply(seq_len(nsub), function(i, elt) {
+                          d <- c(elt[,i,])
+                          s <- split(d, rep(seq_len(nrec), nsub)) 
+                          .pasteCollapse(CharacterList(s), collapse=",")
+                        }, elt, USE.NAMES=FALSE)
+                data.frame(ilst, stringsAsFactors=FALSE)
+              }, geno) 
+    geno[ary] <- SimpleList(arylst)
+
+    FORMAT <- .makeVcfFormat(geno)
+    subj <- lapply(seq_len(nsub), function(i) {
+             dat <- unlist(lapply(geno, function(fld) fld[,i]), use.names=FALSE)
+             mat <- matrix(dat, ncol=length(geno))
+             mat <- gsub("NA", NA, mat)
+             lst <- split(mat, rep(seq_len(nrec), nsub))
+             rmna <- lapply(lst, na.omit)
+             .pasteCollapse(CharacterList(rmna), collapse=":") 
+           })
+
+    cbind(FORMAT, do.call(cbind, subj)) 
+}
+
+.makeVcfInfo <- function(info, ...)
+{
+    cls <- lapply(info, class) 
+    cmp <- grep("Compressed", cls, fixed=TRUE) 
+    cmplst <- sapply(cmp, 
+                function(i, info) {
+                    .pasteCollapse(info[, i], collapse=",") 
+                }, info, USE.NAMES=FALSE)
+    info[, cmp] <- DataFrame(as.character(cmplst))
+
+    key <- rep(names(info), each=nrow(info))
+    vlu <- unlist(info, use.names=FALSE)
+    prs <- paste(key, "=", vlu, sep="")
+    idx <- which(vlu == "")
+    prs[idx] <- key[idx] 
+    mat <- matrix(prs, ncol=ncol(info))
+    mat <- gsub("NA", NA, mat)
+    lst <- split(mat, rep(seq_len(nrow(info)), ncol(info)))
+    rmna <- lapply(lst, na.omit)
+    .pasteCollapse(CharacterList(rmna), collapse=";") 
+}
+
+
+.pasteCollapse <- rtracklayer:::pasteCollapse
+ 
+.makeVcfHeader <- function(obj, ...)
+{
+    hdr <- exptData(obj)[["HEADER"]]
+    fd <- paste("fileDate=", format(Sys.time(), "%Y%m%d"), sep="")
+    hdr$META[rownames(hdr$META) == "fileDate", ] <- fd
+    meta <- paste("##", rownames(hdr$META), "=", hdr$META[,1], sep="")
+
+    inf <- hdr$INFO
+    prs <- paste(rep(colnames(inf), nrow(inf)), "=", unlist(inf, use.names=FALSE), sep="")
+    lst <- split(prs, rep(seq_len(nrow(inf)), each=ncol(inf)))
+    lns <- .pasteCollapse(CharacterList(lst), collapse=",") 
+    info <- paste("##INFO=<ID=", rownames(inf), ",", lns, ">", sep="") 
+ 
+    samples <- as.vector(colnames(obj)) 
+    colnms <- paste(c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", 
+              "INFO", "FORMAT", samples[!is.null(samples)]), collapse="\t")
+
+    c(meta, info, colnms) 
+}
+
+codeAlleleObservations <- function(ref, alt, observed, ...) {
+    if (length(ref) != length(alt))
+        stop("ref and alt must be the same length")
+
+    len <- lapply(ref, length) 
+    if (any(len > 1))
+        stop("each element of ref must be a single nucleotide") 
+
+    options <- .codeAlleleOptions(ref, alt)
+    if (length(options) != length(observed))
+        stop("ref, alt and observed must all be the same length")
+    .Call(.code_allele_observations, options, observed)
+}
+
+.codeAlleleOptions <- function(ref, alt) {
+    mapply(function(x, y) {
+      unique(c(x, y))
+    },ref, alt, USE.NAMES=FALSE)
+}
+
 
 ############
 ## Functions
 ############
 
-#{}  # Roxygen keeps adding junk to the import list if it doesn't hit some code
+#codeAlleleOptions <- function(refbase, alleles) {
+#  mapply(function(x, y) {
+#      unique(c(x, y))
+#    },refbase, alleles, USE.NAMES=FALSE)
+#}
+#
+#codeAlleleObservations <- function( allele.options, observed) {
+#  if (length(allele.options) != length(observed)) {
+#    stop("allele.options and observed must be the same length\n")
+#  }
+#  coded = .Call(.code_allele_observations, allele.options, observed)
+#  return(coded)
+#}
+
+##### Functions to create parts of a VCF file
+##' @import BSgenome.Hsapiens.UCSC.hg19 IRanges
+##' @importFrom Biostrings getSeq
+##' @useDynLib Rvcftoolss
 
 ##' Read probeset info file
-##'
 ##' Read file from Illumina with probe locs and possible nucleotides
-##' 
 ##' @param pinfo.file character, name of file from Illumina with probe location and alleles
 ##' @param mapping character, genome version (e.g. hg19)
 ##' @return data.frame of pinfo.file contents with a little tidying up.
@@ -45,7 +208,6 @@ loadPinfo <- function(pinfo.file,mapping="hg19") {
 }
 
 ##' Parse probe info file to get nucleotide options
-##'
 ##' Parse probe info file to get nucleotide options on top strand.
 ##' @param pinfo data.frame, as read by load.pinfo()
 ##' @return list of characters, e.g. list( c("A","G"), c("C","A"))
@@ -61,9 +223,7 @@ genotypesFromPinfo <- function(pinfo) {
   return(alleles)
 }
 
-
 ##' Look up reference base.
-##'
 ##' Given a RangedData, look up refrence base at each position.
 ##' @param gs Genoset, RangedData, or RangesList
 ##' @return character, nucleotide at each position of rd in reference genome
@@ -74,26 +234,7 @@ getRefBase <- function(gs) {
   return(refbase)
 }
 
-##' Make lookup for alleles
-##'
-##' Take references bases (vector of A, C, G, or T) and alleles (list of
-##' vectors with allowed letters (i.e list( c("A","C") )). Update list to make reference
-##' first position. This lookup will be used to encode each new sample.
-##' @param refbase character, one letter per position specifying base in reference genome
-##' @param alleles list, one character vector per element in refbase, letters allowed at
-##' this position.
-##' @return character, like c("0/1","0/0")
-##' @author Peter M. Haverty \email{phaverty@@gene.com}
-##' @export
-codeAlleleOptions <- function(refbase, alleles) {
-  mapply(function(x, y) {
-      unique(c(x, y)) 
-    },refbase, alleles, USE.NAMES=FALSE)
-}
-
-
 ##' Make ALT column
-##'
 ##' Take lookup of allele options from codeAlleleOptions() and output ALT column
 ##' string vector.  Basically take out ref option and use "." for only ref option.
 ##' This contains the sloweset loop ever. Someone please think of a way to do this
@@ -112,29 +253,7 @@ makeAltColumn <- function(allele.lookup) {
   return(alt)
 }
 
-##' Look up integer vals for observed bases
-##'
-##' .Call version of codeAlleleObservations.
-##' Take references bases (vector of A, C, G, or T) and alleles (list of
-##' vectors with allowed letters (i.e list( c("A","C") )). Return column
-##' for observed alleles in one sample.
-##' @param allele.options list from codeAlleleOptions
-##' @param observed character, like c("AA","AC","CA") from genotypes for a given sample
-##' @return character, like c("0/1","0/0") for reference, alt option 1, then homref, etc.
-##' @author Peter M. Haverty \email{phaverty@@gene.com}
-##' @export
-codeAlleleObservations <- function( allele.options, observed) {
-  if (length(allele.options) != length(observed)) {
-    stop("allele.options and observed must be the same length\n")
-  }
-  coded = .Call(.code_allele_observations, allele.options, observed)
-  return(coded)
-}
-
 ##' Write header part of VCF
-##'
-##' Write header part of VCF
-##' 
 ##' @param filename character, name of file to create and write to
 ##' @param info.list list of lists. Sub-lists are name/value pairs for INFO rows.
 ##' @param filter.list list of lists. Sub-lists are name/value pairs for FILTER rows.
@@ -160,9 +279,6 @@ writeVCFHeader <- function(filename, info.list=NULL, filter.list=NULL, format.li
 }
 
 ##' Format list as VCF header lines
-##'
-##' Format list as VCF header lines
-##' 
 ##' @param x list of lists like info.list, format.list, etc. in writeVCFHeader
 ##' @param type character, like INFO or FORMAT or FILTER
 ##' @return list of characters
@@ -182,8 +298,6 @@ headerLines <- function(x, type) {
   return(lines)
 }
 
-##' Code NA as "."
-##'
 ##' Code NA as "."
 ##' @param x vector
 ##' @return vector

@@ -9,9 +9,24 @@ setGeneric("locateVariants", signature = c("query", "subject"),
            standardGeneric("locateVariants")
 )
 
+setGeneric("MatrixToSnpMatrix", signature = c("callMatrix", "mapGRanges"),
+           function(callMatrix, mapGRanges, ...)
+           standardGeneric("MatrixToSnpMatrix")
+)
+
 setGeneric("getTranscriptSeqs", signature = c("query", "subject"),
            function(query, subject, ...)
            standardGeneric("getTranscriptSeqs")
+)
+
+setGeneric("readVcf", signature = c("file", "genome", "param"),
+           function(file, genome, ..., param)
+           standardGeneric("readVcf")
+)
+
+setGeneric("writeVcf", signature = c("file", "obj"),
+           function(file, obj, ...)
+           standardGeneric("writeVcf")
 )
 
 setGeneric("name", function(x, ...) standardGeneric("name"))
@@ -23,12 +38,3 @@ setGeneric("vaFilter", signature = "fun",
            standardGeneric("vaFilter")
 )
 
-setGeneric("readVcf", signature = c("file", "genome", "param"),
-           function(file, genome, ..., param)
-           standardGeneric("readVcf")
-)
-
-setGeneric("MatrixToSnpMatrix", signature = c("callMatrix", "mapGRanges"),
-           function(callMatrix, mapGRanges, ...)
-           standardGeneric("MatrixToSnpMatrix")
-)

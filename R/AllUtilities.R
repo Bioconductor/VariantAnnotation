@@ -69,21 +69,6 @@
     DNAStringSet(ulist)
 }
 
-.toDNAStringSetList <- function(x)
-{
-    ismissing <- grep(".", x, fixed=TRUE)
-    eltlen <- sapply(as.list(x), 
-        function(i) {
-            length(unlist(strsplit(i, ",", fixed=TRUE)))
-        })
-    eltlen[ismissing] <- 0
-    pbw <- PartitioningByWidth(eltlen)
-    unlisted <- .toDNAStringSet(x)
-    IRanges:::newCompressedList("DNAStringSetList", 
-                                unlistData=unlisted[width(unlisted) > 0], 
-                                end=end(pbw))
-}
-
 .parseINFO <- function(x)
 {
     if (is.list(x)) {
@@ -92,8 +77,7 @@
                 if (is.list(elt)) {
                     dat <- CharacterList(elt)
                 } else { 
-                    dat <- data.frame(elt)
-                    names(dat) <- seq_len(ncol(dat))
+                    dat <- data.frame(elt, stringsAsFactors=FALSE)
                 }
                 dat 
             })
@@ -103,6 +87,9 @@
     }
     if (is.null(names(x)))
         colnames(info) <- "INFO"
+    else
+        colnames(info) <- names(x) 
+
     info 
 }
 

@@ -17,22 +17,22 @@ test_getRefBase <- function() {
   checkEquals(nucleotides, as.character(suppressWarnings(getRefBase(rd))))
 }
 
-test_codeAlleleOptions <- function() {
-  refbase = c("A","C","A","G","G")
-  alleles = list( c("A","T"), c("A","G"), c("A"), c("C"), c("C","G"))
-  checkEquals( list( c("A","T"), c("C","A","G"), c("A"), c("G","C"), c("G","C") ), codeAlleleOptions(refbase,alleles) )
-}
+#test_codeAlleleOptions <- function() {
+#  refbase = c("A","C","A","G","G")
+#  alleles = list( c("A","T"), c("A","G"), c("A"), c("C"), c("C","G"))
+#  checkEquals( list( c("A","T"), c("C","A","G"), c("A"), c("G","C"), c("G","C") ), codeAlleleOptions(refbase,alleles) )
+#}
 
 test_makeAltColumn <- function() {
   allele.lookup = list( c("A","C"), c("A"), c("T","A","G"))
   checkEquals( c("C",".","A,G"), makeAltColumn(allele.lookup) )
 }
 
-test_codeAlleleObservations <- function() {
-  allele.lookup = list( c("A","T"), c("C","A","G"), c("A"), c("G","C"), c("G","C"), c("G","A","C","TCAGT") )
-  observed = list(c("A","A"),c("A","C"),c("A","A"),c("G","C"),c("-","G"),c("A","TCAGT","C"))
-  checkEquals( c("0/0","1/0","0/0","0/1","./0","1/3/2"), codeAlleleObservations(allele.lookup, observed) )
-}
+#test_codeAlleleObservations <- function() {
+#  allele.lookup = list( c("A","T"), c("C","A","G"), c("A"), c("G","C"), c("G","C"), c("G","A","C","TCAGT") )
+#  observed = list(c("A","A"),c("A","C"),c("A","A"),c("G","C"),c("-","G"),c("A","TCAGT","C"))
+#  checkEquals( c("0/0","1/0","0/0","0/1","./0","1/3/2"), codeAlleleObservations(allele.lookup, observed) )
+#}
 
 test_headerLines <- function() {
   format.list = list(
