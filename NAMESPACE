@@ -8,8 +8,6 @@ import(AnnotationDbi)
 
 importFrom(BiocGenerics, rbind, paste, order)
 
-importMethodsFrom(AnnotationDbi, as.list)
-
 importClassesFrom(Biobase, ScalarCharacter)
 importFrom(Biobase, mkScalar, selectSome)
 
