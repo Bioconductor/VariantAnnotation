@@ -24,8 +24,8 @@ setGeneric("readVcf", signature = c("file", "genome", "param"),
            standardGeneric("readVcf")
 )
 
-setGeneric("writeVcf", signature = c("file", "obj"),
-           function(file, obj, ...)
+setGeneric("writeVcf", signature = c("obj", "filename"),
+           function(obj, filename, ...)
            standardGeneric("writeVcf")
 )
 

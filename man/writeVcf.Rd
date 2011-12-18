@@ -1,6 +1,6 @@
 \name{writeVcf}
 \alias{writeVcf}
-\alias{writeVcf,character,SummarizedExperiment-method}
+\alias{writeVcf,SummarizedExperiment,character-method}
 
 
 \title{Write out a VCF (variant call format) file}
@@ -8,15 +8,15 @@
 \description{Write out a VCF file - under construction - }
 
 \usage{
-  \S4method{writeVcf}{character,SummarizedExperiment}(file, obj, ...)
+  \S4method{writeVcf}{SummarizedExperiment,character}(obj, filename, ...)
 }
 
 \arguments{
-  \item{file}{The character() name of the VCF file to be
-    written out.
-  }
   \item{obj}{Object containing data to be written out. At
     present only accepts \linkS4class{SummarizedExperiment}.
+  }
+  \item{filename}{The character() name of the VCF file to be
+    written out.
   }
   \item{\dots}{Additional arguments, passed to methods.
   }
@@ -47,6 +47,9 @@
 }
 
 \examples{
+#  fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
+#  se <- readVcf(fl, "hg19")
+#  writeVcf(se, "out.vcf")
 }
 
 \keyword{manip}

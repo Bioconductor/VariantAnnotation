@@ -6,7 +6,7 @@ import(GenomicRanges)
 import(Rsamtools)
 import(AnnotationDbi)
 
-importFrom(BiocGenerics, rbind, paste, order)
+importFrom(BiocGenerics, rbind, cbind, paste, order, lapply, sapply, mapply)
 
 importClassesFrom(Biobase, ScalarCharacter)
 importFrom(Biobase, mkScalar, selectSome)
@@ -21,7 +21,7 @@ importMethodsFrom(
     isActiveSeq, "isActiveSeq<-")
 importFrom(GenomicFeatures, extractTranscriptsFromGenome)
 
-importClassesFrom(IRanges, Ranges, RangesList, RangedData)
+importClassesFrom(IRanges, DataFrame, Ranges, RangesList, RangedData)
 importMethodsFrom(
     IRanges, "%in%", append, as.matrix, as.vector,
     countOverlaps, elementLengths, end, eval,

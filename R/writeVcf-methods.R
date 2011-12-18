@@ -2,14 +2,14 @@
 ### writeVcf methods 
 ### =========================================================================
 
-setMethod(writeVcf, c("character", "SummarizedExperiment"),
-    function(file, obj, ...)
+setMethod(writeVcf, c("SummarizedExperiment", "character"),
+    function(obj, filename, ...)
 {
 
     hdr <- .makeVcfHeader(obj)
     mat <- .makeVcfMatrix(obj)
  
-    con = file(file, open="w")
+    con = file(filename, open="w")
     writeLines(hdr, con)
     writeLines(mat, con)
  
@@ -19,6 +19,7 @@ setMethod(writeVcf, c("character", "SummarizedExperiment"),
 .makeVcfMatrix <- function(obj)
 {
     rd <- rowData(obj)
+
     CHROM <- as.vector(seqnames(rd))
     POS <- start(rd)
     ID <- .makeVcfID(names(rd))
@@ -27,11 +28,11 @@ setMethod(writeVcf, c("character", "SummarizedExperiment"),
     QUAL <- values(rd)[["QUAL"]]
     FILTER <- values(rd)[["FILTER"]]
     INFO <- .makeVcfInfo(values(rd)[!colnames(values(rd)) %in% 
-      c("REF", "ALT", "QUAL", "FILTER")])
+                         c("REF", "ALT", "QUAL", "FILTER")])
     GENO <- .makeVcfGeno(assays(obj))
 
     mat <- cbind(CHROM, POS, ID, REF, ALT, QUAL, FILTER, 
-             INFO, GENO)
+                 INFO, GENO)
     dimnames(mat) <- NULL
     mat <- gsub("NA", ".", mat)
     apply(mat, 1, function(elt) paste(elt, collapse="\t"))
@@ -46,21 +47,19 @@ setMethod(writeVcf, c("character", "SummarizedExperiment"),
 
 .makeVcfFormat <- function(geno, ...)
 {
-    fmt <- names(geno)
-    idx <- lapply(geno, function(x) {
-             cts <- rep(0, length(unlist(x)))
-             cts[grep("NA", unlist(x), fixed=TRUE)] <- 1 
-             ctmat <- matrix(cts, ncol=ncol(x)) 
-             rowSums(ctmat) 
-           })
-    ctmat <- do.call(cbind,idx)
-    ctlog <- ctmat == 0
-    nms <- apply(ctlog, 1, function(i) fmt[i])
-    .pasteCollapse(CharacterList(nms), collapse=":")
+    nms <- names(geno)
+    idx <- lapply(seq_len(length(geno)), 
+             function(i) rowSums(is.na(geno[[i]])) + i)
+    cds <- do.call(c, idx)
+    lst <- split(nms[cds], rep(seq_len(nrow(geno[[1]])), length(nms)))
+    fmt <- lapply(lst, na.omit)
+    .pasteCollapse(CharacterList(fmt), collapse=":")
 }
 
 .makeVcfGeno <- function(geno, ...)
 {
+    FORMAT <- .makeVcfFormat(geno)
+
     nsub <- ncol(geno[[1]])
     nrec <- nrow(geno[[1]])
     cls <- lapply(geno, class) 
@@ -75,7 +74,6 @@ setMethod(writeVcf, c("character", "SummarizedExperiment"),
               }, geno) 
     geno[ary] <- SimpleList(arylst)
 
-    FORMAT <- .makeVcfFormat(geno)
     subj <- lapply(seq_len(nsub), function(i) {
              dat <- unlist(lapply(geno, function(fld) fld[,i]), use.names=FALSE)
              mat <- matrix(dat, ncol=length(geno))
@@ -91,12 +89,9 @@ setMethod(writeVcf, c("character", "SummarizedExperiment"),
 .makeVcfInfo <- function(info, ...)
 {
     cls <- lapply(info, class) 
-    cmp <- grep("Compressed", cls, fixed=TRUE) 
-    cmplst <- sapply(cmp, 
-                function(i, info) {
-                    .pasteCollapse(info[, i], collapse=",") 
-                }, info, USE.NAMES=FALSE)
-    info[, cmp] <- DataFrame(as.character(cmplst))
+    cmp <- grep("Compressed", cls, fixed=TRUE)
+    for (i in cmp) 
+        info[,i] <- paste(info[,i], collapse=",")
 
     key <- rep(names(info), each=nrow(info))
     vlu <- unlist(info, use.names=FALSE)
@@ -109,7 +104,6 @@ setMethod(writeVcf, c("character", "SummarizedExperiment"),
     rmna <- lapply(lst, na.omit)
     .pasteCollapse(CharacterList(rmna), collapse=";") 
 }
-
 
 .pasteCollapse <- rtracklayer:::pasteCollapse
  
