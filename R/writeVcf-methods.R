@@ -65,13 +65,13 @@ setMethod(writeVcf, c("SummarizedExperiment", "character"),
     cls <- lapply(geno, class) 
     ary <- which(cls == "array") 
     arylst <- lapply(geno[ary], function(elt, geno) {
-                ilst <- sapply(seq_len(nsub), function(i, elt) {
-                          d <- c(elt[,i,])
-                          s <- split(d, rep(seq_len(nrec), nsub)) 
-                          .pasteCollapse(CharacterList(s), collapse=",")
-                        }, elt, USE.NAMES=FALSE)
-                data.frame(ilst, stringsAsFactors=FALSE)
-              }, geno) 
+      ilst <- sapply(seq_len(nsub), function(i, elt) {
+        d <- c(elt[,i,])
+        s <- split(d, rep(seq_len(nrec), nsub)) 
+        .pasteCollapse(CharacterList(s), collapse=",")
+      }, elt, USE.NAMES=FALSE)
+      data.frame(ilst, stringsAsFactors=FALSE)
+    }, geno) 
     geno[ary] <- SimpleList(arylst)
 
     subj <- lapply(seq_len(nsub), function(i) {
@@ -110,21 +110,26 @@ setMethod(writeVcf, c("SummarizedExperiment", "character"),
 .makeVcfHeader <- function(obj, ...)
 {
     hdr <- exptData(obj)[["HEADER"]]
+
     fd <- paste("fileDate=", format(Sys.time(), "%Y%m%d"), sep="")
     hdr$META[rownames(hdr$META) == "fileDate", ] <- fd
     meta <- paste("##", rownames(hdr$META), "=", hdr$META[,1], sep="")
 
-    inf <- hdr$INFO
-    prs <- paste(rep(colnames(inf), nrow(inf)), "=", unlist(inf, use.names=FALSE), sep="")
-    lst <- split(prs, rep(seq_len(nrow(inf)), each=ncol(inf)))
-    lns <- .pasteCollapse(CharacterList(lst), collapse=",") 
-    info <- paste("##INFO=<ID=", rownames(inf), ",", lns, ">", sep="") 
- 
+    cls <- hdr[names(hdr) != "META"]
+    other <- lapply(seq_len(length(cls)), function(idx, cls) {
+        x <- cls[[idx]]
+        prs <- paste(rep(colnames(x), each=nrow(x)), "=", unlist(x,
+                     use.names=FALSE), sep="")
+        lst <- split(prs, rep(seq_len(nrow(x)), ncol(x)))
+        lns <- .pasteCollapse(CharacterList(lst), collapse=",") 
+        paste("##", names(cls)[idx], "=<ID=", rownames(x), ",", lns, ">", sep="")
+    }, cls) 
+
     samples <- as.vector(colnames(obj)) 
     colnms <- paste(c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", 
               "INFO", "FORMAT", samples[!is.null(samples)]), collapse="\t")
 
-    c(meta, info, colnms) 
+    c(meta, other, colnms) 
 }
 
 codeAlleleObservations <- function(ref, alt, observed, ...) {
