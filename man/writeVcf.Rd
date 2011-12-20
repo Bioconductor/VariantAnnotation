@@ -47,9 +47,13 @@
 }
 
 \examples{
-#  fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
-#  se <- readVcf(fl, "hg19")
-#  writeVcf(se, "out.vcf")
+  #fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
+  #in1 <- readVcf(fl, "hg19")
+  #writeVcf(in1, "out1.vcf")
+  #in2 <- readVcf(out1.vcf, "hg19")
+  #writeVcf(in2, tempfile())
+
+  #system("diff out1.vcf out2.vcf")
 }
 
 \keyword{manip}

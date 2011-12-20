@@ -62,8 +62,6 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
             Location[queryHits %in% which(coding)] <- "coding"
             dat1 <- DataFrame(queryHits=queryHits, txID, geneID, Location)
         }
-        ## restore masks on txdb
-        isActiveSeq(subject)[names(isActiveSeq(subject))] <- TRUE 
 
         ## intergenic :
         if (any(txCO == 0)) {

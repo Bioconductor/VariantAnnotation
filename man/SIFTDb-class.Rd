@@ -87,22 +87,22 @@
 \author{Valerie Obenchain <vobencha@fhcrc.org>}
 
 \examples{
-#library(SIFT.Hsapiens.dbSNP132)
-#
-### metadata
-#metadata(SIFT.Hsapiens.dbSNP132)
-#
-### available rsid's 
-#head(keys(SIFT.Hsapiens.dbSNP132))
-#
-### for column descriptions see ?SIFTDbColumns
-#cols(SIFT.Hsapiens.dbSNP132)
-#
-### subset on keys and cols 
-#rsids <- c("rs2142947", "rs17970171", "rs8692231", "rs3026284") 
-#subst <- c("RSID", "PREDICTION", "SCORE")
-#select(SIFT.Hsapiens.dbSNP132, keys=rsids, cols=subst)
-#select(SIFT.Hsapiens.dbSNP132, keys=rsids[1:2])
+library(SIFT.Hsapiens.dbSNP132)
+
+## metadata
+metadata(SIFT.Hsapiens.dbSNP132)
+
+## available rsid's 
+head(keys(SIFT.Hsapiens.dbSNP132))
+
+## for column descriptions see ?SIFTDbColumns
+cols(SIFT.Hsapiens.dbSNP132)
+
+## subset on keys and cols 
+rsids <- c("rs2142947", "rs17970171", "rs8692231", "rs3026284") 
+subst <- c("RSID", "PREDICTION", "SCORE")
+select(SIFT.Hsapiens.dbSNP132, keys=rsids, cols=subst)
+select(SIFT.Hsapiens.dbSNP132, keys=rsids[1:2])
 }
 
 \keyword{classes}

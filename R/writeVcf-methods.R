@@ -5,7 +5,6 @@
 setMethod(writeVcf, c("SummarizedExperiment", "character"),
     function(obj, filename, ...)
 {
-
     hdr <- .makeVcfHeader(obj)
     mat <- .makeVcfMatrix(obj)
  
@@ -31,11 +30,10 @@ setMethod(writeVcf, c("SummarizedExperiment", "character"),
                          c("REF", "ALT", "QUAL", "FILTER")])
     GENO <- .makeVcfGeno(assays(obj))
 
-    mat <- cbind(CHROM, POS, ID, REF, ALT, QUAL, FILTER, 
-                 INFO, GENO)
-    dimnames(mat) <- NULL
-    mat <- gsub("NA", ".", mat)
-    apply(mat, 1, function(elt) paste(elt, collapse="\t"))
+    dat <- c(CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, GENO)
+    dat <- gsub("NA", ".", dat)
+    lst <- split(dat, seq_len(nrow(obj)))
+    .pasteCollapse(CharacterList(lst), collapse="\t")
 }
 
 .makeVcfID <- function(id, ...)
@@ -75,13 +73,13 @@ setMethod(writeVcf, c("SummarizedExperiment", "character"),
     geno[ary] <- SimpleList(arylst)
 
     subj <- lapply(seq_len(nsub), function(i) {
-             dat <- unlist(lapply(geno, function(fld) fld[,i]), use.names=FALSE)
-             mat <- matrix(dat, ncol=length(geno))
-             mat <- gsub("NA", NA, mat)
-             lst <- split(mat, rep(seq_len(nrec), nsub))
-             rmna <- lapply(lst, na.omit)
-             .pasteCollapse(CharacterList(rmna), collapse=":") 
-           })
+      dat <- unlist(lapply(geno, function(fld) fld[,i]), use.names=FALSE)
+      mat <- matrix(dat, ncol=length(geno))
+      mat <- gsub("NA", NA, mat)
+      lst <- split(mat, rep(seq_len(nrec), nsub))
+      rmna <- lapply(lst, na.omit)
+      .pasteCollapse(CharacterList(rmna), collapse=":") 
+    })
 
     cbind(FORMAT, do.call(cbind, subj)) 
 }
@@ -91,17 +89,20 @@ setMethod(writeVcf, c("SummarizedExperiment", "character"),
     cls <- lapply(info, class) 
     cmp <- grep("Compressed", cls, fixed=TRUE)
     for (i in cmp) 
-        info[,i] <- paste(info[,i], collapse=",")
+        info[,i] <- .pasteCollapse(info[,i], collapse=",")
 
     key <- rep(names(info), each=nrow(info))
     vlu <- unlist(info, use.names=FALSE)
     prs <- paste(key, "=", vlu, sep="")
-    idx <- which(vlu == "")
+    ## logical TRUE = present 
+    idx <- which(vlu == TRUE)
     prs[idx] <- key[idx] 
-    mat <- matrix(prs, ncol=ncol(info))
-    mat <- gsub("NA", NA, mat)
-    lst <- split(mat, rep(seq_len(nrow(info)), ncol(info)))
-    rmna <- lapply(lst, na.omit)
+    prs <- gsub("FALSE", NA, prs)
+    ## missings
+    prs <- gsub("NA", NA, prs)
+
+    lst <- split(prs, seq_len(nrow(info)))
+    rmna <- lapply(lst, na.omit) ## FIXME : better way to omit missings
     .pasteCollapse(CharacterList(rmna), collapse=";") 
 }
 
@@ -110,28 +111,32 @@ setMethod(writeVcf, c("SummarizedExperiment", "character"),
 .makeVcfHeader <- function(obj, ...)
 {
     hdr <- exptData(obj)[["HEADER"]]
+    header <- Map(.formatHeader, as.list(hdr), names(hdr))
+    samples <- colnames(obj) 
+    colnms <- paste(c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER",
+                    "INFO", "FORMAT", samples[!is.null(samples)]), collapse="\t")
 
-    fd <- paste("fileDate=", format(Sys.time(), "%Y%m%d"), sep="")
-    hdr$META[rownames(hdr$META) == "fileDate", ] <- fd
-    meta <- paste("##", rownames(hdr$META), "=", hdr$META[,1], sep="")
-
-    cls <- hdr[names(hdr) != "META"]
-    other <- lapply(seq_len(length(cls)), function(idx, cls) {
-        x <- cls[[idx]]
-        prs <- paste(rep(colnames(x), each=nrow(x)), "=", unlist(x,
-                     use.names=FALSE), sep="")
-        lst <- split(prs, rep(seq_len(nrow(x)), ncol(x)))
-        lns <- .pasteCollapse(CharacterList(lst), collapse=",") 
-        paste("##", names(cls)[idx], "=<ID=", rownames(x), ",", lns, ">", sep="")
-    }, cls) 
-
-    samples <- as.vector(colnames(obj)) 
-    colnms <- paste(c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", 
-              "INFO", "FORMAT", samples[!is.null(samples)]), collapse="\t")
-
-    c(meta, other, colnms) 
+    unlist(c(header, colnms), use.names=FALSE) 
 }
 
+.formatHeader <- function(df, nms)
+{
+    if (nms == "META") {
+        fd <- format(Sys.time(), "%Y%m%d")
+        df[rownames(df) == "fileDate", ] <- fd
+        paste("##", rownames(df), "=", df[,1], sep="")
+    } else {
+        if (any(colnames(df) %in% "Description")) 
+            df$Description <- paste("\"", df$Description, "\"", sep="")
+        prs <- paste(rep(colnames(df), each=nrow(df)), "=", unlist(df,
+                     use.names=FALSE), sep="")
+        lst <- split(prs, seq_len(nrow(df)))
+        lns <- .pasteCollapse(CharacterList(lst), collapse=",") 
+        paste("##", nms, "=<ID=", rownames(df), ",", lns, ">", sep="")
+    }
+}
+
+## ------------------------------------------------------------
 codeAlleleObservations <- function(ref, alt, observed, ...) {
     if (length(ref) != length(alt))
         stop("ref and alt must be the same length")
