@@ -9,9 +9,9 @@
 \alias{readVcf,TabixFile,character,missing-method}
 
 
-\title{Read VCF (variant call format) files into a SummarizedExperiment object}
+\title{Read VCF files}
 
-\description{Read VCF files into a SummarizedExperiment object}
+\description{Read Variant Call Format (VCF) files}
 
 \usage{
   \S4method{readVcf}{character,character,ANY}(file, genome, ..., param)
@@ -42,7 +42,7 @@
 
 \details{
   \code{readVcf} imports records from bzip compressed or uncompressed VCF 
-  files. Data are parsed into a \code{\linkS4class{SummarizedExperiment}} 
+  files. Data are parsed into a \code{\linkS4class{VCF}} 
   object using the VCF file header information if available. To import a
   subset of records the VCF file must have a Tabix index file. An index
   file can be created with \code{bzip} and \code{indexTabix} functions.
@@ -54,8 +54,8 @@
 }
 
 \value{
-  The object returned is a \code{\linkS4class{SummarizedExperiment}}.
-  See ?\code{SummarizedExperiment} for complete details of the class structure.
+  The object returned is a \code{\linkS4class{VCF}}.
+  See ?\code{VCF} for complete details of the class structure.
 
   \describe{
     \item{rowData:}{

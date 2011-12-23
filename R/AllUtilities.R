@@ -2,7 +2,6 @@
 ### Helper functions not exported 
 ### =========================================================================
 
-
 ## for readVcf :
 
 .VcfToSummarizedExperiment <- function(vcf, file, genome, ..., param)
@@ -12,7 +11,7 @@
 
     ## assays
     if (length(vcf$GENO) > 0) {
-        geno <- lapply(vcf$GENO, 
+        gno <- lapply(vcf$GENO, 
             function(elt) {
                 if (is.list(elt))
                     do.call(rbind, elt) 
@@ -20,23 +19,22 @@
                     elt
             })
     } else {
-        geno <- list() 
+        gno <- list() 
     }
 
-    ## rowdata
-    ref <- .toDNAStringSet(vcf$REF)
-    alt <- CharacterList(as.list(vcf$ALT))
-    ## info specified in param
+    ## info 
     if (!is.null(param)) {
         if (class(param) == "ScanVcfParam") {
             if (!identical(character(), vcfInfo(param)))
                 vcf$INFO <- vcf$INFO[names(vcf$INFO) %in% vcfInfo(param)]
         }
     } 
-    info <- .parseINFO(vcf$INFO)
-    meta <- DataFrame(REF=ref, ALT=alt, QUAL=vcf$QUAL, 
-                      FILTER=vcf$FILTER, info)
+    inf <- .parseINFO(vcf$INFO,  hdr[["INFO"]])
 
+    ## rowdata
+    ref <- .toDNAStringSet(vcf$REF)
+    alt <- CharacterList(as.list(vcf$ALT))
+    meta <- DataFrame(REF=ref, ALT=alt, QUAL=vcf$QUAL, FILTER=vcf$FILTER)
     rowData <- GRanges(seqnames=Rle(vcf$CHROM), 
                        ranges=IRanges(start=vcf$POS, width=width(ref)))
     values(rowData) <- meta
@@ -56,9 +54,8 @@
         colData <- DataFrame(Samples=character(0))
     }
 
-    SummarizedExperiment(
-      assays=geno, exptData=SimpleList(HEADER=hdr),
-      colData=colData, rowData=rowData)
+    VCF(assays=SimpleList(gno), colData=colData, rowData=rowData, 
+        exptData=SimpleList(HEADER=hdr), info=SimpleList(inf))
 }
 
 .toDNAStringSet <- function(x)
@@ -69,28 +66,22 @@
     DNAStringSet(ulist)
 }
 
-.parseINFO <- function(x)
+.newCompressedList <- IRanges:::newCompressedList
+.parseINFO <- function(x, hdr)
 {
-    if (is.list(x)) {
-        cmb <- lapply(x, 
-            function(elt) {
-                if (is.list(elt)) {
-                    dat <- CharacterList(elt)
-                } else { 
-                    dat <- data.frame(elt, stringsAsFactors=FALSE)
-                }
-                dat 
-            })
-        info <- DataFrame(cmb) 
-    } else {
-        info <- DataFrame(x) 
+    type <- hdr$Type[match(names(x), rownames(hdr))] 
+    idx <- which(lapply(x, is.list) == TRUE)
+    if (length(idx) != 0) {
+        for (i in idx) {
+           x[[i]] <- 
+             switch(type[[i]],
+                    Integer = .newCompressedList("CompressedIntegerList", x[[i]]), 
+                    Float = .newCompressedList("CompressedNumericList", x[[i]]), 
+                    String = .newCompressedList("CompressedCharacterList", x[[i]]), 
+                    Logical = .newCompressedList("CompressedLogicalList", x[[i]])) 
+        }
     }
-    if (is.null(names(x)))
-        colnames(info) <- "INFO"
-    else
-        colnames(info) <- names(x) 
-
-    info 
+    x
 }
 
 .listCumsum <- function(x) {

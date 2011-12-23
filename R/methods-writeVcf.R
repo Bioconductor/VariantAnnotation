@@ -2,7 +2,7 @@
 ### writeVcf methods 
 ### =========================================================================
 
-setMethod(writeVcf, c("SummarizedExperiment", "character"),
+setMethod(writeVcf, c("VCF", "character"),
     function(obj, filename, ...)
 {
     hdr <- .makeVcfHeader(obj)

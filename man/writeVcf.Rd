@@ -1,19 +1,19 @@
 \name{writeVcf}
 \alias{writeVcf}
-\alias{writeVcf,SummarizedExperiment,character-method}
+\alias{writeVcf,VCF,character-method}
 
 
-\title{Write out a VCF (variant call format) file}
+\title{Write VCF files}
 
-\description{Write out a VCF file - under construction - }
+\description{Write Variant Call Format (VCF) files - under construction - }
 
 \usage{
-  \S4method{writeVcf}{SummarizedExperiment,character}(obj, filename, ...)
+  \S4method{writeVcf}{VCF,character}(obj, filename, ...)
 }
 
 \arguments{
   \item{obj}{Object containing data to be written out. At
-    present only accepts \linkS4class{SummarizedExperiment}.
+    present only accepts \linkS4class{VCF}.
   }
   \item{filename}{The character() name of the VCF file to be
     written out.
