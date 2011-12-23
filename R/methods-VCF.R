@@ -127,7 +127,10 @@ setReplaceMethod("geno", c("VCF", "ANY", "ANY"),
                      elt[i, j, drop=FALSE]
               })
     info <- endoapply(info(x), function(elt) {
-                  elt[i, , drop=FALSE]
+                  if (class(elt) == "array")
+                     elt[i, , , drop=FALSE]
+                  else
+                     elt[i, , drop=FALSE]
               })
  
     initialize(x, 
@@ -176,15 +179,21 @@ setMethod("[", c("VCF", "ANY", "ANY", "ANY"),
                    a <- assays(x, withDimnames=FALSE)
                    v <- assays(value, withDimnames=FALSE)
                    mendoapply(function(x, ..., value) {
-                       x[i,j] <- value
-                       x
+                      if (class(x) == "array")
+                         x[i, j, ] <- value
+                      else
+                         x[i, j] <- value
+                      x
                    }, x=a, value=v, ...)
                }), info=local({
                    ii <- info(x, withDimnames=FALSE)
                    v <- info(value, withDimnames=FALSE)
-                   endoapply(function(x, ..., value) {
-                       x[i,] <- info(value)
-                       x 
+                   mendoapply(function(x, ..., value) {
+                      if (class(x) == "array")
+                         x[i, , ] <- value
+                      else
+                         x[i, ] <- value
+                      x
                    }, x=ii, value=v, ...)
                }))
 }
