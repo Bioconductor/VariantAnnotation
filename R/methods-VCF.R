@@ -1,16 +1,24 @@
+### =========================================================================
+### VCF class methods 
+### =========================================================================
+
+
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## Constructor 
 ##
 
-VCF <- function(assays=SimpleList(), rowData=GRanges(), colData=DataFrame(), 
-                exptData=SimpleList(), info=SimpleList(),
-                ..., verbose=FALSE)
+VCF <-
+    function(geno=SimpleList(), rowData=GRanges(), colData=DataFrame(), 
+             exptData=SimpleList(), info=SimpleList(),
+             ..., verbose=FALSE)
 {
-    new("VCF", assays=assays, rowData=rowData, colData=colData,
-        exptData=exptData, info=info)
-}
-
-
+    ## FIXME: strip info (row)names
+    sx <- SummarizedExperiment(assays=geno, rowData=rowData,
+                               colData=colData, exptData=exptData,
+                               verbose=verbose)
+    new("VCF", sx, info=info, ...)
+ }
+ 
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## Getters and Setters
 ##
@@ -19,8 +27,17 @@ VCF <- function(assays=SimpleList(), rowData=GRanges(), colData=DataFrame(),
 setMethod(info, c("VCF", "missing"),
     function(x, i, ..., withDimnames=TRUE)
 {
-    if (withDimnames)
-        endoapply(slot(x, "info"), "names<-", rownames(x))
+    if (withDimnames) {
+        endoapply(slot(x, "info"), function(elt, nms) {
+            if (is.null(dim(elt))) {
+                names(elt) <- nms
+                elt
+            } else {
+                rownames(elt) <- nms
+                elt
+           }
+        }, nms=rownames(x))
+    } 
     else
         slot(x, "info")
 })
@@ -104,6 +121,7 @@ setReplaceMethod("geno", c("VCF", "ANY", "ANY"),
     assays(x, i, ..., value=value)
 })
 
+
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## Subsetting 
 ##
@@ -139,7 +157,7 @@ setReplaceMethod("geno", c("VCF", "ANY", "ANY"),
                assays=assays, info=info)
 }
 
-setMethod("[", c("VCF", "ANY", "ANY", "ANY"),
+setMethod("[", c("VCF", "ANY", "ANY"),
     function(x, i, j, ..., drop=TRUE)
 {
     if (1L != length(drop) || (!missing(drop) && drop))
@@ -170,10 +188,14 @@ setMethod("[", c("VCF", "ANY", "ANY", "ANY"),
                rowData=local({
                    r <- rowData(x)
                    r[i,] <- rowData(value)
+                   nms <- names(r)
+                   nms[i] <- names(rowData(value))
+                   names(r) <- nms
                    r
                }), colData=local({
                    c <- colData(x)
                    c[j,] <- colData(value)
+                   rownames(c)[j] <- rownames(colData(value))
                    c
                }), assays=local({
                    a <- assays(x, withDimnames=FALSE)
@@ -241,7 +263,7 @@ setMethod(show, "VCF",
     nms <- names(assays(object, withDimnames=FALSE))
     if (is.null(nms))
         nms <- character(length(assays(object, withDimnames=FALSE)))
-    scat("assays(%d): %s\n", nms)
+    scat("geno(%d): %s\n", nms)
     dimnames <- dimnames(object)
     dlen <- sapply(dimnames, length)
     if (dlen[[1]]) scat("rownames(%d): %s\n", dimnames[[1]])

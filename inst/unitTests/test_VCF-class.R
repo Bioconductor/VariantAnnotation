@@ -35,10 +35,10 @@ test_VCF_subset <- function()
     checkIdentical(c(2L, ncol(vcf)), dim(ss1))
     ss1 <- vcf[,2]
     checkIdentical(c(nrow(vcf), 1L), dim(ss1))
-    checkIdentical(rownames(ss1), names(info(ss1)[[1]]))
+    checkIdentical(rownames(ss1), rownames(info(ss1)[[1]]))
     ss1 <- vcf[2:3, 2]
     checkIdentical(c(2L, 1L), dim(ss1))
-    checkIdentical(rownames(ss1), names(info(ss1)[[1]]))
+    checkIdentical(rownames(ss1), rownames(info(ss1)[[1]]))
 
     ## character
     ss1 <- vcf 
@@ -67,22 +67,23 @@ test_VCF_subset <- function()
     checkIdentical(colData(ss1)[idx,,drop=FALSE], colData(ss2))
 }
 
-#test_VCF_subsetassign <- function()
-#{
-#    ss1 <- vcf 
-#    ss1[1:2,] <- ss1[2:1,]
-#    checkIdentical(rowData(vcf)[2:1,], rowData(ss1)[1:2,])
-#    checkIdentical(rowData(vcf[-(1:2),]), rowData(ss1)[-(1:2),])
-#    checkIdentical(colData(vcf), colData(ss1))
-#    checkIdentical(c(exptData(vcf), exptData(vcf)), exptData(ss1))
-#
-#    ss1 <- vcf 
-#    ss1[,1:2] <- ss1[,2:1,drop=FALSE]
-#    checkIdentical(colData(vcf)[2:1,,drop=FALSE],
-#                   colData(ss1)[1:2,,drop=FALSE])
-#    checkIdentical(colData(vcf)[-(1:2),,drop=FALSE],
-#                   colData(ss1)[-(1:2),,drop=FALSE])
-#    checkIdentical(rowData(vcf), rowData(ss1))
-#    checkIdentical(c(exptData(vcf), exptData(vcf)), exptData(ss1))
-#    }
-#}
+test_VCF_subsetassign <- function()
+{
+    fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
+    vcf <- readVcf(fl, "hg19")
+    ss1 <- vcf 
+    ss1[1:2,] <- ss1[2:1,]
+    checkIdentical(rowData(vcf)[2:1,], rowData(ss1)[1:2,])
+    checkIdentical(rowData(vcf[-(1:2),]), rowData(ss1)[-(1:2),])
+    checkIdentical(colData(vcf), colData(ss1))
+    checkIdentical(c(exptData(vcf), exptData(vcf)), exptData(ss1))
+
+    ss1 <- vcf 
+    ss1[,1:2] <- ss1[,2:1,drop=FALSE]
+    checkIdentical(colData(vcf)[2:1,,drop=FALSE],
+                   colData(ss1)[1:2,,drop=FALSE])
+    checkIdentical(colData(vcf)[-(1:2),,drop=FALSE],
+                   colData(ss1)[-(1:2),,drop=FALSE])
+    checkIdentical(rowData(vcf), rowData(ss1))
+    checkIdentical(c(exptData(vcf), exptData(vcf)), exptData(ss1))
+}

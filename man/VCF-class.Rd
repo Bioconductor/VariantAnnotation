@@ -50,7 +50,7 @@
 \section{Constructor}{
   \describe{
     \item{}{
-      \code{VCF(assays = SimpleList(), rowData = GRanges(), 
+      \code{VCF(geno = SimpleList(), rowData = GRanges(), 
                 colData = DataFrame(), exptData = SimpleList(), 
                 info = SimpleList(), ..., verbose = FALSE)
       }
@@ -59,92 +59,92 @@
 }
 
 \section{Accessors}{
-  In the following code snippets, \code{x} is a VCF object.
+  In the following code snippets \code{x} is a VCF object.
 
   \describe{
     \item{}{
-      \code{info(x, i, ..., withDimnames=TRUE)}
+      \code{info(x, ..., withDimnames=TRUE)}, \code{info(x) <- value}:
+      Returns or sets \code{info} data. Contains the information
+      stored in the INFO field of a VCF file. \code{value} must be a 
+      \code{SimpleList}.
+
+      \code{info(x)[[i]]}, \code{info(x)[[i]] <- value}:
+      Returns or sets elements of info. \code{value} can be a \code{Vector},
+      \code{CompressedList} or \code{array}. 
     }
     \item{}{
-      \code{info(x, i, ...) <- value}
+      \code{geno(x, ..., withDimnames=TRUE)}, \code{geno(x) <- value}:
+      Returns or sets \code{geno} data. Contains the genotype information 
+      from the samples in a VCF file. \code{value} must be a \code{SimpleList} 
+      of \code{matrices} or \code{arrays}.
+
+      \code{geno(x)[[i]]}, \code{geno(x)[[i]] <- value}:
+      Returns or sets elements of geno. \code{value} can be a \code{matrix},
+      or \code{array}. 
     }
     \item{}{
-      \code{geno(x, i, ..., withDimnames=TRUE)}
+      \code{exptData(x)}, \code{exptData(x) <- value}:
+      Returns or sets \code{exptData} data. Contains the header information 
+      from a VCF file as well as any other experiment-specific information.
+      \code{value} must be a \code{SimpleList}.
     }
     \item{}{
-      \code{geno(x, i, ...) <- value}
+      \code{rowData(x)}, \code{rowData(x) <- value}:
+      Returns or sets \code{rowData} data. Contains a \code{GRanges} of the 
+      first 7 required fields of a VCF file, CHROM, POS, ID, REF, ALT, QUAL and 
+      FILTER. REF, ALT, QUAL and FILTER are elementMetadata columns. 
+      \code{value} must be a \code{GRanges} with names representing the ID's
+      in the VCF file.
     }
     \item{}{
-      \code{assays(x, ..., withDimnames=TRUE)}
-    }
-    \item{}{
-      \code{assays(x, ...) <- value}
-    }
-    \item{}{
-      \code{assay(x, i, ...)}
-    }
-    \item{}{
-      \code{assay(x, i, ...) <- value}
-    }
-    \item{}{
-      \code{exptData(x, ...)}
-    }
-    \item{}{
-      \code{exptData(x, ...) <- value}
-    }
-    \item{}{
-      \code{rowData(x, ...)}
-    }
-    \item{}{
-      \code{rowData(x, ...) <- value}
-    }
-    \item{}{
-      \code{colData(x, ...)}
-    }
-    \item{}{
-      \code{colData(x, ...) <- value}
+      \code{colData(x)}, \code{colData(x) <- value}:
+      Returns or sets \code{colData} data. Contains a \code{DataFrame} of 
+      sample-specific information. Each row represents a sample in the VCF
+      file. \code{value} must be a \code{DataFrame} with rownames representing
+      the samples in the VCF file.
     }
   }
 }
 
 \section{Subsetting}{
+  In the following code snippets \code{x} is a VCF object.
+
   \describe{
     \item{}{
       \code{x[i, j]}, \code{x[i, j] <- value}:
-      Gets or sets rows \code{i} and columns \code{j}.
+      Gets or sets rows \code{i} and columns \code{j}. \code{i} and \code{j}
+      can be integer or logical vectors. \code{value} is a replacement
+      \code{VCF} object.
     }
   }
 }
 
 \section{Arguments}{
   \describe{
-    \item{assays}{A \code{list} or \code{SimpleList} of matrix elements,
+    \item{geno}{A \code{list} or \code{SimpleList} of matrix elements,
       or a \code{matrix}. Each element of the list must have the same
       dimensions, and dimension names (if present) must be consistent
       across elements and with the row names of \code{rowData},
-      \code{colData}.
+      \code{colData}. This is equivalent to the \code{assays} argument
+      in  \code{SummarizedExperiment}.
     }
-    \item{info}{An optional \code{SimpleList}. This slot is intended to
-      hold the fields from the INFO field of a VCF file. If present, the
-      number of fields must match those found in the header stored in
-      \code{exptData(x)[["HEADER"]]$INFO}.
+    \item{info}{A \code{SimpleList}. This slot is intended to
+      hold the fields from the INFO field of a VCF file. Each element of the
+      list must have the same number of rows which must match the number of
+      rows in \code{rowData}.
     }
-    \item{rowData}{A \code{GRanges} or \code{GRangesList} instance describing 
-      the ranges of interest. Row names, if present, become the row names of the
-      \code{VCF}. The length of the \code{GRanges} or the
-      \code{GRangesList} must equal the number of rows of the 
-      matrices in \code{assays}.
+    \item{rowData}{A \code{GRanges} instance describing the ranges of interest. 
+      Row names, if present, become the row names of the \code{VCF}. The length 
+      of the \code{GRanges} must equal the number of rows of the matrices in 
+      \code{geno}.
     }
-    \item{colData}{An optional \code{DataFrame} describing the
-      samples. Row names, if present, become the column names of the
-      \code{VCF}.
+    \item{colData}{A \code{DataFrame} describing the samples. Row names, if 
+      present, become the column names of the \code{VCF}.
     }
-    \item{exptData}{An optional \code{SimpleList} of arbitrary content
-      describing the overall experiment.
+    \item{exptData}{A \code{SimpleList} describing the header of the VCF file or 
+      additional information for the overall experiment. 
     }
-    \item{...}{For \code{VCF}, S4 methods \code{list}
-      and \code{matrix}, arguments identical to those of the
-      \code{SimpleList} method.
+    \item{...}{Additional arguments passed to methods. 
     }
     \item{withDimnames}{A \code{logical(1)}, indicating whether dimnames
       should be applied to extracted assay elements.
@@ -154,18 +154,12 @@
     }
     \item{x}{An instance of \code{VCF}-class.
     }
-    \item{i, j}{For \code{assay}, \code{assay<-}, \code{i} is a integer or
-      numeric scalar; see \sQuote{Details} for additional constraints.
+    \item{i, j}{Integer or logical
 
       For \code{VCF}, \code{VCF<-},
       \code{i}, \code{j} are instances that can act to subset the
       underlying \code{rowData}, \code{colData}, and \code{matrix}
-      elements of \code{assays}.
-    }
-    \item{drop}{A \code{logical(1)}, ignored by these methods.
-    }
-    \item{value}{An instance of a class specified in the S4 method
-      signature or as outlined in \sQuote{Details}.
+      elements of \code{geno}.
     }
   }
 }
@@ -188,24 +182,22 @@
   Slots inherited from the \code{SummarizedExperiment} class,
   \describe{
     \item{\code{exptData}}{A \link{SimpleList}-class instance containing
-      information about the overall experiment.
+      the header or other information about the overall experiment.
     }
     \item{\code{rowData}}{A \link{GRanges}-class instance defining the
-      ranges of interest and associated metadata.
+      variant ranges and associated metadata columns of REF, ALT, QUAL and
+      FILTER.
     }
     \item{\code{colData}}{A \link{DataFrame}-class instance describing
       the samples and associated metadata.
     }
-    \item{\code{assays}}{A \link{SimpleList}-class instance, each
-      element of which is a matrix summarizing data associated with the
-      corresponding range and sample.
+    \item{\code{geno}}{A \link{SimpleList}-class instance, each
+      element of which is a matrix or array summarizing data associated with 
+      the corresponding range and sample. The \code{geno} accessor is a wrapper
+      around the \code{assays} slot in \code{SummarizedExperiment}.
     }
   }
 
-  The \code{readVcf} function parses the genotype information from a VCF file 
-  into the \code{assays} slot. For this reason a \code{geno} accessor was 
-  created for the \code{VCF} class for convenience. It is equivalent in 
-  function to the \code{assays} accessor from \code{SummarizedExperiment}.
 }
 
 \author{Valerie Obenchain <vobencha@fhcrc.org>}
@@ -222,6 +214,7 @@
 \examples{
   fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
   vcf <- readVcf(fl, "hg19")
-  
-  showClass(class(vcf))
+ 
+  names(info(vcf))
+  identical(info(vcf)$AF, info(vcf)[[3]])
 }
