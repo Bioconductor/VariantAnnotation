@@ -12,7 +12,14 @@ VCF <-
              exptData=SimpleList(), info=SimpleList(),
              ..., verbose=FALSE)
 {
-    ## FIXME: strip info (row)names
+    info <- endoapply(info, function(elt) {
+              if (is.null(dim(elt))) {
+                  names(elt) <- NULL 
+                  elt
+              } else {
+                  rownames(elt) <- NULL
+                  elt 
+              }})
     sx <- SummarizedExperiment(assays=geno, rowData=rowData,
                                colData=colData, exptData=exptData,
                                verbose=verbose)
@@ -77,6 +84,7 @@ setReplaceMethod("info", c("VCF", "missing", "SimpleList"),
 setReplaceMethod("info", c("VCF", "missing", "list"),
     function(x, i, ..., value)
 {
+    ## FIXME : why lapply over VCF object?
     value <- lapply(x, "names<-", NULL)
     initialize(x, ..., info=SimpleList(value))
 })
@@ -144,7 +152,7 @@ setReplaceMethod("geno", c("VCF", "ANY", "ANY"),
                   else
                      elt[i, j, drop=FALSE]
               })
-    info <- endoapply(info(x), function(elt) {
+    info <- endoapply(info(x, withDimnames=FALSE), function(elt) {
                   if (class(elt) == "array")
                      elt[i, , , drop=FALSE]
                   else
@@ -188,9 +196,7 @@ setMethod("[", c("VCF", "ANY", "ANY"),
                rowData=local({
                    r <- rowData(x)
                    r[i,] <- rowData(value)
-                   nms <- names(r)
-                   nms[i] <- names(rowData(value))
-                   names(r) <- nms
+                   names(r)[i] <- names(rowData(value))
                    r
                }), colData=local({
                    c <- colData(x)

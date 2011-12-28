@@ -9,6 +9,7 @@ setClass("VCF",
 
 .valid.VCF <- function(x)
 {
+    ## FIXME : add info constraint for Vector, CompressedList, matrix, array
     msg <- NULL
     msg1 <- c("length of info(<VCF>)[[%d]] does not match dim(<VCF>)[1]")
   #  msg2 <- c("names(info(<VCF>))[[d%]] not present in exptData(<VCF>)[['HEADER']]$INFO")
