@@ -1,12 +1,11 @@
 \name{readVcf}
 \alias{readVcf}
-\alias{readVcf,character,character,ANY-method}
+\alias{readVcf,character,character,ScanVcfParam-method}
 \alias{readVcf,character,character,missing-method}
-\alias{readVcf,TabixFile,character,GRanges-method}
-\alias{readVcf,TabixFile,character,RangedData-method}
-\alias{readVcf,TabixFile,character,RangesList-method}
+\alias{readVcf,character,missing,missing-method}
 \alias{readVcf,TabixFile,character,ScanVcfParam-method}
 \alias{readVcf,TabixFile,character,missing-method}
+\alias{readVcf,TabixFile,missing,missing-method}
 
 
 \title{Read VCF files}
@@ -14,13 +13,10 @@
 \description{Read Variant Call Format (VCF) files}
 
 \usage{
-  \S4method{readVcf}{character,character,ANY}(file, genome, ..., param)
-  \S4method{readVcf}{character,character,missing}(file, genome, ..., param)
-  \S4method{readVcf}{TabixFile,character,GRanges}(file, genome, ..., param)
-  \S4method{readVcf}{TabixFile,character,RangedData}(file, genome, ..., param)
-  \S4method{readVcf}{TabixFile,character,RangesList}(file, genome, ..., param)
-  \S4method{readVcf}{TabixFile,character,ScanVcfParam}(file, genome, ..., param)
-  \S4method{readVcf}{TabixFile,character,missing}(file, genome, ..., param)
+  \S4method{readVcf}{character,character,ScanVcfParam}(file, genome, param, ...)
+  \S4method{readVcf}{character,character,missing}(file, genome, param, ...)
+  \S4method{readVcf}{TabixFile,character,ScanVcfParam}(file, genome, param, ...)
+  \S4method{readVcf}{TabixFile,character,missing}(file, genome, param, ...)
 }
 
 \arguments{
@@ -31,10 +27,8 @@
     to. This information is stored in the genome slot of the \code{seqinfo}
     associated with the \code{\linkS4class{GRanges}} object in \code{rowData}.
   }
-  \item{param}{A instance of \code{GRanges}, \code{RangedData},
-    \code{RangesList}, or \code{\link[Rsamtools]{ScanVcfParam}} 
-    providing the sequence names and regions to be
-    parsed.
+  \item{param}{A instance of \code{\link[Rsamtools]{ScanVcfParam}} 
+    providing the desired ranges, info fields or geno fields to be parsed.
   }
   \item{\dots}{Additional arguments, passed to methods.
   }
@@ -59,21 +53,22 @@
 
   \describe{
     \item{rowData:}{
-      The 8 required fields of the VCF file are parsed into a \code{GRanges} in 
-      the \code{rowData} slot. CHROM, POS and ID fields are in the seqnames, 
+      The first 7 required fields of the VCF file are parsed into a 
+      \code{GRanges}. CHROM, POS and ID fields are the seqnames, 
       ranges and rownames. If the ID is missing (i.e., '.') a colon separated
       string of chromosome and start position will be used as the rowname.
-      QUAL, FILTER, INFO, REF and ALT are included as elementMetadata in the
-      \code{GRanges}. The ranges are created using the position(POS) and width 
-      of the reference allele (REF). Genome information from the \code{genome}
-      argument is stored in the seqinfo associated with the \code{GRanges} and
-      can be accessed with \code{genome(rowData(readVcf(file)))}.
+      REF, ALT, QUAL and FILTER are included as elementMetadata.
+
+      The ranges are created using the position(POS) and width of the reference 
+      allele (REF). The \code{genome} argument is stored in the seqinfo 
+      of the \code{GRanges} and can be accessed with 
+      \code{genome(rowData(readVcf(file)))}.
     }
-    \item{assays:}{
+    \item{geno:}{
       If present, genomic data from the samples specified in the FORMAT field
-      are parsed into the \code{assays} slot. This is a list of matrices with
-      one matrix for each of fields in the FORMAT column. The rows are the
-      variants, the columns the samples. 
+      are parsed into a list of \code{matrices} or \code{arrays} with a matrix 
+      for each field in the FORMAT column. The rows are the variants, the columns 
+      the samples. 
     }
     \item{colData:}{
       This slot contains a \code{DataFrame} describing the samples. If present, 
@@ -99,7 +94,9 @@
   \code{samtools}.
 }
 
-\author{Valerie Obenchain <vobencha@fhcrc.org>}
+\author{
+  Valerie Obenchain <vobencha@fhcrc.org>
+}
 
 \seealso{
   \code{\link{indexTabix}}
@@ -111,52 +108,52 @@
 \examples{
   vcfFile <- system.file("extdata", "ex1.vcf", package="VariantAnnotation") 
   vcf <- readVcf(vcfFile, "hg19")
-  names(assays(vcf))
 
-  ## Explore the header information 
+  ## Header information is stored in exptData 
   vcf
   exptData(vcf)[["HEADER"]]
-  exptData(vcf)[["HEADER"]][["META"]]
 
-  ## rowData contains the 8 required VCF fields
-  exptData(vcf)[["HEADER"]][["FILTER"]]
-  exptData(vcf)[["HEADER"]][["INFO"]]
-  unique(genome(rowData(vcf)))
+  ## The GRanges in rowData contains the first 7 required VCF fields
+  ## and the genome information
   head(rowData(vcf), 5)
+  unique(genome(rowData(vcf)))
 
-  ## Genotype data described in FORMAT are parsed into the assays slot 
+  ## Genotype data :
   exptData(vcf)[["HEADER"]][["FORMAT"]]
-  assays(vcf)
-  head(assays(vcf)$GT)
+  geno(vcf)
+  head(geno(vcf)$GT)
+
+  identical(geno(vcf)[["GQ"]], geno(vcf)$GQ)
+
+  ## info data :
+  exptData(vcf)[["HEADER"]][["INFO"]]
+  names(info(vcf))
+  head(info(vcf)$DP)
 
   ## Selecting elements or ranges of data :
-  ## The param argument can be used to extract subsets of ranges and/or specific
-  ## INFO or GENO (FORMAT) fields. 
   vcfFile <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
 
   ## Range subsets :
-  ## Range subsets can be specified in the 'which' argument to ScanVcfParam()
-  ## or as GRanges or RangedData. When ranges are specified the 'file' argument
-  ## to readVcf() must be a TabixFile object.
+  ## Range subsets can be specified in the 'which' argument to ScanVcfParam().
+  ## When ranges are specified 'file' must have a Tabix index.
+  rngs <- GRanges("20", IRanges(1110000, 1234600))
+  param <- ScanVcfParam(which=rngs) 
   compressVcf <- bgzip(vcfFile, tempfile())
   idx <- indexTabix(compressVcf, "vcf")
   tab <- TabixFile(compressVcf, idx)
-  rngs <- GRanges("20", IRanges(1110000, 1234600))
-  vcf <- readVcf(tab, "hg19", param=rngs)
+  vcf <- readVcf(tab, "hg19", param)
 
-  ## INFO or GENO subsets :
-  ## INFO and GENO subsets are specified in a ScanVcfParam object.
-  ## Either a Tabix object or the file name can be used as the 'file' 
-  ## argument to readVcf().
+  ## info or geno subsets :
+  ## A file index is not required if only info and geno fields are specified in 
+  ## a ScanVcfParam object.
   param <- ScanVcfParam(geno=c("GT", "HQ"), info=c("NS", "AF"))
-  vcf_tab <- readVcf(tab, "hg19", param=param)
-  vcf_fname <- readVcf(vcfFile, "hg19", param=param)
+  vcf_tab <- readVcf(tab, "hg19", param)
+  vcf_fname <- readVcf(vcfFile, "hg19", param)
   identical(vcf_tab, vcf_fname) 
 
-  ## A TabixFile must be used as the 'file' argument here because ranges are
-  ## specified. 
+  ## Subsetting on ranges, info and geno : 
   param <- ScanVcfParam(geno="HQ", info="AF", which=rngs)
-  vcf <- readVcf(tab, "hg19", param=param)
+  vcf <- readVcf(tab, "hg19", param)
 }
 
 \keyword{manip}

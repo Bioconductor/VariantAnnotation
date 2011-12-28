@@ -20,7 +20,7 @@ setGeneric("getTranscriptSeqs", signature = c("query", "subject"),
 )
 
 setGeneric("readVcf", signature = c("file", "genome", "param"),
-    function(file, genome, ..., param)
+    function(file, genome, param, ...)
     standardGeneric("readVcf")
 )
 

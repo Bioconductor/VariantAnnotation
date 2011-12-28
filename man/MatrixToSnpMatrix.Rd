@@ -14,12 +14,12 @@
 
 \arguments{
   \item{callMatrix}{A \code{matrix} of genotype data from the "GT" FORMAT field 
-    of a VCF file.  This \code{matrix} is located in the \code{assays} slot of 
-    the \code{SummarizedExperiment} produced from a call to \code{readVcf}.
+    of a VCF file.  This \code{matrix} is created with a call to \code{readVcf}
+    and can be accessed with \code{geno<VCF>}.
   }
   \item{mapGRanges}{An optional \code{GRanges} with REF and ALT allele information
     in the elementMetadata. This \code{GRanges} is located in the \code{rowData} 
-    slot of the \code{SummarizedExperiment} produced by a call to \code{readVcf}. 
+    slot of the \code{VCF} produced by a call to \code{readVcf}. 
   }
   \item{\dots}{Additional arguments, passed to methods.
   }
@@ -62,22 +62,26 @@
     met one or more of the caveats stated above.} 
 }
 
-\author{Valerie Obenchain <vobencha@fhcrc.org>}
+\author{
+  Valerie Obenchain <vobencha@fhcrc.org>
+}
 
 \seealso{
+  \link{readVcf}
+  \linkS4class{VCF}
   \linkS4class{SnpMatrix}
 }
 
 \examples{
-  ## Read a vcf file into a SummarizedExperiment object
+  ## Read a vcf file into a VCF object
   vcfFile <- system.file("extdata", "ex2.vcf", package="VariantAnnotation") 
-  se <- readVcf(vcfFile, "hg19")
+  vcf <- readVcf(vcfFile, "hg19")
  
   ## Genotype calls are stored in the assays slot and the
   ## GRanges with the map information is in the rowData slot.
-  assays(se)
-  calls <- assays(se)$GT
-  mapgr <- rowData(se)
+  geno(vcf)
+  calls <- geno(vcf)$GT
+  mapgr <- rowData(vcf)
   MatrixToSnpMatrix(calls, mapgr)
 }
 
