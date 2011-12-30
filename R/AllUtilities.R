@@ -4,14 +4,14 @@
 
 ## for readVcf :
 
-.VcfToSummarizedExperiment <- function(vcf, file, genome, ..., param)
+.VcfToSummarizedExperiment <- function(vcf, file, genome, ...)
 {
     vcf <- vcf[[1]]
     hdr <- scanVcfHeader(file)[[1]][["Header"]]
 
-    ## assays
+    ## geno 
     if (length(vcf$GENO) > 0) {
-        gno <- lapply(vcf$GENO, 
+        geno <- lapply(vcf$GENO, 
             function(elt) {
                 if (is.list(elt))
                     do.call(rbind, elt) 
@@ -19,17 +19,15 @@
                     elt
             })
     } else {
-        gno <- list() 
+        geno <- list() 
     }
 
     ## info 
-    if (!is.null(param)) {
-        if (class(param) == "ScanVcfParam") {
-            if (!identical(character(), vcfInfo(param)))
-                vcf$INFO <- vcf$INFO[names(vcf$INFO) %in% vcfInfo(param)]
-        }
-    } 
-    inf <- .parseINFO(vcf$INFO,  hdr[["INFO"]])
+    if (length(vcf$INFO) > 0) {
+        info <- .parseINFO(vcf$INFO,  hdr[["INFO"]]) 
+    } else {
+        info <- list() 
+    }
 
     ## rowdata
     ref <- .toDNAStringSet(vcf$REF)
@@ -54,8 +52,8 @@
         colData <- DataFrame(Samples=character(0))
     }
 
-    VCF(assays=SimpleList(gno), colData=colData, rowData=rowData, 
-        exptData=SimpleList(HEADER=hdr), info=SimpleList(inf))
+    VCF(geno=SimpleList(geno), colData=colData, rowData=rowData, 
+        exptData=SimpleList(HEADER=hdr), info=SimpleList(info))
 }
 
 .toDNAStringSet <- function(x)
@@ -73,12 +71,14 @@
     idx <- which(lapply(x, is.list) == TRUE)
     if (length(idx) != 0) {
         for (i in idx) {
+        ## FIXME : .unpackVcfField is returning a list of lists
+        ulst <- lapply(x[[i]], unlist)
            x[[i]] <- 
              switch(type[[i]],
-                    Integer = .newCompressedList("CompressedIntegerList", x[[i]]), 
-                    Float = .newCompressedList("CompressedNumericList", x[[i]]), 
-                    String = .newCompressedList("CompressedCharacterList", x[[i]]), 
-                    Logical = .newCompressedList("CompressedLogicalList", x[[i]])) 
+                    Integer = .newCompressedList("CompressedIntegerList", ulst), 
+                    Float = .newCompressedList("CompressedNumericList", ulst), 
+                    String = .newCompressedList("CompressedCharacterList", ulst), 
+                    Logical = .newCompressedList("CompressedLogicalList", ulst)) 
         }
     }
     x
