@@ -44,6 +44,6 @@ setMethod(readVcf, c(file="character", genome="missing", param="missing"),
         vcf <- unpackVcf(scanVcf(file), file)
     else
         vcf <- unpackVcf(scanVcf(file, param=param), file)
-    .VcfToSummarizedExperiment(vcf, file, genome, param=param)
+    .VcfToSummarizedExperiment(vcf, file, genome)
 }
 

@@ -9,10 +9,9 @@ setClass("VCF",
 
 .valid.VCF <- function(x)
 {
-    ## FIXME : add info constraint for Vector, CompressedList, matrix, array
+    ## FIXME : constraint for Vector, CompressedList, matrix, array
     msg <- NULL
     msg1 <- c("length of info(<VCF>)[[%d]] does not match dim(<VCF>)[1]")
-  #  msg2 <- c("names(info(<VCF>))[[d%]] not present in exptData(<VCF>)[['HEADER']]$INFO")
 
     xlen <- dim(x)[1]
     for (i in seq_len(length(info(x)))) {
@@ -26,14 +25,6 @@ setClass("VCF",
             next 
         }
     }
-  #  hdr <- rownames(exptData(x)[["HEADER"]]$INFO)
-  #  inf <- names(info(x))
-  #  if (!is.null(inf)) {
-  #      for (i in seq_len(length(inf))) {
-  #          if (!inf[i] %in% hdr) 
-  #             msg <- c(msg, sprintf(msg2, i)) 
-  #      }
-  #  }
     msg 
 }
 
