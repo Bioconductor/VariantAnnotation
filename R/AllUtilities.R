@@ -71,14 +71,11 @@
     idx <- which(lapply(x, is.list) == TRUE)
     if (length(idx) != 0) {
         for (i in idx) {
-        ## FIXME : .unpackVcfField is returning a list of lists
-        ulst <- lapply(x[[i]], unlist)
-           x[[i]] <- 
-             switch(type[[i]],
-                    Integer = .newCompressedList("CompressedIntegerList", ulst), 
-                    Float = .newCompressedList("CompressedNumericList", ulst), 
-                    String = .newCompressedList("CompressedCharacterList", ulst), 
-                    Logical = .newCompressedList("CompressedLogicalList", ulst)) 
+           x[[i]] <- switch(type[[i]],
+               Integer = .newCompressedList("CompressedIntegerList", x[[i]]), 
+               Float = .newCompressedList("CompressedNumericList", x[[i]]), 
+               String = .newCompressedList("CompressedCharacterList", x[[i]]), 
+               Logical = .newCompressedList("CompressedLogicalList", x[[i]])) 
         }
     }
     x

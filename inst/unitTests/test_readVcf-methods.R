@@ -19,15 +19,20 @@ test_readVcf_metadata <- function()
 
 test_readVcf_accessors <- function()
 {
-    vcf <- readVcf(f1, "hg19")
+    vcf <- readVcf(f2, "hg19")
     checkTrue(class(rowData(vcf)) == "GRanges")
     checkTrue(class(assays(vcf)) == "SimpleList")
-    checkTrue(class(info(vcf)) == "SimpleList")
-    checkTrue(class(geno(vcf)) == "SimpleList")
     checkTrue(class(exptData(vcf)) == "SimpleList")
     checkTrue(class(colData(vcf)) == "DataFrame")
 
+    checkTrue(class(geno(vcf)) == "SimpleList")
     checkIdentical(assays(vcf), geno(vcf))
+
+    checkTrue(class(info(vcf)) == "SimpleList")
+    checkTrue(class(info(vcf)$AF) == "CompressedNumericList")
+    AF <- NumericList(0.5, 0.017, c(0.333,0.667), NA, NA)
+    names(AF) <- rownames(vcf)
+    checkIdentical(info(vcf)$AF, AF) 
 }
 
 test_readVcf_formats <- function()
@@ -84,7 +89,6 @@ test_readVcf_param <- function()
 
 test_readVcf_tabix <- function()
 {
-    ## variant at position 101558 
     param1 <- GRanges(seqnames="16", ranges=IRanges(start=103466, end=103476))
     param2 <- GRanges(seqnames="16", ranges=IRanges(start=103476, end=103476))
     param3 <- GRanges(seqnames="16", ranges=IRanges(start=103476, end=103486))
