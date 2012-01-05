@@ -35,10 +35,10 @@ test_VCF_subset <- function()
     checkIdentical(c(2L, ncol(vcf)), dim(ss1))
     ss1 <- vcf[,2]
     checkIdentical(c(nrow(vcf), 1L), dim(ss1))
-    checkIdentical(rownames(ss1), rownames(info(ss1)[[1]]))
+    checkIdentical(rownames(ss1), names(info(ss1)[[1]]))
     ss1 <- vcf[2:3, 2]
     checkIdentical(c(2L, 1L), dim(ss1))
-    checkIdentical(rownames(ss1), rownames(info(ss1)[[1]]))
+    checkIdentical(rownames(ss1), names(info(ss1)[[1]]))
 
     ## character
     ss1 <- vcf 
@@ -56,9 +56,9 @@ test_VCF_subset <- function()
     ss1 <- vcf 
     dimnames(ss1) <- list(LETTERS[seq_len(nrow(ss1))],
                           letters[seq_len(ncol(ss1))])
- #   checkIdentical(ss1, ss1[TRUE,])
+    checkIdentical(ss1, ss1[TRUE,])
     checkIdentical(c(0L, ncol(ss1)), dim(ss1[FALSE,]))
- #   checkIdentical(ss1, ss1[,TRUE])
+    checkIdentical(ss1, ss1[,TRUE])
     checkIdentical(c(nrow(ss1), 0L), dim(ss1[,FALSE]))
     idx <- c(TRUE, FALSE)               # recycling
     ss2 <- ss1[idx,]

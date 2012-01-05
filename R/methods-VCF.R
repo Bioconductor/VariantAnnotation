@@ -146,7 +146,7 @@ setReplaceMethod("geno", c("VCF", "ANY", "ANY"),
         j <- GenomicRanges:::.SummarizedExperiment.charbound(j, colnames(x), msg)
     }
 
-    assays <- endoapply(assays(x, withDimnames=FALSE), function(elt) {
+    geno <- endoapply(geno(x, withDimnames=FALSE), function(elt) {
                   if (class(elt) == "array")
                      elt[i, j, , drop=FALSE]
                   else
@@ -156,13 +156,13 @@ setReplaceMethod("geno", c("VCF", "ANY", "ANY"),
                   if (class(elt) == "array")
                      elt[i, , , drop=FALSE]
                   else
-                     elt[i, , drop=FALSE]
+                     elt[i, drop=FALSE]
               })
  
     initialize(x, 
                rowData=rowData(x)[i,,drop=FALSE],
                colData=colData(x)[j,,drop=FALSE],
-               assays=assays, info=info)
+               assays=geno, info=info)
 }
 
 setMethod("[", c("VCF", "ANY", "ANY"),
@@ -204,8 +204,8 @@ setMethod("[", c("VCF", "ANY", "ANY"),
                    rownames(c)[j] <- rownames(colData(value))
                    c
                }), assays=local({
-                   a <- assays(x, withDimnames=FALSE)
-                   v <- assays(value, withDimnames=FALSE)
+                   a <- geno(x, withDimnames=FALSE)
+                   v <- geno(value, withDimnames=FALSE)
                    mendoapply(function(x, ..., value) {
                       if (class(x) == "array")
                          x[i, j, ] <- value
@@ -220,7 +220,7 @@ setMethod("[", c("VCF", "ANY", "ANY"),
                       if (class(x) == "array")
                          x[i, , ] <- value
                       else
-                         x[i, ] <- value
+                         x[i] <- value
                       x
                    }, x=ii, value=v, ...)
                }))
@@ -266,9 +266,9 @@ setMethod(show, "VCF",
     if (is.null(info))
         info <- character(length(info(object, withDimnames=FALSE)))
     scat("info(%d): %s\n", info)
-    nms <- names(assays(object, withDimnames=FALSE))
+    nms <- names(geno(object, withDimnames=FALSE))
     if (is.null(nms))
-        nms <- character(length(assays(object, withDimnames=FALSE)))
+        nms <- character(length(geno(object, withDimnames=FALSE)))
     scat("geno(%d): %s\n", nms)
     dimnames <- dimnames(object)
     dlen <- sapply(dimnames, length)

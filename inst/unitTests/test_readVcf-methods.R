@@ -1,20 +1,21 @@
 f1 <- system.file("extdata", "ex1.vcf", package="VariantAnnotation")
 f2 <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
-f3 <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
+f3 <- system.file("extdata", "ex3.vcf", package="VariantAnnotation")
+st <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
 
-test_readVcf_ranges <- function()
+test_readVcf_format <- function()
 {
-    vcf <- readVcf(f1, "hg19")
-    checkEquals(width(rowData(vcf)), width(values(rowData(vcf))[["REF"]]))
-    checkEquals(scanVcf(f1)[[1]]$POS, start(rowData(vcf))) 
-}
+    ## arrays in geno
+    vcf <- readVcf(f2, "hg19")
+    checkTrue(class(geno(vcf)$HQ) == "array")
 
-test_readVcf_metadata <- function()
-{
-    vcf <- readVcf(f1, "hg19")
-    checkTrue(all(rownames(exptData(vcf)[["HEADER"]][["FORMAT"]]) %in% 
-              names(assays(vcf)))) 
-    checkIdentical("hg19", unique(genome(rowData(vcf)))) 
+    ## duplicate header lines, missing INFO
+    vcf <- suppressWarnings(readVcf(f3, "hg19"))
+    checkTrue(length(info(vcf)) == 1L)
+
+    ## structural 
+    vcf <- readVcf(st, "hg19")
+    checkTrue(class(rowData(vcf)) == "GRanges")
 }
 
 test_readVcf_accessors <- function()
@@ -33,17 +34,15 @@ test_readVcf_accessors <- function()
     AF <- NumericList(0.5, 0.017, c(0.333,0.667), NA, NA)
     names(AF) <- rownames(vcf)
     checkIdentical(info(vcf)$AF, AF) 
+
+    checkIdentical("hg19", unique(genome(rowData(vcf)))) 
 }
 
-test_readVcf_formats <- function()
+test_readVcf_ranges <- function()
 {
-    ## arrays in @assays 
-    vcf <- readVcf(f2, "hg19")
-    checkTrue(class(assays(vcf)$HQ) == "array")
-
-    ## structural 
-    vcf <- readVcf(f3, "hg19")
-    checkTrue(class(rowData(vcf)) == "GRanges")
+    vcf <- readVcf(f1, "hg19")
+    checkEquals(width(rowData(vcf)), width(values(rowData(vcf))[["REF"]]))
+    checkEquals(scanVcf(f1)[[1]]$POS, start(rowData(vcf))) 
 }
 
 test_readVcf_param <- function()
@@ -85,7 +84,6 @@ test_readVcf_param <- function()
     checkTrue(all(names(geno(vcf)) %in% g))
     checkTrue(length(rowData(vcf)) == 3)
 }
-
 
 test_readVcf_tabix <- function()
 {
