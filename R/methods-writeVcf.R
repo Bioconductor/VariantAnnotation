@@ -26,9 +26,8 @@ setMethod(writeVcf, c("VCF", "character"),
     ALT <- unlist(values(rd)[["ALT"]])
     QUAL <- values(rd)[["QUAL"]]
     FILTER <- values(rd)[["FILTER"]]
-    INFO <- .makeVcfInfo(values(rd)[!colnames(values(rd)) %in% 
-                         c("REF", "ALT", "QUAL", "FILTER")])
-    GENO <- .makeVcfGeno(assays(obj))
+    INFO <- .makeVcfInfo(info(obj))
+    GENO <- .makeVcfGeno(geno(obj))
 
     dat <- c(CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, GENO)
     dat <- gsub("NA", ".", dat)
@@ -43,67 +42,103 @@ setMethod(writeVcf, c("VCF", "character"),
     id
 }
 
-.makeVcfFormat <- function(geno, ...)
+.makeVcfFormat <- function(geno, cls, idx, ...)
 {
-    nms <- names(geno)
-    idx <- lapply(seq_len(length(geno)), 
-             function(i) rowSums(is.na(geno[[i]])) + i)
-    cds <- do.call(c, idx)
-    lst <- split(nms[cds], rep(seq_len(nrow(geno[[1]])), length(nms)))
+    if (length(idx) > 0) 
+        geno[[idx]] <- matrix(unlist(geno[[idx]], use.names=FALSE), 
+            nrow=nrow(geno[[idx]])) 
+    map <- Map(function(elt, nms) {
+               apply(elt, 1, function(i, nms) {
+                   if (!all(is.na(i)))
+                       nms
+                   else
+                       NA
+               }, nms)
+             }, as.list(geno), names(geno))
+
+    lst <- split(unlist(map, use.names=FALSE), 
+                 rep(seq_len(nrow(geno[[1]])), length(cls)))
     fmt <- lapply(lst, na.omit)
     .pasteCollapse(CharacterList(fmt), collapse=":")
 }
 
 .makeVcfGeno <- function(geno, ...)
 {
-    FORMAT <- .makeVcfFormat(geno)
+    ## FIXME: NA vs NULL handle in C
+    cls <- lapply(geno, class) 
+    idx <- which(cls == "array") 
+    FORMAT <- .makeVcfFormat(geno, cls, idx)
 
     nsub <- ncol(geno[[1]])
     nrec <- nrow(geno[[1]])
-    cls <- lapply(geno, class) 
-    ary <- which(cls == "array") 
-    arylst <- lapply(geno[ary], function(elt, geno) {
-      ilst <- sapply(seq_len(nsub), function(i, elt) {
-        d <- c(elt[,i,])
-        s <- split(d, rep(seq_len(nrec), nsub)) 
-        .pasteCollapse(CharacterList(s), collapse=",")
-      }, elt, USE.NAMES=FALSE)
-      data.frame(ilst, stringsAsFactors=FALSE)
-    }, geno) 
-    geno[ary] <- SimpleList(arylst)
+    arylst <- lapply(geno[idx], 
+        function(elt, geno) {
+            ilst <- sapply(seq_len(nsub), 
+              function(i, elt) {
+                d <- c(elt[,i,])
+                s <- split(d, rep(seq_len(nrec), nsub))
+                .pasteCollapse(CharacterList(s), collapse=",")
+              }, elt, USE.NAMES=FALSE)
+            data.frame(ilst, stringsAsFactors=FALSE)
+        }, geno)
+    geno[idx] <- SimpleList(arylst)
 
-    subj <- lapply(seq_len(nsub), function(i) {
-      dat <- unlist(lapply(geno, function(fld) fld[,i]), use.names=FALSE)
-      mat <- matrix(dat, ncol=length(geno))
-      mat <- gsub("NA", NA, mat)
-      lst <- split(mat, rep(seq_len(nrec), nsub))
-      rmna <- lapply(lst, na.omit)
-      .pasteCollapse(CharacterList(rmna), collapse=":") 
-    })
+    subj <- lapply(seq_len(nsub), 
+        function(i) {
+            dat <- unlist(lapply(geno, function(fld) fld[,i]), use.names=FALSE)
+            mat <- matrix(dat, ncol=length(geno))
+            mat <- gsub("NA", NA, mat)
+            lst <- split(mat, rep(seq_len(nrec), nsub))
+            rmna <- lapply(lst, na.omit)
+            .pasteCollapse(CharacterList(rmna), collapse=":")
+        })
 
-    cbind(FORMAT, do.call(cbind, subj)) 
+    cbind(FORMAT, do.call(cbind, subj))
 }
 
 .makeVcfInfo <- function(info, ...)
 {
-    cls <- lapply(info, class) 
+    ## FIXME: NA vs NULL handle in C
+    cls <- lapply(info, class)
+
+    ## CompressedLists
     cmp <- grep("Compressed", cls, fixed=TRUE)
-    for (i in cmp) 
-        info[,i] <- .pasteCollapse(info[,i], collapse=",")
+    for (i in cmp)
+        info[[i]] <- lapply(info[[i]], 
+            function(elt) {
+                if (all(is.na(elt)))
+                    NA
+                else
+                    paste(as.list(elt), collapse=",")
+            }) 
 
-    key <- rep(names(info), each=nrow(info))
-    vlu <- unlist(info, use.names=FALSE)
-    prs <- paste(key, "=", vlu, sep="")
-    ## logical TRUE = present 
-    idx <- which(vlu == TRUE)
-    prs[idx] <- key[idx] 
-    prs <- gsub("FALSE", NA, prs)
-    ## missings
-    prs <- gsub("NA", NA, prs)
+    ## arrays
+    arr <- which(cls == "array") 
+    for (i in arr) {
+        mat <- matrix(info[[i]], nrow=nrow(info[[i]]))
+        info[[i]] <- apply(mat, 1, 
+            function(elt) {
+                if (all(is.na(elt)))
+                    NA
+                else
+                    paste(elt, collapse=",")
+            })
+    }
 
-    lst <- split(prs, seq_len(nrow(info)))
-    rmna <- lapply(lst, na.omit) ## FIXME : better way to omit missings
-    .pasteCollapse(CharacterList(rmna), collapse=";") 
+    map <- Map(function(elt, nms, cls) {
+        if (is(elt, "logical")) {
+            lapply(elt, function(x) if(x) nms)
+        } else {
+            lapply(elt, function(i) {
+                if (!is.na(i))
+                    paste(nms, "=", i, sep="")
+            })
+        }
+    }, as.list(info), names(info), cls)
+
+    lapply(seq_len(length(map[[1]])), function(i, map) {
+        paste(unlist(lapply(map, "[", i), use.names=FALSE), collapse=";")
+        }, map)
 }
 
 .pasteCollapse <- rtracklayer:::pasteCollapse
