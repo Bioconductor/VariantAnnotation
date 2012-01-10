@@ -1,11 +1,17 @@
 \name{readVcf}
 \alias{readVcf}
 \alias{readVcf,character,character,ScanVcfParam-method}
+\alias{readVcf,character,character,RangedData-method}
+\alias{readVcf,character,character,RangesList-method}
+\alias{readVcf,character,character,GRanges-method}
 \alias{readVcf,character,character,missing-method}
-\alias{readVcf,character,missing,missing-method}
+\alias{readVcf,character,missing,ANY-method}
 \alias{readVcf,TabixFile,character,ScanVcfParam-method}
+\alias{readVcf,TabixFile,character,RangedData-method}
+\alias{readVcf,TabixFile,character,RangesList-method}
+\alias{readVcf,TabixFile,character,GRanges-method}
 \alias{readVcf,TabixFile,character,missing-method}
-\alias{readVcf,TabixFile,missing,missing-method}
+\alias{readVcf,TabixFile,missing,ANY-method}
 
 
 \title{Read VCF files}
@@ -14,14 +20,21 @@
 
 \usage{
   \S4method{readVcf}{character,character,ScanVcfParam}(file, genome, param, ...)
+  \S4method{readVcf}{character,character,RangedData}(file, genome, param, ...)
+  \S4method{readVcf}{character,character,RangesList}(file, genome, param, ...)
+  \S4method{readVcf}{character,character,GRanges}(file, genome, param, ...)
   \S4method{readVcf}{character,character,missing}(file, genome, param, ...)
   \S4method{readVcf}{TabixFile,character,ScanVcfParam}(file, genome, param, ...)
+  \S4method{readVcf}{TabixFile,character,RangedData}(file, genome, param, ...)
+  \S4method{readVcf}{TabixFile,character,RangesList}(file, genome, param, ...)
+  \S4method{readVcf}{TabixFile,character,GRanges}(file, genome, param, ...)
   \S4method{readVcf}{TabixFile,character,missing}(file, genome, param, ...)
 }
 
 \arguments{
   \item{file}{The character() file name of the VCF file to be
-    processed, or an instance of class \code{\link{TabixFile}}.
+    processed, a \code{GRanges}, \code{RangedData}, \code{RangesList} or an 
+    instance of class \code{\link{TabixFile}}.
   }
   \item{genome}{The character() name of the genome the variants are mapped 
     to. This information is stored in the genome slot of the \code{seqinfo}
@@ -35,16 +48,41 @@
 }
 
 \details{
-  \code{readVcf} imports records from bzip compressed or uncompressed VCF 
-  files. Data are parsed into a \code{\linkS4class{VCF}} 
-  object using the VCF file header information if available. To import a
-  subset of records the VCF file must have a Tabix index file. An index
-  file can be created with \code{bzip} and \code{indexTabix} functions.
-  See examples below.
+  \describe{
+    \item{Data Import}{
+      \code{readVcf} imports records from bzip compressed or uncompressed VCF 
+      files. Data are parsed into a \code{\linkS4class{VCF}} 
+      object using the VCF file header information if available. To import a
+      subset of records the VCF file must have a Tabix index file. An index
+      file can be created with \code{bzip} and \code{indexTabix} functions.
+      See examples below.
 
-  The function calls \code{Rsamtools} \code{\link{scanVcf}}, and 
-  \code{\link{unpackVcf}} the details of which can be found with 
-  \code{?scanVcf} and \code{?unpackVcf}.
+      The function calls \code{Rsamtools} \code{\link{scanVcf}}, the details of 
+      which can be found with \code{?scanVcf}.
+    }
+    \item{Data Representation}{
+      Data from the INFO and FORMAT (GENO) fields in the VCF file are parsed
+      into a \code{vector}, \code{matrix}, \code{arrays} or 
+      \code{CompressedList} based on the 'Number' field in the header.
+
+      If 'Number' is 1, 'info' data are parsed into a \code{vector}. 'geno' 
+      data are parsed into a \code{matrix} where the columns are the samples.
+
+      If 'Number' is an integer >1, 'info' data are parsed into a
+      \code{DataFrame} with the same number of columns. The 'geno' data are
+      parsed into an \code{array} with the same dimentions as 'Number'. The 
+      columns of the 'geno' matrices are the samples.
+
+      If 'Number' is '.', 'A' or 'G', a \code{CompressedList} is used for both
+      'info' and 'geno' data. 
+    }
+    \item{Flat Format}{
+      When the \code{asGRanges} argument to \code{ScanVcfParam} is specified as 
+      'info' or 'geno', the return value is a 'long form' \code{GRanges} object. 
+      In this form, each row represents a variant with 'info' or 'geno' data
+      expanded in the elementMetadata columns.
+    }
+  }
 }
 
 \value{
@@ -63,6 +101,11 @@
       allele (REF). The \code{genome} argument is stored in the seqinfo 
       of the \code{GRanges} and can be accessed with 
       \code{genome(rowData(readVcf(file)))}.
+    }
+    \item{info:}{
+      Data from the INFO field of the VCF is parsed into a \code{DataFrame}.
+      Individual elements can be a \code{vector}, \code{CompressedList},
+      or an \code{array}.
     }
     \item{geno:}{
       If present, genomic data from the samples specified in the FORMAT field
@@ -118,7 +161,7 @@
   head(rowData(vcf), 5)
   unique(genome(rowData(vcf)))
 
-  ## Genotype data :
+  ## geno data :
   exptData(vcf)[["HEADER"]][["FORMAT"]]
   geno(vcf)
   head(geno(vcf)$GT)
@@ -154,6 +197,10 @@
   ## Subsetting on ranges, info and geno : 
   param <- ScanVcfParam(geno="HQ", info="AF", which=rngs)
   vcf <- readVcf(tab, "hg19", param)
+
+  ## Long form GRanges
+  param <- ScanVcfParam(asGRanges="info")
+  gr <- readVcf(vcfFile, "hg19", param)
 }
 
 \keyword{manip}

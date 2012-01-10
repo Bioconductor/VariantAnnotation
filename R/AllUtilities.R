@@ -4,7 +4,49 @@
 
 ## for readVcf :
 
-.VcfToSummarizedExperiment <- function(vcf, file, genome, ...)
+.VcfAsGRanges <- function(vcf, file, genome, param, ...)
+{
+    vcf <- vcf[[1]]
+    if (vcfAsGRanges(param) == "info")
+        dat <- vcf$INFO
+    else if (vcfAsGRanges(param) == "geno")
+        dat <- vcf$GENO
+    else
+        stop("asGRanges must be specified as 'info' or 'geno")
+ 
+    rowData <- .rowData(vcf, genome)
+    nvar <- length(rowData)
+    idx <- lapply(dat, function(elt, nvar) {
+               if (is.list(elt))
+                   elementLengths(elt)
+               else
+                   rep(1, nvar)
+           }, nvar) 
+    reps <- apply(do.call(cbind, idx), 1, max)
+
+    lst <- lapply(dat, function(elt, reps) {
+               if (is(elt, "array")) {
+                   slen <- rep(seq_len(length(reps)), reps)
+                   data.frame(elt)[slen, ]
+               } else if (is(elt, "list")) {
+                   mt <- elementLengths(elt) == reps
+                   newrep <- rep(1, length(mt))
+                   newrep[mt == FALSE] <- reps[mt == FALSE]
+                   unlist(rep(elt, newrep)) 
+               } else {
+                   rep(elt, reps)
+               }
+           }, reps)
+
+    DF <- DataFrame(do.call(cbind, lst))
+    colnames(DF) <- gsub(".X1", "", colnames(DF), fixed=TRUE)
+    gr <- rowData[rep(seq_len(length(rowData)), reps)]
+    values(gr) <- DF
+    gr 
+
+}
+
+.VcfAsSummarizedExperiment <- function(vcf, file, genome, ...)
 {
     vcf <- vcf[[1]]
     hdr <- scanVcfHeader(file)[[1]][["Header"]]
@@ -23,27 +65,17 @@
     }
 
     ## info 
-    if (length(vcf$INFO) > 0) {
-        info <- .parseINFO(vcf$INFO,  hdr[["INFO"]]) 
-    } else {
+    if (length(vcf$INFO) > 0)
+        info <- .parseINFO(vcf$INFO,  hdr[["INFO"]])
+    else 
         info <- list() 
-    }
 
-    ## rowdata
-    ref <- .toDNAStringSet(vcf$REF)
-    alt <- CharacterList(as.list(vcf$ALT))
-    meta <- DataFrame(REF=ref, ALT=alt, QUAL=vcf$QUAL, FILTER=vcf$FILTER)
-    rowData <- GRanges(seqnames=Rle(vcf$CHROM), 
-                       ranges=IRanges(start=vcf$POS, width=width(ref)))
-    values(rowData) <- meta
-    idx <- vcf$ID == "."
-    vcf$ID[idx] <- paste("chr", seqnames(rowData[idx]), ":", start(rowData[idx]), sep="") 
-    names(rowData) <- vcf$ID
-    genome(seqinfo(rowData)) <- genome
+    ## rowData
+    rowData <- .rowData(vcf, genome)
 
     ## colData
     if (length(vcf$GENO) > 0) {
-        sampleID <- colnames(vcf$GENO[[1]]) 
+        sampleID <- colnames(geno[[1]]) 
         samples <- length(sampleID) 
         colData <- DataFrame(
                      Samples=seq_len(samples),
@@ -55,6 +87,23 @@
     VCF(geno=SimpleList(geno), colData=colData, rowData=rowData, 
         exptData=SimpleList(HEADER=hdr), info=SimpleList(info))
 }
+
+.rowData <- function(vcf, genome, ...)
+{
+    ref <- .toDNAStringSet(vcf$REF)
+    ## FIXME: DNAStringSet when not structural
+    alt <- CharacterList(as.list(vcf$ALT))
+    meta <- DataFrame(REF=ref, ALT=alt, QUAL=vcf$QUAL, FILTER=vcf$FILTER)
+    rowData <- GRanges(seqnames=Rle(vcf$CHROM), 
+                       ranges=IRanges(start=vcf$POS, width=width(ref)))
+    values(rowData) <- meta
+    idx <- vcf$ID == "."
+    vcf$ID[idx] <- paste("chr", seqnames(rowData[idx]), ":", start(rowData[idx]), sep="") 
+    names(rowData) <- vcf$ID
+    genome(seqinfo(rowData)) <- genome
+    rowData
+}
+
 
 .toDNAStringSet <- function(x)
 {
