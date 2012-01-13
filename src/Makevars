@@ -1,0 +1,4 @@
+SAMVARS=$(shell echo 'cat(system.file("usretc", .Platform[["r_arch"]],\
+    "Rsamtools.mk", package="Rsamtools", mustWork=TRUE))' |\
+    "${R_HOME}/bin/R" --vanilla --slave)
+include $(SAMVARS)

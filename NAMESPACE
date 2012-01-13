@@ -1,20 +1,12 @@
 useDynLib(VariantAnnotation, .registration=TRUE)
 
 import(methods)
+import(Rsamtools)
 import(Biostrings)
 import(GenomicRanges)
 import(AnnotationDbi)
 
 importFrom(BiocGenerics, rbind, cbind, paste, order, lapply, sapply, mapply)
-
-#importFrom(Rsamtools, vcfInfo, vcfWhich, TabixFile, indexTabix)
-#importClassesFrom(Rsamtools, FaFile, ScanVcfParam, TabixFile)
-#importMethodsFrom(Rsamtools, path, scanFaIndex, scanVcf, scanVcfHeader,
-#                  ScanVcfParam, unpackVcf, bgzip)
-
-#importClassesFrom(AnnotationDbi, AnnotationDb)
-#importMethodsFrom(AnnotationDbi, as.list, colnames, cols, head, keys,
-#                  ncol, nrow, select)
 
 importClassesFrom(Biobase, ScalarCharacter)
 importFrom(Biobase, mkScalar, selectSome)

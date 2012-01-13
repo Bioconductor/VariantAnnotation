@@ -40,7 +40,7 @@
     to. This information is stored in the genome slot of the \code{seqinfo}
     associated with the \code{\linkS4class{GRanges}} object in \code{rowData}.
   }
-  \item{param}{A instance of \code{\link[Rsamtools]{ScanVcfParam}} 
+  \item{param}{A instance of \code{\linkS4class{ScanVcfParam}} 
     providing the desired ranges, info fields or geno fields to be parsed.
   }
   \item{\dots}{Additional arguments, passed to methods.
@@ -77,10 +77,11 @@
       'info' and 'geno' data. 
     }
     \item{Flat Format}{
-      When the \code{asGRanges} argument to \code{ScanVcfParam} is specified as 
-      'info' or 'geno', the return value is a 'long form' \code{GRanges} object. 
-      In this form, each row represents a variant with 'info' or 'geno' data
-      expanded in the elementMetadata columns.
+      When the \code{asGRanges} argument to \code{\linkS4class{ScanVcfParam}} 
+      is specified as \sQuote{info} or \sQuote{geno}, the return value is a 
+      'long form' \code{GRanges} object. In this form, each row represents a 
+      variant with 'info' or 'geno' data expanded in the elementMetadata 
+      columns.
     }
   }
 }
@@ -149,8 +150,8 @@
 }
 
 \examples{
-  vcfFile <- system.file("extdata", "ex1.vcf", package="VariantAnnotation") 
-  vcf <- readVcf(vcfFile, "hg19")
+  fl <- system.file("extdata", "ex1.vcf", package="VariantAnnotation") 
+  vcf <- readVcf(fl, "hg19")
 
   ## Header information is stored in exptData 
   vcf
@@ -174,33 +175,33 @@
   head(info(vcf)$DP)
 
   ## Selecting elements or ranges of data :
-  vcfFile <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
+  fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
 
   ## Range subsets :
-  ## Range subsets can be specified in the 'which' argument to ScanVcfParam().
+  ## Range subsets are specified in the 'which' argument to ScanVcfParam().
   ## When ranges are specified 'file' must have a Tabix index.
   rngs <- GRanges("20", IRanges(1110000, 1234600))
   param <- ScanVcfParam(which=rngs) 
-  compressVcf <- bgzip(vcfFile, tempfile())
+  compressVcf <- bgzip(fl, tempfile())
   idx <- indexTabix(compressVcf, "vcf")
   tab <- TabixFile(compressVcf, idx)
   vcf <- readVcf(tab, "hg19", param)
 
-  ## info or geno subsets :
+  ## 'info' or 'geno' subsets :
   ## A file index is not required if only info and geno fields are specified in 
   ## a ScanVcfParam object.
   param <- ScanVcfParam(geno=c("GT", "HQ"), info=c("NS", "AF"))
   vcf_tab <- readVcf(tab, "hg19", param)
-  vcf_fname <- readVcf(vcfFile, "hg19", param)
+  vcf_fname <- readVcf(fl, "hg19", param)
   identical(vcf_tab, vcf_fname) 
 
-  ## Subsetting on ranges, info and geno : 
+  ## Subsetting on ranges, 'info' and 'geno' : 
   param <- ScanVcfParam(geno="HQ", info="AF", which=rngs)
   vcf <- readVcf(tab, "hg19", param)
 
-  ## Long form GRanges
+  ## Long form GRanges with 'info'
   param <- ScanVcfParam(asGRanges="info")
-  gr <- readVcf(vcfFile, "hg19", param)
+  gr <- readVcf(fl, "hg19", param)
 }
 
 \keyword{manip}

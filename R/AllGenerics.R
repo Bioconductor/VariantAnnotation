@@ -29,6 +29,20 @@ setGeneric("writeVcf", signature = c("obj", "filename"),
     standardGeneric("writeVcf")
 )
 
+## scanVcf
+
+setGeneric("ScanVcfParam",
+           function(info=character(), geno=character(), trimEmpty=TRUE,
+                    which, asGRanges=character(), ...)
+           standardGeneric("ScanVcfParam"),
+           signature="which")
+
+setGeneric("scanVcfHeader",
+           function(file, ...) standardGeneric("scanVcfHeader"))
+
+setGeneric("scanVcf",
+           function(file, ..., param) standardGeneric("scanVcf"))
+
 ## VAFilter and VAFilterResult 
 
 setGeneric("name", 

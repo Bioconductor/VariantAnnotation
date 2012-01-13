@@ -2,7 +2,7 @@ Package:     VariantAnnotation
 Type:        Package
 Title:       Annotation of Genetic Variants 
 Description: Annotate variants with respect to location and amino acid coding 
-Version:     1.1.28
+Version:     1.1.29
 Author:      Michael Lawrence and Valerie Obenchain 
 Maintainer:  Valerie Obenchain <vobencha@fhcrc.org> 
 License:     Artistic-2.0 
@@ -10,10 +10,11 @@ biocViews:   DataImport, Sequencing, HighThroughputSequencing, SNP,
              AnnotationData, Genetics, Homo_sapiens
 Depends:     R (>= 2.8.0), methods, GenomicRanges (>= 1.7.9), 
              AnnotationDbi (>= 1.17.11), Biostrings (>= 2.23.4), 
-             Rsamtools (>= 1.7.14)
+             Rsamtools (>= 1.7.21)
 Imports:     methods, BiocGenerics (>= 0.1.0), IRanges (>= 1.13.5), 
-             Biobase (>= 2.15.1),
+             Biobase (>= 2.15.1), Rsamtools (>= 1.7.21),
              AnnotationDbi (>= 1.17.11), BSgenome, GenomicFeatures, snpStats, DBI
+LinkingTo:   Rsamtools
 Suggests:    RUnit, BSgenome.Hsapiens.UCSC.hg19, TxDb.Hsapiens.UCSC.hg19.knownGene, 
              SNPlocs.Hsapiens.dbSNP.20110815, SIFT.Hsapiens.dbSNP132,
              PolyPhen.Hsapiens.dbSNP131

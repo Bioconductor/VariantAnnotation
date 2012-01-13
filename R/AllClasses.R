@@ -1,5 +1,4 @@
 ## VCF 
-
 setClass("VCF",
     contains="SummarizedExperiment",
     representation(
@@ -29,6 +28,8 @@ setClass("VCF",
 }
 
 setValidity2("VCF", .valid.VCF)
+
+setClass("ScanVcfParam", contains="ScanBVcfParam")
 
 
 ## VAFilters 
