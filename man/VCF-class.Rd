@@ -11,21 +11,39 @@
 % Coercion methods:
 
 % Accessor methods:
+\alias{ref}
+\alias{ref,VCF-method}
+\alias{ref<-}
+\alias{ref<-,VCF,DNAStringSet-method}
+\alias{alt}
+\alias{alt,VCF-method}
+\alias{alt<-}
+\alias{alt<-,VCF,CharacterList-method}
+\alias{alt<-,VCF,DNAStringSetList-method}
+\alias{qual}
+\alias{qual,VCF-method}
+\alias{qual<-}
+\alias{qual<-,VCF,integer-method}
+\alias{filt}
+\alias{filt,VCF-method}
+\alias{filt<-}
+\alias{filt<-,VCF,character-method}
+\alias{fixedFields}
+\alias{fixedFields,VCF-method}
+\alias{fixedFields<-}
+\alias{fixedFields<-,VCF,DataFrame-method}
+\alias{fixed}
+\alias{fixed,VCF-method}
 \alias{info}
-\alias{info,VCF,missing-method}
-\alias{info,VCF,numeric-method}
-\alias{info,VCF,character-method}
+\alias{info,VCF-method}
 \alias{info<-}
-\alias{info<-,VCF,missing,list-method}
-\alias{info<-,VCF,missing,SimpleList-method}
-\alias{info<-,VCF,numeric,Vector-method}
-\alias{info<-,VCF,character,Vector-method}
+\alias{info<-,VCF,DataFrame-method}
 \alias{geno}
-\alias{geno,VCF,ANY-method}
-\alias{geno,VCF,missing-method}
+\alias{geno,VCF-method}
 \alias{geno<-}
-\alias{geno<-,VCF,ANY-method}
-\alias{geno<-,VCF,missing-method}
+\alias{geno<-,VCF,character,matrix-method}
+\alias{geno<-,VCF,numeric,matrix-method}
+\alias{geno<-,VCF,missing,SimpleList-method}
 
 % Subset methods
 \alias{[,VCF-method}
@@ -35,12 +53,12 @@
 % show method:
 \alias{show,VCF-method}
 
-\title{VCF instances - under construction -}
+\title{VCF instances}
 
 \description{
   The VCF class is an extension of the
-  \code{\linkS4class{SummarizedExperiment}-class} with an additional slot,
-  \code{info}, which contains a \code{SimpleList}.
+  \code{\linkS4class{SummarizedExperiment}-class} with two additional slots,
+  \code{info} and \code{fixedFields}.
 }
 
 \section{Extends}{
@@ -50,32 +68,64 @@
 \section{Constructor}{
   \describe{
     \item{}{
-      \code{VCF(geno = SimpleList(), 
-                rowData = GRanges(), 
-                colData = DataFrame(), 
-                exptData = SimpleList(), 
-                info = SimpleList(), ..., verbose = FALSE)
+      \code{VCF(rowData = GRanges(), colData = DataFrame(), exptData = SimpleList(), 
+                info = DataFrame(), fixedFields = DataFrame(), geno = SimpleList(), 
+                ..., verbose = FALSE)
       }
     }
   }
 }
 
 \section{Accessors}{
-  In the following code snippets \code{x} is a VCF object.
+  In the following code snippets \code{x} is a VCF object. All accessors except
+  \code{geno} return the specified data as elementMetadata column(s) of the
+  \code{rowData} \code{GRanges} object. The \code{geno} accessor returns
+  a \code{SimpleList}.
 
   \describe{
+    \item{}{
+      \code{ref(x)}, \code{ref(x) <- value}:
+
+      Returns or sets the reference allele data from the REF column of the VCF
+      file. \code{value} must be a \code{DNAStringSet}. 
+    }
+    \item{}{
+      \code{alt(x)}, \code{alt(x) <- value}:
+
+      Returns or sets the alternate allele data from the ALT column of the VCF
+      file. \code{value} can be a \code{DNAStringSet} or a \code{CharacterList}
+      (for a structural VCF file). 
+    }
+    \item{}{
+      \code{qual(x)}, \code{qual(x) <- value}:
+
+      Returns or sets the quality scores from the QUAL column of the VCF
+      file. \code{value} must be an \code{integer(1L)}.
+    }
+    \item{}{
+      \code{filt(x)}, \code{filt(x) <- value}:
+
+      Returns or sets the filter data from the FILTER column of the VCF
+      file. \code{value} must be a \code{character(1L)}.
+    }
+    \item{}{
+      \code{fixedFields(x)}, \code{fixedFields(x)}:
+
+      Returns or sets a \code{DataFrame} of the REF, ALT, QUAL, and FILTER fields 
+      from the VCF file. \code{value} must be a \code{DataFrame}.
+    }
+    \item{}{
+      \code{fixed(x)}:
+
+      Returns all fixed fields, REF, ALT, QUAL, FILTER and INFO. This is a 
+      convenience function only; there is no 'setter'.
+    }
     \item{}{
       \code{info(x)}, \code{info(x) <- value}:
 
       Returns or sets \code{info} data. Contains the information
       stored in the INFO field of a VCF file. \code{value} must be a 
-      \code{SimpleList}. An optional \code{withDimnames} argument
-      controls the return of dimnames (default = TRUE).
-
-      \code{info(x)[[i]]}, \code{info(x)[[i]] <- value}:
-
-      Returns or sets elements of info. \code{value} can be a \code{Vector},
-      \code{CompressedList} or \code{array}. 
+      \code{DataFrame}. 
     }
     \item{}{
       \code{geno(x)}, \code{geno(x) <- value}:
@@ -100,11 +150,11 @@
     \item{}{
       \code{rowData(x)}, \code{rowData(x) <- value}:
 
-      Returns or sets \code{rowData} data. Contains a \code{GRanges} of the 
-      first 7 required fields of a VCF file, CHROM, POS, ID, REF, ALT, QUAL and 
-      FILTER. REF, ALT, QUAL and FILTER are elementMetadata columns. 
-      \code{value} must be a \code{GRanges} with names representing the ID's
-      in the VCF file.
+      Returns or sets \code{rowData} data. Contains a \code{GRanges} constructed
+      from the CHROM, POS and ID fields of the VCF file. The ID's serve as the
+      \code{rownames}; if they are NULL, \code{rownames} are constructed from 
+      CHROM:POS. \code{value} must be a \code{GRanges} with names representing 
+      the ID's in the VCF file.
     }
     \item{}{
       \code{colData(x)}, \code{colData(x) <- value}:
@@ -140,10 +190,12 @@
       \code{colData}. This is equivalent to the \code{assays} argument
       in  \code{SummarizedExperiment}.
     }
-    \item{info}{A \code{SimpleList}. This slot is intended to
-      hold the fields from the INFO field of a VCF file. Each element of the
-      list must have the same number of rows which must match the number of
-      rows in \code{rowData}.
+    \item{info}{A \code{DataFrame} of data from the INFO field of a VCF file. 
+      The number of rows must match that in the \code{rowData} object.
+    }
+    \item{fixedFields}{A \code{DataFrame} of REF, ALT, QUAL and FILTER 
+      fields from a VCF file. The number of rows must match that
+      of the \code{rowData} object.
     }
     \item{rowData}{A \code{GRanges} instance describing the ranges of interest. 
       Row names, if present, become the row names of the \code{VCF}. The length 
@@ -159,8 +211,8 @@
     \item{...}{Additional arguments passed to methods. 
     }
     \item{withDimnames}{A \code{logical(1)}, indicating whether dimnames
-      should be applied to extracted assay elements. Applicable to \code{info}
-      and \code{geno} accessors only.
+      should be applied to extracted assay elements. Applicable to the 
+      \code{geno} accessor only.
     }
     \item{verbose}{A \code{logical(1)} indicating whether messages
       about data coercion during construction should be printed.
@@ -172,13 +224,17 @@
 \details{
   The \code{VCF} class is designed to hold data from a Variant Call Format (VCF) 
   file. The class extends \code{\linkS4class{SummarizedExperiment}} with the 
-  addition of a single slot, \code{info}. For a detailed description of the 
-  slots other than \code{info} see ?\code{SummarizedExperiment}.
+  addition of two slots, \code{info} and \code{fixedFields}. See 
+  ?\code{SummarizedExperiment} for a detailed description of the inherited
+  slots. 
 
   Slots unique to the \code{VCF} class,
   \describe{
-    \item{\code{info}}{A \link{SimpleList}-class instance containing
-      information from the INFO fields in a VCF file.
+    \item{\code{fixedFields}}{A \link{DataFrame} containing information from the 
+      REF, ALT, QUAL and FILTER fields from a VCF file.
+    }
+    \item{\code{info}}{A \link{DataFrame} containing information from the INFO 
+      fields from a VCF file.
     }
   }
 
@@ -217,7 +273,9 @@
 \examples{
   fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
   vcf <- readVcf(fl, "hg19")
- 
-  names(info(vcf))
-  identical(info(vcf)$AF, info(vcf)[[3]])
+
+  fixed(vcf)
+  info(vcf)
+  geno(vcf)
+  identical(geno(vcf)$DP, geno(vcf)[[3]])
 }

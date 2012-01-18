@@ -1,6 +1,6 @@
 \name{MatrixToSnpMatrix}
 \alias{MatrixToSnpMatrix}
-\alias{MatrixToSnpMatrix,matrix,GRanges-method}
+\alias{MatrixToSnpMatrix,matrix,DNAStringSet,DNAStringSetList-method}
 
 
 \title{Convert genotype calls from a VCF file to a SnpMatrix object}
@@ -10,16 +10,16 @@
   file to a \linkS4class{SnpMatrix}.
 }
 
-\usage{MatrixToSnpMatrix(callMatrix, mapGRanges, ...)}
+\usage{MatrixToSnpMatrix(callMatrix, ref, alt, ...)}
 
 \arguments{
   \item{callMatrix}{A \code{matrix} of genotype data from the "GT" FORMAT field 
     of a VCF file.  This \code{matrix} is created with a call to \code{readVcf}
     and can be accessed with \code{geno<VCF>}.
   }
-  \item{mapGRanges}{An optional \code{GRanges} with REF and ALT allele information
-    in the elementMetadata. This \code{GRanges} is located in the \code{rowData} 
-    slot of the \code{VCF} produced by a call to \code{readVcf}. 
+  \item{ref}{A \code{DNAStringSet} of reference alleles.
+  }
+  \item{alt}{A \code{DNAStringSetList} of alternate alleles. 
   }
   \item{\dots}{Additional arguments, passed to methods.
   }
@@ -81,8 +81,9 @@
   ## GRanges with the map information is in the rowData slot.
   geno(vcf)
   calls <- geno(vcf)$GT
-  mapgr <- rowData(vcf)
-  MatrixToSnpMatrix(calls, mapgr)
+  a0 <- values(ref(vcf))[["REF"]]
+  a1 <- values(alt(vcf))[["ALT"]]
+  MatrixToSnpMatrix(calls, a0, a1)
 }
 
 \keyword{manip}

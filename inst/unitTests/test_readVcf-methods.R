@@ -11,29 +11,28 @@ test_readVcf_format <- function()
 
     ## duplicate header lines, missing INFO
     vcf <- suppressWarnings(readVcf(f3, "hg19"))
-    checkTrue(length(info(vcf)) == 1L)
+    checkTrue(ncol(values(info(vcf))) == 1L)
+    checkTrue(class(values(alt(vcf))[["ALT"]]) == "DNAStringSetList")
 
     ## structural 
     vcf <- readVcf(st, "hg19")
-    checkTrue(class(rowData(vcf)) == "GRanges")
+    checkTrue(class(values(alt(vcf))[["ALT"]]) == "CompressedCharacterList")
 }
 
 test_readVcf_accessors <- function()
 {
     vcf <- readVcf(f2, "hg19")
     checkTrue(class(rowData(vcf)) == "GRanges")
-    checkTrue(class(assays(vcf)) == "SimpleList")
     checkTrue(class(exptData(vcf)) == "SimpleList")
     checkTrue(class(colData(vcf)) == "DataFrame")
-
+    checkTrue(class(assays(vcf)) == "SimpleList")
     checkTrue(class(geno(vcf)) == "SimpleList")
     checkIdentical(assays(vcf), geno(vcf))
 
-    checkTrue(class(info(vcf)) == "SimpleList")
-    checkTrue(class(info(vcf)$AF) == "CompressedNumericList")
+    checkTrue(class(values(info(vcf))) == "DataFrame")
+    checkTrue(class(values(info(vcf))[["AF"]]) == "CompressedNumericList")
     AF <- NumericList(0.5, 0.017, c(0.333,0.667), NA, NA)
-    names(AF) <- rownames(vcf)
-    checkIdentical(info(vcf)$AF, AF) 
+    checkIdentical(values(info(vcf))[["AF"]], AF) 
 
     checkIdentical("hg19", unique(genome(rowData(vcf)))) 
 }
@@ -41,7 +40,7 @@ test_readVcf_accessors <- function()
 test_readVcf_ranges <- function()
 {
     vcf <- readVcf(f1, "hg19")
-    checkEquals(width(rowData(vcf)), width(values(rowData(vcf))[["REF"]]))
+    checkEquals(width(rowData(vcf)), width(values(ref(vcf))[["REF"]]))
     checkEquals(scanVcf(f1)[[1]]$POS, start(rowData(vcf))) 
 }
 
@@ -61,8 +60,8 @@ test_readVcf_param <- function()
     i <- inms[c(1,4)]
     param <- ScanVcfParam(info=i)
     vcf <- readVcf(f2, "hg19", param=param)
-    checkTrue(length(names(info(vcf))) == length(i))
-    checkTrue(all(names(info(vcf)) %in% i))
+    checkTrue(ncol(values(info(vcf))) == length(i))
+    checkTrue(all(names(values(info(vcf))) %in% i))
 
     ## geno, info
     param <- ScanVcfParam()
@@ -80,7 +79,7 @@ test_readVcf_param <- function()
     idx <- indexTabix(compressVcf, "vcf")
     tab <- TabixFile(compressVcf, idx)
     vcf <- readVcf(tab, "hg19", param=param)
-    checkTrue(all(names(info(vcf)) %in% i))
+    checkTrue(all(names(values(info(vcf))) %in% i))
     checkTrue(all(names(geno(vcf)) %in% g))
     checkTrue(length(rowData(vcf)) == 3)
 }

@@ -56,7 +56,7 @@ setMethod("select", "PolyPhenDb",
     ## restore order
     missing <- (!keys %in% as.character(raw$RSID))
     if (any(missing))
-        warning(paste("keys not found in database : ", keys[missing],
+        warning(paste("key not found in database : ", keys[missing],
                       "\n", sep=""))
 
     lst <- lapply(keys[!missing], 

@@ -85,12 +85,12 @@ setMethod(readVcf, c(file="character", genome="missing", param="ANY"),
 .readVcf <- function(file, genome, param, ...)
 {
     if (missing(param)) {
-        .VcfAsSummarizedExperiment(scanVcf(file), file, genome)
+        .scanVcfToVCF(scanVcf(file), file, genome)
     } else {
         if (!identical(character(), vcfAsGRanges(param)))
-            .VcfAsGRanges(scanVcf(file, param=param), file, genome, param)
+            .scanVcfToLongGRanges(scanVcf(file, param=param), file, genome, param)
         else
-            .VcfAsSummarizedExperiment(scanVcf(file, param=param), file, genome)
+            .scanVcfToVCF(scanVcf(file, param=param), file, genome)
     }
 }
 

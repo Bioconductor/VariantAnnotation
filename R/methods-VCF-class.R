@@ -8,127 +8,158 @@
 ##
 
 VCF <-
-    function(geno=SimpleList(), rowData=GRanges(), colData=DataFrame(), 
-             exptData=SimpleList(), info=SimpleList(),
+    function(rowData=GRanges(), colData=DataFrame(), exptData=SimpleList(), 
+             fixedFields=DataFrame(), info=DataFrame(), geno=SimpleList(),
              ..., verbose=FALSE)
 {
-    info <- endoapply(info, function(elt) {
-              if (is.null(dim(elt))) {
-                  names(elt) <- NULL 
-                  elt
-              } else {
-                  rownames(elt) <- NULL
-                  elt 
-              }})
+    rownames(info) <- rownames(fixedFields) <- NULL
     sx <- SummarizedExperiment(assays=geno, rowData=rowData,
                                colData=colData, exptData=exptData,
                                verbose=verbose)
-    new("VCF", sx, info=info, ...)
+    new("VCF", sx, info=info, fixedFields=fixedFields, ...)
  }
  
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## Getters and Setters
 ##
 
-## info
-setMethod(info, c("VCF", "missing"),
-    function(x, i, ..., withDimnames=TRUE)
+## ref 
+setMethod("ref", "VCF", 
+    function(x) 
 {
-    if (withDimnames) {
-        endoapply(slot(x, "info"), function(elt, nms) {
-            if (is.null(dim(elt))) {
-                names(elt) <- nms
-                elt
-            } else {
-                rownames(elt) <- nms
-                elt
-           }
-        }, nms=rownames(x))
-    } 
-    else
-        slot(x, "info")
+    gr <- rowData(x)
+    values(gr) <- DataFrame(REF=slot(x, "fixedFields")$REF)
+    gr
 })
 
-setMethod(info, c("VCF", "numeric"),
-    function(x, i, ..., withDimnames=TRUE)
+setReplaceMethod("ref", c("VCF", "DNAStringSet"),
+    function(x, value)
 {
-    msg <- 'info(<VCF>, i="numeric", ...) invalid subscript "i"'
-    tryCatch({
-        info(x, ...)[[i]]
-    }, error=function(err) {
-        stop(msg, "\n", conditionMessage(err))
-    })
-})
-
-setMethod(info, c("VCF", "character"),
-    function(x, i = names(x)[1], ..., withDimnames=TRUE)
-{
-    msg <- 'info(<VCF>, i="character", ...) invalid subscript "i"'
-    res <-
-        tryCatch({
-            info(x, ...)[[i]]
-        }, error=function(err) {
-            stop(msg, "\n", conditionMessage(err))
-        })
-    if (is.null(res))
-        stop(msg, "\n    '", i, "' not in names(info(<VCF>))")
-    res
-})
-
-setReplaceMethod("info", c("VCF", "missing", "SimpleList"),
-    function(x, i, ..., value)
-{
-    initialize(x, ..., info=value)
-})
-
-setReplaceMethod("info", c("VCF", "missing", "list"),
-    function(x, i, ..., value)
-{
-    ## FIXME : why lapply over VCF object?
-    value <- lapply(x, "names<-", NULL)
-    initialize(x, ..., info=SimpleList(value))
-})
-
-setReplaceMethod("info", c("VCF", "numeric", "Vector"),
-    function(x, i = 1, ..., value)
-{
-    info(x, ...)[[i]] <- value
+    slot(x, "fixedFields")$REF <- value
     x
 })
 
-setReplaceMethod("info", c("VCF", "character", "Vector"),
-    function(x, i = names(x)[1], ..., value)
+## alt 
+setMethod("alt", "VCF", 
+    function(x) 
 {
-    info(x, ...)[[i]] <- value
+    gr <- rowData(x)
+    values(gr) <- DataFrame(ALT=slot(x, "fixedFields")$ALT)
+    gr
+})
+
+setReplaceMethod("alt", c("VCF", "CharacterList"),
+    function(x, value)
+{
+    slot(x, "fixedFields")$ALT <- value
     x
 })
 
+setReplaceMethod("alt", c("VCF", "DNAStringSetList"),
+    function(x, value)
+{
+    slot(x, "fixedFields")$ALT <- value
+    x
+})
+
+## qual 
+setMethod("qual", "VCF", 
+    function(x) 
+{
+    gr <- rowData(x)
+    values(gr) <- DataFrame(QUAL=slot(x, "fixedFields")$QUAL)
+    gr
+})
+
+setReplaceMethod("qual", c("VCF", "integer"),
+    function(x, value)
+{
+    slot(x, "fixedFields")$QUAL <- value
+    x
+})
+
+## filt
+setMethod("filt", "VCF", 
+    function(x) 
+{
+    gr <- rowData(x)
+    values(gr) <- DataFrame(FILTER=slot(x, "fixedFields")$FILTER)
+    gr
+})
+
+setReplaceMethod("filt", c("VCF", "character"),
+    function(x, value)
+{
+    slot(x, "fixedFields")$FILTER <- value
+    x
+})
+
+## fixedFields 
+setMethod("fixedFields", "VCF", 
+    function(x) 
+{
+    gr <- rowData(x)
+    values(gr) <- slot(x, "fixedFields")
+    gr
+})
+
+setReplaceMethod("filt", c("VCF", "character"),
+    function(x, value)
+{
+    ## FIXME: validity method
+    slot(x, "fixedFields") <- value
+    x
+})
+
+## fixed
+setMethod("fixed", "VCF", 
+    function(x) 
+{
+    gr <- rowData(x)
+    values(gr) <- DataFrame(slot(x, "fixedFields"), slot(x, "info"))
+    gr
+})
+
+## info 
+setMethod("info", "VCF", 
+    function(x) 
+{
+    gr <- rowData(x)
+    values(gr) <- slot(x, "info")
+    gr
+})
+
+setReplaceMethod("info", c("VCF", "DataFrame"),
+    function(x, value)
+{
+    slot(x, "info") <- value
+    x
+})
 
 ## geno
-setMethod(geno, c("VCF", "missing"),
-    function(x, i, ..., withDimnames=TRUE)
+setMethod("geno", "VCF",
+    function(x, ..., withDimnames = TRUE)
 {
     assays(x, ..., withDimnames=withDimnames) 
 })
 
-setMethod(geno, c("VCF", "ANY"),
-    function(x, i, ..., withDimnames=TRUE)
-{
-    assay(x, i, ...) 
-})
-
-setReplaceMethod("geno", c("VCF", "missing", "ANY"),
+setReplaceMethod("geno", c("VCF", "character", "matrix"),
     function(x, i, ..., value)
 {
-    assays(x, ..., value=value)
+    assay(x, i, ..., value=value)
 })
 
-setReplaceMethod("geno", c("VCF", "ANY", "ANY"),
+setReplaceMethod("geno", c("VCF", "numeric", "matrix"),
     function(x, i, ..., value)
 {
-    assays(x, i, ..., value=value)
+    assay(x, i, ..., value=value)
 })
 
+setReplaceMethod("geno", c("VCF", "missing", "SimpleList"),
+    function(x, i, ..., value)
+{
+    assay(x, ..., value=value)
+})
 
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## Subsetting 
@@ -152,17 +183,13 @@ setReplaceMethod("geno", c("VCF", "ANY", "ANY"),
                   else
                      elt[i, j, drop=FALSE]
               })
-    info <- endoapply(info(x, withDimnames=FALSE), function(elt) {
-                  if (class(elt) == "array")
-                     elt[i, , , drop=FALSE]
-                  else
-                     elt[i, drop=FALSE]
-              })
  
     initialize(x, 
                rowData=rowData(x)[i,,drop=FALSE],
                colData=colData(x)[j,,drop=FALSE],
-               assays=geno, info=info)
+               assays=geno, 
+               info=values(info(x))[i,],
+               fixedFields=values(fixedFields(x))[i,])
 }
 
 setMethod("[", c("VCF", "ANY", "ANY"),
@@ -214,16 +241,14 @@ setMethod("[", c("VCF", "ANY", "ANY"),
                       x
                    }, x=a, value=v, ...)
                }), info=local({
-                   ii <- info(x, withDimnames=FALSE)
-                   v <- info(value, withDimnames=FALSE)
-                   mendoapply(function(x, ..., value) {
-                      if (class(x) == "array")
-                         x[i, , ] <- value
-                      else
-                         x[i] <- value
-                      x
-                   }, x=ii, value=v, ...)
-               }))
+                   ii <- values(info(x))
+                   ii[i,] <- values(info(value))
+                   ii 
+               }), fixedFields=local({
+                   ff <- values(fixedFields(x)) 
+                   ff[i,] <- values(fixedFields(value)) 
+                   ff})
+              )
 }
 
 setReplaceMethod("[",
@@ -258,18 +283,27 @@ setMethod(show, "VCF",
     }
     cat("class:", class(object), "\n")
     cat("dim:", dim(object), "\n")
+
     expt <- names(exptData(object))
     if (is.null(expt))
         expt <- character(length(exptData(object)))
     scat("exptData(%d): %s\n", expt)
-    info <- names(info(object, withDimnames=FALSE))
+
+    fixed <- names(values(fixedFields(object)))
+    if (is.null(fixed))
+        fixed <- character(ncol(values(fixedFields(object))))
+    scat("fixedFields(%d): %s\n", fixed)
+
+    info <- names(values(info(object)))
     if (is.null(info))
-        info <- character(length(info(object, withDimnames=FALSE)))
+        info <- character(ncol(values(info(object))))
     scat("info(%d): %s\n", info)
+
     nms <- names(geno(object, withDimnames=FALSE))
     if (is.null(nms))
         nms <- character(length(geno(object, withDimnames=FALSE)))
     scat("geno(%d): %s\n", nms)
+
     dimnames <- dimnames(object)
     dlen <- sapply(dimnames, length)
     if (dlen[[1]]) scat("rownames(%d): %s\n", dimnames[[1]])

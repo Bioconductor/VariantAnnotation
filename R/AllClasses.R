@@ -2,29 +2,18 @@
 setClass("VCF",
     contains="SummarizedExperiment",
     representation(
-        info="SimpleList"
+        fixedFields="DataFrame",
+        info="DataFrame"
     ),
 )
 
 .valid.VCF <- function(x)
 {
-    ## FIXME : constraint for Vector, CompressedList, matrix, array
-    msg <- NULL
-    msg1 <- c("length of info(<VCF>)[[%d]] does not match dim(<VCF>)[1]")
-
     xlen <- dim(x)[1]
-    for (i in seq_len(length(info(x)))) {
-        if (class(info(x, i)) == "array")
-            len <- dim(info(x, i))[1]
-        else
-            len <- length(info(x, i))
-
-        if (len != xlen) {
-            msg <- c(msg, sprintf(msg1, i))
-            next 
-        }
-    }
-    msg 
+    if (nrow(values(fixedFields(x))) != xlen)
+        stop("'fixedFields' must have the same number of rows as 'rowData'")
+    if (nrow(values(info(x))) != xlen)
+        stop("'info' must have the same number of rows as 'rowData'")
 }
 
 setValidity2("VCF", .valid.VCF)

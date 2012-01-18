@@ -82,9 +82,7 @@
   rd <- rowData(vcf)
   seqlevels(rd) <- paste("chr", seqlevels(rd), sep="")
 
-  loc <- locateVariants(
-           query=rd, 
-           subject=txdb19)
+  loc <- locateVariants(query=rd, subject=txdb19)
 
   ## Location for all variant-transcript matches
   table(loc$Location)

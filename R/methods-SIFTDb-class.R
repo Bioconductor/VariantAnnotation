@@ -49,7 +49,7 @@ setMethod("select", "SIFTDb",
         fmtkeys <- gsub("rs", "", keys, fixed=TRUE)
         missing <- (!fmtkeys %in% as.character(raw$RSID))
         if (any(missing))
-            warning(paste("keys not found in database : ", keys[missing], 
+            warning(paste("key not found in database : ", keys[missing], 
                           "\n", sep="")) 
         reorder <- match(fmtkeys[!missing], as.character(raw$RSID))
         raw <- raw[reorder, ]

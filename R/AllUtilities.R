@@ -4,7 +4,7 @@
 
 ## for readVcf :
 
-.VcfAsGRanges <- function(vcf, file, genome, param, ...)
+.scanVcfToLongGRanges <- function(vcf, file, genome, param, ...)
 {
     vcf <- vcf[[1]]
     if (vcfAsGRanges(param) == "info")
@@ -12,95 +12,106 @@
     else if (vcfAsGRanges(param) == "geno")
         dat <- vcf$GENO
     else
-        stop("asGRanges must be specified as 'info' or 'geno")
+        stop("asGRanges must be specified as 'info' or 'geno'")
  
-    rowData <- .rowData(vcf, genome)
-    nvar <- length(rowData)
-    idx <- lapply(dat, function(elt, nvar) {
+    ref <- .toDNAStringSet(vcf$REF)
+    rowData <- GRanges(seqnames=Rle(vcf$CHROM), 
+        ranges=IRanges(start=vcf$POS, width=width(ref)))
+    rowData <- .rowDataNames(vcf, rowData)
+
+    eltrep <- lapply(dat, function(elt, dim0) {
                if (is.list(elt))
                    elementLengths(elt)
                else
-                   rep(1, nvar)
-           }, nvar) 
-    reps <- apply(do.call(cbind, idx), 1, max)
-
-    lst <- lapply(dat, function(elt, reps) {
-               if (is(elt, "array")) {
-                   slen <- rep(seq_len(length(reps)), reps)
-                   data.frame(elt)[slen, ]
-               } else if (is(elt, "list")) {
-                   mt <- elementLengths(elt) == reps
-                   newrep <- rep(1, length(mt))
-                   newrep[mt == FALSE] <- reps[mt == FALSE]
-                   unlist(rep(elt, newrep)) 
-               } else {
-                   rep(elt, reps)
-               }
-           }, reps)
-
-    DF <- DataFrame(do.call(cbind, lst))
-    colnames(DF) <- gsub(".X1", "", colnames(DF), fixed=TRUE)
-    gr <- rowData[rep(seq_len(length(rowData)), reps)]
-    values(gr) <- DF
+                   rep(1, dim0)
+           }, dim0=length(rowData)) 
+    maxrep <- apply(do.call(cbind, eltrep), 1, max)
+    unwind <- .unwind(length(rowData), maxrep, dat)
+    gr <- rowData[rep(seq_len(length(rowData)), maxrep)]
+    values(gr) <- unwind 
     gr 
-
 }
 
-.VcfAsSummarizedExperiment <- function(vcf, file, genome, ...)
+.unwind <- function(rep0, rep1, lst, ...)
+{
+   ll <- lapply(lst, function(elt, rep1) {
+              if (is(elt, "list")) {
+                  mt <- elementLengths(elt) == rep1 
+                  newrep <- rep(1, length(mt))
+                  newrep[mt == FALSE] <- rep1[mt == FALSE]
+                  unlist(rep(elt, newrep), use.names=FALSE) 
+              } else if (is(elt, "array")) {
+                  slen <- rep(seq_len(length(rep1)), rep1)
+                  matrix(elt, ncol=dim(elt)[3])[slen, ]
+              } else {
+                  rep(elt, rep1)
+              }
+          }, rep1)
+
+    ## FIXME: why can't DF go in list via lapply above
+    idx <- which(lapply(lst, class) == "array") 
+    if (length(idx) != 0)
+        for (i in idx) 
+            ll[[i]] <- DataFrame(I(ll[[i]]))
+    DF <- DataFrame(ll)
+    names(DF) <- names(lst)
+    DF
+}
+
+
+.scanVcfToVCF <- function(vcf, file, genome, ...)
 {
     vcf <- vcf[[1]]
     hdr <- scanVcfHeader(file)[[1]][["Header"]]
 
-    ## geno 
-    if (length(vcf$GENO) > 0) {
-        geno <- lapply(vcf$GENO, 
-            function(elt) {
-                if (is.list(elt))
-                    do.call(rbind, elt) 
-                else
-                    elt
-            })
-    } else {
-        geno <- list() 
-    }
+    ## fixed fields
+    structural <- grep("<", vcf$ALT, fixed=TRUE)
+    if (!identical(integer(0), structural))
+        alt <- CharacterList(as.list(vcf$ALT))
+    else
+        alt <- .toDNAStringSetList(vcf$ALT)
 
-    ## info 
-    if (length(vcf$INFO) > 0)
-        info <- .parseINFO(vcf$INFO,  hdr[["INFO"]])
-    else 
-        info <- list() 
+    ref <- .toDNAStringSet(vcf$REF)
+    fixedFields <- DataFrame(REF=ref, ALT=alt, QUAL=vcf$QUAL, FILTER=vcf$FILTER)
 
     ## rowData
-    rowData <- .rowData(vcf, genome)
+    rowData <- GRanges(seqnames=Rle(vcf$CHROM), ranges=IRanges(start=vcf$POS, 
+        width=width(ref)))
+    rowData <- .rowDataNames(vcf, rowData)
+    genome(seqinfo(rowData)) <- genome
+
+    ## geno
+    if (length(vcf$GENO) > 0) 
+        geno <- lapply(vcf$GENO, function(elt) {
+                    if (is.list(elt))
+                        do.call(rbind, elt) 
+                    else
+                        elt
+                    })
+    else 
+        geno <- list() 
+
+    ## info 
+    info <- .formatInfo(vcf$INFO,  hdr[["INFO"]])
 
     ## colData
     if (length(vcf$GENO) > 0) {
-        sampleID <- colnames(geno[[1]]) 
-        samples <- length(sampleID) 
-        colData <- DataFrame(
-                     Samples=seq_len(samples),
-                     row.names=sampleID)
+        samples <- colnames(geno[[1]]) 
+        colData <- DataFrame(Samples=seq_len(length(samples)), row.names=samples)
     } else {
         colData <- DataFrame(Samples=character(0))
     }
 
-    VCF(geno=SimpleList(geno), colData=colData, rowData=rowData, 
-        exptData=SimpleList(HEADER=hdr), info=SimpleList(info))
+    VCF(rowData=rowData, colData=colData, exptData=SimpleList(HEADER=hdr), 
+        fixedFields=fixedFields, info=DataFrame(info), geno=SimpleList(geno))
 }
 
-.rowData <- function(vcf, genome, ...)
+.rowDataNames <- function(vcf, rowData, ...)
 {
-    ref <- .toDNAStringSet(vcf$REF)
-    ## FIXME: DNAStringSet when not structural
-    alt <- CharacterList(as.list(vcf$ALT))
-    meta <- DataFrame(REF=ref, ALT=alt, QUAL=vcf$QUAL, FILTER=vcf$FILTER)
-    rowData <- GRanges(seqnames=Rle(vcf$CHROM), 
-                       ranges=IRanges(start=vcf$POS, width=width(ref)))
-    values(rowData) <- meta
     idx <- vcf$ID == "."
-    vcf$ID[idx] <- paste("chr", seqnames(rowData[idx]), ":", start(rowData[idx]), sep="") 
+    vcf$ID[idx] <- paste("chr", seqnames(rowData[idx]), ":", 
+        start(rowData[idx]), sep="") 
     names(rowData) <- vcf$ID
-    genome(seqinfo(rowData)) <- genome
     rowData
 }
 
@@ -113,21 +124,40 @@
     DNAStringSet(ulist)
 }
 
-.newCompressedList <- IRanges:::newCompressedList
-.parseINFO <- function(x, hdr)
+.toDNAStringSetList <- function(x)
 {
+    dna <- .toDNAStringSet(x)
+    idx <- elementLengths(strsplit(x, ","))
+    pbw <- PartitioningByWidth(idx)
+    IRanges:::newCompressedList("DNAStringSetList",
+        unlistData=dna, end=end(pbw))
+}
+
+.newCompressedList <- IRanges:::newCompressedList
+.formatInfo <- function(x, hdr)
+{
+    if (is.null(hdr))
+        return(CharacterList(as.list(x[[1]])))
+
     type <- hdr$Type[match(names(x), rownames(hdr))] 
     idx <- which(lapply(x, is.list) == TRUE)
     if (length(idx) != 0) {
         for (i in idx) {
-           x[[i]] <- switch(type[[i]],
-               Integer = .newCompressedList("CompressedIntegerList", x[[i]]), 
-               Float = .newCompressedList("CompressedNumericList", x[[i]]), 
-               String = .newCompressedList("CompressedCharacterList", x[[i]]), 
-               Logical = .newCompressedList("CompressedLogicalList", x[[i]])) 
+            x[[i]] <- switch(type[[i]],
+                Integer = .newCompressedList("CompressedIntegerList", x[[i]]), 
+                Float = .newCompressedList("CompressedNumericList", x[[i]]), 
+                String = .newCompressedList("CompressedCharacterList", x[[i]]), 
+                Logical = .newCompressedList("CompressedLogicalList", x[[i]])) 
         }
     }
-    x
+    ## FIXME: should C return matrices only
+    idx <- which(lapply(x, is.array) == TRUE)
+    if (length(idx) != 0)
+        for (i in idx) 
+            x[[i]] <- DataFrame(I(matrix(x[[i]], ncol=dim(x[[i]])[3])))
+    DF <- DataFrame(x)
+    names(DF) <- names(x)
+    DF 
 }
 
 .listCumsum <- function(x) {

@@ -91,13 +91,26 @@ exptData(vcf)[["HEADER"]]
 exptData(vcf)[["HEADER"]][["META"]]
 @
 
-The CHROM, POS, ID, REF, ALT, QUAL and FILTER fields of the VCF file are parsed 
+The CHROM, POS, and ID fields of the VCF file are parsed 
 into a \Robject{GRanges} object in the \Rcode{rowData} slot. 
 
 <<readVCF_rowData>>=
 head(exptData(vcf)[["HEADER"]][["INFO"]], 3)
 head(rowData(vcf), 3)
 @
+
+Individual fields of REF, ALT, QUAL, FILTER and INFO can be viewed individually 
+with the \Rcode{rowData} using the \Rcode{ref}, \Rcode{alt}, \Rcode{qual},
+\Rcode{filt} and \Rcode{info} accessors. All fixed fields can be viewed together
+with the \Rcode{fixed} accessor.
+
+<<fixedAccessors>>=
+head(ref(vcf))
+head(filt(vcf))
+
+head(fixed(vcf), 3)
+@
+
 
 The genotype data described in the \Rcode{FORMAT} fields is parsed into 
 matrices or arrays and can be accessed with the \Rcode{geno} accessor.
@@ -120,9 +133,10 @@ which variants were set to NA due to the criteria specified at
 <<snpMatrix>>=
 ## Genotypes have been parsed into the "GT" matrix
 calls <- geno(vcf)$GT
-mapgr <- rowData(vcf)
+a0 <- values(ref(vcf))[["REF"]]
+a1 <- values(alt(vcf))[["ALT"]] 
 
-MatrixToSnpMatrix(calls, mapgr)
+MatrixToSnpMatrix(calls, a0, a1)
 @
 
 \section{Location of variants with respect to gene function}
@@ -263,9 +277,11 @@ pair and the ALT values are a DNAStringSet as required by
 \Rfunction{predictCoding}.
 
 <<flatten>>=
-## expand the ALT column and convert to DNAStringSet
-rdflat <- rep(rd, elementLengths(values(rd)[["ALT"]]))
-values(rdflat) <- DataFrame(ALT=DNAStringSet(unlist(values(rd)[["ALT"]])))
+## expand the ALT column
+ALT <- alt(vcf)
+flat <- rep(ALT, elementLengths(values(ALT)[["ALT"]]))
+seqlevels(flat) <- paste("chr", seqlevels(flat), sep="")
+values(flat) <- DataFrame(ALT=unlist(values(ALT)[["ALT"]]))
 @
 
 We use a \Robject{BSgenome} as our sequence source but could have also used
@@ -274,10 +290,10 @@ an appropriate fasta file.
 <<aacoding>>=
 library(BSgenome.Hsapiens.UCSC.hg19)
 aacoding <- predictCoding(
-              query=rdflat, 
-              subject=txdb19, 
-              seqSource=Hsapiens, 
-              varAllele="ALT")
+                query=flat, 
+                subject=txdb19, 
+                seqSource=Hsapiens, 
+                varAllele="ALT")
 @
 
 The result is a \Robject{DataFrame} with one row for each variant-transcript 
@@ -392,6 +408,8 @@ head(keys(SIFT.Hsapiens.dbSNP132))
 ## list available columns
 cols(SIFT.Hsapiens.dbSNP132)
 
+## select a subset of columns
+## a warning is thrown when a key is not found in the database
 subst <- c("RSID", "PREDICTION", "SCORE", "AACHANGE", "PROTEINID")
 sift <- select(SIFT.Hsapiens.dbSNP132, keys=rsids, cols=subst)
 head(sift)

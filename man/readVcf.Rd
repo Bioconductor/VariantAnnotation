@@ -68,10 +68,10 @@
       If 'Number' is 1, 'info' data are parsed into a \code{vector}. 'geno' 
       data are parsed into a \code{matrix} where the columns are the samples.
 
-      If 'Number' is an integer >1, 'info' data are parsed into a
-      \code{DataFrame} with the same number of columns. The 'geno' data are
+      If 'Number' is an integer >1, \sQuote{info} data are parsed into a
+      \code{DataFrame} with the same number of columns. \sQuote{geno} data are
       parsed into an \code{array} with the same dimentions as 'Number'. The 
-      columns of the 'geno' matrices are the samples.
+      columns of the \sQuote{geno} matrices are the samples.
 
       If 'Number' is '.', 'A' or 'G', a \code{CompressedList} is used for both
       'info' and 'geno' data. 
@@ -79,9 +79,9 @@
     \item{Flat Format}{
       When the \code{asGRanges} argument to \code{\linkS4class{ScanVcfParam}} 
       is specified as \sQuote{info} or \sQuote{geno}, the return value is a 
-      'long form' \code{GRanges} object. In this form, each row represents a 
-      variant with 'info' or 'geno' data expanded in the elementMetadata 
-      columns.
+      'long form' \code{GRanges} object instead of a \code{VCF} object. In 
+      this form, each row represents a variant with the \sQuote{info} or
+      \sQuote{geno} data expanded in the metadata columns.
     }
   }
 }
@@ -153,26 +153,30 @@
   fl <- system.file("extdata", "ex1.vcf", package="VariantAnnotation") 
   vcf <- readVcf(fl, "hg19")
 
-  ## Header information is stored in exptData 
+  ## Header and genome information 
   vcf
   exptData(vcf)[["HEADER"]]
-
-  ## The GRanges in rowData contains the first 7 required VCF fields
-  ## and the genome information
-  head(rowData(vcf), 5)
   unique(genome(rowData(vcf)))
 
-  ## geno data :
+  ## Accessors :
+  ## Fixed fields together
+  head(fixedFields(vcf), 5)
+
+  ## Fixed fields separately 
+  exptData(vcf)[["HEADER"]][["INFO"]]
+  info(vcf)
+  values(info(vcf))[["DP"]]
+
+  filt(vcf)
+  ref(vcf) 
+
+  ## geno data 
   exptData(vcf)[["HEADER"]][["FORMAT"]]
   geno(vcf)
   head(geno(vcf)$GT)
 
   identical(geno(vcf)[["GQ"]], geno(vcf)$GQ)
 
-  ## info data :
-  exptData(vcf)[["HEADER"]][["INFO"]]
-  names(info(vcf))
-  head(info(vcf)$DP)
 
   ## Selecting elements or ranges of data :
   fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
@@ -188,8 +192,7 @@
   vcf <- readVcf(tab, "hg19", param)
 
   ## 'info' or 'geno' subsets :
-  ## A file index is not required if only info and geno fields are specified in 
-  ## a ScanVcfParam object.
+  ## An index file is not required if no ranges are specified.
   param <- ScanVcfParam(geno=c("GT", "HQ"), info=c("NS", "AF"))
   vcf_tab <- readVcf(tab, "hg19", param)
   vcf_fname <- readVcf(fl, "hg19", param)
@@ -199,7 +202,8 @@
   param <- ScanVcfParam(geno="HQ", info="AF", which=rngs)
   vcf <- readVcf(tab, "hg19", param)
 
-  ## Long form GRanges with 'info'
+  ## Long form GRanges :
+  ## To obtain a long form GRanges, specify the 'asGRanges' argument.
   param <- ScanVcfParam(asGRanges="info")
   gr <- readVcf(fl, "hg19", param)
 }
