@@ -52,7 +52,7 @@ _alloc_types_list(int vcf_n, int col_n, SEXP map, SEXP eltnms)
     int i, j, map_n = Rf_length(map);
     SEXP types;
 
-    /* no INFO or GENO information in header */
+    /* case of no INFO or GENO information in header */
     if (map_n == 0) {
         PROTECT(types = Rf_allocVector(VECSXP, 1));
         SEXP elt = Rf_allocMatrix(STRSXP, vcf_n, 1);
@@ -159,6 +159,7 @@ SEXP _split_vcf(SEXP vcf, SEXP sample, SEXP imap, SEXP gmap)
     for (i = 0; i < vcf_n; i++) {
         struct it it0, it1, it2;
         char *record, *sample, *field, *ifld, *ikey, *fmt;
+        char *dot = ".";
 
         record = strdup(CHAR(STRING_ELT(vcf, i)));
 
@@ -171,7 +172,10 @@ SEXP _split_vcf(SEXP vcf, SEXP sample, SEXP imap, SEXP gmap)
                 INTEGER(elt)[i] = atoi(field);
                 break;
             case REALSXP:
-                REAL(elt)[i] = atof(field);
+                if (strcmp(field, dot) == 0) 
+                    REAL(elt)[i] = R_NaReal;
+                else
+                    REAL(elt)[i] = atof(field); 
                 break;
             case STRSXP:
                 SET_STRING_ELT(elt, i, mkChar(field));

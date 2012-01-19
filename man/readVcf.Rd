@@ -74,7 +74,11 @@
       columns of the \sQuote{geno} matrices are the samples.
 
       If 'Number' is '.', 'A' or 'G', a \code{CompressedList} is used for both
-      'info' and 'geno' data. 
+      'info' and 'geno' data.
+
+      When the VCF header does not contain data type information for the
+      sQuote{INFO} or \sQuote{GENO} elements the data are returned as a single
+      unparsed column named as \sQuote{INFO} or \sQuote{GENO}.
     }
     \item{Flat Format}{
       When the \code{asGRanges} argument to \code{\linkS4class{ScanVcfParam}} 

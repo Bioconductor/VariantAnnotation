@@ -17,6 +17,7 @@ test_readVcf_format <- function()
     ## structural 
     vcf <- readVcf(st, "hg19")
     checkTrue(class(values(alt(vcf))[["ALT"]]) == "CompressedCharacterList")
+    checkIdentical(values(qual(vcf))[["QUAL"]], c(NA, 6, 12, 23, 14, 11))
 }
 
 test_readVcf_accessors <- function()
