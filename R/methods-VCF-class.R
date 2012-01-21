@@ -106,7 +106,6 @@ setMethod("fixedFields", "VCF",
 setReplaceMethod("filt", c("VCF", "character"),
     function(x, value)
 {
-    ## FIXME: validity method
     slot(x, "fixedFields") <- value
     x
 })

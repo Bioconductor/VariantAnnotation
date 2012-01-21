@@ -8,14 +8,15 @@ test_VCF_construction <- function() {
 
     ## substance
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
-    dat <- readVcf(fl, "hg19") 
-    checkTrue(validObject(VCF(rowData=rowData(dat), colData=colData(dat), 
-        geno=geno(dat), info=values(info(dat)), 
-        fixedFields=values(fixedFields(dat))))) 
-    checkException(VCF(rowData=rowData(dat), colData=colData(dat), 
-        geno=geno(dat), info=values(info(dat))), silent=TRUE) 
-    checkException(VCF(rowData=rowData(dat), colData=colData(dat), 
-        geno=geno(dat), fixedFields=values(fixedFields(dat))), silent=TRUE) 
+    vcf <- readVcf(fl, "hg19") 
+    checkTrue(validObject(VCF(rowData=rowData(vcf), colData=colData(vcf), 
+        geno=geno(vcf), info=values(info(vcf)), 
+        fixedFields=values(fixedFields(vcf))))) 
+    checkException(VCF(rowData=rowData(vcf), colData=colData(vcf), 
+        geno=geno(vcf), info=values(info(vcf))), silent=TRUE) 
+    checkException(VCF(rowData=rowData(vcf), colData=colData(vcf), 
+        geno=geno(vcf), fixedFields=values(fixedFields(vcf))), silent=TRUE) 
+    checkIdentical("hg19", unique(genome(rowData(vcf)))) 
 }
 
 test_VCF_accessors <- function() {
@@ -53,12 +54,37 @@ test_VCF_accessors <- function() {
     checkException(fixedFields(vcf) <- as.matrix(values(fixedFields(vcf))), 
         silent=TRUE)
 
+    DF <- DataFrame(REF=DNAStringSet(c("A", "C", "T", "T", "C")),
+                    ALT=CharacterList(list("C", "G", "A", "G", "G")),
+                    QUAL=c(10, 20, NA, 10, 10),
+                    FILTER=c("pass", "pass", "q10", "q10", "pass"))
+    df <- DF
+    names(df) <- c("reference", "ALT", "QUAL", "FILTER")
+    checkException(fixedFields(vcf) <- df)
+    df <- DF
+    names(df) <- c("REF", "ALT", "qual", "FILTER")
+    checkException(fixedFields(vcf) <- df)
+    df <- DF
+    df$QUAL <- as.character(df$QUAL)
+    checkException(fixedFields(vcf) <- df)
+    df <- DF
+    df$ALT <- unlist(df$ALT, use.names=FALSE)
+    checkException(fixedFields(vcf) <- df)
+    df <- DF
+    df$REF <- as.character(df$REF)
+    checkException(fixedFields(vcf) <- df)
+
     ## info
     checkTrue(class(values(info(vcf))) == "DataFrame")
     checkException(info(vcf) <- NULL, silent=TRUE)
     v1 <- vcf 
     info(v1) <- DataFrame()
     checkException(validObject(v1), silent=TRUE)
+
+    checkTrue(class(values(info(vcf))[["AF"]]) == "CompressedNumericList")
+    AF <- NumericList(0.5, 0.017, c(0.333,0.667), NA, NA)
+    checkIdentical(values(info(vcf))[["AF"]], AF) 
+
 
     ## geno
     checkTrue(class(geno(vcf)) == "SimpleList")

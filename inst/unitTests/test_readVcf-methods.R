@@ -20,24 +20,6 @@ test_readVcf_format <- function()
     checkIdentical(values(qual(vcf))[["QUAL"]], c(NA, 6, 12, 23, 14, 11))
 }
 
-test_readVcf_accessors <- function()
-{
-    vcf <- readVcf(f2, "hg19")
-    checkTrue(class(rowData(vcf)) == "GRanges")
-    checkTrue(class(exptData(vcf)) == "SimpleList")
-    checkTrue(class(colData(vcf)) == "DataFrame")
-    checkTrue(class(assays(vcf)) == "SimpleList")
-    checkTrue(class(geno(vcf)) == "SimpleList")
-    checkIdentical(assays(vcf), geno(vcf))
-
-    checkTrue(class(values(info(vcf))) == "DataFrame")
-    checkTrue(class(values(info(vcf))[["AF"]]) == "CompressedNumericList")
-    AF <- NumericList(0.5, 0.017, c(0.333,0.667), NA, NA)
-    checkIdentical(values(info(vcf))[["AF"]], AF) 
-
-    checkIdentical("hg19", unique(genome(rowData(vcf)))) 
-}
-
 test_readVcf_ranges <- function()
 {
     vcf <- readVcf(f1, "hg19")
