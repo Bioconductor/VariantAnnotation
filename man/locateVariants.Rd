@@ -29,14 +29,14 @@
   \code{locateVariants} accepts a \link[GenomicRanges]{GRanges} object that 
   contains the variants of interest. The ranges should reflect the position(s) 
   of the reference allele. For snps the range will be of width 1. For range
-  insertions or deletions the reference allele could be a sequences such as
+  insertions or deletions the reference allele could be a sequence such as
   GGTG in which case the width of the range should be 4. 
 
   Location classification :
 
   Variants that fall within a transcript are classified as 'coding', 'intron', 
   '3'UTR' or '5'UTR'. All overlap operations require variants to fall completely 
-  within one of the defined regions to be classified. When a variant falls 
+  'within' the defined region to be classified as such. When a variant falls 
   within a transcript but not completely within one of the defined regions it 
   is designated 'transcript_region'.
 
@@ -53,16 +53,14 @@
 
 \value{
   A \link[IRanges]{DataFrame} with a row for each variant-transcript match.
-  Only variants that fall within coding regions are reported. Columns are 
-  \code{queryHits}, which is a map back to the original variants in the 
-  \code{query}, \code{txID}, \code{geneID} and \code{Location}. 
+  Columns are \code{queryHits}, \code{txID}, \code{geneID} and \code{Location}. 
 
-  Variants that fall in a trancscript will have both a \code{txID} and 
-  \code{geneID} if present in the annotation. The 'intergenic' variants will 
-  have no \code{txID} and the \code{geneID} will contain identifiers for the 
-  preceding and following genes. Both \code{txID} and \code{geneID} will be 
-  NA for variants with Location classification of 'transcript_region' and 
-  NA.
+  Variants that fall in a trancscript ('coding', '5'UTR', '3'UTR' and 'intron') 
+  will have both a \code{txID} and \code{geneID} if present in the annotation. 
+  The 'intergenic' variants will have no \code{txID} and the \code{geneID} will 
+  contain identifiers for the preceding and following genes. Both \code{txID} 
+  and \code{geneID} will be NA for a Location classification of 
+  'transcript_region' and NA.
 }
 
 \author{Valerie Obenchain <vobencha@fhcrc.org>}
@@ -76,13 +74,22 @@
   library(TxDb.Hsapiens.UCSC.hg19.knownGene)
   txdb19 <- TxDb.Hsapiens.UCSC.hg19.knownGene 
 
-  ## Read variants from a VCF file and adjust seqlevels to match the annotation 
+  ## Read variants from a VCF file 
   fl <- system.file("extdata", "ex1.vcf", package="VariantAnnotation")
   vcf <- readVcf(fl, "hg19")
-  rd <- rowData(vcf)
-  seqlevels(rd) <- paste("chr", seqlevels(rd), sep="")
 
-  loc <- locateVariants(query=rd, subject=txdb19)
+  ## The seqlevels in the GRanges do not match those in the TxDb.
+  rd <- rowData(vcf)
+  head(seqlevels(rd))
+  head(seqlevels(txdb19))
+  intersect(seqlevels(rd), seqlevels(txdb19))
+
+  ## Use the renameSeqlevels() helper to rename seqlevels
+  rd_adj <- renameSeqlevels(rd, c("16"="chr16", "21"="chr21"))
+  intersect(seqlevels(rd_adj), seqlevels(txdb19))
+
+  ## Call locateVariants with the 
+  loc <- locateVariants(query=rd_adj, subject=txdb19)
 
   ## Location for all variant-transcript matches
   table(loc$Location)

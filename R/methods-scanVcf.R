@@ -7,7 +7,7 @@
     map <- lapply(fmt$Type, switch,
                   String=character(), Integer=integer(),
                   Float=numeric(), Flag=logical())
-    ## FIXME: these types should be parsed to 'arrays' of true data type in C 
+    ## FIXME: should these be parsed to true data type in C 
     ##        (reassigns >1 and non-numeric))
     d <- suppressWarnings(as.integer(fmt$Number))
     map[is.na(d)] <- list(character())

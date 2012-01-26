@@ -58,7 +58,7 @@
     structure.}
 
   \item{map}{A \code{DataFrame} giving the snp names and alleles at each locus.
-    The \code{setNA} column indicates which variants were set to NA because they 
+    The \code{ignore} column indicates which variants were set to NA because they 
     met one or more of the caveats stated above.} 
 }
 
@@ -67,8 +67,8 @@
 }
 
 \seealso{
-  \link{readVcf}
-  \linkS4class{VCF}
+  \link{readVcf},
+  \linkS4class{VCF},
   \linkS4class{SnpMatrix}
 }
 

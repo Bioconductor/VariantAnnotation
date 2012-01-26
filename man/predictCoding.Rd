@@ -1,9 +1,8 @@
 \name{predictCoding}
 \alias{predictCoding}
-\alias{predictCoding,Ranges,TranscriptDb,ANY,character-method}
-\alias{predictCoding,GRanges,TranscriptDb,ANY,character-method}
-\alias{predictCoding,Ranges,GRangesList,ANY,character-method}
-\alias{predictCoding,GRanges,GRangesList,ANY,character-method}
+\alias{predictCoding,Ranges,TranscriptDb,ANY,DNAStringSet-method}
+\alias{predictCoding,GRanges,TranscriptDb,ANY,DNAStringSet-method}
+\alias{predictCoding,VCF,TranscriptDb,ANY,missing-method}
 
 \title{Predict amino acid coding changes for variants}
 
@@ -12,31 +11,30 @@
 }
 
 \usage{
-  \S4method{predictCoding}{GRanges,GRangesList,ANY,character}(query, subject, 
+  \S4method{predictCoding}{VCF,TranscriptDb,ANY,missing}(query, subject, 
+    seqSource, varAllele, ...)
+  \S4method{predictCoding}{Ranges,TranscriptDb,ANY,DNAStringSet}(query, subject, 
+    seqSource, varAllele, ...)
+  \S4method{predictCoding}{GRanges,TranscriptDb,ANY,DNAStringSet}(query, subject, 
     seqSource, varAllele, ...)
 }
 
 \arguments{
-  \item{query}{A \link{Ranges} or \link{GRanges} instance containing the 
-    variants to be annotated. If a \link[IRanges]{Ranges} is provided it will be 
-    coerced to a \link{GRanges}. A single elementMetadata column containing the 
-    variant alleles is required; others are ignored.
+  \item{query}{A \linkS4class{VCF}, \link{Ranges} or \link{GRanges} 
+    instance containing the variants to be annotated. If a \link[IRanges]{Ranges} 
+    is provided it will be coerced to a \link{GRanges}. If a \linkS4class{VCF}
+    is provided the \code{GRanges} from the \code{rowData} slot will be used. All 
+    elementMetadata columns are ignored.
   }
-  \item{subject}{A \link{GRangesList} or a \link[GenomicFeatures]{TranscriptDb}. 
-
-    When \code{subject} is provided as a \link{GRangesList} it is assumed that
-    the outer list elements define coding regions and the individual elements
-    are ranges within that coding region. This object can be created with the 
-    'cdsBy' function on a \link[GenomicFeatures]{TranscriptDb}.
+  \item{subject}{A \link[GenomicFeatures]{TranscriptDb}. 
   } 
   \item{seqSource}{A \code{\link[BSgenome]{BSgenome}} instance or an \link{FaFile}
     to be used for sequence extraction.
   }
-  \item{varAllele}{The character name of the elementMetadata column in 
-    \code{query} that contains the variant alleles. These data should be a 
-    \link[Biostrings]{DNAStringSet} where missing values are represented by a
-    zero width empty element. Ranges with missing \code{varAllele} values will
-    be ignored. 
+  \item{varAllele}{A \link[Biostrings]{DNAStringSet} containing the variant
+    (alternate) alleles. The length of \code{varAllele} must equal the length
+    of \code{query}. Missing values are represented by a zero width empty 
+    element. Ranges with missing values will be ignored. 
   }
   \item{\dots}{Additional arguments passed to methods.
   }
@@ -58,8 +56,8 @@
   A \link[IRanges]{DataFrame} with a row for each variant-transcript 
   match. This includes only variants that fell in a coding regions.
 
-  Columns include \code{queryHits}, \code{txID}, \code{refSeq}, 
-  \code{varSeq}, \code{refAA}, \code{varAA}, \code{Consequence}, and any 
+  Columns include \code{queryID}, \code{txID}, \code{refSeq}, 
+  \code{varSeq}, \code{refAA}, \code{varAA}, \code{consequence}, and any 
   metadata that was present in the \code{subject}. 
 
   The \code{queryHits} column provides a map back to the variants in the 
@@ -67,10 +65,10 @@
   and variant-modified DNA sequences. Reference and variant amino acid codes are
   provided in \code{refAA} and \code{varAA}. 
 
-  Possible values for the \code{Consequence} column are `synonymous',
+  Possible values for the \code{consequence} column are `synonymous',
   `nonsynonymous', or `frameshift'. Variant sequences are transcribed only if they
   are divisible by 3. When a sequence is not transcribed the \code{varAA} column 
-  will be empty and the \code{Consequence} will be a `frameshift'. 
+  will be empty and the \code{consequence} will be a `frameshift'. 
 }
 
 \references{
@@ -93,19 +91,14 @@
   ## Read variants from a VCF file and adjust seqlevels to match the annotation 
   fl <- system.file("extdata", "chr22.vcf.gz", package="VariantAnnotation")
   vcf <- readVcf(fl, "hg19")
-  rd <- rowData(vcf)
-  seqlevels(rd) <- paste("chr", seqlevels(rd), sep="")
 
-  ## Expand the ALT column and convert to DNAStringSet
-  ALT <- values(alt(vcf))[["ALT"]]
-  rdflat <- rep(rd, elementLengths(ALT))
-  values(rdflat) <- DataFrame(ALT=unlist(ALT))
-
-  aacoding <- predictCoding(query=rdflat, subject=txdb19, seqSource=Hsapiens,
-                  varAllele="ALT")
+  ## rename seqlevels in the VCF to match those in the TxDb
+  rd <- renameSeqlevels(rowData(vcf), c("22"="chr22"))
+  rowData(vcf) <- rd 
+  aacoding <- predictCoding(query=vcf, subject=txdb19, seqSource=Hsapiens)
 
   ## Consequence for all variant-transcript matches
-  table(aacoding$Consequence)
+  table(aacoding$consequence)
 }
 
 \keyword{methods}

@@ -10,15 +10,22 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
         if (!any(queryseq %in% subseq))
             warning("none of seqlevels(query) match seqlevels(subject)")
 
+        ## mask chromosomes not in query
         masks <- isActiveSeq(subject)
         isActiveSeq(subject)[!names(isActiveSeq(subject)) %in% queryseq] <- FALSE
-        on.exit(isActiveSeq(subject) <- masks) 
+        on.exit(isActiveSeq(subject) <- masks)
+
+        ## prevent findOverlaps circularity error
+        circular <- .checkCircular(subject)
+        if (any(circular %in% isActiveSeq(subject))) 
+            stop("Please remove circular sequence ", circular, " from the ",
+                 "query. Overlaps for type 'within' are not yet supported for ",
+                 "circular sequences.")
 
         tx <- transcripts(subject, columns=c("exon_id", "tx_id", "gene_id"))
         cdsByTx <- cdsBy(subject)
 
-        ## findOverlaps won't find negative widths
-        ## adjust query with width=0 :
+        ## ranges with width=0 :
         ## de-increment start to equal end value 
         if (any(width(query) == 0)) {
             insertion <- width(query) == 0
@@ -66,27 +73,35 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
         ## intergenic :
         if (any(txCO == 0)) {
             intergenic <- txCO == 0
+            ## tx that have gene IDs
             geneWidth <- elementLengths(values(tx)[["gene_id"]]) 
+            if (any(geneWidth > 1))
+                stop("assumption of one transcript per gene is not valid")
             txWithGeneID <- tx[geneWidth != 0]
-            genes <- values(txWithGeneID)[["gene_id"]]
+            ## collapse to single range w/in gene ID
+            grle <- Rle(unlist(values(txWithGeneID)[["gene_id"]], 
+                use.names=FALSE))
+            gfact <- rep(seq_len(nrun(grle)), runLength(grle)) 
+            rngWithGeneID <- unlist(range(split(txWithGeneID, gfact)), use.names=FALSE)
+            genes <- runValue(grle)
 
-            ## variants with no nearest gene
+            ## locate range nearest to the variant 
             intvar <- queryAdj[txCO == 0]
-            nst <- nearest(intvar, txWithGeneID)
+            nst <- nearest(intvar, rngWithGeneID)
             if (any(is.na(nst))) {
                 nonearestIdx <- which(intergenic == TRUE)[is.na(nst)] 
                 nonearest <- rep(FALSE, length(intergenic))
                 nonearest[nonearestIdx] <- TRUE
                 intergenic[nonearestIdx] <- FALSE
                 intvar <- queryAdj[intergenic == TRUE] 
-                nearestIdx <- nearest(intvar, txWithGeneID)
+                nearestIdx <- nearest(intvar, rngWithGeneID)
             } else {
-                nearestIdx <- nearest(intvar, txWithGeneID)
+                nearestIdx <- nearest(intvar, rngWithGeneID)
             }
 
-            isPreceding <- (end(txWithGeneID[nearestIdx]) - start(intvar)) < 0
+            isPreceding <- (end(rngWithGeneID[nearestIdx]) - start(intvar)) < 0
             isFirst <- nearestIdx == 1
-            isLast <- nearestIdx == length(txWithGeneID) 
+            isLast <- nearestIdx == length(rngWithGeneID) 
 
             ## nearest is preceding
             precedeIdx <- nearestIdx
@@ -104,9 +119,8 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
             if (any(isPreceding & isLast)) 
                 f[isPreceding & isLast] <- "no following" 
             if (any(!isPreceding & isFirst)) 
-                p[!isPreceding & isFirst] <- "no preceding" 
-
-            ## assuming a transcript can fall in only 1 gene 
+                p[!isPreceding & isFirst] <- "no preceding"
+ 
             flankGenes <- CharacterList(data.frame(rbind(unlist(p), unlist(f))))
 
             queryhits <- which(intergenic)
@@ -134,5 +148,4 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
         ans[order(ans$queryHits), ]
     }
 )
-
 

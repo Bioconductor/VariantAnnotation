@@ -61,12 +61,12 @@ setMethod("MatrixToSnpMatrix", c("matrix", "DNAStringSet", "DNAStringSetList"),
         DataFrame(snp.names=character(0), 
                   allele.1=DNAStringSet(), 
                   allele.2=DNAStringSet(),
-                  setNA=logical())
+                  ignore=logical())
     else 
         DataFrame(snp.names=nms, 
                   allele.1=ref, 
                   allele.2=alt,
-                  setNA=flt)
+                  ignore=flt)
 }
 
 
