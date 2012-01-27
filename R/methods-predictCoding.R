@@ -30,22 +30,24 @@ setMethod("predictCoding", signature(query="GRanges", subject="TranscriptDb",
     {
         stopifnot(length(varAllele) == length(query))
 
-        ## check and adjust seqlevels
-        txdb <- subject
-        subject <- cdsBy(subject)
-        qseq <- seqlevels(query)
-        sseq <- seqlevels(subject)
-        if (!any(qseq %in% sseq))
+        queryseq <- seqlevels(query)
+        subseq <- seqlevels(subject)
+        if (!any(queryseq %in% subseq))
             warning("none of seqlevels(query) match seqlevels(subject)")
-        subject <- keepSeqlevels(subject, query) 
+
+        ## mask chromosomes not in query
+        masks <- isActiveSeq(subject)
+        isActiveSeq(subject)[!names(isActiveSeq(subject)) %in% queryseq] <- FALSE
+        on.exit(isActiveSeq(subject) <- masks)
 
         ## prevent findOverlaps circularity error
         circular <- .checkCircular(subject)
-        if (!is.na(circular)) 
+        if (any(circular %in% isActiveSeq(subject))) 
             stop("Please remove circular sequence ", circular, " from the ",
                  "query. Overlaps for type 'within' are not yet supported for ",
                  "circular sequences.")
- 
+
+        cdsByTx <- cdsBy(subject)
         ## ranges with width=0 :
         ## de-increment start to equal end value 
         if (any(width(query) == 0)) {
@@ -54,18 +56,18 @@ setMethod("predictCoding", signature(query="GRanges", subject="TranscriptDb",
                 start(query)[width(query) == 0] - 1
         } else queryAdj <- query
 
-        fo <- findOverlaps(queryAdj, subject, type = "within")
+        fo <- findOverlaps(queryAdj, cdsByTx, type = "within")
         if (length(fo) == 0)
             return(
                 DataFrame(
-                  queryID=character(0), consequence=character(0), 
+                  queryID=integer(), consequence=character(), 
                   refSeq=DNAStringSet(), varSeq=DNAStringSet(), 
                   refAA=AAStringSet(), varAA=AAStringSet(), 
-                  txID=character(0), geneID=character(0), cdsID=character(0))) 
+                  txID=integer(), geneID=character(), cdsID=integer())) 
 
         ## map transcript indices to genome indices
-        subject <- subject[unique(subjectHits(fo))]
-        txLocal <- globalToLocal(queryAdj, subject)
+        cdsByTx <- cdsByTx[unique(subjectHits(fo))]
+        txLocal <- globalToLocal(queryAdj, cdsByTx)
         midx <- which(width(varAllele) == 0)
         if (length(midx) > 0) {
             warning("ranges with missing values in the varAllele column ",
@@ -79,7 +81,7 @@ setMethod("predictCoding", signature(query="GRanges", subject="TranscriptDb",
         originalWidth <- width(xCoding)
         codonStart <- (start(txLocal$local) - 1L) %/% 3L * 3L + 1L
         codonEnd <- codonStart + originalWidth %/% 3L * 3L + 2L
-        txseqs <- getTranscriptSeqs(subject, seqSource)
+        txseqs <- getTranscriptSeqs(cdsByTx, seqSource)
         codons <- DNAStringSet(substring(txseqs[txLocal$rangesInd], 
             codonStart, codonEnd))
 
@@ -93,18 +95,18 @@ setMethod("predictCoding", signature(query="GRanges", subject="TranscriptDb",
 
         ## results
         queryID <- txLocal$globalInd
-        txID <- names(subject)[txLocal$rangesInd]
+        txID <- names(cdsByTx)[txLocal$rangesInd]
         fromSubject <-
-            values(subject@unlistData)[txLocal$rangesInd,]
+            values(cdsByTx@unlistData)[txLocal$rangesInd,]
         if (any(names(fromSubject) %in% "cds_id"))
             cdsID <- fromSubject$cds_id
         else
             cdsID <- rep(NA, length(txID))
  
-        txBygene <- transcriptsBy(txdb, "gene")
+        txByGene <- transcriptsBy(subject, "gene")
         map <- data.frame(
-            geneid=rep(names(txBygene), elementLengths(txBygene)),
-            txid=values(unlist(txBygene, use.names=FALSE))[["tx_id"]])
+            geneid=rep(names(txByGene), elementLengths(txByGene)),
+            txid=values(unlist(txByGene, use.names=FALSE))[["tx_id"]])
         geneID <- map$geneid[match(txID, map$txid)]
 
         refSeq <- codons

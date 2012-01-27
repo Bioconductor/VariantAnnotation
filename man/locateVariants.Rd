@@ -1,6 +1,8 @@
 \name{locateVariants}
 \alias{locateVariants}
+\alias{locateVariants,Ranges,TranscriptDb-method}
 \alias{locateVariants,GRanges,TranscriptDb-method}
+\alias{locateVariants,VCF,TranscriptDb-method}
 
 \title{Locate variants}
 
@@ -8,13 +10,15 @@
 
 \usage{
   locateVariants(query, subject, ...)
+  \S4method{locateVariants}{Ranges,TranscriptDb}(query, subject, ...)
   \S4method{locateVariants}{GRanges,TranscriptDb}(query, subject, ...)
+  \S4method{locateVariants}{VCF,TranscriptDb}(query, subject, ...)
 }
 
 \arguments{
-  \item{query}{A \link[GenomicRanges]{GRanges} object containing the variants.
-    Metadata columns can be present but are ignored. Only the \code{seqnames}
-    \code{ranges} and \code{strand} are pertinent to the method. 
+  \item{query}{A \link[IRanges]{Ranges}, \link[GenomicRanges]{GRanges} or 
+    \linkS4class{VCF} object containing the variants. Metadata columns are 
+    allowed but are ignored. 
   }
   \item{subject}{A \link[GenomicFeatures]{TranscriptDb} object that serves
     as the annotation reference.
@@ -41,7 +45,7 @@
   is designated 'transcript_region'.
 
   Variants that do not fall in a transcript are classified as 'intergenic' if 
-  flanking genes can be identified. A variant is classified as NA if it
+  flanking genes can be identified. A variant location will be 'NA' if it
   meets one of the following conditions :
 
   (1) the variant does not hit a transcript and no flanking genes can be
@@ -88,7 +92,7 @@
   rd_adj <- renameSeqlevels(rd, c("16"="chr16", "21"="chr21"))
   intersect(seqlevels(rd_adj), seqlevels(txdb19))
 
-  ## Call locateVariants with the 
+  ## Call locateVariants 
   loc <- locateVariants(query=rd_adj, subject=txdb19)
 
   ## Location for all variant-transcript matches

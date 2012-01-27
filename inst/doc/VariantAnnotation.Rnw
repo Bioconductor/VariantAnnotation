@@ -1,5 +1,4 @@
 %\VignetteIndexEntry{Introduction to VariantAnnotation}
-%\VignetteDepends{GenomicRanges, Rsamtools, Biostrings, AnnotationDbi, BSgenome}
 %\VignetteKeywords{variants, sequence, sequencing, alignments}
 %\VignettePackage{VariantAnnotation}
 \documentclass[10pt]{article}
@@ -34,6 +33,7 @@
 \begin{document} 
 
 \maketitle
+\tableofcontents
 
 <<options, echo=FALSE>>=
 options(width=72)
@@ -44,13 +44,12 @@ This vignette demonstrates a general workflow for annotating and filtering
 genetic variants using the \VariantAnnotation  package. Sample data are in 
 the form of a Variant Call Format (VCF) file which are parsed into a 
 \Rfunction{VCF} object. The \Rfunction{locateVariants} function categorizes
-the variants with respect to gene function, such as 'intron', 'coding', 'UTR' 
-or 'intergenic'. Amino acid coding changes for the non-synonymous variants
-can be computed with \Rfunction{predictCoding}. Subsequently, the SIFT and 
-PolyPhen databases can be queried to provide predictions of how severly these
-amino acid coding changes may affect protein function. Filtering functions 
-allow the subsetting of variants on physical location in the gene or membership 
-in dbSNP. 
+variants with respect to gene function, such as 'intron', 'coding', 'UTR' 
+or 'intergenic' region. Amino acid coding changes for the non-synonymous variants
+can be computed with \Rfunction{predictCoding}. SIFT and PolyPhen databases can 
+be queried to provide predictions of how severly these amino acid coding changes 
+may affect protein function. Filtering functions allow the subsetting of variants 
+on physical location or membership in dbSNP. 
 
 \section{Reading Variant Call Format (VCF) files}
 \subsection{Accessing the data}
@@ -85,8 +84,6 @@ The REF, ALT, QUAL and FILTER fields can be accessed together with
 \Rcode{qual} and \Rcode{filt}. 
 <<readVCF_fixed>>=
 head(fixedFields(vcf), 3)
-head(ref(vcf), 3)
-head(alt(vcf), 3)
 @
 
 The \Robject{ALT} column is stored as a \Robject{DNAStringSetList} unless
@@ -100,7 +97,7 @@ alternate
 
 ## number of ALT values per variant
 unique(elementLengths(alternate))
-unlist(alternate)
+head(unlist(alternate))
 @
 
 Data from the \Rcode{INFO} field can be accessed with \Rcode{info}. Detailed
@@ -120,10 +117,10 @@ info(vcf)[1:3, 1:3]
 fixed(vcf)[1:3, 1:7] 
 @
 
-The genotype data described in the \Rcode{FORMAT} fields is parsed into 
+The genotype data described in the \Rcode{FORMAT} field is parsed into 
 matrices or arrays and can be accessed with \Rcode{geno}. These data
 are not returned with the \Robject{GRanges} from the \Rcode{rowData}
-slot because the data structures may be multidimentional.
+slot because the data structures can be multidimentional.
 <<readVCF_geno>>=
 ## header information related to the genotype fields
 exptData(vcf)[["HEADER"]][["FORMAT"]]
@@ -132,43 +129,38 @@ geno(vcf)$GT[1:3,1:5]
 geno(vcf)$DS[1:3,1:5]
 @
 
-\subsection{Reading in subsets of data}
-When the \Rcode{param} argument to \Rfunction{readVcf} is not specified the 
-entire file is read in was the case in our previous example. When working 
-with large VCF files or when interested in only a portion of the data it may be 
-more efficient to read in subsets of the data. Subsets can be specified as 
-ranges and/or elements in the \Rcode{INFO} or \Rcode{FORMAT} fields from the VCF 
-file. 
+\subsection{Reading in subsets}
+When working with large VCF files it may be more efficient to read in subsets 
+of the data. Subsets can be specified as ranges and/or elements from the 
+\Rcode{INFO} and \Rcode{FORMAT} fields in the VCF file. 
 
 \subsubsection{Subset on ranges}
 Specifying range subsets can be accomplished by specifying the \Rcode{which} 
 argument of a \Rcode{ScanVcfParam} object or by providing a \Robject{GRanges}, 
 \Robject{RangedData} or \Robject{RangesList} as the \Rcode{param} argument.
+\begin{itemize}
+  \item{Tabix index file :}{
+    When ranges are specified, the VCF file must have an accompanying Tabix index 
+    file; if one does not exist it must be created. See ?\Rcode{indexTabix} for help 
+    creating an index. The index is only necessary when subsetting by ranges. If the 
+    full file is being read in or if the data are being subset on \Rcode{INFO} and 
+    \Rcode{FORMAT} elements then creation of an index file is not necessary.}
+  \item{TabixFile Object :}{
+    Once a Tabix index exists for the VCF file, we can create a \Robject{TabixFile} 
+    object. See ?\Rcode{TabixFile}. This object creates a reference to the VCF and 
+    its index. Once opened, the reference remains open across calls to methods, 
+    avoiding costly index re-loading. The \Rcode{file} argument to 
+    \Rfunction{readVcf} can be either a \Rcode{character} name of the file or a 
+    \Robject{TabixFile} instance. A \Rcode{character} name will be coerced to a 
+    \Robject{TabixFile} and if no Tabix index file exists an error will be thrown.}
+\end{itemize}
 
-Tabix index file :\\
-\noindent When ranges are specified, the VCF file must have an accompanying 
-Tabix index file; if one does not exist it must be created. See 
-?\Rcode{indexTabix} for help creating an index file. An index file is only 
-necessary when subsetting the data by ranges. If the full file is to be read 
-or if the data are being subset only on \Rcode{INFO} or \Rcode{FORMAT} subsets 
-then an index file is not necessary.
-
-TabixFile Object :\\
-\noindent Once a Tabix index exists for the VCF file, we can create a
-\Robject{TabixFile} object. See ?\Rcode{TabixFile}. This object creates
-a reference to the VCF and its index. Once opened, the reference remains
-open across calls to methods, avoiding costly index re-loading. 
-
-\noindent Note that the \Rcode{file} argument to \Rfunction{readVcf} can be either a 
-\Rcode{character} name of the file or a \Robject{TabixFile} instance. When 
-a \Rcode{character} name is provided it will be coerced to a \Robject{TabixFile}
-and if no Tabix index file is found an error will be thrown.
-
-Our sample file has an index file which enables us to create a \Rcode{TabixFile} 
-instance. 
+An index for our sample file is included with the package. We create a 
+\Rcode{TabixFile} instance and call \Rfunction{readVcf}. 
 <<readVCF_tabix>>=
 ## create a TabixFile instance
 tab <- TabixFile(vcffile)
+tab
 rng <- GRanges(seqnames="22", ranges=IRanges(start=51151293, end=51152761))
 
 ## call the method with either the filename or TabixFile
@@ -177,9 +169,9 @@ vcf_tab_rng <- readVcf(tab, "hg19", param=rng)
 identical(vcf_fl_rng, vcf_tab_rng)
 @
 
-In the previous example ranges were specified as a \Robject{GRanges} object.
-Here we put the ranges in a \Robject{ScanVcfParam} and see the results are 
-equivalent.
+In the previous example the ranges for subsetting were in a \Robject{GRanges} 
+object. Alternatively they can be stored in the 'which' argument of a 
+\Robject{ScanVcfParam} which yields the same result.
 
 <<readVCF_ranges>>=
 svp <- ScanVcfParam(which=rng)
@@ -187,25 +179,22 @@ vcf_fl_svp <- readVcf(vcffile, "hg19", param=svp)
 identical(vcf_fl_rng, vcf_fl_svp)
 @
 
-%% FIXME: read in genes in chr22
-
 \subsubsection{Subset on INFO and FORMAT elements}
-A subset of data can be read in based on the elements in the \Rcode{INFO} and / 
-or \Rcode{FORMAT} fields of the VCF file. Elements are provided as a
-\Rcode{character} vector in the \Rcode{info} and \Rcode{geno} arguments to 
-\Rcode{ScanVcfParam}. Currently there is no way to filter the incoming data
-on a particular value of a \Rcode{INFO} or \Rcode{FORMAT} element. That may be
-a feature added in the future. 
+To subset data based on the \Rcode{INFO} and/or \Rcode{FORMAT} fields the 
+elements must be specified as \Rcode{character} vectors in the \Rcode{info} 
+and \Rcode{geno} arguments to \Rcode{ScanVcfParam}. Currently there is no way 
+to filter the incoming data on a particular value of a \Rcode{INFO} or 
+\Rcode{FORMAT} element. That may be a feature added in the future. 
 
 In the previous section we saw that a Tabix index file must exist when data are
 subset on ranges. This is not the case when subsetting on elements in the
 \Rcode{INFO} and \Rcode{FORMAT} fields. An index file is only needed when
 subsetting by ranges.
 
-<<readVCF_infogeno, eval=FALSE>>=
+<<readVcf_infogeno, eval=FALSE>>=
 ## view available INFO and FORMAT fields
 hdr <- scanVcfHeader(vcffile)[[1]]$Header
-hdr$INFO
+head(hdr$INFO)
 hdr$FORMAT
 
 ## subset on INFO and FORMAT
@@ -218,17 +207,16 @@ vcf <- readVcf(vcffile, "hg19", param)
 @
 
 
-\section{Variant location with respect to gene function}
+\section{Variant location}
 The \Rfunction{locateVariants} function matches ranges in a \Robject{GRanges}
 object to the coding, intron and UTR regions in a \Robject{TranscriptDb}. 
 Metadata columns may be present in the \Robject{GRanges} but they are ignored.
+When a \Robject{VCF} is provided as the \Robject{query} the variant ranges come 
+from the \Rcode{rowData} slot. 
 
-The variant ranges come from the \Rcode{rowData} slot in the \Robject{VCF} 
-object. As a preliminary step, we must ensure the chromosome names in our ranges 
-are compatible with those in the \Robject{TranscriptDb}.
-
-Chromosome names are represented by the number only, i.e. '22', in the
-variant ranges
+As a preliminary step, we must ensure the chromosome names in our ranges are 
+compatible with those in the \Robject{TranscriptDb}. Chromosome names are 
+represented by the number only, i.e. '22', in the variant ranges
 <<seqlevels_rd>>=
 rd <- rowData(vcf)
 seqlevels(rd)
@@ -241,29 +229,30 @@ txdb19 <- TxDb.Hsapiens.UCSC.hg19.knownGene
 head(seqlevels(txdb19))
 @
 
-We rename the seqlevels in the \Robject{VCF} object to match the TxDb.
-Modifying the chromosome names at the \Robject{VCF}-level ensures all 
-future data extractions from the \Robject{VCF} will have the new 
-seqlevels. Helper functions for renaming and subsetting seqlevels are 
-\Rfunction{renameSeqlevels} and \Rfunction{keepSeqlevels}.
+Chromosome names are modified in the \Robject{GRanges} with 
+\Rfunction{renameSeqlevels}. We then replace the data in the \Robject{rowData}
+slot with the modified \Robject{GRanges}. Modifying the seqlevels at the 
+\Robject{VCF} object level ensures all future data extractions from the 
+\Robject{VCF} will have the new seqlevels. See ?\Rfunction{renameSeqlevels}
+for details.
 <<seqlevels_rename>>=
 ## rename variant seqlevels in the VCF object
 rd_mod <- renameSeqlevels(rd, c("22"="chr22"))
 rowData(vcf) <- rd_mod 
 
-## extract the modified rowData
+## extract the rowData with modified seqlevels
 rd <- rowData(vcf)
  
 ## confirm seqlevels are the same
 intersect(seqlevels(rd), seqlevels(txdb19))
 @
 
-Our sample data has ranges for chromosome 22 only so there is no need
+The sample data ranges are for chromosome 22 only so there is no need
 for further subsetting. However, if we had additional chromosomes we
-wanted to drop we could subset a \Robject{GRanges} using 
+wanted to drop we can easily subset a \Robject{GRanges} using 
 \Rfunction{keepSeqlevels}. As an example we extract transcripts for
 all chromosomes in TxDb.Hsapiens.UCSC.hg19.knownGene then keep only 
-'chr21' and 'chr22'. 
+'chr21' and 'chr22'. See ?\Rfunction{keepSeqlevels} for details. 
 \begin{verbatim}
 ## initially there are 93 chromosomes
 > rngs <- transcripts(txdb19)
@@ -279,52 +268,77 @@ Call \Rfunction{locateVariants},
 \begin{verbatim}
 > loc <- locateVariants(rd, txdb19)
 > loc[515:605,]
-DataFrame with 91 rows and 4 columns
-    queryHits      txID                    geneID   Location
-    <integer> <integer> <CompressedCharacterList>   <factor>
-1         249     73653                     85358      3'UTR
-2         250     73651                     85358     coding
-3         250     73653                     85358     coding
-4         251     73651                     85358     coding
-5         251     73653                     85358     coding
-6         252        NA                  85358,49 intergenic
-7         253        NA                  85358,49 intergenic
-8         254        NA                  85358,49 intergenic
-9         255        NA                  85358,49 intergenic
-...       ...       ...                       ...        ...
-83        329     73654                               intron
-84        330     73654                               intron
-85        331     73654                               intron
-86        332     73654                               intron
-87        333        NA                  85358,49 intergenic
-88        334        NA                  85358,49 intergenic
-89        335        NA                  85358,49 intergenic
-90        336     73655                        49      5'UTR
-91        336     73656                        49      5'UTR
-
+DataFrame with 91 rows and 5 columns
+      queryID   location      txID                    geneID     cdsID
+    <integer>   <factor> <integer> <CompressedCharacterList> <integer>
+1         249      3'UTR     73653                     85358    226441
+2         250     coding     73651                     85358    226416
+3         250     coding     73653                     85358    226441
+4         251     coding     73651                     85358    226416
+5         251     coding     73653                     85358    226441
+6         252 intergenic        NA                  85358,49        NA
+7         253 intergenic        NA                  85358,49        NA
+8         254 intergenic        NA                  85358,49        NA
+9         255 intergenic        NA                  85358,49        NA
+...       ...        ...       ...                       ...       ...
+83        329     intron     73654                                  NA
+84        330     intron     73654                                  NA
+85        331     intron     73654                                  NA
+86        332     intron     73654                                  NA
+87        333 intergenic        NA                  85358,49        NA
+88        334 intergenic        NA                  85358,49        NA
+89        335 intergenic        NA                  85358,49        NA
+90        336      5'UTR     73655                        49    226443
+91        336      5'UTR     73656                        49    226443
 \end{verbatim}
 
-\Rfunction{locateVariants} returns a \Robject{DataFrame} with 4 columns. The
-\Rcode{queryHits} column maps back to the row number in the original 
+\Rfunction{locateVariants} returns a \Robject{DataFrame} with 5 columns. The
+\Rcode{queryID} column maps back to the row number in the original 
 \Robject{GRanges} of variants. Each row represents a variant-transcript overlap 
-and so multiple rows per variant are possible. Location categories of `coding', 
+therfore multiple rows per variant are possible. Location categories of `coding', 
 `5'UTR', `3'UTR', `intron' and `intergenic' are assigned based on the criteria 
 in Table \ref{table:location}. Intergenic variants will have gene IDs for both
 preceding and following genes.
 
+\begin{table}[h!]
+\begin{center}
+\begin{tabular}{l|l}
+\hline
+Location & Details \\
+\hline
+coding &  variant falls \emph{within} a coding region \\
+5'UTR &  variant falls \emph{within} a 5' untranslated region \\
+3'UTR &  variant falls \emph{within} a 3' untranslated region \\
+intron &  variant falls \emph{within} a transcript but not \emph{within} a 
+coding region \\
+intergenic & variant does not fall \emph{within} a transcript but does have
+a nearest gene match\\
+transcript\_region & variant falls \emph{within} a transcript but does not 
+fall \emph{within} a specified region\\
+NA & variant does not fall \emph{within} a transcript and has no
+nearest gene match \\
+NA & variant is on a chromosome present in \Robject{query} but not in the 
+\Robject{subject}\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Location of variants with respect to genes}
+\label{table:location}
+\end{table}
+
 Each variant has the potential to match multiple transcripts and the output 
 from \Rfunction{locateVariants} can be large. Further processing may
 be necessary to better understand the data. A first step might be to summarize
-'Location' by gene while accounting for the variants that hit multiple 
+'location' by gene while accounting for the variants that hit multiple 
 transcripts in the same gene.
 
 %% FIXME : modify example 
 \begin{verbatim}
 > single <- loc[elementLengths(loc$geneID) == 1, ]
-> genes <- data.frame(queryHits=single$queryHits, geneID=unlist(single$geneID), 
-+                     Location=single$Location)
+> genes <- data.frame(queryID=single$queryID, geneID=unlist(single$geneID), 
++                     location=single$location)
 > dups <- duplicated(genes)
-> genesLst <- split(genes$Location[!dups], genes$geneID[!dups]) 
+> genesLst <- split(genes$location[!dups], genes$geneID[!dups]) 
 > lapply(genesLst, table)
 $`11158`
 
@@ -348,43 +362,10 @@ $`85358`
 
 \end{verbatim}
 
-\begin{table}[ht]
-\begin{center}
-\begin{tabular}{l|l}
-\hline
-Region & Details \\
-\hline
-coding &  variant falls \emph{within} a coding region \\
-5'UTR &  variant falls \emph{within} a 5' untranslated region \\
-3'UTR &  variant falls \emph{within} a 3' untranslated region \\
-intron &  variant falls \emph{within} a transcript but not \emph{within} a 
-coding region \\
-intergenic & variant does not fall \emph{within} a transcript but does have
-a nearest gene match\\
-transcript\_region & variant falls \emph{within} a transcript but does not 
-fall \emph{within} a specified region\\
-NA & variant does not fall \emph{within} a transcript and has no
-nearest gene match \\
-NA & variant is on a chromosome present in \Robject{query} but not in the 
-\Robject{subject}\\
-\hline
-\end{tabular}
-\end{center}
-\caption{Location of variants with respect to genes}
-\label{table:location}
-\end{table}
 
-Summarize Location for all variant-transcript matches.
-\begin{verbatim}
-> table(loc$Location)
+\section{Amino acid coding}
 
-     3'UTR      5'UTR     coding intergenic     intron 
-       215         32        168        211       3092 
-\end{verbatim}
-
-\section{Amino acid coding changes}
-
-\Rfunction{predictCoding} provides amino acid coding changes for non-synonymous 
+\Rfunction{predictCoding} computes amino acid coding changes for non-synonymous 
 variants. This function identifies overlaps between the variants in 
 \Robject{query} and the coding regions of a \Robject{TranscriptDb} object. 
 Sequences for the reference codons are retrieved from either a \Robject{BSgenome} 
@@ -394,7 +375,7 @@ reference sequence. Amino acid codes are computed for the resulting variant codo
 sequence when the length is a multiple of 3. Examples of various coding 
 situations are shown in Table \ref{table:aacoding}. 
 
-\begin{table}[ht]
+\begin{table}[h!]
 \begin{center}
 \begin{tabular}{l|l|l|l|l|c}
 \hline
@@ -414,97 +395,32 @@ deletion & GGCCTA & `' & acggcctaa & aca & yes\\
 \label{table:aacoding}
 \end{table}
 
-\Rfunction{predictCoding} will accept either a \Robject{TranscriptDb} or a 
-\Robject{GRangesList} as the \Rcode{subject}. When a \Robject{TranscriptDb} 
-is supplied the approprate \Robject{GRangesList} is created by calling the 
-\Rfunction{cdsBy} function. If a \Robject{GRangesList} is supplied it is 
-assumed that it was created with \Rfunction{cdsBy} or has been put
-into the same format as the output from that function. In other words, the 
-outer list elements must define coding regions and the individual elements 
-fall within that coding region. 
+The \Robject{query} argument to \Rfunction{predictCoding} can be a 
+\Robject{GRanges} or \Robject{VCF}. When a \Robject{GRanges} is supplied 
+the \Rcode{varAllele} argument must be specified; when working with a
+\Robject{VCF} the alternate alleles are obtained internally and therefore 
+\Robject{varAllele} is not specified in the function call. \Robject{seqSource} 
+can be a \Robject{BSgenome} as or an appropriate fasta file.
 
-The \Robject{query} argument can be a \Robject{GRanges} or \Robject{VCF}.
-When a \Robject{GRanges} is supplied it must have a elementMetadata column
-that contains the variant (alternate) alleles as a \Robject{DNAStringSet}.
-The name of this column is provideed as the \Robject{varAllele} argument.
-When the \Robject{query} is a \Robject{VCF} object no \Robject{varAllele}
-argument is necessary.
-
-We use a \Robject{BSgenome} as our sequence source but could have also used
-an appropriate fasta file.
+The return object from \Rfunction{predictCoding} is a \Robject{DataFrame} with 
+one row for each variant-transcript match. Unlike \Rfunction{locateVariants}, 
+this function only returns results for the variants that fall in a coding 
+region. 
 
 <<predictCoding>>=
 library(BSgenome.Hsapiens.UCSC.hg19)
 aacoding <- predictCoding(query=vcf, subject=txdb19, seqSource=Hsapiens)
+head(aacoding, 4)
 @
 
-\Robject{predictCoding} returns a \Robject{DataFrame} with one row for each 
-variant-transcript match. Unlike \Rfunction{locateVariants}, this function 
-only returns results for the variants that fall in a coding region. The 
-\Robject{queryID} column is the map back to the variants in the original 
-\Robject{query}. If translation was possible, the consequence value will be 
+If translation was possible, the value in the consequence column will be 
 `synonymous' or `nonsynonymous'. Where translation was not possible, 
-consequence will be `frameshift' and the varAA value will be missing. 
+consequence will be `frameshift' and the \Robject{varAA} value will be missing. 
 
-<<aacoding_notranslation>>= 
-head(aacoding, 4)
-
+<<predictCoding_frameshift>>=
 ## consequence is 'frameshift' where translation is not possible
 head(aacoding[width(aacoding$varAA) == 0,], 4)
 @
-
-\section{Filtering}
-
-Often it is useful to identify subsets of variants that meet a specific 
-criteria. There are currently two built-in filters available in
-\Rpackage{VariantAnnotation}. The \Rfunction{dbSNPfilter} checks for membership 
-in dbSNP and \Rfunction{regionFilter} filters variants based on the locations 
-identified with\Rfunction{locateVariants}. Filters are created with the 
-appropriate reference object such as a \Robject{SNPlocs} or 
-\Robject{TranscriptDb} object. 
-
-<<createFilters>>=
-## create filter to identify variants present in dbSNP 
-library("SNPlocs.Hsapiens.dbSNP.20110815")
-snpFilt <- dbSNPFilter("SNPlocs.Hsapiens.dbSNP.20110815")
-vaFilter(snpFilt)
-
-## create filter to identify variants present in introns 
-regionFilt <- regionFilter(txdb19, region="intron")
-vaFilter(regionFilt)
-@
-
-When filtering data with \Rfunction{dbSNPFilter} or \Rfunction{regionsFilt} two 
-options are available for the return object. If the argument \Rcode{subset=TRUE}
-(default) a \Robject{GRanges} is returned that contains only the records that
-passed the filter. If \Rcode{subset=FALSE}, the result is a 
-\Robject{VAFilterResult} object. This object contains a logical vector 
-indicating which records passed the filter and some statistics on the number of 
-records removed and what filter was applied. 
-
-First we return the subset of variants that are in dbSNP. Again, the variant 
-seqlevels need to be adjusted to match the seqlevels of the annotation.
-<<filtering>>=
-## return the subset of records that passed the filter
-rd <- rowData(vcf)
-seqlevels(rd) <- paste("ch", seqlevels(rd), sep="")
-dbsnp <- snpFilt(rd)
-summary(dbsnp) 
-metadata(dbsnp)
-
-## return a VAFilterResult object
-snpFilt(rd, subset=FALSE)
-@
-
-Next we identify the variants that fall in an intron region.
-\begin{verbatim}
-> rd <- rowData(vcf)
-> seqlevels(rd) <- paste("chr", seqlevels(rd), sep="")
-> intron <- regionFilt(rd)
-> summary(intron)
- Length   Class    Mode 
-    712 GRanges      S4 
-\end{verbatim}
 
 \section{SIFT and PolyPhen Databases}
 
@@ -568,7 +484,7 @@ pp <- select(PolyPhen.Hsapiens.dbSNP131, keys=rsids,
 head(pp)
 @
 
-\section{Extras}
+\section{Other tasks}
 \subsection{Creating a SnpMatrix object}
 
 The 'GT' element in the \Rcode{FORMAT} field of the VCF represents the 
@@ -610,6 +526,62 @@ allele2 <- res$map[["allele.2"]]
 unique(elementLengths(allele2))
 unlist(allele2)
 @
+
+\subsection{Filtering - under construction}
+
+Often it is useful to identify subsets of variants that meet a specific 
+criteria. There are currently two built-in filters available in
+\Rpackage{VariantAnnotation}. The \Rfunction{dbSNPfilter} checks for membership 
+in dbSNP and \Rfunction{regionFilter} filters variants based on the locations 
+identified with\Rfunction{locateVariants}. Filters are created with the 
+appropriate reference object such as a \Robject{SNPlocs} or 
+\Robject{TranscriptDb} object. 
+
+<<createFilters>>=
+## create filter to identify variants present in dbSNP 
+library("SNPlocs.Hsapiens.dbSNP.20110815")
+snpFilt <- dbSNPFilter("SNPlocs.Hsapiens.dbSNP.20110815")
+#vaFilter(snpFilt)
+
+## create filter to identify variants present in introns 
+regionFilt <- regionFilter(txdb19, region="intron")
+#vaFilter(regionFilt)
+@
+
+When filtering data with \Rfunction{dbSNPFilter} or \Rfunction{regionsFilt} two 
+options are available for the return object. If the argument \Rcode{subset=TRUE}
+(default) a \Robject{GRanges} is returned that contains only the records that
+passed the filter. If \Rcode{subset=FALSE}, the result is a 
+\Robject{VAFilterResult} object. This object contains a logical vector 
+indicating which records passed the filter and some statistics on the number of 
+records removed and what filter was applied. 
+
+Identify the variants that fall in an intron region.
+\begin{verbatim}
+> rd <- rowData(vcf)
+> intron <- regionFilt(rd)
+> summary(intron)
+ Length   Class    Mode 
+    712 GRanges      S4 
+\end{verbatim}
+
+Next we return the subset of variants that are in dbSNP. Again, we need to 
+be sure the seqlevels of the variants match those of the annotation. 
+Previously we renamed the seqlevels in our \Robject{VCF} to 'chr'. Chromosome
+names in the SNPlocs packages start with 'ch' instead of 'chr' as in the TxDb 
+packages. Adjust the seqlevels with \Rfunction{renameSeqlevels} then apply the
+filter. 
+\begin{verbatim}
+## return the subset of records that passed the filter
+rd <- rowData(vcf)
+rd <- renameSeqlevels(rd, c("chr22"="ch22"))
+dbsnp <- snpFilt(rd)
+summary(dbsnp) 
+metadata(dbsnp)
+
+## return a VAFilterResult object
+snpFilt(rd, subset=FALSE)
+\end{verbatim}
 
 \section{References}
 Wang K, Li M, Hakonarson H, (2010), ANNOVAR: functional annotation of genetic 
