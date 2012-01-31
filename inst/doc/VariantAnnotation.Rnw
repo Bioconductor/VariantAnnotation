@@ -51,17 +51,15 @@ and optional genotype information on samples for each position. A full
 description of the VCF format can be found on the 1000 Genomes page,
 \url{http://www.1000genomes.org/wiki/Analysis/Variant%20Call%20Format/vcf-variant-call-format-version-41}
 
-The \Rfunction{readVcf} function parses data from a VCF file into a 
-\Rfunction{VCF} object. \Rfunction{locateVariants} categorizes variants with 
-respect to gene function, such as 'intron', 'coding', 'UTR' or 'intergenic' 
-region. Amino acid coding changes for the non-synonymous variants can be 
-computed with \Rfunction{predictCoding}. SIFT and PolyPhen databases can be 
+In the following workflow we read in data from a VCF file and locate
+the variants with respect to gene function. Amino acid coding changes
+are computed for the non-synonymous variants. SIFT and PolyPhen databases are 
 queried to provide predictions of how severly these amino acid coding changes 
-may affect protein function. Filtering functions allow the subsetting of 
-variants on physical location or membership in dbSNP. 
+affect protein function. At the end of the vignette we cover other
+transformations of the VCF data such as the creation of a \Robject{SnpMatrix} or
+a 'flattened' \Robject{GRanges} which is an expanded form of the VCF data.
 
-\section{Variant Call Format (VCF) files}
-\subsection{Reading in data}
+\section{Reading Variant Call Format (VCF) files}
 
 <<readVcf>>=
 library(VariantAnnotation)
@@ -69,18 +67,23 @@ vcffile <- system.file("extdata", "chr22.vcf.gz", package="VariantAnnotation")
 vcf <- readVcf(vcffile, "hg19")
 @
 
-Data are parsed into a \Robject{VCF} object with \Rfunction{readVcf}. Header 
-information from the VCF file is stored as a \Robject{SimpleList} in the 
-\Rcode{exptData} slot and can be viewed by querying elements of the list.
+Data are parsed into a \Robject{VCF} object with \Rfunction{readVcf}. 
 
 <<readVCF_show>>=
 vcf
+@
+
+Header information from the VCF file is stored as a \Robject{SimpleList} in the 
+\Rcode{exptData} slot and can be viewed by querying elements of the list.
+
+<<readVCF_showheader>>=
 exptData(vcf)[["HEADER"]]
 exptData(vcf)[["HEADER"]][["META"]]
 @
 
 The CHROM, POS, and ID fields of the VCF file are used to create a 
 \Robject{GRanges} object which is stored in the \Rcode{rowData} slot. 
+
 <<readVCF_rowData>>=
 head(rowData(vcf))
 @
@@ -88,6 +91,7 @@ head(rowData(vcf))
 The REF, ALT, QUAL and FILTER fields can be accessed together with 
 \Rcode{fixedFields} accessor or individually with \Rcode{ref}, \Rcode{alt}, 
 \Rcode{qual} and \Rcode{filt} accessors. 
+
 <<readVCF_fixed>>=
 head(fixedFields(vcf), 3)
 @
@@ -97,6 +101,7 @@ the file is a structural VCF, in which case it is stored as a
 \Robject{CharacterList}. To take a closer look at \Robject{ALT} we extract 
 it from the \Robject{GRanges} and determine the number of elements in the
 list. In this case we have only 1 alternate allele value per variant.
+
 <<readVCF_ALT>>=
 alternate <- values(alt(vcf))[["ALT"]]
 alternate
@@ -106,12 +111,12 @@ unique(elementLengths(alternate))
 head(unlist(alternate))
 @
 
-Data from the \Rcode{INFO} field can be accessed with \Rcode{info}. Detailed
-information about each of the \Rcode{INFO} fields from the VCF header can be 
-accessed with \Rfunction{exptData}. To view all of REF, ALT, QUAL, FILTER and 
-INFO together use the \Rfunction{fixed} accessor. Note the distinction between
-the \Rfunction{fixedFields} and \Rfunction{fixed} accessors. The first returns 
-REF, ALT, QUAL and FILTER fields while the second also returns INFO. 
+Data from the \Rcode{INFO} field can be accessed with the \Rcode{info} accessor
+function. Detailed information for each of the \Rcode{INFO} fields can be
+accessed with the \Rfunction{exptData} accessor. To view all of REF, ALT, QUAL, 
+FILTER and INFO together use the \Rfunction{fixed} accessor. Note the difference 
+between the \Rfunction{fixedFields} and \Rfunction{fixed} accessors. The first 
+returns REF, ALT, QUAL and FILTER fields while the second also returns INFO. 
 <<readVCF_info>>=
 ## header information related to the INFO fields
 head(exptData(vcf)[["HEADER"]][["INFO"]], 3)
@@ -135,12 +140,12 @@ geno(vcf)$GT[1:3,1:5]
 geno(vcf)$DS[1:3,1:5]
 @
 
-\subsection{Reading in subsets}
+\subsection{Reading subsets of data}
 When working with large VCF files it may be more efficient to read in subsets 
-of the data. Data can be subset by selecting specific fields from the VCF or by
-selecting parts of the genome or both.
+of the data. Data can be subset by selecting genomic coordinates or by
+selecting fields from the VCF file. 
 
-\subsubsection{Subset on genomic coordinates}
+\subsubsection{Genomic coordinates}
 Subset by genomic coordinates by creating a \Robject{GRanges}, 
 \Robject{RangedData} or \Robject{RangesList}. To read in a portion of
 chromosome 22, we create a \Robject{GRanges} with the regions of interest.
@@ -151,13 +156,13 @@ rng <- GRanges(seqnames="22", ranges=IRanges(start=51151293, end=51152761))
 
 When ranges are specified, the VCF file must have an accompanying Tabix index 
 file; if one does not exist it must be created. See ?\Rcode{indexTabix} for 
-help creating an index. An index file for our sample file is included with the 
-package. 
+help creating an index. 
 
-Once an index exists we create \Robject{TabixFile} instance. See 
+Once the index exists we can create \Robject{TabixFile} instance. See 
 ?\Rcode{TabixFile}. This object creates a reference to the VCF and its index. 
 Once opened, the reference remains open across calls to methods, avoiding costly 
-index re-loading. 
+index re-loading. An index file for our sample data is included in the package
+so we now create the \Rcode{TabixFile}.
 
 <<subset_TabixFile>>=
 tab <- TabixFile(vcffile)
@@ -166,14 +171,14 @@ tab
 
 Once the \Robject{TabixFile} is created \Rfunction{readVcf} is called with the 
 \Robject{TabixFile} as the \Robject{file} argument and the ranges as the 
-\Robject{param}. The resulting \Robject{VCF} object shows 27 of the total 1000
-variants overlaps with our defined ranges and were read in. 
+\Robject{param}. The resulting \Robject{VCF} object shows that 27 of the total 1000
+variants overlaped with our defined ranges and were read in. 
 <<subset_call>>= 
 vcf_rng <- readVcf(tab, "hg19", param=rng)
 vcf_rng
 @
 
-\subsubsection{Subset on VCF fields}
+\subsubsection{VCF fields}
 Data can also be subset on the \Rcode{INFO} and/or \Rcode{FORMAT} fields in the
 VCF file. To discover what fields are available for subsetting we call
 \Rfunction{ScanVcfHeader}. The return value is a list of length 3 with names
@@ -579,66 +584,32 @@ unique(elementLengths(allele2))
 unlist(allele2)
 @
 
-\subsection{Create a flat GRanges}
+\subsection{Expanded GRanges - under construction}
 
+The fields in the INFO and FORMAT fields of a VCF file can have more than 
+one value per variant. In the \Robject{VCF} object created by 
+\Rfunction{readVcf} elements with multiple values are represented as compressed 
+lists or arrays.
 
+It may be useful to have an expanded form of the data where each
+row represents a variant with a single value. This can be accomplished by
+setting an option in the \Robject{ScanVcfParam} object.
 
-
-\subsection{Filtering - under construction}
-
-Often it is useful to identify subsets of variants that meet a specific 
-criteria. There are currently two built-in filters available in
-\Rpackage{VariantAnnotation}. The \Rfunction{dbSNPfilter} checks for membership 
-in dbSNP and \Rfunction{regionFilter} filters variants based on the locations 
-identified with\Rfunction{locateVariants}. Filters are created with the 
-appropriate reference object such as a \Robject{SNPlocs} or 
-\Robject{TranscriptDb} object. 
-
-<<createFilters>>=
-## create filter to identify variants present in dbSNP 
-library("SNPlocs.Hsapiens.dbSNP.20110815")
-snpFilt <- dbSNPFilter("SNPlocs.Hsapiens.dbSNP.20110815")
-#vaFilter(snpFilt)
-
-## create filter to identify variants present in introns 
-regionFilt <- regionFilter(txdb19, region="intron")
-#vaFilter(regionFilt)
+Specify the \Rcode{asGRanges} argument as 'info' for an expanded 
+\Robject{GRanges} with the INFO data
+<<expand_info, eval=FALSE>>=
+param <- ScanVcfParam(asGRanges="info")
+iflat <- readVcf(vcffile, "hg19", param)
+head(iflat)
 @
 
-When filtering data with \Rfunction{dbSNPFilter} or \Rfunction{regionsFilt} two 
-options are available for the return object. If the argument \Rcode{subset=TRUE}
-(default) a \Robject{GRanges} is returned that contains only the records that
-passed the filter. If \Rcode{subset=FALSE}, the result is a 
-\Robject{VAFilterResult} object. This object contains a logical vector 
-indicating which records passed the filter and some statistics on the number of 
-records removed and what filter was applied. 
+and 'geno' for expanded genotype data.
+<<expand_geno, eval=FALSE>>=
+param <- ScanVcfParam(asGRanges="geno")
+gflat <- readVcf(vcffile, "hg19", param)
+@
 
-Identify the variants that fall in an intron region.
-\begin{verbatim}
-> rd <- rowData(vcf)
-> intron <- regionFilt(rd)
-> summary(intron)
- Length   Class    Mode 
-    712 GRanges      S4 
-\end{verbatim}
-
-Next we return the subset of variants that are in dbSNP. Again, we need to 
-be sure the seqlevels of the variants match those of the annotation. 
-Previously we renamed the seqlevels in our \Robject{VCF} to 'chr'. Chromosome
-names in the SNPlocs packages start with 'ch' instead of 'chr' as in the TxDb 
-packages. Adjust the seqlevels with \Rfunction{renameSeqlevels} then apply the
-filter. 
-\begin{verbatim}
-## return the subset of records that passed the filter
-rd <- rowData(vcf)
-rd <- renameSeqlevels(rd, c("chr22"="ch22"))
-dbsnp <- snpFilt(rd)
-summary(dbsnp) 
-metadata(dbsnp)
-
-## return a VAFilterResult object
-snpFilt(rd, subset=FALSE)
-\end{verbatim}
+\subsection{Write out VCF files - under construction}
 
 \section{References}
 Wang K, Li M, Hakonarson H, (2010), ANNOVAR: functional annotation of genetic 

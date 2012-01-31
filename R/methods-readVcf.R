@@ -130,27 +130,30 @@ setMethod(readVcf, c(file="character", genome="missing", param="ANY"),
                    rep(1, dim0)
            }, dim0=length(rowData)) 
     maxrep <- apply(do.call(cbind, eltrep), 1, max)
-    unwind <- .unwind(length(rowData), maxrep, dat)
+    unwind <- .unwind(maxrep, dat)
     gr <- rowData[rep(seq_len(length(rowData)), maxrep)]
     values(gr) <- unwind 
     gr 
 }
 
-.unwind <- function(rep0, rep1, lst, ...)
+.unwind <- function(reps, lst, ...)
 {
-   ll <- lapply(lst, function(elt, rep1) {
+   ll <- lapply(lst, function(elt, reps) {
               if (is(elt, "list")) {
-                  mt <- elementLengths(elt) == rep1 
+                  mt <- elementLengths(elt) == reps 
                   newrep <- rep(1, length(mt))
-                  newrep[mt == FALSE] <- rep1[mt == FALSE]
+                  newrep[mt == FALSE] <- reps[mt == FALSE]
                   unlist(rep(elt, newrep), use.names=FALSE) 
               } else if (is(elt, "array")) {
-                  slen <- rep(seq_len(length(rep1)), rep1)
-                  matrix(elt, ncol=dim(elt)[3])[slen, ]
+                  slen <- rep(seq_len(length(reps)), reps)
+                  if (length(dim(elt)) == 3)
+                      matrix(elt, ncol=dim(elt)[3])[slen, ]
+                  else
+                      matrix(elt, ncol=dim(elt)[2])[slen, ]
               } else {
-                  rep(elt, rep1)
+                  rep(elt, reps)
               }
-          }, rep1)
+          }, reps)
 
     ## FIXME: why can't DF go in list via lapply above
     idx <- which(lapply(lst, class) == "array") 

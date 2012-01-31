@@ -19,8 +19,11 @@ setMethod("predictCoding", signature(query="VCF", subject="TranscriptDb",
         rd <- rowData(query) 
         alt <- values(alt(query))[["ALT"]]
         rdf <- rep(rd, elementLengths(alt))
-        callGeneric(query=rdf, subject=subject, seqSource=seqSource, 
+        res <- callGeneric(query=rdf, subject=subject, seqSource=seqSource, 
              varAllele=unlist(alt, use.names=FALSE), ...) 
+        origID <- rep(seq_len(length(rd)), elementLengths(alt))
+        res$queryID <- origID[res$queryID]
+        res
     }
 )
 
@@ -79,15 +82,19 @@ setMethod("predictCoding", signature(query="GRanges", subject="TranscriptDb",
  
         ## construct original sequences 
         originalWidth <- width(xCoding)
-        codonStart <- (start(txLocal$local) - 1L) %/% 3L * 3L + 1L
-        codonEnd <- codonStart + originalWidth %/% 3L * 3L + 2L
+        codonStart <- ((start(txLocal$local) - 1L) %/% 3L) * 3L + 1L
+        ## codonEnd must be adjusted for 
+        ## (1) the width of the reference sequence and
+        ## (2) the position in the codon of the alternate allele substitution
+        varPosition <- (start(txLocal$local) - 1L) %% 3L + 1L
+        codonEnd <- 
+            codonStart + (((varPosition + originalWidth) %/% 3L) * 3L + 2L)
         txseqs <- getTranscriptSeqs(cdsByTx, seqSource)
         codons <- DNAStringSet(substring(txseqs[txLocal$rangesInd], 
             codonStart, codonEnd))
 
         ## construct variant sequences 
         varWidth <- width(xAllele)
-        varPosition <- (start(txLocal$local) - 1L) %% 3L + 1L
         indels <- originalWidth == 0 | varWidth == 0 
         translateIdx <- abs(varWidth - originalWidth) %% 3 == 0 
         varSeq <- codons
