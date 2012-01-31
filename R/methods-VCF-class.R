@@ -187,7 +187,7 @@ setReplaceMethod("geno", c("VCF", "missing", "SimpleList"),
                rowData=rowData(x)[i,,drop=FALSE],
                colData=colData(x)[j,,drop=FALSE],
                assays=geno, 
-               info=values(info(x))[i,],
+               info=values(info(x))[i,,drop=FALSE],
                fixedFields=values(fixedFields(x))[i,])
 }
 
@@ -262,6 +262,24 @@ setReplaceMethod("[",
         .VCF.subsetassign(x, i, TRUE, ..., value=value)
     else
         .VCF.subsetassign(x, i, j, ..., value=value)
+})
+
+setMethod("renameSeqlevels",  c("VCF", "character"),
+            function(x, value, ...)
+{
+    rd <- renameSeqlevels(rowData(x), value)
+    rowData(vcf) <- rd
+    vcf
+})
+
+setMethod("keepSeqlevels",  c("VCF", "character"),
+            function(x, value, ...)
+{
+    rd <- keepSeqlevels(rowData(x), value)
+    idx <- as.vector(seqnames(rowData(x))) %in% value
+    vcf <- x[idx, ]
+    rowData(vcf) <- rd
+    vcf
 })
 
 

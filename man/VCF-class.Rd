@@ -50,6 +50,10 @@
 \alias{[,VCF,ANY,ANY,ANY-method}
 \alias{[<-,VCF,ANY,ANY,VCF-method}
 
+% Other methods
+\alias{keepSeqlevels,VCF,character-method}
+\alias{renameSeqlevels,VCF,character-method}
+
 % show method:
 \alias{show,VCF-method}
 
@@ -181,6 +185,24 @@
   }
 }
 
+\section{Other methods}{
+  \describe{
+    \item{}{
+      \code{renameSeqlevels(x, value)}:
+
+      Rename the seqlevels in the \code{GRanges} in the \code{rowData} slot
+      of the VCF object. \code{value} is a named character vector where
+      the names are the old seqlevels and the values are the new.
+    }
+    \item{}{
+      \code{keepSeqlevels(x, value)}:
+
+      Subset the \code{GRanges} in the \code{rowData} slot of the VCF object. 
+      \code{value} is a character vector of seqlevels to keep.
+    }
+  }
+}
+
 \section{Arguments}{
   \describe{
     \item{geno}{A \code{list} or \code{SimpleList} of matrix elements,
@@ -271,11 +293,23 @@
 }
 
 \examples{
-  fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
+  fl <- system.file("extdata", "ex1.vcf", package="VariantAnnotation")
   vcf <- readVcf(fl, "hg19")
 
+  ## accessors
   fixed(vcf)
   info(vcf)
   geno(vcf)
   identical(geno(vcf)$DP, geno(vcf)[[3]])
+
+  ## rename and subset the seqlevels in the rowData GRanges object
+  seqlevels(rowData(vcf))
+ 
+  ## renameSeqlevels 
+  vcf_rename <- renameSeqlevels(vcf, c("16"="chr16", "21"="chr21"))
+  seqlevels(rowData(vcf_rename))
+ 
+  ## keepSeqlevels 
+  vcf_subset <- keepSeqlevels(vcf_rename, "chr16")
+  seqlevels(rowData(vcf_subset))
 }
