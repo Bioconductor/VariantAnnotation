@@ -82,7 +82,7 @@
   fl <- system.file("extdata", "ex1.vcf", package="VariantAnnotation")
   vcf <- readVcf(fl, "hg19")
 
-  ## The seqlevels in the GRanges do not match those in the TxDb.
+  ## Note the variant seqlevels do not match those in the TxDb
   rd <- rowData(vcf)
   head(seqlevels(rd))
   head(seqlevels(txdb19))

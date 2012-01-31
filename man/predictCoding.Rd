@@ -35,6 +35,10 @@
     (alternate) alleles. The length of \code{varAllele} must equal the length
     of \code{query}. Missing values are represented by a zero width empty 
     element. Ranges with missing values will be ignored. 
+
+    When the \code{query} is a \code{VCF} object the \code{varAllele} will
+    be missing. This value is taken internally from the \code{VCF} with
+    \code{values(alt(<VCF>))[["ALT"]]}.
   }
   \item{\dots}{Additional arguments passed to methods.
   }
@@ -47,18 +51,22 @@
   allele. For guidance on how to represent an insertion, deletion or
   substitution see the 1000 Genomes VCF format (references). Reference 
   sequences are retrieved from a fasta file or \link[BSgenome]{BSgenome}. 
-  Variant alleles are required input and are substituted into the reference 
-  sequences and transcribed. Sequences are transcribed only if the substitution, 
-  insertion or deletion results in a new sequence length divisible by 3. 
+  Variant alleles are substituted into the reference sequences and transcribed. 
+  Sequences are transcribed only if the substitution, insertion or deletion 
+  results in a new sequence length divisible by 3.
+
+  When the \code{query} is a \code{VCF} object the \code{varAllele} will
+  be missing. This value is taken internally from the \code{VCF} with
+  \code{values(alt(<VCF>))[["ALT"]]}. 
 } 
 
 \value{
   A \link[IRanges]{DataFrame} with a row for each variant-transcript 
   match. This includes only variants that fell in a coding regions.
 
-  Columns include \code{queryID}, \code{txID}, \code{refSeq}, 
-  \code{varSeq}, \code{refAA}, \code{varAA}, \code{consequence}, and any 
-  metadata that was present in the \code{subject}. 
+  Columns include \code{queryID}, \code{consequence}, \code{refSeq}, 
+  \code{varSeq}, \code{refAA}, \code{varAA}, \code{txID}, \code{geneID},
+  and \code{cdsID}.
 
   The \code{queryHits} column provides a map back to the variants in the 
   original \code{query}. \code{refSeq} and \code{varSeq} contain the reference 
