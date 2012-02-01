@@ -225,8 +225,8 @@ setMethod(readVcf, c(file="character", genome="missing", param="ANY"),
 
 .toDNAStringSet <- function(x)
 {
-    xx <- unlist(strsplit(x, ",", fixed=TRUE))
-    ulist <- gsub("\\.", "", xx)
+    xx <- unlist(strsplit(x, ",", fixed = TRUE))
+    ulist <- gsub(".", "", xx, fixed = TRUE)
     ulist[is.na(ulist)] <- ""
     DNAStringSet(ulist)
 }
@@ -234,7 +234,7 @@ setMethod(readVcf, c(file="character", genome="missing", param="ANY"),
 .toDNAStringSetList <- function(x)
 {
     dna <- .toDNAStringSet(x)
-    idx <- elementLengths(strsplit(x, ","))
+    idx <- elementLengths(strsplit(x, ",", fixed = TRUE))
     pbw <- PartitioningByWidth(idx)
     IRanges:::newCompressedList("DNAStringSetList",
         unlistData=dna, end=end(pbw))
