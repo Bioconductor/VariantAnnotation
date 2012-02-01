@@ -51,8 +51,9 @@
 \alias{[<-,VCF,ANY,ANY,VCF-method}
 
 % Other methods
-\alias{keepSeqlevels,VCF,character-method}
+\alias{seqlevels,VCF-method}
 \alias{renameSeqlevels,VCF,character-method}
+\alias{keepSeqlevels,VCF,character-method}
 
 % show method:
 \alias{show,VCF-method}
@@ -187,6 +188,12 @@
 
 \section{Other methods}{
   \describe{
+    \item{}{
+      \code{seqlevels(x)}:
+
+      Extract the \code{seqlevels} from a \code{VCF} object. Seqlevels are
+      taken from the \code{GRanges} in the \code{rowData} slot.
+    }
     \item{}{
       \code{renameSeqlevels(x, value)}:
 

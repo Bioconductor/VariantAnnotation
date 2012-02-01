@@ -155,3 +155,20 @@ test_VCF_subsetassign <- function()
     checkIdentical(rowData(vcf), rowData(ss1))
     checkIdentical(c(exptData(vcf), exptData(vcf)), exptData(ss1))
 }
+
+test_VCF_seqlevels <- function()
+{
+    fl <- system.file("extdata", "ex1.vcf", package="VariantAnnotation")
+    vcf <- readVcf(fl, "hg19")
+    seqlev <- seqlevels(vcf)
+    checkIdentical(seqlev, c("16", "21"))
+
+    vcf2 <- renameSeqlevels(vcf, c("16"="chr16", "21"="chr21"))
+    checkIdentical(seqlevels(vcf2), c("chr16", "chr21"))
+ 
+    vcf3 <- keepSeqlevels(vcf, "16")
+    checkIdentical(seqlevels(vcf3), "16")
+}
+
+
+

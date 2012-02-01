@@ -264,22 +264,28 @@ setReplaceMethod("[",
         .VCF.subsetassign(x, i, j, ..., value=value)
 })
 
+setMethod("seqlevels", "VCF",
+    function(x)
+{
+    seqlevels(rowData(x))
+})
+
 setMethod("renameSeqlevels",  c("VCF", "character"),
-            function(x, value, ...)
+    function(x, value, ...)
 {
     rd <- renameSeqlevels(rowData(x), value)
-    rowData(vcf) <- rd
-    vcf
+    rowData(x) <- rd
+    x 
 })
 
 setMethod("keepSeqlevels",  c("VCF", "character"),
-            function(x, value, ...)
+    function(x, value, ...)
 {
     rd <- keepSeqlevels(rowData(x), value)
     idx <- as.vector(seqnames(rowData(x))) %in% value
-    vcf <- x[idx, ]
-    rowData(vcf) <- rd
-    vcf
+    xsub <- x[idx, ]
+    rowData(xsub) <- rd
+    xsub 
 })
 
 

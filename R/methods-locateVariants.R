@@ -13,8 +13,7 @@ setMethod("locateVariants",  c(query="Ranges", subject="TranscriptDb"),
 setMethod("locateVariants", c(query="VCF", subject="TranscriptDb"), 
     function(query, subject, ...)
     {
-        rd <- rowData(query) 
-        callGeneric(query=rd, subject, ...) 
+        callGeneric(query=rowData(query), subject, ...) 
     }
 )
 
@@ -122,7 +121,8 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
         if (any(is.na(nidx))) {
             nnidx[which(txCO == 0)] <- is.na(nidx)
             intergenic[nnidx] <- FALSE
-            intvar <- intvar[!is.na(nidx)] 
+            intvar <- intvar[!is.na(nidx)]
+            nidx <- na.omit(nidx)
         } 
         isPreceding <- (end(rngWithGeneID[nidx]) - start(intvar)) < 0
         isFirst <- nidx == 1
@@ -152,10 +152,13 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
         location <- rep("intergenic", length(qhits))
         res <- DataFrame(queryID=qhits, location=location, txID=txid,
             geneID=geneid, cdsID=cdsid) 
-        if (any(nnidx)) 
-            c(res, DataFrame(which(nnidx), NA_character_, NA_integer_, 
-                CharacterList(NA_character_), NA_integer_))
-        else
+        if (any(nnidx)) { 
+            noNearestDF <- DataFrame(queryID=which(nnidx), location=NA_character_, 
+                txID=NA_integer_, geneID=CharacterList(NA_character_), cdsID=NA_integer_)
+            DF <- rbind(res, noNearestDF)
+            DF[order(DF$queryID), ] 
+        } else {
             res
+        }
     }
 }
