@@ -264,6 +264,16 @@ setReplaceMethod("[",
         .VCF.subsetassign(x, i, j, ..., value=value)
 })
 
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Other methods 
+##
+
+setMethod("genome", "VCF",
+    function(x)
+{
+    genome(rowData(x))
+})
+
 setMethod("seqlevels", "VCF",
     function(x)
 {
@@ -306,6 +316,7 @@ setMethod(show, "VCF",
     }
     cat("class:", class(object), "\n")
     cat("dim:", dim(object), "\n")
+    cat("genome:", genome(rowData(object)), "\n")
 
     expt <- names(exptData(object))
     if (is.null(expt))

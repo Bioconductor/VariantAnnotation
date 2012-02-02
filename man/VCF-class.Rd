@@ -189,6 +189,12 @@
 \section{Other methods}{
   \describe{
     \item{}{
+      \code{genome(x)}:
+
+      Extract the \code{genome} from a \code{VCF} object. This information is
+      taken from the \code{GRanges} \code{seqinfo} in the \code{rowData} slot.
+    }
+    \item{}{
       \code{seqlevels(x)}:
 
       Extract the \code{seqlevels} from a \code{VCF} object. Seqlevels are
