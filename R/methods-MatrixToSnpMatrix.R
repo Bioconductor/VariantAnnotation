@@ -37,11 +37,12 @@ setMethod("MatrixToSnpMatrix", c("matrix", "DNAStringSet", "DNAStringSetList"),
         nsamp <- ncol(callMatrix)
         mat <-  matrix(as.raw(0), nrow=nsamp, ncol=nsnps)
         str <- strsplit(callMatrix, "")
-        alts <- do.call(rbind, str)[,c(1,3)]
-        alts[alts == "."] <- NA
-        geno <- 2 - as.numeric(alts[,1] == 0) + as.numeric(alts[,2] == 0)
-        geno[is.na(geno)] <- -1
-        glst <- split(as.raw(geno+1), rep(seq(1:nsnps), nsamp))
+        vlu <- do.call(rbind, str)[,c(1,3)]
+        vlu[vlu == "."] <- NA_character_
+        geno <- rowSums(matrix(as.integer(vlu), nrow=nrow(vlu))) + 1
+        #geno <- 2 - as.numeric(alts[,1] == 0) + as.numeric(alts[,2] == 0)
+        geno[is.na(geno)] <- 0 
+        glst <- split(as.raw(geno), rep(seq(1:nsnps), nsamp))
         for (i in 1:nsnps) 
             mat[,i] = glst[[i]]
 

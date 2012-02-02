@@ -83,7 +83,30 @@
   calls <- geno(vcf)$GT
   a0 <- values(ref(vcf))[["REF"]]
   a1 <- values(alt(vcf))[["ALT"]]
-  MatrixToSnpMatrix(calls, a0, a1)
+  mat <- MatrixToSnpMatrix(calls, a0, a1)
+
+  ## The results is a list of length 2
+  names(mat)
+
+  ## Compare the original coding in the VCF file to the SnpMatrix coding
+  geno(vcf)$GT
+  t(as(mat$genotype, "character"))
+
+  ## The 'ignore' column of the map list element indicates which variants 
+  ## were set to 'missing' as per the criteria stated in the details section 
+  mat$map
+
+  ## Variant rs6040355 was ignored because it has more than one alternate
+  ## allele. The microsat1 variant has a reference allele with length
+  ## greater than 1 and more than 1 alternate allele.
+  ## Variant chr20:1230237 was ignored because the alternate allele is not
+  ## of length 1. 
+
+  ## View the reference and alternate alleles 
+  fixed <- fixedFields(vcf)
+  DataFrame(reference = values(fixed)[["REF"]], 
+            alternate = CharacterList(as.list(values(fixed)[["ALT"]])),
+            row.names = rownames(vcf))
 }
 
 \keyword{manip}
