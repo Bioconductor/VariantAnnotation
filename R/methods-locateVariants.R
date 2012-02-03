@@ -27,15 +27,8 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
 
         ## mask chromosomes not in query
         masks <- isActiveSeq(subject)
-        isActiveSeq(subject)[!names(isActiveSeq(subject)) %in% queryseq] <- FALSE
         on.exit(isActiveSeq(subject) <- masks)
-
-        ## prevent findOverlaps circularity error
-        circular <- .checkCircular(subject)
-        if (any(circular %in% isActiveSeq(subject))) 
-            stop("Please remove circular sequence ", circular, " from the ",
-                 "query. Overlaps for type 'within' are not yet supported for ",
-                 "circular sequences.")
+        .setActiveSubjectSeq(query, subject)
 
         tx <- transcripts(subject, columns=c("exon_id", "tx_id", "gene_id"))
         cdsByTx <- cdsBy(subject)

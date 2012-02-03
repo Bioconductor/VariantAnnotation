@@ -40,12 +40,18 @@
     paste(unlist(sql), collapse = ",")
 }
 
-.checkCircular <- function(x)
+.setActiveSubjectSeq <-
+    function(query, subject)
+    ## set active state of circular sequences of subject to FALSE;
+    ## warn if query contains circular sequences
 {
-    circular <- isCircular(seqinfo(x))
-    if (any(circular == TRUE))
-        seqnames(seqinfo(x))[circular] 
-    else
-        NA
-}
+    queryseq <- seqlevels(query)
+    circular <- isCircular(TxDb.Hsapiens.UCSC.hg19.knownGene)
+    circNames <- intersect(queryseq, names(circular)[circular])
+    if (0L != length(circNames))
+        warning("circular sequence(s) in query '",
+                paste(circNames, sep="' '"), "' ignored")
 
+    isActiveSeq(subject)[] <- FALSE
+    isActiveSeq(subject)[setdiff(queryseq, circNames)] <- TRUE
+}
