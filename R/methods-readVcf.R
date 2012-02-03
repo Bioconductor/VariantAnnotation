@@ -100,12 +100,12 @@ setMethod(readVcf, c(file="character", genome="missing", param="ANY"),
         .scanVcfToVCF(scanVcf(file), file, genome)
     } else {
         if (vcfAsGRanges(param)) {
-            p <- param
             if (identical(character(0), vcfInfo(param))) 
-                slot(p, "info") <- NA_character_
+                slot(param, "info") <- NA_character_
             else if (identical(character(0), vcfGeno(param))) 
-                slot(p, "geno") <- NA_character_
-            .scanVcfToLongGRanges(scanVcf(file, param=p), file, genome, param=p)
+                slot(param, "geno") <- NA_character_
+            .scanVcfToLongGRanges(scanVcf(file, param=param),
+                                  file, genome, param=param)
         } else {
             .scanVcfToVCF(scanVcf(file, param=param), file, genome)
         }
@@ -202,19 +202,8 @@ setMethod(readVcf, c(file="character", genome="missing", param="ANY"),
         colData <- DataFrame(Samples=character(0))
     }
 
-    ## FIXME : .unpack still returns lists for Number="."
-    if (length(vcf$GENO) > 0)
-        geno <- lapply(vcf$GENO, function(elt) {
-                    if (is.list(elt))
-                        do.call(rbind, elt)
-                    else
-                        elt
-                    })
-    else
-        geno <- list()
-
     VCF(rowData=rowData, colData=colData, exptData=SimpleList(HEADER=hdr), 
-        fixedFields=fixedFields, info=info, geno=SimpleList(geno))
+        fixedFields=fixedFields, info=info, geno=SimpleList(vcf$GENO))
 }
 
 .rowDataNames <- function(vcf, rowData, ...)
