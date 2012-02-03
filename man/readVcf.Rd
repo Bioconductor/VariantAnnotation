@@ -157,12 +157,16 @@
   fl <- system.file("extdata", "ex1.vcf", package="VariantAnnotation") 
   vcf <- readVcf(fl, "hg19")
 
+  ## ---------------------------------
   ## Header and genome information 
+  ## ---------------------------------
   vcf
   exptData(vcf)[["HEADER"]]
   unique(genome(rowData(vcf)))
 
-  ## Accessors :
+  ## ---------------------------------
+  ## Accessors
+  ## ---------------------------------
   ## Fixed fields together
   head(fixedFields(vcf), 5)
 
@@ -181,13 +185,15 @@
 
   identical(geno(vcf)[["GQ"]], geno(vcf)$GQ)
 
-
-  ## Selecting elements or ranges of data :
+  ## ---------------------------------
+  ## Reading in subsets
+  ## ---------------------------------
   fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
 
-  ## Range subsets :
-  ## Range subsets are specified in the 'which' argument to ScanVcfParam().
-  ## When ranges are specified 'file' must have a Tabix index.
+  ## Subset on genome coordinates :
+  ## Range subsets are specified in a GRanges, RangedData or RangesList
+  ## and supplied as the 'which' argument to ScanVcfParam().
+  ## When range subsets are specified the 'file' must have a Tabix index.
   rngs <- GRanges("20", IRanges(1110000, 1234600))
   param <- ScanVcfParam(which=rngs) 
   compressVcf <- bgzip(fl, tempfile())
@@ -195,21 +201,48 @@
   tab <- TabixFile(compressVcf, idx)
   vcf <- readVcf(tab, "hg19", param)
 
-  ## 'info' or 'geno' subsets :
-  ## An index file is not required if no ranges are specified.
+  ## Subset on 'info' or 'geno' elements :
+  ## An index file is not required if no ranges (genome coordinates) 
+  ## are specified.
   param <- ScanVcfParam(geno=c("GT", "HQ"), info=c("NS", "AF"))
   vcf_tab <- readVcf(tab, "hg19", param)
   vcf_fname <- readVcf(fl, "hg19", param)
   identical(vcf_tab, vcf_fname) 
 
-  ## Subsetting on ranges, 'info' and 'geno' : 
+  ## Subsetting on both genome coordinates and 'info' or 'geno' elements : 
   param <- ScanVcfParam(geno="HQ", info="AF", which=rngs)
   vcf <- readVcf(tab, "hg19", param)
 
-  ## Long form GRanges :
-  ## To obtain a long form GRanges, specify the 'asGRanges' argument.
-  param <- ScanVcfParam(asGRanges="info")
-  gr <- readVcf(fl, "hg19", param)
+  ## ---------------------------------
+  ## Long form GRanges : 
+  ## ---------------------------------
+  ## A 'long form' GRanges has been expanded to match the expanded length of 
+  ## elements in the 'info' or 'geno' fields that have more than one value
+  ## per record. This results in a GRanges with potentially multiple rows per
+  ## record but each row represents a unique combination of the elementMetadata
+  ## columns. The elementMetadata columns are the values supplied in 'info'
+  ## or 'geno' in the ScanVcfParam object.
+  ##
+  ## To specify a long form GRanges, set asGRanges=TRUE and specify one or more
+  ## elements in the 'info' filed OR specify one element in the 'geno' field.
+  ## In this usage only one of 'info' or 'geno' can be specified and 'info' can
+  ## accept multiple elements but 'geno' can take only one. See ?ScanVcfParam for 
+  ## more details.
+  ##
+  ## First retrieve available INFO and FORMAT fields from the file
+  hdr <- scanVcfHeader(fl)
+  hdr[[1]]$Header$INFO
+
+  ## Specify one or more fields to 'info'. The "AF" element has two values for
+  ## variant rs6040355. In the result there are now two rows for this variant
+  ## with the same ranges but unique elementMetadata.
+  param <- ScanVcfParam(asGRanges=TRUE, info=c("NS", "AF", "H2"))
+  readVcf(fl, "hg19", param)
+
+  ## When creating a long form GRanges only one 'geno' element can be specified
+  ## at a time.
+  param <- ScanVcfParam(asGRanges=TRUE, geno="GT")
+  readVcf(fl, "hg19", param)
 }
 
 \keyword{manip}

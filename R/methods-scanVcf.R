@@ -176,15 +176,14 @@ setMethod(scanVcf, c("connection", "missing"),
                    stop(sprintf("unhandled FORMAT type '%s'", type)))
         } else {
             ## non-numeric
-            nrow <- nrow(x)
-            dimnames <- dimnames(x)
-            x <- strsplit(x, ",", fixed=TRUE)
+            x <- apply(x, 1, function(i) strsplit(i, ",", fixed=TRUE)) 
             x <- switch(type, 
                         Character=, String=x,
-                        Integer= lapply(x, as.integer),
-                        Float=lapply(x, as.numeric),
+                        Integer=lapply(x, lapply, as.integer),
+                        Float=lapply(x, lapply, as.numeric),
                         stop(sprintf("unhandled FORMAT type '%s'", type)))
-            matrix(x, nrow, dimnames=dimnames)
+            names(x) <- NULL
+            x
         }
     }, warning=function(w) {
         msg <- sprintf("unpackVcf field '%s': %s", id,
@@ -227,6 +226,18 @@ setMethod(scanVcf, c("connection", "missing"),
     })
 }
 
+.unpackVcfGeno <-
+    function(geno, id, n, type)
+{
+    .unpackVcfTag(geno, id, n, type)
+    #lapply(result, function(elt) {
+    #    if (is(elt, "list"))
+    #        unlist(elt, recursive=FALSE, use.names=FALSE)
+    #    else 
+    #        elt
+    #})
+}
+
 .unpackVcf <- function(x, hdr, ...)
 {
     if (length(x[[1]]$INFO) != 0) {
@@ -247,7 +258,7 @@ setMethod(scanVcf, c("connection", "missing"),
             warning("'FORMAT' vcf header info not found in file")
         } else {
             x <- lapply(x, function(elt, id, n, type) {
-                elt[["GENO"]] <- .unpackVcfTag(elt[["GENO"]], id, n, type)
+                elt[["GENO"]] <- .unpackVcfGeno(elt[["GENO"]], id, n, type)
                 elt
             }, rownames(geno), geno$Number, geno$Type)
         }

@@ -35,7 +35,7 @@ setGeneric("writeVcf", signature = c("obj", "filename"),
 
 setGeneric("ScanVcfParam",
            function(info=character(), geno=character(), trimEmpty=TRUE,
-                    which, asGRanges=character(), ...)
+                    which, asGRanges=FALSE, ...)
            standardGeneric("ScanVcfParam"),
            signature="which")
 

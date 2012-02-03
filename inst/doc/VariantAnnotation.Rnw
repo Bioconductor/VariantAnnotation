@@ -598,14 +598,14 @@ setting an option in the \Robject{ScanVcfParam} object.
 Specify the \Rcode{asGRanges} argument as 'info' for an expanded 
 \Robject{GRanges} with the INFO data
 <<expand_info, eval=FALSE>>=
-param <- ScanVcfParam(asGRanges="info")
+param <- ScanVcfParam(asGRanges=TRUE, info=c("LDAF", "HOMSEQ"))
 iflat <- readVcf(vcffile, "hg19", param)
 head(iflat)
 @
 
 and 'geno' for expanded genotype data.
 <<expand_geno, eval=FALSE>>=
-param <- ScanVcfParam(asGRanges="geno")
+param <- ScanVcfParam(asGRanges=TRUE, geno="GT")
 gflat <- readVcf(vcffile, "hg19", param)
 @
 

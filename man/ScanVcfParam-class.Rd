@@ -23,7 +23,7 @@
 
 \usage{
   ScanVcfParam(info=character(), geno=character(), trimEmpty=TRUE,
-               which, asGRanges=character(), ...)
+               which, asGRanges=FALSE, ...)
 
   ## Accessors
  
@@ -50,10 +50,17 @@
     whose \code{POS} lies in the interval(s) \code{[start, end]} are
     returned. 
   }
-  \item{asGRanges}{A character(1) with the name \sQuote{info} or \sQuote{geno}.
-    When specified, a long form \code{GRanges} is returned with the specified 
-    field expanded as the elementMetadata columns. For use with \code{readVcf} 
-    only; ignored by \code{scanVcf}.
+  \item{asGRanges}{A logical(1) indicating whether a flattened (expanded) 
+    \code{GRanges} should be returned instead of a \code{VCF} object. For 
+    use with \code{readVcf} only; ignored by \code{scanVcf}.
+
+    The return value is a \code{GRanges} expanded to match the dimentions
+    of the unlisted elements specified in \sQuote{info} or \sQuote{geno}.
+    The \sQuote{info} or \sQuote{geno} elements are included as elementMetadata
+    columns. When \code{asGRanges=TRUE} multiple elements can be provided to 
+    the \sQuote{info} argument but only a single element can be provided to 
+    \sQuote{geno}. This restriction is due to the dimention of the \sQuote{geno} 
+    data.
   }
   \item{object}{An instance of class \code{ScanVcfParam}.}
 
@@ -119,15 +126,37 @@
 }
 
 \examples{
-  p0 <- ScanVcfParam()
+  ScanVcfParam()
 
-  ## subset of reads based on genomic coordinates
-  which <- RangesList(seq1=IRanges(1000, 2000),
-                      seq2=IRanges(c(100, 1000), c(1000, 2000)))
-  p1 <- ScanVcfParam(which=which)
-  
-  ## return only specified GENO field(s)
-  p2 <- ScanVcfParam(geno="GT", which=which)
-}
+  ## -----------------------------
+  ## 'which' argument
+  ## -----------------------------
+  ## To subset on genomic coordinates, create a GRanges, RangedData or 
+  ## RangesList with the ranges of interest. This object is supplied
+  ## to ScanVcfParam() as the 'which' argument.
+  which <- RangesList(seq1=IRanges(1000, 2000), 
+      seq2=IRanges(c(100, 1000), c(1000, 2000)))
+  ScanVcfParam(which=which)
+ 
+  ## -----------------------------
+  ## 'info' and 'geno' arguments
+  ## -----------------------------
+  ## Subsets of INFO or FORMAT field elements are specified in the 'info'
+  ## and 'geno' arguments. This call specifies the return of the "GT" 'geno' 
+  ## field and all of the 'info' fields. Note that when 'geno' or 'info' are
+  ## not specified all fields are read in.
+  ScanVcfParam(geno="GT", which=which)
 
+  ## -----------------------------
+  ## 'asGRanges' argument 
+  ## -----------------------------
+  ## When asGRanges=TRUE only one of 'info' or 'geno' can be provided.
+  ## Specifying values for both is wrong and will generate an error :
+  ## ScanVcfParam(info="DP", geno="GT", asGranges=TRUE)
+
+  ## When asGRanges=TRUE only a single element can be provided to 'geno' 
+  ScanVcfParam(geno="GT", asGranges=TRUE)
+  ## but multiple can be provided to 'info'.
+  ScanVcfParam(info=c("DP", "NS"), asGranges=TRUE)
+} 
 \keyword{classes}

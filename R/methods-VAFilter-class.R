@@ -75,7 +75,7 @@ regionFilter <-
     vaFilter(function(x) {
         loc <- locateVariants(x, txdb)
         res <- logical(length(x))
-        res[unique(loc$queryHits[loc$Location %in% region])] <- TRUE
+        res[unique(loc$queryID[loc$location %in% region])] <- TRUE
         res
     }, name=.name)
 }

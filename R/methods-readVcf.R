@@ -99,10 +99,16 @@ setMethod(readVcf, c(file="character", genome="missing", param="ANY"),
     if (missing(param)) {
         .scanVcfToVCF(scanVcf(file), file, genome)
     } else {
-        if (!identical(character(), vcfAsGRanges(param)))
-            .scanVcfToLongGRanges(scanVcf(file, param=param), file, genome, param)
-        else
+        if (vcfAsGRanges(param)) {
+            p <- param
+            if (identical(character(0), vcfInfo(param))) 
+                slot(p, "info") <- NA_character_
+            else if (identical(character(0), vcfGeno(param))) 
+                slot(p, "geno") <- NA_character_
+            .scanVcfToLongGRanges(scanVcf(file, param=p), file, genome, param=p)
+        } else {
             .scanVcfToVCF(scanVcf(file, param=param), file, genome)
+        }
     }
 }
 
@@ -111,18 +117,14 @@ setMethod(readVcf, c(file="character", genome="missing", param="ANY"),
 .scanVcfToLongGRanges <- function(vcf, file, genome, param, ...)
 {
     vcf <- vcf[[1]]
-    if (vcfAsGRanges(param) == "info")
-        dat <- vcf$INFO
-    else if (vcfAsGRanges(param) == "geno")
-        dat <- vcf$GENO
-    else
-        stop("asGRanges must be specified as 'info' or 'geno'")
- 
     ref <- .toDNAStringSet(vcf$REF)
     rowData <- GRanges(seqnames=Rle(vcf$CHROM), 
         ranges=IRanges(start=vcf$POS, width=width(ref)))
     rowData <- .rowDataNames(vcf, rowData)
 
+    elts <- na.omit(c(vcfInfo(param), vcfGeno(param)))
+    dat <- c(vcf$INFO[names(vcf$INFO) %in% elts],
+         vcf$GENO[names(vcf$GENO) %in% elts])
     eltrep <- lapply(dat, function(elt, dim0) {
                if (is.list(elt))
                    elementLengths(elt)
@@ -138,28 +140,30 @@ setMethod(readVcf, c(file="character", genome="missing", param="ANY"),
 
 .unwind <- function(reps, lst, ...)
 {
-   ll <- lapply(lst, function(elt, reps) {
-              if (is(elt, "list")) {
-                  mt <- elementLengths(elt) == reps 
-                  newrep <- rep(1, length(mt))
-                  newrep[mt == FALSE] <- reps[mt == FALSE]
-                  unlist(rep(elt, newrep), use.names=FALSE) 
-              } else if (is(elt, "array")) {
-                  slen <- rep(seq_len(length(reps)), reps)
-                  if (length(dim(elt)) == 3)
-                      matrix(elt, ncol=dim(elt)[3])[slen, ]
-                  else
-                      matrix(elt, ncol=dim(elt)[2])[slen, ]
-              } else {
-                  rep(elt, reps)
-              }
-          }, reps)
+    ## replication of rows
+    ll <- lapply(lst, 
+        function(elt, reps) {
+            if (is(elt, "list")) {
+                mt <- elementLengths(elt) == reps 
+                newrep <- rep(1, length(mt))
+                newrep[mt == FALSE] <- reps[mt == FALSE]
+                unlist(rep(elt, newrep), use.names=FALSE) 
+            } else if (is(elt, "array")) {
+                slen <- rep(seq_len(length(reps)), reps)
+                if (length(dim(elt)) == 3)
+                    matrix(elt, ncol=dim(elt)[3])[slen, ]
+                else
+                    elt[slen, ]
+            } else {
+                rep(elt, reps)
+            }
+        }, reps)
 
     ## FIXME: why can't DF go in list via lapply above
-    idx <- which(lapply(lst, class) == "array") 
+    idx <- which(lapply(lst, is.array) == TRUE) 
     if (length(idx) != 0)
         for (i in idx) 
-            ll[[i]] <- DataFrame(I(ll[[i]]))
+            ll[[i]] <- DataFrame(I(matrix(ll[[i]], nrow=nrow(ll[[i]]))))
     DF <- DataFrame(ll)
     names(DF) <- names(lst)
     DF
@@ -198,11 +202,23 @@ setMethod(readVcf, c(file="character", genome="missing", param="ANY"),
         colData <- DataFrame(Samples=character(0))
     }
 
+    ## FIXME : .unpack still returns lists for Number="."
+    if (length(vcf$GENO) > 0)
+        geno <- lapply(vcf$GENO, function(elt) {
+                    if (is.list(elt))
+                        do.call(rbind, elt)
+                    else
+                        elt
+                    })
+    else
+        geno <- list()
+
     VCF(rowData=rowData, colData=colData, exptData=SimpleList(HEADER=hdr), 
-        fixedFields=fixedFields, info=DataFrame(info), geno=SimpleList(vcf$GENO))
+        fixedFields=fixedFields, info=info, geno=SimpleList(geno))
 }
 
 .rowDataNames <- function(vcf, rowData, ...)
+## create chrom:start rownames for records with no ID
 {
     idx <- vcf$ID == "."
     vcf$ID[idx] <- paste("chr", seqnames(rowData[idx]), ":", 
@@ -246,7 +262,6 @@ setMethod(readVcf, c(file="character", genome="missing", param="ANY"),
                 Logical = .newCompressedList("CompressedLogicalList", x[[i]])) 
         }
     }
-    ## FIXME: should C return matrices only
     idx <- which(lapply(x, is.array) == TRUE)
     if (length(idx) != 0)
         for (i in idx) 

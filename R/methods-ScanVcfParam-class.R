@@ -1,13 +1,13 @@
 setMethod(ScanVcfParam, "ANY",
     function(info=character(), geno=character(), trimEmpty=TRUE, which, 
-             asGRanges=character(), ...)
+             asGRanges=FALSE, ...)
 {
     ScanBcfParam(info, geno, trimEmpty, which, asGRanges, class="ScanVcfParam")
 })
 
 setMethod(ScanVcfParam, "missing",
     function(info=character(), geno=character(), trimEmpty=TRUE, which, 
-             asGRanges=character(), ...)
+             asGRanges=FALSE, ...)
 {
     ScanBcfParam(info, geno, trimEmpty, asGRanges=asGRanges, class="ScanVcfParam")
 })
