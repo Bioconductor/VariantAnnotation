@@ -187,30 +187,19 @@ setMethod(readVcf, c(file="character", genome="missing", param="ANY"),
     rowData <- .rowDataNames(vcf, rowData)
     genome(seqinfo(rowData)) <- genome
 
-    ## geno
-    if (length(vcf$GENO) > 0) 
-        geno <- lapply(vcf$GENO, function(elt) {
-                    if (is.list(elt))
-                        do.call(rbind, elt) 
-                    else
-                        elt
-                    })
-    else 
-        geno <- list() 
-
     ## info 
     info <- .formatInfo(vcf$INFO,  hdr[["INFO"]])
 
     ## colData
     if (length(vcf$GENO) > 0) {
-        samples <- colnames(geno[[1]]) 
+        samples <- colnames(vcf$GENO[[1]]) 
         colData <- DataFrame(Samples=seq_len(length(samples)), row.names=samples)
     } else {
         colData <- DataFrame(Samples=character(0))
     }
 
     VCF(rowData=rowData, colData=colData, exptData=SimpleList(HEADER=hdr), 
-        fixedFields=fixedFields, info=DataFrame(info), geno=SimpleList(geno))
+        fixedFields=fixedFields, info=DataFrame(info), geno=SimpleList(vcf$GENO))
 }
 
 .rowDataNames <- function(vcf, rowData, ...)
