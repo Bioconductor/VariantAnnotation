@@ -216,31 +216,33 @@
   ## ---------------------------------
   ## Long form GRanges : 
   ## ---------------------------------
-  ## A 'long form' GRanges has been expanded to match the expanded length of 
-  ## elements in the 'info' or 'geno' fields that have more than one value
-  ## per record. This results in a GRanges with potentially multiple rows per
-  ## record but each row represents a unique combination of the elementMetadata
-  ## columns. The elementMetadata columns are the values supplied in 'info'
-  ## or 'geno' in the ScanVcfParam object.
-  ##
-  ## To specify a long form GRanges, set asGRanges=TRUE and specify one or more
-  ## elements in the 'info' filed OR specify one element in the 'geno' field.
-  ## In this usage only one of 'info' or 'geno' can be specified and 'info' can
-  ## accept multiple elements but 'geno' can take only one. See ?ScanVcfParam for 
-  ## more details.
+  ## A 'long form' GRanges has been expanded to match the expanded
+  ## length of elements in the 'info' or 'geno' fields that have more
+  ## than one value per record. This results in a GRanges with
+  ## potentially multiple rows per record but each row represents a
+  ## unique combination of the elementMetadata columns. The
+  ## elementMetadata columns are the values supplied in 'info' or 'geno'
+  ## in the ScanVcfParam object.
+  ## To specify a long form GRanges, set asGRanges=TRUE and specify one
+  ## or more elements in the 'info' filed OR specify one element in the
+  ## 'geno' field.  In this usage only one of 'info' or 'geno' can be
+  ## specified and 'info' can accept multiple elements but 'geno' can
+  ## take only one. See ?ScanVcfParam for more details.
   ##
   ## First retrieve available INFO and FORMAT fields from the file
   hdr <- scanVcfHeader(fl)
   hdr[[1]]$Header$INFO
+  hdr[[1]]$Header$FORMAT
 
-  ## Specify one or more fields to 'info'. The "AF" element has two values for
-  ## variant rs6040355. In the result there are now two rows for this variant
-  ## with the same ranges but unique elementMetadata.
+  ## Specify one or more fields to 'info'. The "AF" element has two
+  ## values for variant rs6040355. In the result there are now two rows
+  ## for this variant with the same ranges but unique elementMetadata.
+
   param <- ScanVcfParam(asGRanges=TRUE, info=c("NS", "AF", "H2"))
   readVcf(fl, "hg19", param)
 
-  ## When creating a long form GRanges only one 'geno' element can be specified
-  ## at a time.
+  ## When creating a long form GRanges only one 'geno' element can be
+  ## specified at a time.
   param <- ScanVcfParam(asGRanges=TRUE, geno="GT")
   readVcf(fl, "hg19", param)
 }
