@@ -57,7 +57,7 @@ are computed for the non-synonymous variants. SIFT and PolyPhen databases are
 queried to provide predictions of how severly these amino acid coding changes 
 affect protein function. At the end of the vignette we cover other
 transformations of the VCF data such as the creation of a \Robject{SnpMatrix} or
-a 'flattened' \Robject{GRanges} which is an expanded form of the VCF data.
+a 'long form' \Robject{GRanges} which is an expanded form of the VCF data.
 
 \section{Reading Variant Call Format (VCF) files}
 
@@ -584,7 +584,7 @@ unique(elementLengths(allele2))
 unlist(allele2)
 @
 
-\subsection{Expanded GRanges - under construction}
+\subsection{Long form GRanges - under construction}
 
 The fields in the INFO and FORMAT fields of a VCF file can have more than 
 one value per variant. In the \Robject{VCF} object created by 
@@ -599,14 +599,14 @@ Specify the \Rcode{asGRanges} argument as 'info' for an expanded
 \Robject{GRanges} with the INFO data
 <<expand_info, eval=FALSE>>=
 param <- ScanVcfParam(asGRanges=TRUE, info=c("LDAF", "HOMSEQ"))
-iflat <- readVcf(vcffile, "hg19", param)
-head(iflat)
+#iflat <- readVcf(vcffile, "hg19", param)
+#head(iflat)
 @
 
 and 'geno' for expanded genotype data.
 <<expand_geno, eval=FALSE>>=
 param <- ScanVcfParam(asGRanges=TRUE, geno="GT")
-gflat <- readVcf(vcffile, "hg19", param)
+#gflat <- readVcf(vcffile, "hg19", param)
 @
 
 \subsection{Write out VCF files - under construction}

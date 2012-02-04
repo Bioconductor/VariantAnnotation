@@ -115,8 +115,8 @@
     \item{geno:}{
       If present, genomic data from the samples specified in the FORMAT field
       are parsed into a list of \code{matrices} or \code{arrays} with a matrix 
-      for each field in the FORMAT column. The rows are the variants, the columns 
-      the samples. 
+      for each field in the FORMAT column. The rows are the variants, the 
+      columns the samples. 
     }
     \item{colData:}{
       This slot contains a \code{DataFrame} describing the samples. If present, 
@@ -216,6 +216,9 @@
   ## ---------------------------------
   ## Long form GRanges : 
   ## ---------------------------------
+  ##
+  ## -  under construction - 
+
   ## A 'long form' GRanges has been expanded to match the expanded
   ## length of elements in the 'info' or 'geno' fields that have more
   ## than one value per record. This results in a GRanges with
@@ -230,6 +233,7 @@
   ## take only one. See ?ScanVcfParam for more details.
   ##
   ## First retrieve available INFO and FORMAT fields from the file
+  fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
   hdr <- scanVcfHeader(fl)
   hdr[[1]]$Header$INFO
   hdr[[1]]$Header$FORMAT
@@ -239,12 +243,12 @@
   ## for this variant with the same ranges but unique elementMetadata.
 
   param <- ScanVcfParam(asGRanges=TRUE, info=c("NS", "AF", "H2"))
-  readVcf(fl, "hg19", param)
+  #readVcf(fl, "hg19", param)
 
   ## When creating a long form GRanges only one 'geno' element can be
   ## specified at a time.
   param <- ScanVcfParam(asGRanges=TRUE, geno="GT")
-  readVcf(fl, "hg19", param)
+  #readVcf(fl, "hg19", param)
 }
 
 \keyword{manip}

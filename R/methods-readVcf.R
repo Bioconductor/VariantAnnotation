@@ -153,7 +153,7 @@ setMethod(readVcf, c(file="character", genome="missing", param="ANY"),
                 if (length(dim(elt)) == 3)
                     matrix(elt, ncol=dim(elt)[3])[slen, ]
                 else
-                    elt[slen, ]
+                    matrix(elt[slen, ], ncol=ncol(elt), nrow=length(slen))
             } else {
                 rep(elt, reps)
             }
@@ -163,7 +163,7 @@ setMethod(readVcf, c(file="character", genome="missing", param="ANY"),
     idx <- which(lapply(lst, is.array) == TRUE) 
     if (length(idx) != 0)
         for (i in idx) 
-            ll[[i]] <- DataFrame(I(matrix(ll[[i]], nrow=nrow(ll[[i]]))))
+            ll[[i]] <- DataFrame(I(matrix(ll[[i]], nrow=nrow(lst[[i]]))))
     DF <- DataFrame(ll)
     names(DF) <- names(lst)
     DF
@@ -237,9 +237,11 @@ setMethod(readVcf, c(file="character", genome="missing", param="ANY"),
 .newCompressedList <- IRanges:::newCompressedList
 .formatInfo <- function(x, hdr)
 {
-    if (is.null(hdr))
-        return(CharacterList(as.list(x[[1]])))
-
+    if (is.null(hdr)) {
+        DF <- DataFrame(x)
+        names(DF) <- names(x)
+        return(DF)
+    }
     type <- hdr$Type[match(names(x), rownames(hdr))] 
     idx <- which(lapply(x, is.list) == TRUE)
     if (length(idx) != 0) {

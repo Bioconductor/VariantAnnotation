@@ -8,7 +8,7 @@ test_InfoTypes <- function()
 
     checkIdentical(as.integer(c(3, 3, 2, 3, 3)), info$NS)
     checkIdentical(as.integer(c(14, 11, 10, 13, 9)), info$DP)
-    checkEquals(list(.5, .017, c(.333, .667), NA_real_, NA_real_), info$AF)
+    checkEquals(class(info$AF), "matrix")
     checkIdentical(c(TRUE, FALSE, FALSE, FALSE, FALSE), info$DB)
     checkIdentical(rep(FALSE, 5), info$H2)
 }

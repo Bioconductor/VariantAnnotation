@@ -50,7 +50,7 @@
     whose \code{POS} lies in the interval(s) \code{[start, end]} are
     returned. 
   }
-  \item{asGRanges}{A logical(1) indicating whether a flattened (expanded) 
+  \item{asGRanges}{A logical(1) indicating whether a long form (expanded) 
     \code{GRanges} should be returned instead of a \code{VCF} object. For 
     use with \code{readVcf} only; ignored by \code{scanVcf}.
 
