@@ -32,16 +32,15 @@ const struct fld_fmt {
     const char *name;
     SEXPTYPE type;
 } FLD_FMT[] = {
-    {
-    "CHROM", STRSXP}, {
-    "POS", INTSXP}, {
-    "ID", STRSXP}, {
-    "REF", STRSXP}, {
-    "ALT", STRSXP}, {
-    "QUAL", REALSXP}, {
-    "FILTER", STRSXP}, {
-    "INFO", STRSXP}, {
-    "GENO", VECSXP}
+    {"CHROM", STRSXP},
+    {"POS", INTSXP},
+    {"ID", STRSXP},
+    {"REF", STRSXP},
+    {"ALT", STRSXP},
+    {"QUAL", REALSXP},
+    {"FILTER", STRSXP},
+    {"INFO", STRSXP},
+    {"GENO", VECSXP}
 };
 
 const int N_FLDS = sizeof(FLD_FMT) / sizeof(FLD_FMT[0]);
@@ -120,7 +119,7 @@ _trim_null(SEXP data, SEXP nms)
    return data;
 }
 
-SEXP _split_vcf(SEXP vcf, SEXP sample, SEXP imap, SEXP gmap)
+SEXP _split_vcf(SEXP vcf, SEXP sample, SEXP fmap, SEXP imap, SEXP gmap)
 {
     int i, j;
     const int
@@ -129,16 +128,24 @@ SEXP _split_vcf(SEXP vcf, SEXP sample, SEXP imap, SEXP gmap)
         imap_n = Rf_length(imap),
         gmap_n = Rf_length(gmap);
 
-    SEXP gnms = GET_NAMES(gmap);
     SEXP inms = GET_NAMES(imap);
+    SEXP gnms = GET_NAMES(gmap);
     int fmtidx, sampleidx;
     int *gmapidx = (int *) R_alloc(sizeof(int), gmap_n), imapidx;
+
+    if (Rf_length(fmap) != N_FLDS - 2)
+        Rf_error("[internal] 'fixed' field length %d does not equal %d",
+                 Rf_length(fmap), N_FLDS - 2);
 
     /* allocate result and first 7 fixed fields */
     SEXP result, info, geno, eltnms;
     PROTECT(result = Rf_allocVector(VECSXP, N_FLDS));
-    for (i = 0; i < N_FLDS - 2; ++i)
-        SET_VECTOR_ELT(result, i, Rf_allocVector(FLD_FMT[i].type, vcf_n));
+    for (i = 0; i < N_FLDS - 2; ++i) {
+        SEXP elt = R_NilValue;
+        if (R_NilValue != VECTOR_ELT(fmap, i))
+            elt = Rf_allocVector(FLD_FMT[i].type, vcf_n);
+        SET_VECTOR_ELT(result, i, elt);
+    }
 
     PROTECT(eltnms = Rf_allocVector(STRSXP, N_FLDS));
     for (i = 0; i < N_FLDS; ++i)
@@ -147,13 +154,16 @@ SEXP _split_vcf(SEXP vcf, SEXP sample, SEXP imap, SEXP gmap)
     UNPROTECT(1);
 
     /* allocate info */
-    PROTECT(info = _alloc_types_list(vcf_n, 1, imap, R_NilValue));
+    info = _alloc_types_list(vcf_n, 1, imap, R_NilValue);
+    SET_VECTOR_ELT(result, N_FLDS - 2, info);
 
     /* allocate geno, including matricies */
     PROTECT(eltnms = Rf_allocVector(VECSXP, 2));
     SET_VECTOR_ELT(eltnms, 0, R_NilValue);
     SET_VECTOR_ELT(eltnms, 1, sample);
-    PROTECT(geno = _alloc_types_list(vcf_n, samp_n, gmap, eltnms));
+    geno = _alloc_types_list(vcf_n, samp_n, gmap, eltnms);
+    SET_VECTOR_ELT(result, N_FLDS - 1, geno);
+    UNPROTECT(1);
 
     /* parse each line */
     for (i = 0; i < vcf_n; i++) {
@@ -168,14 +178,16 @@ SEXP _split_vcf(SEXP vcf, SEXP sample, SEXP imap, SEXP gmap)
              j < N_FLDS - 2; field = _it_next(&it0), ++j) {
             SEXP elt = VECTOR_ELT(result, j);
             switch (TYPEOF(elt)) {
+            case NILSXP:
+                break;
             case INTSXP:
                 INTEGER(elt)[i] = atoi(field);
                 break;
             case REALSXP:
-                if (strcmp(field, dot) == 0) 
+                if (strcmp(field, dot) == 0)
                     REAL(elt)[i] = R_NaReal;
                 else
-                    REAL(elt)[i] = atof(field); 
+                    REAL(elt)[i] = atof(field);
                 break;
             case STRSXP:
                 SET_STRING_ELT(elt, i, mkChar(field));
@@ -191,8 +203,8 @@ SEXP _split_vcf(SEXP vcf, SEXP sample, SEXP imap, SEXP gmap)
         /* INFO field not parsed if no header information present */
         if (imap_n == 0) {
             SEXP matrix = VECTOR_ELT(info, 0);
-            SET_STRING_ELT(matrix, midx, mkChar(field)); 
-        } else { 
+            SET_STRING_ELT(matrix, midx, mkChar(field));
+        } else {
             for (ifld = _it_init(&it1, field, ';'); '\0' != *ifld;
                 ifld = _it_next(&it1)) {
                 ikey = _it_init(&it2, ifld, '=');
@@ -279,16 +291,16 @@ SEXP _split_vcf(SEXP vcf, SEXP sample, SEXP imap, SEXP gmap)
     SET_VECTOR_ELT(result, N_FLDS - 2, _trim_null(info, inms));
     SET_VECTOR_ELT(result, N_FLDS - 1, _trim_null(geno, gnms));
 
-    UNPROTECT(4);
+    UNPROTECT(1);
     return result;
 }
 
-SEXP scan_vcf(SEXP tbx, SEXP sample, SEXP imap, SEXP gmap)
+SEXP scan_vcf(SEXP tbx, SEXP sample, SEXP fmap, SEXP imap, SEXP gmap)
 {
     SEXP result = PROTECT(Rf_allocVector(VECSXP, Rf_length(tbx)));
 
     for (int i = 0; i < Rf_length(tbx); ++i) {
-        SEXP record = _split_vcf(VECTOR_ELT(tbx, i), sample, imap, gmap);
+        SEXP record = _split_vcf(VECTOR_ELT(tbx, i), sample, fmap, imap, gmap);
         SET_VECTOR_ELT(result, i, record);
     }
 
@@ -296,11 +308,11 @@ SEXP scan_vcf(SEXP tbx, SEXP sample, SEXP imap, SEXP gmap)
     return result;
 }
 
-SEXP scan_vcf_connection(SEXP txt, SEXP sample, SEXP imap, SEXP gmap)
+SEXP scan_vcf_connection(SEXP txt, SEXP sample, SEXP fmap, SEXP imap, SEXP gmap)
 {
     SEXP result = PROTECT(Rf_allocVector(VECSXP, 1));
 
-    SET_VECTOR_ELT(result, 0, _split_vcf(txt, sample, imap, gmap));
+    SET_VECTOR_ELT(result, 0, _split_vcf(txt, sample, fmap, imap, gmap));
 
     UNPROTECT(1);
     return result;

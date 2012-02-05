@@ -1,5 +1,30 @@
 ## scanVcf 
 
+.vcf_usertag <-
+    function(map, tag, nm, ...)
+{
+    if (!identical(character(), tag))
+        if (1L == length(tag) && is.na(tag)) {
+            map[] <- list(NULL)
+        } else {
+            map[!names(map) %in% tag] <- list(NULL)
+            if (!all(tag %in% names(map)))
+                warning("ScanVcfParam '", nm, "' fields not present: '",
+                        paste(tag[!tag %in% names(map)], collapse="' ' "),
+                        "'")
+        }
+    map
+}
+
+.vcf_fixed <-
+    function(tag, ...)
+{
+    map <- list(CHROM=character(), POS=integer(), ID=character(),
+                REF=character(), ALT=character(), QUAL=numeric(),
+                FILTER=character())
+    .vcf_usertag(map, tag, "fixed")
+}
+
 .vcf_map <-
     function(fmt, tag, ...)
 {
@@ -14,22 +39,13 @@
     map[d > 1] <- list(character())
     names(map) <- rownames(fmt)
 
-    ## user selected 
-    if (!identical(character(), tag))
-        if (1L == length(tag) && is.na(tag)) {
-            map[] <- list(NULL)
-        } else {
-            map[!names(map) %in% tag] <- list(NULL)
-            if (!all(tag %in% names(map)))
-                warning(paste("values in ScanVcfParam(", tag, "=c(...)) ",
-                        "not present in header :", 
-                        tag[!tag %in% names(map)], sep=""))
-        }
-    map
+    ## user selected
+    .vcf_usertag(map, tag, ...)
 }
 
-.vcf_scan <-
-    function(file, ..., info=character(), geno=character(), param)
+.vcf_scan <- 
+   function(file, ..., fixed=character(), info=character(),
+            geno=character(), param)
 {
     res <- 
         tryCatch({
@@ -39,10 +55,11 @@
             }
             hdr <- scanVcfHeader(file)[[1]]
             samples <- hdr$Sample
-            imap <- .vcf_map(hdr$Header[["INFO"]], info)
-            gmap <- .vcf_map(hdr$Header[["FORMAT"]], geno)
+            fmap <- .vcf_fixed(fixed)
+            imap <- .vcf_map(hdr$Header[["INFO"]], info, nm="info")
+            gmap <- .vcf_map(hdr$Header[["FORMAT"]], geno, nm="geno")
             tbx <- scanTabix(file, param=param) 
-            result <- .Call(.scan_vcf, tbx, samples, imap, gmap)
+            result <- .Call(.scan_vcf, tbx, samples, fmap, imap, gmap)
             #names(result) <- sprintf("%s:%d-%d", space, start, end)
             result
         }, error = function(err) {
@@ -54,19 +71,22 @@
 }
 
 .vcf_scan_connection <-
-    function(file, ..., info=character(), geno=character())
+    function(file, ..., fixed=character(), info=character(),
+             geno=character())
 {
     res <- 
         tryCatch({
             fl <- summary(file)$description
             hdr <- scanVcfHeader(fl)[[1]]
             samples <- hdr$Sample
-            imap <- .vcf_map(hdr$Header[["INFO"]], info)
-            gmap <- .vcf_map(hdr$Header[["FORMAT"]], geno)
+            fmap <- .vcf_fixed(fixed)
+            imap <- .vcf_map(hdr$Header[["INFO"]], info, "info")
+            gmap <- .vcf_map(hdr$Header[["FORMAT"]], geno, "geno")
 
             txt <- readLines(file, ...)
             txt <- txt[!grepl("^#", txt)] # FIXME: handle header lines better
-            result <- .Call(.scan_vcf_connection, txt, samples, imap, gmap)
+            result <- .Call(.scan_vcf_connection, txt, samples,
+                            fmap, imap, gmap)
             names(result) <- "*:*-*"
             result
         }, error = function(err) {
@@ -127,7 +147,8 @@ setMethod(scanVcf, c("character", "ScanVcfParam"),
     if (length(vcfWhich(param)) == 0) {
         con <- file(file)
         on.exit(close(con))
-        .vcf_scan_connection(con, info=vcfInfo(param), geno=vcfGeno(param))
+        .vcf_scan_connection(con, ..., info=vcfInfo(param),
+                             geno=vcfGeno(param))
     } else {
     ## ranges
       callGeneric(TabixFile(file), ..., param=param)
