@@ -47,6 +47,6 @@ test_GenoTypes <- function()
     checkEquals(typeof(unlist(geno$GT)), "character")
     checkIdentical(lapply(geno, class), list(GT="matrix", GQ="matrix",
                    DP="matrix", HQ="array"))
-    checkIdentical(as.integer(c(1, 3, 6, 7, 4, 8, 5, 0, 4, 2)),
-                   as.vector(geno$DP))
+    checkIdentical(matrix(c(1, 3, 6, 7, 4, 8, 5, 0, 4, 2), nrow=5),
+                   geno$DP)
 } 
