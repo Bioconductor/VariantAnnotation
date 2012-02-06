@@ -1,14 +1,19 @@
 library(BSgenome.Hsapiens.UCSC.hg19)
 
 test_genotypesFromPinfo <- function() {
-  pinfo.ds = data.frame(
-    Chr=rep(1,6), MapInfo=seq(start=100,length=6,by=100),
-    "SNP.design.strand."=c("[T/C]","[A/G]","[T/C]","[A/G]","[T/C]","[A/G]"),
-    IlmnDesStrand=c("+","+","-","+","-","+"), dbSNPdesStrand=c("F","F","F","F","R","R"),
-    TopGenomicSeq=c("AAAA[A/C]CCCC","CACA[A/G]CACA","TTTT[A/G]AATA","AAAA[A/G]CCCC","CACA[A/G]CACA","TTTT[A/G]AATA"),
-    stringsAsFactors=FALSE)
-  alleles = list(c("A","C"),c("A","G"),c("T","C"),c("A","G"),c("A","G"),c("T","C"))
-  checkEquals( alleles, genotypesFromPinfo(pinfo.ds) )
+    pinfo.ds = data.frame(
+      Chr=rep(1, 6), MapInfo=seq(from=100, length=6, by=100),
+      `SNP.design.strand.`=c("[T/C]", "[A/G]", "[T/C]", "[A/G]",
+        "[T/C]", "[A/G]"),
+      IlmnDesStrand=c("+", "+", "-", "+", "-", "+"),
+      dbSNPdesStrand=c("F", "F", "F", "F", "R", "R"),
+      TopGenomicSeq=c("AAAA[A/C]CCCC", "CACA[A/G]CACA",
+        "TTTT[A/G]AATA", "AAAA[A/G]CCCC", "CACA[A/G]CACA",
+        "TTTT[A/G]AATA"),
+      stringsAsFactors=FALSE)
+    alleles <- list(c("A", "C"), c("A", "G"), c("T", "C"), c("A", "G"),
+                    c("A", "G"), c("T", "C"))
+    checkEquals( alleles, genotypesFromPinfo(pinfo.ds) )
 }
 
 test_getRefBase <- function() {
