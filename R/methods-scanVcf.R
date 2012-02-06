@@ -47,27 +47,26 @@
    function(file, ..., fixed=character(), info=character(),
             geno=character(), param)
 {
-    res <- 
-        tryCatch({
-            if (!isOpen(file)) {
-                open(file)
-                on.exit(close(file))
-            }
-            hdr <- scanVcfHeader(file)[[1]]
-            samples <- hdr$Sample
-            fmap <- .vcf_fixed(fixed)
-            imap <- .vcf_map(hdr$Header[["INFO"]], info, nm="info")
-            gmap <- .vcf_map(hdr$Header[["FORMAT"]], geno, nm="geno")
-            tbx <- scanTabix(file, param=param) 
-            result <- .Call(.scan_vcf, tbx, samples, fmap, imap, gmap)
-            #names(result) <- sprintf("%s:%d-%d", space, start, end)
-            result
-        }, error = function(err) {
-            stop("scanVcf: ", conditionMessage(err), "\n  path: ", 
-                 path(file), call. = FALSE)
-        })
+    result <- tryCatch({
+        if (!isOpen(file)) {
+            open(file)
+            on.exit(close(file))
+        }
+        hdr <- scanVcfHeader(file)[[1]]
+        samples <- hdr$Sample
+        fmap <- .vcf_fixed(fixed)
+        imap <- .vcf_map(hdr$Header[["INFO"]], info, nm="info")
+        gmap <- .vcf_map(hdr$Header[["FORMAT"]], geno, nm="geno")
+        tbxstate <- list(samples, fmap, imap, gmap)
+        tbxsym <- getNativeSymbolInfo(".tabix_as_vcf",
+                                      "VariantAnnotation")
+        scanTabix(file, param=param, tbxsym=tbxsym, tbxstate=tbxstate)
+    }, error = function(err) {
+        stop("scanVcf: ", conditionMessage(err), "\n  path: ", 
+             path(file), call. = FALSE)
+    })
 
-    .unpackVcf(res, hdr)
+    .unpackVcf(result, hdr)
 }
 
 .vcf_scan_connection <-

@@ -10,11 +10,14 @@ biocViews:   DataImport, Sequencing, HighThroughputSequencing, SNP,
              AnnotationData, Genetics, Homo_sapiens
 Depends:     R (>= 2.8.0), methods, GenomicRanges (>= 1.7.9), 
              AnnotationDbi (>= 1.17.11), Biostrings (>= 2.23.4), 
-             Rsamtools (>= 1.7.26)
+             Rsamtools (>= 1.7.28)
 Imports:     methods, BiocGenerics (>= 0.1.0), IRanges (>= 1.13.5), 
-             Biobase (>= 2.15.1), Rsamtools (>= 1.7.21),
-             AnnotationDbi (>= 1.17.11), BSgenome, GenomicFeatures, snpStats, DBI
-Suggests:    RUnit, BSgenome.Hsapiens.UCSC.hg19, TxDb.Hsapiens.UCSC.hg19.knownGene, 
+             Biobase (>= 2.15.1), Rsamtools (>= 1.7.28),
+             AnnotationDbi (>= 1.17.11), BSgenome, GenomicFeatures,
+             snpStats, DBI
+Suggests:    RUnit, BSgenome.Hsapiens.UCSC.hg19,
+             TxDb.Hsapiens.UCSC.hg19.knownGene,
              SNPlocs.Hsapiens.dbSNP.20110815, SIFT.Hsapiens.dbSNP132,
              PolyPhen.Hsapiens.dbSNP131
+LinkingTo:   Rsamtools
 LazyLoad:    yes

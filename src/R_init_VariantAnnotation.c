@@ -2,11 +2,10 @@
 #include "writevcf.h"
 #include "vcffile.h"
 
-
 static const R_CallMethodDef callMethods[] = {
     /* vcffile.c */
-    {".scan_vcf", (DL_FUNC) & scan_vcf, 5},
     {".scan_vcf_connection", (DL_FUNC) & scan_vcf_connection, 5},
+    {".tabix_as_vcf", (DL_FUNC) & tabix_as_vcf, 5},
     /* writevcf.c */
     {".code_allele_observations", (DL_FUNC) & code_allele_observations, 2},
     {NULL, NULL, 0}
