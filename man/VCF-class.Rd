@@ -28,12 +28,10 @@
 \alias{filt,VCF-method}
 \alias{filt<-}
 \alias{filt<-,VCF,character-method}
-\alias{fixedFields}
-\alias{fixedFields,VCF-method}
-\alias{fixedFields<-}
-\alias{fixedFields<-,VCF,DataFrame-method}
 \alias{fixed}
 \alias{fixed,VCF-method}
+\alias{fixed<-}
+\alias{fixed<-,VCF,DataFrame-method}
 \alias{info}
 \alias{info,VCF-method}
 \alias{info<-}
@@ -63,7 +61,7 @@
 \description{
   The VCF class is an extension of the
   \code{\linkS4class{SummarizedExperiment}-class} with two additional slots,
-  \code{info} and \code{fixedFields}.
+  \code{fixed} and \code{info}.
 }
 
 \section{Extends}{
@@ -74,7 +72,7 @@
   \describe{
     \item{}{
       \code{VCF(rowData = GRanges(), colData = DataFrame(), exptData = SimpleList(), 
-                info = DataFrame(), fixedFields = DataFrame(), geno = SimpleList(), 
+                fixed = DataFrame(), info = DataFrame(), geno = SimpleList(), 
                 ..., verbose = FALSE)
       }
     }
@@ -114,23 +112,19 @@
       file. \code{value} must be a \code{character(1L)}.
     }
     \item{}{
-      \code{fixedFields(x)}, \code{fixedFields(x)}:
+      \code{fixed(x)}, \code{fixed(x) <- value}:
 
       Returns or sets a \code{DataFrame} of the REF, ALT, QUAL, and FILTER fields 
       from the VCF file. \code{value} must be a \code{DataFrame}.
-    }
-    \item{}{
-      \code{fixed(x)}:
-
-      Returns all fixed fields, REF, ALT, QUAL, FILTER and INFO. This is a 
-      convenience function only; there is no 'setter'.
     }
     \item{}{
       \code{info(x)}, \code{info(x) <- value}:
 
       Returns or sets \code{info} data. Contains the information
       stored in the INFO field of a VCF file. \code{value} must be a 
-      \code{DataFrame}. 
+      \code{DataFrame}. If no \code{info} fields are present the
+      \code{rowData} \code{GRanges} will be returned with no elementMetadata
+      columns. 
     }
     \item{}{
       \code{geno(x)}, \code{geno(x) <- value}:
@@ -228,7 +222,7 @@
     \item{info}{A \code{DataFrame} of data from the INFO field of a VCF file. 
       The number of rows must match that in the \code{rowData} object.
     }
-    \item{fixedFields}{A \code{DataFrame} of REF, ALT, QUAL and FILTER 
+    \item{fixed}{A \code{DataFrame} of REF, ALT, QUAL and FILTER 
       fields from a VCF file. The number of rows must match that
       of the \code{rowData} object.
     }
@@ -259,13 +253,13 @@
 \details{
   The \code{VCF} class is designed to hold data from a Variant Call Format (VCF) 
   file. The class extends \code{\linkS4class{SummarizedExperiment}} with the 
-  addition of two slots, \code{info} and \code{fixedFields}. See 
+  addition of two slots, \code{fixed} and \code{info}. See 
   ?\code{SummarizedExperiment} for a detailed description of the inherited
   slots. 
 
   Slots unique to the \code{VCF} class,
   \describe{
-    \item{\code{fixedFields}}{A \link{DataFrame} containing information from the 
+    \item{\code{fixed}}{A \link{DataFrame} containing information from the 
       REF, ALT, QUAL and FILTER fields from a VCF file.
     }
     \item{\code{info}}{A \link{DataFrame} containing information from the INFO 
@@ -309,20 +303,27 @@
   fl <- system.file("extdata", "ex1.vcf", package="VariantAnnotation")
   vcf <- readVcf(fl, "hg19")
 
-  ## accessors
+  ## Access all 'fixed' fields with fixed and individual fixed fields with
+  ## ref, alt, qual and filt accessors
   fixed(vcf)
-  info(vcf)
+  ref(vcf)
+
+  ##  Extract 'fixed', 'info' and 'geno' fields 
+  head(fixed(vcf))
+  head(info(vcf))
   geno(vcf)
   identical(geno(vcf)$DP, geno(vcf)[[3]])
 
-  ## rename and subset the seqlevels in the rowData GRanges object
-  seqlevels(rowData(vcf))
+  ## Rename and subset the seqlevels in the rowData GRanges object :
+  ## The seqlevels (chromosome names) of the vcf are numbers instead of 
+  ## being preceded by "chr*" or "ch*"
+  seqlevels(vcf)
  
-  ## renameSeqlevels 
-  vcf_rename <- renameSeqlevels(vcf, c("16"="chr16", "21"="chr21"))
-  seqlevels(rowData(vcf_rename))
+  ## Add "chr" in front of the seqlevels using renameSeqlevels()
+  vcf <- renameSeqlevels(vcf, c("16"="chr16", "21"="chr21"))
+  seqlevels(vcf)
  
-  ## keepSeqlevels 
-  vcf_subset <- keepSeqlevels(vcf_rename, "chr16")
-  seqlevels(rowData(vcf_subset))
+  ## To subset on seqlevels use the keepSeqlevels() helper function
+  vcf_subset <- keepSeqlevels(vcf, "chr16")
+  seqlevels(vcf_subset)
 }

@@ -119,11 +119,11 @@ setMethod(scanVcf, c("TabixFile", "ScanVcfParam"),
 {
     ## no ranges
     if (length(vcfWhich(param)) == 0) 
-        result <- callGeneric(path(file), param=param)
+        result <- callGeneric(path(file), ..., param=param)
     else 
     ## ranges
-        result <- scanVcf(file, ..., info=vcfInfo(param), geno=vcfGeno(param), 
-            param=vcfWhich(param))
+        result <- scanVcf(file, ..., fixed=vcfFixed(param), info=vcfInfo(param), 
+            geno=vcfGeno(param), param=vcfWhich(param))
     if (vcfTrimEmpty(param))
         lapply(result, function(rng) {
             rng[["GENO"]] <- Filter(Negate(is.null), rng[["GENO"]])
@@ -146,8 +146,8 @@ setMethod(scanVcf, c("character", "ScanVcfParam"),
     if (length(vcfWhich(param)) == 0) {
         con <- file(file)
         on.exit(close(con))
-        .vcf_scan_connection(con, ..., info=vcfInfo(param),
-                             geno=vcfGeno(param))
+        .vcf_scan_connection(con, ..., fixed=vcfFixed(param), 
+            info=vcfInfo(param), geno=vcfGeno(param))
     } else {
     ## ranges
       callGeneric(TabixFile(file), ..., param=param)

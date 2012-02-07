@@ -3,32 +3,37 @@
 setClass("VCF",
     contains="SummarizedExperiment",
     representation(
-        fixedFields="DataFrame",
+        fixed="DataFrame",
         info="DataFrame"
     ),
 )
 
-.valid.VCF.fixedFields <- function(x)
+.valid.VCF.fixed <- function(x)
 {
     xlen <- dim(x)[1]
-    ff <- values(fixedFields(x))
-    if (nrow(ff) != xlen)
-        return(paste("'fixedFields(x)' and 'rowData(x) must have the same ",
-               "number of rows", sep=""))
+    ffld <- values(fixed(x))
+    nms <- names(ffld)
 
-    if (!identical(DataFrame(), ff)) {
-        if (!all(names(ff) %in% c("REF", "ALT", "QUAL", "FILTER")))
-            return(paste("'values(fixedFields(x))' colnames must be 'REF', ",
+    if (length(ffld) != 0) {
+        if (nrow(ffld) != xlen)
+            return(paste("'fixed(x)' and 'rowData(x) must have the same ",
+                   "number of rows", sep=""))
+        if (!all(nms %in% c("REF", "ALT", "QUAL", "FILTER")))
+            return(paste("'values(fixed(x))' colnames must be 'REF', ",
                    "'ALT', 'QUAL' and 'FILTER'", sep=""))
-        if (!is(ff$REF, "DNAStringSet"))
-            return("'values(fixedFields(x))[['REF']] must be a DNAStringSet")
-        if (!is(ff$ALT, "DNAStringSetList") && !is(ff$ALT, "CharacterList"))
-            return(paste("'values(fixedFields(x))[['ALT']] must be a ",
-                   "DNAStringSetList or a CharacterList", sep=""))
-        if (!is(ff$QUAL, "numeric"))
-            return("'values(fixedFields(x))[['QUAL']] must be numeric")
-        if (!is(ff$FILTER, "character"))
-            return("'values(fixedFields(x))[['FILTER']] must be a character")
+        if ("REF" %in% nms) 
+            if (!is(ffld$REF, "DNAStringSet"))
+                return("'values(fixed(x))[['REF']] must be a DNAStringSet")
+        if ("ALT" %in% nms) 
+            if (!is(ffld$ALT, "DNAStringSetList") && !is(ffld$ALT, "CharacterList"))
+                return(paste("'values(fixed(x))[['ALT']] must be a ",
+                       "DNAStringSetList or a CharacterList", sep=""))
+        if ("QUAL" %in% nms) 
+            if (!is(ffld$QUAL, "numeric"))
+                return("'values(fixed(x))[['QUAL']] must be numeric")
+        if ("FILTER" %in% nms) 
+            if (!is(ffld$FILTER, "character"))
+                return("'values(fixed(x))[['FILTER']] must be a character")
     }
     NULL
 }
@@ -36,14 +41,16 @@ setClass("VCF",
 .valid.VCF.info <- function(x)
 {
     xlen <- dim(x)[1]
-    if (nrow(values(info(x))) != xlen)
-        return("'info' must have the same number of rows as 'rowData'")
+    info <- values(info(x))
+    if (length(info) != 0)
+        if (nrow(values(info(x))) != xlen)
+            return("'info' must have the same number of rows as 'rowData'")
     NULL
 }
 
 .valid.VCF <- function(x)
 {
-    c(.valid.VCF.fixedFields(x),
+    c(.valid.VCF.fixed(x),
       .valid.VCF.info(x))
 }
 

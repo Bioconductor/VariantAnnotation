@@ -168,15 +168,16 @@
   ## Accessors
   ## ---------------------------------
   ## Fixed fields together
-  head(fixedFields(vcf), 5)
+  head(fixed(vcf), 5)
 
   ## Fixed fields separately 
+  filt(vcf)
+  ref(vcf) 
+
+  ## info data 
   exptData(vcf)[["HEADER"]][["INFO"]]
   info(vcf)
   values(info(vcf))[["DP"]]
-
-  filt(vcf)
-  ref(vcf) 
 
   ## geno data 
   exptData(vcf)[["HEADER"]][["FORMAT"]]
@@ -212,6 +213,12 @@
   ## Subsetting on both genome coordinates and 'info' or 'geno' elements : 
   param <- ScanVcfParam(geno="HQ", info="AF", which=rngs)
   vcf <- readVcf(tab, "hg19", param)
+
+  ## When either of 'fixed', 'info' or 'geno' are omitted (i.e., no
+  ## elements specified) all records are retrieved. Use NA to indicate
+  ## that no records should be retrieved. This param object specifies
+  ## the "GT" 'geno' field and none of 'info' fields.
+  ScanVcfParam(geno="GT", info=NA)
 
   ## ---------------------------------
   ## Long form GRanges : 

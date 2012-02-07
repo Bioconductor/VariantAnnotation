@@ -103,7 +103,7 @@
   ## of length 1. 
 
   ## View the reference and alternate alleles 
-  fixed <- fixedFields(vcf)
+  fixed <- fixed(vcf)
   DataFrame(reference = values(fixed)[["REF"]], 
             alternate = CharacterList(as.list(values(fixed)[["ALT"]])),
             row.names = rownames(vcf))

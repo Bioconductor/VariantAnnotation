@@ -89,11 +89,11 @@ head(rowData(vcf))
 @
 
 The REF, ALT, QUAL and FILTER fields can be accessed together with 
-\Rcode{fixedFields} accessor or individually with \Rcode{ref}, \Rcode{alt}, 
+\Rcode{fixed} accessor or individually with \Rcode{ref}, \Rcode{alt}, 
 \Rcode{qual} and \Rcode{filt} accessors. 
 
 <<readVCF_fixed>>=
-head(fixedFields(vcf), 3)
+head(fixed(vcf), 3)
 @
 
 The \Robject{ALT} column is stored as a \Robject{DNAStringSetList} unless
@@ -113,19 +113,20 @@ head(unlist(alternate))
 
 Data from the \Rcode{INFO} field can be accessed with the \Rcode{info} accessor
 function. Detailed information for each of the \Rcode{INFO} fields can be
-accessed with the \Rfunction{exptData} accessor. To view all of REF, ALT, QUAL, 
-FILTER and INFO together use the \Rfunction{fixed} accessor. Note the difference 
-between the \Rfunction{fixedFields} and \Rfunction{fixed} accessors. The first 
-returns REF, ALT, QUAL and FILTER fields while the second also returns INFO. 
+retrieved with the \Rfunction{exptData} accessor. To view all of REF, ALT, QUAL, 
+and FILTER together use the \Rfunction{fixed} accessor.
 <<readVCF_info>>=
-## header information related to the INFO fields
+## View the header information related to the INFO fields
 head(exptData(vcf)[["HEADER"]][["INFO"]], 3)
 
-## just the INFO data
-info(vcf)[1:3, 1:3]
+## Access all fixed fields with 'fixed'
+fixed(vcf)[1:3,] 
+## or individual fields with their own accessors.
+ref(vcf)[1:3,] 
+qual(vcf)[1:3,] 
 
-## all fixed fields
-fixed(vcf)[1:3, 1:7] 
+## Retrieve the INFO data
+info(vcf)[1:3,]
 @
 
 The genotype data described in the \Rcode{FORMAT} field is parsed into 
@@ -171,18 +172,19 @@ tab
 
 Once the \Robject{TabixFile} is created \Rfunction{readVcf} is called with the 
 \Robject{TabixFile} as the \Robject{file} argument and the ranges as the 
-\Robject{param}. The resulting \Robject{VCF} object shows that 27 of the total 1000
-variants overlaped with our defined ranges and were read in. 
+\Robject{param}. The resulting \Robject{VCF} object shows that 27 of the total 
+1000 variants overlaped with our defined ranges and were read in. 
 <<subset_call>>= 
 vcf_rng <- readVcf(tab, "hg19", param=rng)
 vcf_rng
 @
 
 \subsubsection{VCF fields}
-Data can also be subset on the \Rcode{INFO} and/or \Rcode{FORMAT} fields in the
-VCF file. To discover what fields are available for subsetting we call
-\Rfunction{ScanVcfHeader}. The return value is a list of length 3 with names
-of 'Reference', 'Sample' and 'Header'. 
+Data can also be subset on the \Rcode{INFO} and \Rcode{FORMAT} fields in the 
+VCF file. To discover what \Rcode{INFO} and \Rcode{geno} fields are available 
+for subsetting we use \Rfunction{ScanVcfHeader} to inspect the header 
+information. The return value is a list of length 3 with names of 'Reference', 
+'Sample' and 'Header'. 
 
 <<subset_scanVcfHeader>>=
 hdr <- scanVcfHeader(vcffile)
@@ -195,10 +197,10 @@ description of the fields as well as the data type and number of values. All
 possible elements can be listed by looking at the rownames.
 
 <<subset_infoformat>>=
-## all INFO fields
+## INFO fields
 info_DF <- hdr[[1]]$Header$INFO
 rownames(info_DF)
-## all FORMAT fields
+## FORMAT fields
 geno_DF <- hdr[[1]]$Header$FORMAT
 rownames(geno_DF)
 @

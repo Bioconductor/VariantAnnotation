@@ -46,14 +46,14 @@ test_readVcf_param <- function()
     checkTrue(ncol(values(info(vcf))) == length(i))
     checkTrue(all(names(values(info(vcf))) %in% i))
 
-    ## geno, info
+    ## geno, info combined
     param <- ScanVcfParam()
     vcf_a <- readVcf(f1, "hg19", param=param)
     vcf_b <- readVcf(f1, "hg19")
     checkIdentical(names(geno(vcf_a)), names(geno(vcf_b))) 
     checkIdentical(rowData(vcf_a), rowData(vcf_b))
 
-    ## info, geno, ranges
+    ## info, geno, ranges combined
     g <- gnms[1]
     i <- inms[2:3]
     rngs <- GRanges("20", IRanges(1110000, 1234600))
@@ -65,6 +65,10 @@ test_readVcf_param <- function()
     checkTrue(all(names(values(info(vcf))) %in% i))
     checkTrue(all(names(geno(vcf)) %in% g))
     checkTrue(length(rowData(vcf)) == 3)
+
+    ## no info, geno
+    checkTrue(validObject(readVcf(f2, "hg19", ScanVcfParam(geno=NA))))
+    checkTrue(validObject(readVcf(f2, "hg19", ScanVcfParam(info=NA))))
 }
 
 test_readVcf_tabix <- function()

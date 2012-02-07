@@ -9,14 +9,14 @@
 
 VCF <-
     function(rowData=GRanges(), colData=DataFrame(), exptData=SimpleList(), 
-             fixedFields=DataFrame(), info=DataFrame(), geno=SimpleList(),
+             fixed=DataFrame(), info=DataFrame(), geno=SimpleList(),
              ..., verbose=FALSE)
 {
-    rownames(info) <- rownames(fixedFields) <- NULL
+    rownames(info) <- rownames(fixed) <- NULL
     sx <- SummarizedExperiment(assays=geno, rowData=rowData,
                                colData=colData, exptData=exptData,
                                verbose=verbose)
-    new("VCF", sx, info=info, fixedFields=fixedFields, ...)
+    new("VCF", sx, fixed=fixed, info=info, ...)
  }
  
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -28,14 +28,15 @@ setMethod("ref", "VCF",
     function(x) 
 {
     gr <- rowData(x)
-    values(gr) <- DataFrame(REF=slot(x, "fixedFields")$REF)
+    if (length(slot(x, "fixed")$REF) != 0L)
+        values(gr) <- DataFrame(REF=slot(x, "fixed")$REF)
     gr
 })
 
 setReplaceMethod("ref", c("VCF", "DNAStringSet"),
     function(x, value)
 {
-    slot(x, "fixedFields")$REF <- value
+    slot(x, "fixed")$REF <- value
     x
 })
 
@@ -44,21 +45,22 @@ setMethod("alt", "VCF",
     function(x) 
 {
     gr <- rowData(x)
-    values(gr) <- DataFrame(ALT=slot(x, "fixedFields")$ALT)
+    if (length(slot(x, "fixed")$ALT) != 0L)
+        values(gr) <- DataFrame(ALT=slot(x, "fixed")$ALT)
     gr
 })
 
 setReplaceMethod("alt", c("VCF", "CharacterList"),
     function(x, value)
 {
-    slot(x, "fixedFields")$ALT <- value
+    slot(x, "fixed")$ALT <- value
     x
 })
 
 setReplaceMethod("alt", c("VCF", "DNAStringSetList"),
     function(x, value)
 {
-    slot(x, "fixedFields")$ALT <- value
+    slot(x, "fixed")$ALT <- value
     x
 })
 
@@ -67,14 +69,15 @@ setMethod("qual", "VCF",
     function(x) 
 {
     gr <- rowData(x)
-    values(gr) <- DataFrame(QUAL=slot(x, "fixedFields")$QUAL)
+    if (length(slot(x, "fixed")$QUAL) != 0L)
+        values(gr) <- DataFrame(QUAL=slot(x, "fixed")$QUAL)
     gr
 })
 
 setReplaceMethod("qual", c("VCF", "integer"),
     function(x, value)
 {
-    slot(x, "fixedFields")$QUAL <- value
+    slot(x, "fixed")$QUAL <- value
     x
 })
 
@@ -83,40 +86,34 @@ setMethod("filt", "VCF",
     function(x) 
 {
     gr <- rowData(x)
-    values(gr) <- DataFrame(FILTER=slot(x, "fixedFields")$FILTER)
+    if (length(slot(x, "fixed")$FILTER) != 0L)
+        values(gr) <- DataFrame(FILTER=slot(x, "fixed")$FILTER)
     gr
 })
 
 setReplaceMethod("filt", c("VCF", "character"),
     function(x, value)
 {
-    slot(x, "fixedFields")$FILTER <- value
+    slot(x, "fixed")$FILTER <- value
     x
 })
 
-## fixedFields 
-setMethod("fixedFields", "VCF", 
-    function(x) 
-{
-    gr <- rowData(x)
-    values(gr) <- slot(x, "fixedFields")
-    gr
-})
-
-setReplaceMethod("filt", c("VCF", "character"),
-    function(x, value)
-{
-    slot(x, "fixedFields") <- value
-    x
-})
-
-## fixed
+## fixed 
 setMethod("fixed", "VCF", 
     function(x) 
 {
     gr <- rowData(x)
-    values(gr) <- DataFrame(slot(x, "fixedFields"), slot(x, "info"))
+    if (length(slot(x, "fixed")) != 0L)
+        values(gr) <- slot(x, "fixed")
     gr
+})
+
+setReplaceMethod("fixed", c("VCF", "DataFrame"),
+    function(x, value)
+{
+    slot(x, "fixed") <- value
+    validObject(x)
+    x
 })
 
 ## info 
@@ -124,7 +121,8 @@ setMethod("info", "VCF",
     function(x) 
 {
     gr <- rowData(x)
-    values(gr) <- slot(x, "info")
+    if (length(slot(x, "info")) != 0L)
+        values(gr) <- slot(x, "info")
     gr
 })
 
@@ -188,7 +186,7 @@ setReplaceMethod("geno", c("VCF", "missing", "SimpleList"),
                colData=colData(x)[j,,drop=FALSE],
                assays=geno, 
                info=values(info(x))[i,,drop=FALSE],
-               fixedFields=values(fixedFields(x))[i,])
+               fixed=values(fixed(x))[i,])
 }
 
 setMethod("[", c("VCF", "ANY", "ANY"),
@@ -243,9 +241,9 @@ setMethod("[", c("VCF", "ANY", "ANY"),
                    ii <- values(info(x))
                    ii[i,] <- values(info(value))
                    ii 
-               }), fixedFields=local({
-                   ff <- values(fixedFields(x)) 
-                   ff[i,] <- values(fixedFields(value)) 
+               }), fixed=local({
+                   ff <- values(fixed(x)) 
+                   ff[i,] <- values(fixed(value)) 
                    ff})
               )
 }
@@ -323,10 +321,10 @@ setMethod(show, "VCF",
         expt <- character(length(exptData(object)))
     scat("exptData(%d): %s\n", expt)
 
-    fixed <- names(values(fixedFields(object)))
+    fixed <- names(values(fixed(object)))
     if (is.null(fixed))
-        fixed <- character(ncol(values(fixedFields(object))))
-    scat("fixedFields(%d): %s\n", fixed)
+        fixed <- character(ncol(values(fixed(object))))
+    scat("fixed(%d): %s\n", fixed)
 
     info <- names(values(info(object)))
     if (is.null(info))

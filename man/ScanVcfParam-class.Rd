@@ -6,6 +6,7 @@
 \alias{ScanVcfParam-class}
 \alias{ScanVcfParam,missing-method}
 \alias{ScanVcfParam,ANY-method}
+\alias{vcfFixed}
 \alias{vcfInfo}
 \alias{vcfGeno}
 \alias{vcfTrimEmpty}
@@ -15,18 +16,20 @@
 \title{Parameters for scanning VCF files}
 
 \description{
-  Use \code{ScanVcfParam()} to create a parameter object influencing the
-  \sQuote{INFO} and \sQuote{GENO} fields parsed, and which recrods are
-  imported from a VCF file. Use of \code{which} requires that a Tabix 
-  index file exists.
+  Use \code{ScanVcfParam()} to create a parameter object influencing 
+  which records and fields are imported from a VCF file. Record
+  parsing is based on genomic coordinates and requires a Tabix index
+  file. Individual elements can be selected from the \sQuote{INFO} and 
+  \sQuote{GENO} fields.
 }
 
 \usage{
-  ScanVcfParam(info=character(), geno=character(), trimEmpty=TRUE,
-               which, asGRanges=FALSE, ...)
+  ScanVcfParam(fixed=character(), info=character(), geno=character(), 
+               trimEmpty=TRUE, which, asGRanges=FALSE, ...)
 
   ## Accessors
  
+  vcfFixed(object)
   vcfInfo(object)
   vcfGeno(object)
   vcfTrimEmpty(object)
@@ -36,11 +39,14 @@
 
 \arguments{
   \item{info}{A character() vector of \sQuote{INFO} fields (see
-    \code{\link{scanVcfHeader}}) to be returned.
+    \code{\link{scanVcfHeader}}) to be returned. If not specified,
+    all fields are returned; if \code{info=NA} no fields 
+    are returned.
   }
   \item{geno}{A character() vector of \sQuote{GENO} fields (see
-    \code{\link{scanVcfHeader}}) to be returned. \code{character(0)}
-    returns all fields, \code{NA_character_} returns none.
+    \code{\link{scanVcfHeader}}) to be returned. If not specified,
+    all fields are returned; if \code{geno=NA} no fields 
+    are returned.
   }
   \item{trimEmpty}{A logical(1) indicating whether \sQuote{GENO} fields
     with no values should be returned.
@@ -54,17 +60,19 @@
     \code{GRanges} should be returned instead of a \code{VCF} object. For 
     use with \code{readVcf} only; ignored by \code{scanVcf}.
 
-    The return value is a \code{GRanges} expanded to match the dimentions
+    The return value is a \code{GRanges} expanded to match the dimensions
     of the unlisted elements specified in \sQuote{info} or \sQuote{geno}.
     The \sQuote{info} or \sQuote{geno} elements are included as elementMetadata
     columns. When \code{asGRanges=TRUE} multiple elements can be provided to 
     the \sQuote{info} argument but only a single element can be provided to 
-    \sQuote{geno}. This restriction is due to the dimention of the \sQuote{geno} 
+    \sQuote{geno}. This restriction is due to the dimension of the \sQuote{geno} 
     data.
   }
-  \item{object}{An instance of class \code{ScanVcfParam}.}
-
+  \item{object}{An instance of class \code{ScanVcfParam}.
+  }
   \item{\dots}{Arguments passed to methods.
+  }
+  \item{fixed}{Internal use only.
   }
 }
 
@@ -91,6 +99,8 @@
       the return of a long form \code{GRanges} with either
       the \sQuote{INFO} or \sQuote{GENO} fields expanded in the elementMetadata.
     }
+    \item{\code{fixed}:}{Internal use only.
+    }
   }
 }
 
@@ -107,8 +117,8 @@
 
   Accessors:
   \describe{
-    \item{vcfInfo, vcfGeno, vcfTrimEmpty, vcfWhich, vcfAsGRanges:}{Return the
-      corresponding field from \code{object}.
+    \item{vcfFixed, vcfInfo, vcfGeno, vcfTrimEmpty, vcfWhich, vcfAsGRanges:}{
+      Return the corresponding field from \code{object}.
     }
   }
 
@@ -143,9 +153,12 @@
   ## -----------------------------
   ## Subsets of INFO or FORMAT field elements are specified in the 'info'
   ## and 'geno' arguments. This call specifies the return of the "GT" 'geno' 
-  ## field and all of the 'info' fields. Note that when 'geno' or 'info' are
-  ## not specified all fields are read in.
+  ## field and the subset of ranges in 'which'. All 'info' fields will be 
+  ## returned. 
   ScanVcfParam(geno="GT", which=which)
+ 
+  ## This param specifies the geno 'GT' and none of the 'info' fields.
+  ScanVcfParam(geno="GT", info=NA) 
 
   ## -----------------------------
   ## 'asGRanges' argument 

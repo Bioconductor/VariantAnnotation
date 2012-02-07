@@ -1,18 +1,22 @@
 setMethod(ScanVcfParam, "ANY",
-    function(info=character(), geno=character(), trimEmpty=TRUE, which, 
-             asGRanges=FALSE, ...)
+    function(fixed=character(), info=character(), geno=character(), 
+             trimEmpty=TRUE, which, asGRanges=FALSE, ...)
 {
-    ScanBcfParam(info, geno, trimEmpty, which, asGRanges, class="ScanVcfParam")
+    ScanBcfParam(fixed, info, geno, trimEmpty, which, asGRanges, 
+                 class="ScanVcfParam")
 })
 
 setMethod(ScanVcfParam, "missing",
-    function(info=character(), geno=character(), trimEmpty=TRUE, which, 
-             asGRanges=FALSE, ...)
+    function(fixed=character(), info=character(), geno=character(), 
+             trimEmpty=TRUE, which, asGRanges=FALSE, ...)
 {
-    ScanBcfParam(info, geno, trimEmpty, asGRanges=asGRanges, class="ScanVcfParam")
+    ScanBcfParam(fixed, info, geno, trimEmpty, asGRanges=asGRanges, 
+                 class="ScanVcfParam")
 })
 
 ## accessors
+
+vcfFixed <- function(object) slot(object, "fixed")
 
 vcfInfo <- function(object) slot(object, "info")
 

@@ -100,7 +100,9 @@ setMethod(readVcf, c(file="character", genome="missing", param="ANY"),
         .scanVcfToVCF(scanVcf(file), file, genome)
     } else {
         if (vcfAsGRanges(param)) {
-            if (identical(character(0), vcfInfo(param))) 
+            if (identical(character(0), vcfFixed(param))) 
+                slot(param, "fixed") <- NA_character_
+            else if (identical(character(0), vcfInfo(param))) 
                 slot(param, "info") <- NA_character_
             else if (identical(character(0), vcfGeno(param))) 
                 slot(param, "geno") <- NA_character_
@@ -175,21 +177,42 @@ setMethod(readVcf, c(file="character", genome="missing", param="ANY"),
     vcf <- vcf[[1]]
     hdr <- scanVcfHeader(file)[[1]][["Header"]]
 
-    ## fixed fields
+    ## fixed fieldEF
     structural <- grep("<", vcf$ALT, fixed=TRUE)
-    if (!identical(integer(0), structural))
-        alt <- CharacterList(as.list(vcf$ALT))
+    if (!is.null(vcf$ALT)) {
+        if (!identical(integer(0), structural))
+            ALT <- CharacterList(as.list(vcf$ALT))
+        else
+            ALT <- .toDNAStringSetList(vcf$ALT)
+    } else {
+        ALT <- vcf$ALT
+    }
+    if (!is.null(vcf$REF)) 
+        REF <- .toDNAStringSet(vcf$REF)
     else
-        alt <- .toDNAStringSetList(vcf$ALT)
+        REF <- vcf$REF
 
-    ref <- .toDNAStringSet(vcf$REF)
-    fixedFields <- DataFrame(REF=ref, ALT=alt, QUAL=vcf$QUAL, FILTER=vcf$FILTER)
+    if (!is.null(vcf$QUAL)) 
+        QUAL <- DataFrame(vcf$QUAL)
+    else
+        QUAL <- vcf$QUAL
+    if (!is.null(vcf$FILTER)) 
+        FILTER <- DataFrame(vcf$FILTER)
+    else
+        FILTER <- vcf$FILTER
+    fxfld <- list(REF=REF, ALT=ALT, QUAL=QUAL, FILTER=FILTER)
+    fixed <- DataFrame(unlist(fxfld)) 
+    dimnames(fixed) <- list(NULL, names(unlist(fxfld))) 
 
     ## rowData
-    rowData <- GRanges(seqnames=Rle(vcf$CHROM), ranges=IRanges(start=vcf$POS, 
-        width=width(ref)))
-    rowData <- .rowDataNames(vcf, rowData)
-    genome(seqinfo(rowData)) <- genome
+    if (any(is.null(c(vcf$CHROM, vcf$POS, vcf$ID, vcf$REF)))) {
+        rowData <- GRanges()
+    } else if (!any(is.null(c(vcf$CHROM, vcf$POS, vcf$ID, vcf$REF)))) {
+        rowData <- GRanges(seqnames=Rle(vcf$CHROM), ranges=IRanges(start=vcf$POS, 
+            width=width(REF)))
+        rowData <- .rowDataNames(vcf, rowData)
+        genome(seqinfo(rowData)) <- genome
+    }
 
     ## info 
     info <- .formatInfo(vcf$INFO,  hdr[["INFO"]])
@@ -203,7 +226,7 @@ setMethod(readVcf, c(file="character", genome="missing", param="ANY"),
     }
 
     VCF(rowData=rowData, colData=colData, exptData=SimpleList(HEADER=hdr), 
-        fixedFields=fixedFields, info=info, geno=SimpleList(vcf$GENO))
+        fixed=fixed, info=info, geno=SimpleList(vcf$GENO))
 }
 
 .rowDataNames <- function(vcf, rowData, ...)
@@ -215,7 +238,6 @@ setMethod(readVcf, c(file="character", genome="missing", param="ANY"),
     names(rowData) <- vcf$ID
     rowData
 }
-
 
 .toDNAStringSet <- function(x)
 {
@@ -237,6 +259,8 @@ setMethod(readVcf, c(file="character", genome="missing", param="ANY"),
 .newCompressedList <- IRanges:::newCompressedList
 .formatInfo <- function(x, hdr)
 {
+    if (length(x) == 0L) 
+        return(DataFrame())
     if (is.null(hdr)) {
         DF <- DataFrame(x)
         names(DF) <- names(x)

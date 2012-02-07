@@ -34,8 +34,8 @@ setGeneric("writeVcf", signature = c("obj", "filename"),
 ## scanVcf
 
 setGeneric("ScanVcfParam",
-           function(info=character(), geno=character(), trimEmpty=TRUE,
-                    which, asGRanges=FALSE, ...)
+           function(fixed=character(), info=character(), geno=character(), 
+                    trimEmpty=TRUE, which, asGRanges=FALSE, ...)
            standardGeneric("ScanVcfParam"),
            signature="which")
 
@@ -47,16 +47,12 @@ setGeneric("scanVcf",
 
 ## VCF class
 
-setGeneric("fixedFields", signature = "x", 
-    function(x) standardGeneric("fixedFields")
-)
-
-setGeneric("fixedFields<-", signature = c("x", "value"),
-    function(x, value) standardGeneric("fixedFields<-")
-)
-
 setGeneric("fixed", signature = "x", 
     function(x) standardGeneric("fixed")
+)
+
+setGeneric("fixed<-", signature = c("x", "value"),
+    function(x, value) standardGeneric("fixed<-")
 )
 
 setGeneric("ref", signature = "x", 
