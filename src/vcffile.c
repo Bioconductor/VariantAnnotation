@@ -9,7 +9,7 @@ struct it {
     char delim;
 };
 
-static char *_it_next(struct it *it)
+static inline char *_it_next(struct it *it)
 {
     char *curr = it->str;
     while ('\0' != *it->str && it->delim != *it->str)
@@ -49,12 +49,12 @@ static SEXP _types_alloc(const int vcf_n, const int col_n,
                          SEXP map, SEXP eltnms)
 {
     int i, j, map_n = Rf_length(map);
-    SEXP types;
+    SEXP types, elt;
 
     /* case of no INFO or GENO information in header */
     if (map_n == 0) {
         PROTECT(types = Rf_allocVector(VECSXP, 1));
-        SEXP elt = Rf_allocMatrix(STRSXP, vcf_n, 1);
+        elt = Rf_allocMatrix(STRSXP, vcf_n, 1);
         SET_VECTOR_ELT(types, 0, elt);
         for (i = 0; i < vcf_n; ++i)
             SET_STRING_ELT(elt, i, R_NaString);
@@ -68,7 +68,7 @@ static SEXP _types_alloc(const int vcf_n, const int col_n,
                 SET_VECTOR_ELT(types, j, R_NilValue);
                 continue;
             }
-            SEXP elt = Rf_allocMatrix(type, vcf_n, col_n);
+            elt = Rf_allocMatrix(type, vcf_n, col_n);
             SET_VECTOR_ELT(types, j, elt);
             switch (type) {
             case LGLSXP:
@@ -239,15 +239,15 @@ static void _vcf_grow(SEXP vcf, const int vcf_n, const int samp_n)
 }
 
 static void _vcf_parse(char *line, const int irec,
-                const struct vcf_parse_t *param)
+                       const struct vcf_parse_t *param)
 {
-    SEXP vcf = param->vcf, info = param->info, geno=param->geno;
+    SEXP vcf = param->vcf, info = param->info, geno=param->geno, elt;
     const int samp_n = param->samp_n, imap_n = param->imap_n,
         gmap_n = param->gmap_n;
     const char **inms = param->inms, **gnms = param->gnms;
     int fmtidx, sampleidx, imapidx, *gmapidx = param->gmapidx;
 
-    int j;
+    int idx = irec, j;
     struct it it0, it1, it2;
     char *sample, *field, *ifld, *ikey, *fmt;
     char *dot = ".";
@@ -255,21 +255,21 @@ static void _vcf_parse(char *line, const int irec,
     /* first 7 'fixed' fields */
     for (field = _it_init(&it0, line, '\t'), j = 0;
          j < N_FLDS - 2; field = _it_next(&it0), ++j) {
-        SEXP elt = VECTOR_ELT(vcf, j);
+        elt = VECTOR_ELT(vcf, j);
         switch (TYPEOF(elt)) {
         case NILSXP:
             break;
         case INTSXP:
-            INTEGER(elt)[irec] = atoi(field);
+            INTEGER(elt)[idx] = atoi(field);
             break;
         case REALSXP:
             if (strcmp(field, dot) == 0)
-                REAL(elt)[irec] = R_NaReal;
+                REAL(elt)[idx] = R_NaReal;
             else
-                REAL(elt)[irec] = atof(field);
+                REAL(elt)[idx] = atof(field);
             break;
         case STRSXP:
-            SET_STRING_ELT(elt, irec, mkChar(field));
+            SET_STRING_ELT(elt, idx, mkChar(field));
             break;
         default:
             Rf_error("(internal) unhandled fixed field type '%s'",
@@ -278,10 +278,9 @@ static void _vcf_parse(char *line, const int irec,
     }
 
     /* 'INFO' field */
-    int midx = irec;
     if (imap_n == 0) {          /* no header; parse as char */
-        SEXP matrix = VECTOR_ELT(info, 0);
-        SET_STRING_ELT(matrix, midx, mkChar(field));
+        elt = VECTOR_ELT(info, 0);
+        SET_STRING_ELT(elt, idx, mkChar(field));
     } else {
         for (ifld = _it_init(&it1, field, ';'); '\0' != *ifld;
              ifld = _it_next(&it1)) {
@@ -291,29 +290,29 @@ static void _vcf_parse(char *line, const int irec,
                     break;
             }
             if (imap_n == imapidx)
-                Rf_error("record %d INFO '%s' not found",
-                         irec + 1, ikey);
+                Rf_error("record %d INFO '%s' not found", idx + 1,
+                         ikey);
 
-            SEXP matrix = VECTOR_ELT(info, imapidx);
-            if (LGLSXP == TYPEOF(matrix)) {
-                LOGICAL(matrix)[midx] = TRUE;
+            elt = VECTOR_ELT(info, imapidx);
+            if (LGLSXP == TYPEOF(elt)) {
+                LOGICAL(elt)[idx] = TRUE;
             } else {
                 field = _it_next(&it2);
-                switch (TYPEOF(matrix)) {
+                switch (TYPEOF(elt)) {
                 case NILSXP:
                     break;
                 case INTSXP:
-                    INTEGER(matrix)[midx] = atoi(field);
+                    INTEGER(elt)[idx] = atoi(field);
                     break;
                 case REALSXP:
-                    REAL(matrix)[midx] = atof(field);
+                    REAL(elt)[idx] = atof(field);
                     break;
                 case STRSXP:
-                    SET_STRING_ELT(matrix, midx, mkChar(field));
+                    SET_STRING_ELT(elt, idx, mkChar(field));
                     break;
                 default:
                     Rf_error("(internal) unhandled type '%s'",
-                             type2char(TYPEOF(matrix)));
+                             type2char(TYPEOF(elt)));
                 }
             }
         }
@@ -339,23 +338,23 @@ static void _vcf_parse(char *line, const int irec,
          '\0' != *sample; sample = _it_next(&it0), sampleidx++) {
         for (field = _it_init(&it2, sample, ':'), fmtidx = 0;
              '\0' != *field; field = _it_next(&it2), fmtidx++) {
-            SEXP matrix = VECTOR_ELT(geno, gmapidx[fmtidx]);
-            int midx = irec * samp_n + sampleidx;
-            switch (TYPEOF(matrix)) {
+            elt = VECTOR_ELT(geno, gmapidx[fmtidx]);
+            idx = irec * samp_n + sampleidx;
+            switch (TYPEOF(elt)) {
             case NILSXP:
                 break;
             case INTSXP:
-                INTEGER(matrix)[midx] = atoi(field);
+                INTEGER(elt)[idx] = atoi(field);
                 break;
             case REALSXP:
-                REAL(matrix)[midx] = atof(field);
+                REAL(elt)[idx] = atof(field);
                 break;
             case STRSXP:
-                SET_STRING_ELT(matrix, midx, mkChar(field));
+                SET_STRING_ELT(elt, idx, mkChar(field));
                 break;
             default:
                 Rf_error("(internal) unhandled type '%s'",
-                         type2char(TYPEOF(matrix)));
+                         type2char(TYPEOF(elt)));
             }
         }
     }
@@ -406,7 +405,8 @@ SEXP scan_vcf_connection(SEXP txt, SEXP sample, SEXP fmap, SEXP imap,
     return result;
 }
 
-SEXP tabix_as_vcf(tabix_t *tabix, ti_iter_t iter, const int size,
+SEXP tabix_as_vcf(tabix_t *tabix, ti_iter_t iter,
+                  const int *keep, const int size,
                   const Rboolean grow, SEXP state)
 {
     SEXP sample = VECTOR_ELT(state, 0), fmap = VECTOR_ELT(state, 1),
@@ -441,8 +441,9 @@ SEXP tabix_as_vcf(tabix_t *tabix, ti_iter_t iter, const int size,
     int linelen;
     const char *line;
 
-    int irec = 0;
+    int irec = 0, trec=1;
     while (NULL != (line = ti_read(tabix, iter, &linelen))) {
+
         if (irec == vcf_n) {
             if (!grow)
                 break;
@@ -450,6 +451,11 @@ SEXP tabix_as_vcf(tabix_t *tabix, ti_iter_t iter, const int size,
             _vcf_grow(param.vcf, vcf_n, samp_n);
             param.info = VECTOR_ELT(param.vcf, N_FLDS - 2);
             param.geno = VECTOR_ELT(param.vcf, N_FLDS - 1);
+        }
+
+        if (NULL != keep) {
+            if (trec++ != *keep) continue;
+            keep++;
         }
 
         if (linelen + 1 > buflen) {

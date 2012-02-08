@@ -35,8 +35,7 @@
     ## FIXME: should these be parsed to true data type in C 
     ##        (reassigns >1 and non-numeric))
     d <- suppressWarnings(as.integer(fmt$Number))
-    map[is.na(d)] <- list(character())
-    map[d > 1] <- list(character())
+    map[is.na(d) | d > 1] <- list(character())
     names(map) <- rownames(fmt)
 
     ## user selected
@@ -225,7 +224,7 @@ setMethod(scanVcf, c("connection", "missing"),
                            nm)
             stop(msg)
         }
-    ## handle NULL elements
+        ## handle NULL elements
         if (is.null(elt))
             elt
         else
