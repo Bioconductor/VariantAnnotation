@@ -75,7 +75,7 @@ setMethod(readVcf, c(file="character", param="missing"),
 {
     if (1L != length(x)) 
         stop("'x' must be character(1)")
-    if (grepl("\\.tbi$", x, fixed=TRUE))
+    if (grepl("\\.tbi$", x))
         TabixFile(sub("\\.tbi", "", x))
     else 
         tryCatch(TabixFile(x), error = function(e) return(x))
