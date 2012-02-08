@@ -4,97 +4,86 @@
 
 ## TabixFile
 
-setMethod(readVcf, c(file="TabixFile", genome="character", param="ScanVcfParam"), 
-    function(file, genome, param, ...)
+setMethod(readVcf, c(file="TabixFile", param="ScanVcfParam"), 
+    function(file, param, genome, ...)
 {
-    .readVcf(file, genome, param)
+    .readVcf(file, param, genome)
 })
 
-setMethod(readVcf, c(file="TabixFile", genome="character", param="GRanges"),
-    function(file, genome, param, ...)
+setMethod(readVcf, c(file="TabixFile", param="GRanges"),
+    function(file, param, genome,  ...)
 {
-    .readVcf(file, genome, param=ScanVcfParam(which=param))
+    .readVcf(file, param=ScanVcfParam(which=param), genome)
 })
 
-setMethod(readVcf, c(file="TabixFile", genome="character", param="RangedData"),
-    function(file, genome, param, ...)
+setMethod(readVcf, c(file="TabixFile", param="RangedData"),
+    function(file, param, genome, ...)
 {
-    .readVcf(file, genome, param=ScanVcfParam(which=param))
+    .readVcf(file, param=ScanVcfParam(which=param), genome)
 })
 
-setMethod(readVcf, c(file="TabixFile", genome="character", param="RangesList"),
-    function(file, genome, param, ...)
+setMethod(readVcf, c(file="TabixFile", param="RangesList"),
+    function(file, param, genome, ...)
 {
-    .readVcf(file, genome, param=ScanVcfParam(which=param))
+    .readVcf(file, param=ScanVcfParam(which=param), genome)
 })
 
-setMethod(readVcf, c(file="TabixFile", genome="character", param="missing"), 
-    function(file, genome, param, ...)
+setMethod(readVcf, c(file="TabixFile", param="missing"), 
+    function(file, param, genome, ...)
 {
     .readVcf(file, genome)
 })
-
-setMethod(readVcf, c(file="TabixFile", genome="missing", param="ANY"), 
-    function(file, genome, param, ...)
-{
-    stop("'genome' argument is missing")
-})
-
 
 ## character
 
-setMethod(readVcf, c(file="character", genome="character", param="ScanVcfParam"),
-    function(file, genome, param, ...)
+setMethod(readVcf, c(file="character", param="ScanVcfParam"),
+    function(file, param, genome, ...)
 {
     file <- .checkTabix(file)
-    .readVcf(file, genome, param)
+    .readVcf(file, param, genome)
 })
 
-setMethod(readVcf, c(file="character", genome="character", param="GRanges"),
-    function(file, genome, param, ...)
+setMethod(readVcf, c(file="character", param="GRanges"),
+    function(file, param, genome, ...)
 {
     file <- .checkTabix(file)
-    .readVcf(file, genome, param=ScanVcfParam(which=param))
+    .readVcf(file, param=ScanVcfParam(which=param), genome)
 })
 
-setMethod(readVcf, c(file="character", genome="character", param="RangedData"),
-    function(file, genome, param, ...)
+setMethod(readVcf, c(file="character", param="RangedData"),
+    function(file, param, genome, ...)
 {
     file <- .checkTabix(file)
-    .readVcf(file, genome, param=ScanVcfParam(which=param))
+    .readVcf(file, param=ScanVcfParam(which=param), genome)
 })
 
-setMethod(readVcf, c(file="character", genome="character", param="RangesList"),
-    function(file, genome, param, ...)
+setMethod(readVcf, c(file="character", param="RangesList"),
+    function(file, param, genome, ...)
 {
     file <- .checkTabix(file)
-    .readVcf(file, genome, param=ScanVcfParam(which=param))
+    .readVcf(file, param=ScanVcfParam(which=param), genome)
 })
 
-setMethod(readVcf, c(file="character", genome="character", param="missing"),
-    function(file, genome, param, ...)
+setMethod(readVcf, c(file="character", param="missing"),
+    function(file, param, genome, ...)
 {
     file <- .checkTabix(file)
-    .readVcf(file, genome)
-})
-
-setMethod(readVcf, c(file="character", genome="missing", param="ANY"),
-    function(file, genome, param, ...)
-{
-    stop("'genome' argument is missing")
+    .readVcf(file, genome=genome)
 })
 
 .checkTabix <- function(x)
 {
-    if (grepl("[.]tbi$", x))
-        TabixFile(gsub(".tbi", "", x, fixed=TRUE))
-    else
-        x 
+    if (1L != length(x)) 
+        stop("'x' must be character(1)")
+    if (grepl("\\.tbi$", x, fixed=TRUE))
+        TabixFile(sub("\\.tbi", "", x))
+    else 
+        tryCatch(TabixFile(x), error = function(e) return(x))
 }
 
 ## .readVcf internal
 
-.readVcf <- function(file, genome, param, ...)
+.readVcf <- function(file, param, genome, ...)
 {
     if (missing(param)) {
         .scanVcfToVCF(scanVcf(file), file, genome)
@@ -107,7 +96,7 @@ setMethod(readVcf, c(file="character", genome="missing", param="ANY"),
             else if (identical(character(0), vcfGeno(param))) 
                 slot(param, "geno") <- NA_character_
             .scanVcfToLongGRanges(scanVcf(file, param=param),
-                                  file, genome, param=param)
+                                  file, param=param, genome)
         } else {
             .scanVcfToVCF(scanVcf(file, param=param), file, genome)
         }
@@ -116,7 +105,7 @@ setMethod(readVcf, c(file="character", genome="missing", param="ANY"),
 
 ## helpers
 
-.scanVcfToLongGRanges <- function(vcf, file, genome, param, ...)
+.scanVcfToLongGRanges <- function(vcf, file, param, genome, ...)
 {
     vcf <- vcf[[1]]
     ref <- .toDNAStringSet(vcf$REF)
@@ -161,7 +150,7 @@ setMethod(readVcf, c(file="character", genome="missing", param="ANY"),
             }
         }, reps)
 
-    ## FIXME: why can't DF go in list via lapply above
+    ## FIXME: DF in list via lapply above
     idx <- which(lapply(lst, is.array) == TRUE) 
     if (length(idx) != 0)
         for (i in idx) 
@@ -177,7 +166,7 @@ setMethod(readVcf, c(file="character", genome="missing", param="ANY"),
     vcf <- vcf[[1]]
     hdr <- scanVcfHeader(file)[[1]][["Header"]]
 
-    ## fixed fieldEF
+    ## fixed fields
     structural <- grep("<", vcf$ALT, fixed=TRUE)
     if (!is.null(vcf$ALT)) {
         if (!identical(integer(0), structural))

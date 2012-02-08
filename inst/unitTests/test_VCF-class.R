@@ -8,7 +8,7 @@ test_VCF_construction <- function() {
 
     ## substance
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
-    vcf <- readVcf(fl, "hg19") 
+    vcf <- readVcf(fl, genome="hg19") 
     checkTrue(validObject(VCF(rowData=rowData(vcf), colData=colData(vcf), 
         geno=geno(vcf), info=values(info(vcf)), 
         fixed=values(fixed(vcf))))) 
@@ -17,7 +17,7 @@ test_VCF_construction <- function() {
 
 test_VCF_accessors <- function() {
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
-    vcf <- readVcf(fl, "hg19")
+    vcf <- readVcf(fl, genome="hg19")
 
     ## ref
     checkTrue(class(values(ref(vcf))[["REF"]]) == "DNAStringSet")
@@ -90,7 +90,7 @@ test_VCF_accessors <- function() {
 test_VCF_subset <- function()
 {
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
-    vcf <- readVcf(fl, "hg19")
+    vcf <- readVcf(fl, genome="hg19")
 
     ## numeric
     ss1 <- vcf[2:3,]
@@ -131,7 +131,7 @@ test_VCF_subset <- function()
 test_VCF_subsetassign <- function()
 {
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
-    vcf <- readVcf(fl, "hg19")
+    vcf <- readVcf(fl, genome="hg19")
     ss1 <- vcf 
     ss1[1:2,] <- ss1[2:1,]
     checkIdentical(rowData(vcf)[2:1,], rowData(ss1)[1:2,])
@@ -152,7 +152,7 @@ test_VCF_subsetassign <- function()
 test_VCF_seqlevels <- function()
 {
     fl <- system.file("extdata", "ex1.vcf", package="VariantAnnotation")
-    vcf <- readVcf(fl, "hg19")
+    vcf <- readVcf(fl, genome="hg19")
     seqlev <- seqlevels(vcf)
     checkIdentical(seqlev, c("16", "21"))
 

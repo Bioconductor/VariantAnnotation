@@ -75,7 +75,7 @@
 \examples{
   ## Read a vcf file into a VCF object
   vcfFile <- system.file("extdata", "ex2.vcf", package="VariantAnnotation") 
-  vcf <- readVcf(vcfFile, "hg19")
+  vcf <- readVcf(vcfFile, genome="hg19")
  
   ## Genotype calls are stored in the assays slot and the
   ## GRanges with the map information is in the rowData slot.

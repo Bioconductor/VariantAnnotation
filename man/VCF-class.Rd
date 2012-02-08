@@ -301,7 +301,7 @@
 
 \examples{
   fl <- system.file("extdata", "ex1.vcf", package="VariantAnnotation")
-  vcf <- readVcf(fl, "hg19")
+  vcf <- readVcf(fl, genome="hg19")
 
   ## Access all 'fixed' fields with fixed and individual fixed fields with
   ## ref, alt, qual and filt accessors

@@ -21,8 +21,8 @@ setGeneric("getTranscriptSeqs", signature = c("query", "subject"),
 
 ## read/write Vcf
 
-setGeneric("readVcf", signature = c("file", "genome", "param"),
-    function(file, genome, param, ...)
+setGeneric("readVcf", signature = c("file", "param"),
+    function(file, param, genome, ...)
     standardGeneric("readVcf")
 )
 
@@ -33,17 +33,19 @@ setGeneric("writeVcf", signature = c("obj", "filename"),
 
 ## scanVcf
 
-setGeneric("ScanVcfParam",
+setGeneric("ScanVcfParam", signature = "which",
            function(fixed=character(), info=character(), geno=character(), 
                     trimEmpty=TRUE, which, asGRanges=FALSE, ...)
-           standardGeneric("ScanVcfParam"),
-           signature="which")
+           standardGeneric("ScanVcfParam")
+)
 
-setGeneric("scanVcfHeader",
-           function(file, ...) standardGeneric("scanVcfHeader"))
+setGeneric("scanVcfHeader", signature = "file",
+           function(file, ...) standardGeneric("scanVcfHeader")
+)
 
-setGeneric("scanVcf",
-           function(file, ..., param) standardGeneric("scanVcf"))
+setGeneric("scanVcf", signature = c("file", "param"),
+           function(file, ..., param) standardGeneric("scanVcf")
+)
 
 ## VCF class
 
@@ -123,19 +125,4 @@ setGeneric("vaFilter", signature = "fun",
 )
 
 setGeneric(".vaValidity")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

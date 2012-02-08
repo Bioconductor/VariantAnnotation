@@ -98,7 +98,7 @@
 \author{Valerie Obenchain <vobencha@fhcrc.org>}
 
 \seealso{
-  \code{\link{readVcf}}
+  \code{\link{readVcf}},
   \code{\link{predictCoding}}
 }
 
@@ -108,7 +108,7 @@
 
   ## Read variants from a VCF file 
   fl <- system.file("extdata", "ex1.vcf", package="VariantAnnotation")
-  vcf <- readVcf(fl, "hg19")
+  vcf <- readVcf(fl, genome="hg19")
 
   ## Note the variant seqlevels do not match those in the TxDb
   rd <- rowData(vcf)
