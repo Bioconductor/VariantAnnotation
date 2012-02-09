@@ -447,7 +447,7 @@ SEXP tabix_as_vcf(tabix_t *tabix, ti_iter_t iter,
         if (irec == vcf_n) {
             if (!grow)
                 break;
-            vcf_n *= SCALE;
+            vcf_n = vcf_n < 2 ? 2 : vcf_n * SCALE;
             _vcf_grow(param.vcf, vcf_n, samp_n);
             param.info = VECTOR_ELT(param.vcf, N_FLDS - 2);
             param.geno = VECTOR_ELT(param.vcf, N_FLDS - 1);

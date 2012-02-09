@@ -59,7 +59,7 @@
         tbxstate <- list(samples, fmap, imap, gmap)
         tbxsym <- getNativeSymbolInfo(".tabix_as_vcf",
                                       "VariantAnnotation")
-        scanTabix(file, param=param, tbxsym=tbxsym, tbxstate=tbxstate)
+        scanTabix(file, ..., param=param, tbxsym=tbxsym, tbxstate=tbxstate)
     }, error = function(err) {
         stop("scanVcf: ", conditionMessage(err), "\n  path: ", 
              path(file), call. = FALSE)
