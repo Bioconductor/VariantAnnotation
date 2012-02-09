@@ -1,9 +1,6 @@
 \name{readVcf}
 \alias{readVcf}
 \alias{readVcf,character,ScanVcfParam-method}
-\alias{readVcf,character,RangedData-method}
-\alias{readVcf,character,RangesList-method}
-\alias{readVcf,character,GRanges-method}
 \alias{readVcf,character,missing-method}
 \alias{readVcf,TabixFile,ScanVcfParam-method}
 \alias{readVcf,TabixFile,RangedData-method}

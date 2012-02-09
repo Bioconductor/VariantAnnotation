@@ -31,7 +31,7 @@ setMethod(readVcf, c(file="TabixFile", param="RangesList"),
 setMethod(readVcf, c(file="TabixFile", param="missing"), 
     function(file, param, genome, ...)
 {
-    .readVcf(file, genome)
+    .readVcf(file, genome=genome)
 })
 
 ## character
@@ -41,27 +41,6 @@ setMethod(readVcf, c(file="character", param="ScanVcfParam"),
 {
     file <- .checkTabix(file)
     .readVcf(file, param, genome)
-})
-
-setMethod(readVcf, c(file="character", param="GRanges"),
-    function(file, param, genome, ...)
-{
-    file <- .checkTabix(file)
-    .readVcf(file, param=ScanVcfParam(which=param), genome)
-})
-
-setMethod(readVcf, c(file="character", param="RangedData"),
-    function(file, param, genome, ...)
-{
-    file <- .checkTabix(file)
-    .readVcf(file, param=ScanVcfParam(which=param), genome)
-})
-
-setMethod(readVcf, c(file="character", param="RangesList"),
-    function(file, param, genome, ...)
-{
-    file <- .checkTabix(file)
-    .readVcf(file, param=ScanVcfParam(which=param), genome)
 })
 
 setMethod(readVcf, c(file="character", param="missing"),
@@ -78,7 +57,7 @@ setMethod(readVcf, c(file="character", param="missing"),
     if (grepl("\\.tbi$", x))
         TabixFile(sub("\\.tbi", "", x))
     else 
-        tryCatch(TabixFile(x), error = function(e) return(x))
+        x 
 }
 
 ## .readVcf internal

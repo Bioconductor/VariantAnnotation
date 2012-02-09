@@ -121,7 +121,7 @@ setMethod(scanVcf, c("TabixFile", "ScanVcfParam"),
         result <- callGeneric(path(file), ..., param=param)
     else 
     ## ranges
-        result <- scanVcf(file, ..., fixed=vcfFixed(param), info=vcfInfo(param), 
+        result <- scanVcf(file, ..., fixed=character(), info=vcfInfo(param), 
             geno=vcfGeno(param), param=vcfWhich(param))
     if (vcfTrimEmpty(param))
         lapply(result, function(rng) {
