@@ -38,8 +38,12 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
         on.exit(isActiveSeq(subject) <- masks)
         .setActiveSubjectSeq(query, subject)
 
-        tx <- transcripts(subject, columns=c("exon_id", "tx_id", "gene_id"))
+        tx <- transcripts(subject, columns=c("tx_id", "gene_id"))
         cdsByTx <- cdsBy(subject)
+        fiveUTR <- fiveUTRsByTranscript(subject)
+        threeUTR <- threeUTRsByTranscript(subject)
+        txbygn <- transcriptsBy(subject, "gene")
+        
         map <- data.frame(
             txid=rep(names(cdsByTx), elementLengths(cdsByTx)),
             cdsid=values(unlist(cdsByTx, use.names=FALSE))[["cds_id"]])
@@ -71,9 +75,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
             intron <- txCO != 0 & cdsCO == 0
 
             ## UTRs :
-            fiveUTR <- fiveUTRsByTranscript(subject)
             utr5 <- countOverlaps(query, fiveUTR, type="within") > 0
-            threeUTR <- threeUTRsByTranscript(subject)
             utr3 <- countOverlaps(query, threeUTR, type="within") > 0
 
             location <- .location(length(qhits), "transcript_region")
@@ -86,14 +88,14 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
         }
 
         ## intergenic :
-        mat2 <- .intergenic(txCO, tx, query, subject, map) 
+        mat2 <- .intergenic(txCO, tx, query, txbygn, map) 
 
         ans <- rbind(mat1, mat2)
         ans[order(ans$queryID), ]
     }
 )
 
-.intergenic <- function(txCO, tx, query, subject, map, ...)
+.intergenic <- function(txCO, tx, query, txbygn, map, ...)
 {
     intergenic <- txCO == 0
     if (all(intergenic)) {
@@ -104,7 +106,6 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
         query <- query[intergenic]
 
         ## gene ranges
-        txbygn <- transcriptsBy(subject, "gene")
         rnglst <- range(txbygn)
         rng <- unlist(rnglst, use.names=FALSE)
         genes <- rep(names(rnglst), elementLengths(rnglst))
