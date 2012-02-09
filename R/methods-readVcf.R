@@ -147,43 +147,24 @@ setMethod(readVcf, c(file="character", param="missing"),
 
     ## fixed fields
     structural <- grep("<", vcf$ALT, fixed=TRUE)
-    if (!is.null(vcf$ALT)) {
-        if (!identical(integer(0), structural))
-            ALT <- CharacterList(as.list(vcf$ALT))
-        else
-            ALT <- .toDNAStringSetList(vcf$ALT)
-    } else {
-        ALT <- vcf$ALT
-    }
-    if (!is.null(vcf$REF)) 
-        REF <- .toDNAStringSet(vcf$REF)
+    if (!identical(integer(0), structural))
+        ALT <- seqsplit(vcf$ALT, seq_len(length(vcf$ALT)))
     else
-        REF <- vcf$REF
-
-    if (!is.null(vcf$QUAL)) 
-        QUAL <- DataFrame(vcf$QUAL)
-    else
-        QUAL <- vcf$QUAL
-    if (!is.null(vcf$FILTER)) 
-        FILTER <- DataFrame(vcf$FILTER)
-    else
-        FILTER <- vcf$FILTER
-    fxfld <- list(REF=REF, ALT=ALT, QUAL=QUAL, FILTER=FILTER)
-    fixed <- DataFrame(unlist(fxfld)) 
-    dimnames(fixed) <- list(NULL, names(unlist(fxfld))) 
+        ALT <- .toDNAStringSetList(vcf$ALT)
+    REF <- .toDNAStringSet(vcf$REF)
+    QUAL <- DataFrame(vcf$QUAL)
+    FILTER <- DataFrame(vcf$FILTER)
+    fixed <- DataFrame(REF, ALT, QUAL, FILTER)
+    dimnames(fixed) <- list(NULL, c("REF", "ALT", "QUAL", "FILTER"))
 
     ## rowData
-    if (any(is.null(c(vcf$CHROM, vcf$POS, vcf$ID, vcf$REF)))) {
-        rowData <- GRanges()
-    } else if (!any(is.null(c(vcf$CHROM, vcf$POS, vcf$ID, vcf$REF)))) {
-        rowData <- GRanges(seqnames=Rle(vcf$CHROM), ranges=IRanges(start=vcf$POS, 
-            width=width(REF)))
-        rowData <- .rowDataNames(vcf, rowData)
-        genome(seqinfo(rowData)) <- genome
-    }
+    rowData <- GRanges(seqnames=Rle(vcf$CHROM), ranges=IRanges(start=vcf$POS,
+        width=width(REF)))
+    rowData <- .rowDataNames(vcf, rowData)
+    genome(seqinfo(rowData)) <- genome
 
     ## info 
-    info <- .formatInfo(vcf$INFO,  hdr[["INFO"]])
+    info <- .formatInfo(vcf$INFO, length(rowData))
 
     ## colData
     if (length(vcf$GENO) > 0) {
@@ -224,32 +205,17 @@ setMethod(readVcf, c(file="character", param="missing"),
         unlistData=dna, end=end(pbw))
 }
 
-.newCompressedList <- IRanges:::newCompressedList
-.formatInfo <- function(x, hdr)
+.formatInfo <- function(x, nrow)
 {
-    if (length(x) == 0L) 
+    if (length(x) == 0L)
         return(DataFrame())
-    if (is.null(hdr)) {
-        DF <- DataFrame(x)
-        names(DF) <- names(x)
-        return(DF)
+    for (i in seq_len(length(x))) {
+        if (is(x[[i]], "matrix"))
+            x[[i]] <- DataFrame(I(matrix(x[[i]], nrow=nrow)))
+        else
+            x[[i]] <- DataFrame(x[[i]])
     }
-    type <- hdr$Type[match(names(x), rownames(hdr))] 
-    idx <- which(lapply(x, is.list) == TRUE)
-    if (length(idx) != 0) {
-        for (i in idx) {
-            x[[i]] <- switch(type[[i]],
-                Integer = .newCompressedList("CompressedIntegerList", x[[i]]), 
-                Float = .newCompressedList("CompressedNumericList", x[[i]]), 
-                String = .newCompressedList("CompressedCharacterList", x[[i]]), 
-                Logical = .newCompressedList("CompressedLogicalList", x[[i]])) 
-        }
-    }
-    idx <- which(lapply(x, is.array) == TRUE)
-    if (length(idx) != 0)
-        for (i in idx) 
-            x[[i]] <- DataFrame(I(matrix(x[[i]], ncol=dim(x[[i]])[3])))
     DF <- DataFrame(x)
     names(DF) <- names(x)
-    DF 
+    DF
 }
