@@ -38,18 +38,14 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
 
         ## ranges with width=0 :
         ## de-increment start to equal end value 
-        if (any(width(query) == 0)) {
-            insertion <- width(query) == 0
-            queryAdj <- query
-            start(queryAdj[insertion]) <- start(query)[insertion] - 1
-        } else queryAdj <- query
+        if (any(insertion <- width(query) == 0))
+            start(query)[insertion] <- start(query)[insertion] - 1
 
-        cdsFO <- findOverlaps(queryAdj, cdsByTx, type="within")
-        cdsCO <- tabulate(queryHits(cdsFO), length(queryAdj))
-        txFO <- findOverlaps(queryAdj, tx, type="within")
-        txCO <- tabulate(queryHits(txFO), length(queryAdj))
+        cdsCO <- countOverlaps(query, cdsByTx, type="within")
+        txFO <- findOverlaps(query, tx, type="within")
+        txCO <- tabulate(queryHits(txFO), length(query))
 
-        if (sum(txCO) == 0) {
+        if (length(txFO) == 0) {
             mat1 <- DataFrame(queryID=integer(), location=character(), 
                 txID=integer(), geneID=CharacterList(), cdsID=integer())
         } else {
@@ -66,9 +62,9 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
 
             ## UTRs :
             fiveUTR <- fiveUTRsByTranscript(subject)
+            utr5 <- countOverlaps(query, fiveUTR, type="within") > 0
             threeUTR <- threeUTRsByTranscript(subject)
-            utr5 <- countOverlaps(queryAdj, fiveUTR, type="within") > 0
-            utr3 <- countOverlaps(queryAdj, threeUTR, type="within") > 0
+            utr3 <- countOverlaps(query, threeUTR, type="within") > 0
 
             location <- rep("transcript_region", length(qhits))
             location[qhits %in% which(intron)] <- "intron"
@@ -79,7 +75,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
         }
 
         ## intergenic :
-        mat2 <- .intergenic(txCO, tx, queryAdj, map) 
+        mat2 <- .intergenic(txCO, tx, query, subject, map) 
 
         ans <- rbind(mat1, mat2)
         ans$location <- factor(ans$location)
@@ -87,71 +83,32 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
     }
 )
 
-.intergenic <- function(txCO, tx, queryAdj, map, ...)
+.intergenic <- function(txCO, tx, query, subject, map, ...)
 {
     if (!any(txCO == 0)) {
         DataFrame(queryID=integer(), location=character(), txID=integer(), 
             geneID=CharacterList(), cdsID=integer())
     } else {
         intergenic <- txCO == 0
-        ## tx that have gene IDs
-        geneWidth <- elementLengths(values(tx)[["gene_id"]]) 
-        if (any(geneWidth > 1))
-            stop("assumption of one gene per transcript is not valid")
-        txWithGeneID <- tx[geneWidth != 0]
-        ## collapse to single range w/in gene ID
-        grle <- Rle(unlist(values(txWithGeneID)[["gene_id"]], 
-            use.names=FALSE))
-        gfact <- rep(seq_len(nrun(grle)), runLength(grle)) 
-        rngWithGeneID <- unlist(range(split(txWithGeneID, gfact)), 
-            use.names=FALSE)
-        genes <- runValue(grle)
+        query <- query[txCO == 0]
 
-        ## locate nearest range 
-        intvar <- queryAdj[txCO == 0]
-        nidx <- nearest(intvar, rngWithGeneID)
-        nnidx <- logical(length(txCO))
-        if (any(is.na(nidx))) {
-            nnidx[which(txCO == 0)] <- is.na(nidx)
-            intergenic[nnidx] <- FALSE
-            intvar <- intvar[!is.na(nidx)]
-            nidx <- na.omit(nidx)
-        } 
-        isPreceding <- (end(rngWithGeneID[nidx]) - start(intvar)) < 0
-        isFirst <- nidx == 1
-        isLast <- nidx == length(rngWithGeneID) 
-        ## nearest is preceding
-        precedeIdx <- nidx
-        followIdx <- precedeIdx + 1
-        ## nearest is following 
-        precedeIdx[!isPreceding & !isFirst] <- 
-            precedeIdx[!isPreceding & !isFirst] - 1 
-        followIdx[!isPreceding & !isFirst] <- 
-            followIdx[!isPreceding & !isFirst] - 1 
+        ## gene ranges
+        txbygn <- transcriptsBy(subject, "gene")
+        rnglst <- range(txbygn)
+        rng <- unlist(rnglst, use.names=FALSE)
+        genes <- rep(names(rnglst), elementLengths(rnglst))
+        nidx <- nearest(query, rng)
+        ## query precedes subject; get index for following gene 
+        pidx <- precede(query, rng)
+        ## query follows subject; get index for preceding gene 
+        fidx <- follow(query, rng)
 
-        ## edge cases where nearest is first or last 
-        ## (ie, one flanking gene)
-        p <- genes[precedeIdx]
-        f <- genes[followIdx]
-        if (any(isPreceding & isLast)) 
-            f[isPreceding & isLast] <- "no following" 
-        if (any(!isPreceding & isFirst)) 
-            p[!isPreceding & isFirst] <- "no preceding"
-        flankGenes <- CharacterList(data.frame(rbind(unlist(p), unlist(f))))
+        geneid <- as.list(paste(genes[fidx], genes[pidx], sep=","))
+        txid <- cdsid <- rep(NA_integer_, length(query))
+        location <- rep(NA_character_, length(query))
+        location[seqlevels(query) %in% seqlevels(rng)] <- "intergenic"
 
-        qhits <- which(intergenic)
-        txid <- cdsid <- rep(NA_integer_, length(qhits))
-        geneid <- flankGenes
-        location <- rep("intergenic", length(qhits))
-        res <- DataFrame(queryID=qhits, location=location, txID=txid,
-            geneID=geneid, cdsID=cdsid) 
-        if (any(nnidx)) { 
-            noNearestDF <- DataFrame(queryID=which(nnidx), location=NA_character_, 
-                txID=NA_integer_, geneID=CharacterList(NA_character_), cdsID=NA_integer_)
-            DF <- rbind(res, noNearestDF)
-            DF[order(DF$queryID), ] 
-        } else {
-            res
-        }
+        DataFrame(queryID=which(intergenic), location=location, 
+                  txID=txid, geneID=CharacterList(geneid), cdsID=cdsid) 
     }
 }

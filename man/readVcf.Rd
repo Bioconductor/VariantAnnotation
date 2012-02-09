@@ -20,9 +20,6 @@
   \S4method{readVcf}{TabixFile,GRanges}(file, param, genome, ...)
   \S4method{readVcf}{TabixFile,missing}(file, param, genome, ...)
   \S4method{readVcf}{character,ScanVcfParam}(file, param, genome, ...)
-  \S4method{readVcf}{character,RangedData}(file, param, genome, ...)
-  \S4method{readVcf}{character,RangesList}(file, param, genome, ...)
-  \S4method{readVcf}{character,GRanges}(file, param, genome, ...)
   \S4method{readVcf}{character,missing}(file, param, genome, ...)
 }
 
