@@ -17,6 +17,14 @@ setMethod("locateVariants", c(query="VCF", subject="TranscriptDb"),
     }
 )
 
+.location <-
+    function(length=0, value=NA)
+{
+    levels <- c("transcript_region", "intron", "5'UTR", "3'UTR",
+        "coding", "intergenic")
+    factor(rep(value, length), levels=levels)
+}
+
 setMethod("locateVariants", c("GRanges", "TranscriptDb"),
     function(query, subject, ...)
     {
@@ -46,8 +54,10 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
         txCO <- tabulate(queryHits(txFO), length(query))
 
         if (length(txFO) == 0) {
-            mat1 <- DataFrame(queryID=integer(), location=character(), 
-                txID=integer(), geneID=CharacterList(), cdsID=integer())
+            mat1 <- DataFrame(queryID=integer(), location=.location(),
+                txID=integer(), geneID=character(),
+                precedesID=character(), followsID=character(),
+                cdsID=integer())
         } else {
             qhits <- queryHits(txFO)
             txID <- values(tx)["tx_id"][subjectHits(txFO),]
@@ -66,49 +76,49 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
             threeUTR <- threeUTRsByTranscript(subject)
             utr3 <- countOverlaps(query, threeUTR, type="within") > 0
 
-            location <- rep("transcript_region", length(qhits))
+            location <- .location(length(qhits), "transcript_region")
             location[qhits %in% which(intron)] <- "intron"
             location[qhits %in% which(utr5)] <- "5'UTR"
             location[qhits %in% which(utr3)] <- "3'UTR"
             location[qhits %in% which(coding)] <- "coding"
-            mat1 <- DataFrame(queryID=qhits, location, txID, geneID, cdsID)
+            mat1 <- DataFrame(queryID=qhits, location, txID, geneID,
+                precedesID=NA_character_, followsID=NA_character_, cdsID)
         }
 
         ## intergenic :
         mat2 <- .intergenic(txCO, tx, query, subject, map) 
 
         ans <- rbind(mat1, mat2)
-        ans$location <- factor(ans$location)
         ans[order(ans$queryID), ]
     }
 )
 
 .intergenic <- function(txCO, tx, query, subject, map, ...)
 {
-    if (!any(txCO == 0)) {
-        DataFrame(queryID=integer(), location=character(), txID=integer(), 
-            geneID=CharacterList(), cdsID=integer())
+    intergenic <- txCO == 0
+    if (all(intergenic)) {
+        DataFrame(queryID=integer(), location=.location(),
+            txID=integer(), geneID=character(), precedesID=character(),
+            followsID=character(), cdsID=integer())
     } else {
-        intergenic <- txCO == 0
-        query <- query[txCO == 0]
+        query <- query[intergenic]
 
         ## gene ranges
         txbygn <- transcriptsBy(subject, "gene")
         rnglst <- range(txbygn)
         rng <- unlist(rnglst, use.names=FALSE)
         genes <- rep(names(rnglst), elementLengths(rnglst))
-        nidx <- nearest(query, rng)
         ## query precedes subject; get index for following gene 
         pidx <- precede(query, rng)
         ## query follows subject; get index for preceding gene 
         fidx <- follow(query, rng)
 
-        geneid <- as.list(paste(genes[fidx], genes[pidx], sep=","))
-        txid <- cdsid <- rep(NA_integer_, length(query))
-        location <- rep(NA_character_, length(query))
+        location <- .location(length(query))
         location[seqlevels(query) %in% seqlevels(rng)] <- "intergenic"
 
         DataFrame(queryID=which(intergenic), location=location, 
-                  txID=txid, geneID=CharacterList(geneid), cdsID=cdsid) 
+            txID=NA_integer_, geneID=NA_character_,
+            precedesID=genes[pidx], followsID=genes[fidx],
+            cdsID=NA_integer_) 
     }
 }
