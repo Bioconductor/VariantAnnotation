@@ -1,48 +1,34 @@
 #include <stdlib.h>
 #include <string.h>
 #include "vcffile.h"
-
-/* iterator to return null-terminated delimited fields */
-
-struct it {
-    char *str;
-    char delim;
-};
-
-static inline char *_it_next(struct it *it)
-{
-    char *curr = it->str;
-    while ('\0' != *it->str && it->delim != *it->str)
-        it->str++;
-    if ('\0' != *it->str)
-        *it->str++ = '\0';
-    return curr;
-}
-
-static char *_it_init(struct it *it, char *str, char delim)
-{
-    it->str = str;
-    it->delim = delim;
-    return _it_next(it);
-}
-
-/* parse a single 'vcf' line into vectors and matricies 'map' */
+#include "rle.h"
+#include "dna_hash.h"
+#include "utilities.h"
+#include "IRanges_interface.h"
 
 const struct fld_fmt {
     const char *name;
     SEXPTYPE type;
 } FLD_FMT[] = {
-    {"CHROM", STRSXP}, {"POS", INTSXP}, {"ID", STRSXP},
-    {"REF", STRSXP}, {"ALT", STRSXP}, {"QUAL", REALSXP},
-    {"FILTER", STRSXP}, {"INFO", STRSXP}, {"GENO", VECSXP}
+    /* {"CHROM", VECSXP}, {"POS", INTSXP}, {"ID", STRSXP}, */
+    /* {"REF", STRSXP}, */
+    {"rowData", S4SXP}, {"REF", S4SXP}, {"ALT", STRSXP},
+    {"QUAL", REALSXP}, {"FILTER", STRSXP}, {"INFO", STRSXP},
+    {"GENO", VECSXP}
 };
+
+enum { ROWDATA_IDX = 0, REF_IDX, ALT_IDX, QUAL_IDX, FILTER_IDX,
+       INFO_IDX, GENO_IDX };
+enum { POS_IDX = 0, ID_IDX };
 
 const int N_FLDS = sizeof(FLD_FMT) / sizeof(FLD_FMT[0]);
 
 struct vcf_parse_t {
-    SEXP vcf, info, geno;
+    SEXP vcf, fixed, info, geno;
     const char **inms, **gnms;
     int imap_n, gmap_n, samp_n, *gmapidx;
+    struct rle_t *chrom;
+    struct dna_hash_t *ref;
 };
 
 static SEXP _types_alloc(const int vcf_n, const int col_n,
@@ -145,7 +131,7 @@ static void _types_grow(SEXP types, const int vcf_n, const int col_n)
     }
 }
 
-static void _types_transpose(SEXP types)
+static SEXP _types_transpose(SEXP types)
 {
     SEXP elt, tpose, fun;
     for (int t = 0; t < Rf_length(types); ++t) {
@@ -157,6 +143,7 @@ static void _types_transpose(SEXP types)
         SET_VECTOR_ELT(types, t, tpose);
         UNPROTECT(1);
     }
+    return types;
 }
 
 static SEXP _trim_null(SEXP data, const char **cnms)
@@ -181,8 +168,8 @@ static SEXP _trim_null(SEXP data, const char **cnms)
 static SEXP _vcf_allocate(const int vcf_n, SEXP sample,
                           SEXP fmap, SEXP imap, SEXP gmap)
 {
-    /* allocate result and first 7 fixed fields */
-    SEXP vcf, info, geno, elt, eltnms;
+    /* allocate result and fixed fields */
+    SEXP vcf, rowData, info, geno, elt, eltnms;
     const int samp_n = Rf_length(sample);
 
     if (Rf_length(fmap) != N_FLDS - 2)
@@ -196,24 +183,31 @@ static SEXP _vcf_allocate(const int vcf_n, SEXP sample,
     vcf = Rf_namesgets(vcf, eltnms);
     UNPROTECT(1);
 
-    /* allocate fixed fields */
-    for (int i = 0; i < N_FLDS - 2; ++i) {
+    /* fixed fields */
+    SET_VECTOR_ELT(vcf, ROWDATA_IDX, Rf_allocVector(VECSXP, 2));
+    rowData = VECTOR_ELT(vcf, ROWDATA_IDX);
+    SET_VECTOR_ELT(rowData, POS_IDX, Rf_allocVector(INTSXP, vcf_n));
+    SET_VECTOR_ELT(rowData, ID_IDX, Rf_allocVector(STRSXP, vcf_n));
+
+    SET_VECTOR_ELT(vcf, REF_IDX, R_NilValue);
+
+    for (int i = ALT_IDX; i <= FILTER_IDX; ++i) {
         elt = R_NilValue;
         if (R_NilValue != VECTOR_ELT(fmap, i))
             elt = Rf_allocVector(FLD_FMT[i].type, vcf_n);
         SET_VECTOR_ELT(vcf, i, elt);
     }
 
-    /* allocate info */
+    /* info */
     info = _types_alloc(vcf_n, 1, imap, R_NilValue);
-    SET_VECTOR_ELT(vcf, N_FLDS - 2, info);
+    SET_VECTOR_ELT(vcf, INFO_IDX, info);
 
-    /* allocate _transposed_ GENO */
+    /* _transposed_ GENO */
     PROTECT(eltnms = Rf_allocVector(VECSXP, 2));
     SET_VECTOR_ELT(eltnms, 0, sample);
     SET_VECTOR_ELT(eltnms, 1, R_NilValue);
     geno = _types_alloc(samp_n, vcf_n, gmap, eltnms);
-    SET_VECTOR_ELT(vcf, N_FLDS - 1, geno);
+    SET_VECTOR_ELT(vcf, GENO_IDX, geno);
     UNPROTECT(1);
 
     UNPROTECT(1);
@@ -222,39 +216,58 @@ static SEXP _vcf_allocate(const int vcf_n, SEXP sample,
 
 static void _vcf_grow(SEXP vcf, const int vcf_n, const int samp_n)
 {
-    SEXP elt;
+    SEXP rowData, elt;
 
-    for (int i = 0; i < N_FLDS - 2; ++i) {
+    rowData = VECTOR_ELT(vcf, ROWDATA_IDX);
+    for (int i = POS_IDX; i <= ID_IDX; ++i) {
+        elt = VECTOR_ELT(rowData, i);
+        SET_VECTOR_ELT(rowData, i, Rf_lengthgets(elt, vcf_n));
+    }
+
+    for (int i = ALT_IDX; i <= FILTER_IDX; ++i) {
         elt = VECTOR_ELT(vcf, i);
         if (R_NilValue != elt)
             SET_VECTOR_ELT(vcf, i, Rf_lengthgets(elt, vcf_n));
     }
 
-    elt = VECTOR_ELT(vcf, N_FLDS - 2);
+    elt = VECTOR_ELT(vcf, INFO_IDX);
     _types_grow(elt, vcf_n, 1);
 
     /* _transposed_ matrix */
-    elt = VECTOR_ELT(vcf, N_FLDS - 1);
+    elt = VECTOR_ELT(vcf, GENO_IDX);
     _types_grow(elt, samp_n, vcf_n);
 }
 
 static void _vcf_parse(char *line, const int irec,
                        const struct vcf_parse_t *param)
 {
-    SEXP vcf = param->vcf, info = param->info, geno=param->geno, elt;
+    SEXP vcf = param->vcf, info = param->info, geno=param->geno,
+        rowData, elt;
     const int samp_n = param->samp_n, imap_n = param->imap_n,
         gmap_n = param->gmap_n;
     const char **inms = param->inms, **gnms = param->gnms;
     int fmtidx, sampleidx, imapidx, *gmapidx = param->gmapidx;
 
     int idx = irec, j;
-    struct it it0, it1, it2;
+    struct it_t it0, it1, it2;
     char *sample, *field, *ifld, *ikey, *fmt;
-    char *dot = ".";
 
-    /* first 7 'fixed' fields */
-    for (field = _it_init(&it0, line, '\t'), j = 0;
-         j < N_FLDS - 2; field = _it_next(&it0), ++j) {
+    /* fixed fields */
+    /* CHROM */
+    field = it_init(&it0, line, '\t');
+    rle_append(param->chrom, field);
+    /* POS, ID */
+    rowData = VECTOR_ELT(vcf, ROWDATA_IDX);
+    field = it_next(&it0);
+    INTEGER(VECTOR_ELT(rowData, POS_IDX))[irec] = atoi(field);
+    field = it_next(&it0);
+    SET_STRING_ELT(VECTOR_ELT(rowData, ID_IDX), irec, mkChar(field));
+    /* REF */
+    field = it_next(&it0);
+    dna_hash_append(param->ref, field);
+    for (field = it_next(&it0), j = ALT_IDX; j <= FILTER_IDX;
+         field = it_next(&it0), ++j)
+    {
         elt = VECTOR_ELT(vcf, j);
         switch (TYPEOF(elt)) {
         case NILSXP:
@@ -263,10 +276,7 @@ static void _vcf_parse(char *line, const int irec,
             INTEGER(elt)[idx] = atoi(field);
             break;
         case REALSXP:
-            if (strcmp(field, dot) == 0)
-                REAL(elt)[idx] = R_NaReal;
-            else
-                REAL(elt)[idx] = atof(field);
+            REAL(elt)[idx] = ('.' == *field) ? R_NaReal : atof(field);
             break;
         case STRSXP:
             SET_STRING_ELT(elt, idx, mkChar(field));
@@ -282,9 +292,9 @@ static void _vcf_parse(char *line, const int irec,
         elt = VECTOR_ELT(info, 0);
         SET_STRING_ELT(elt, idx, mkChar(field));
     } else {
-        for (ifld = _it_init(&it1, field, ';'); '\0' != *ifld;
-             ifld = _it_next(&it1)) {
-            ikey = _it_init(&it2, ifld, '=');
+        for (ifld = it_init(&it1, field, ';'); '\0' != *ifld;
+             ifld = it_next(&it1)) {
+            ikey = it_init(&it2, ifld, '=');
             for (imapidx = 0; imapidx < imap_n; ++imapidx) {
                 if (0L == strcmp(ikey, inms[imapidx]))
                     break;
@@ -297,7 +307,7 @@ static void _vcf_parse(char *line, const int irec,
             if (LGLSXP == TYPEOF(elt)) {
                 LOGICAL(elt)[idx] = TRUE;
             } else {
-                field = _it_next(&it2);
+                field = it_next(&it2);
                 switch (TYPEOF(elt)) {
                 case NILSXP:
                     break;
@@ -319,10 +329,10 @@ static void _vcf_parse(char *line, const int irec,
     }
 
     /* 'FORMAT' field */
-    field = _it_next(&it0);
+    field = it_next(&it0);
     fmt = field;
-    for (field = _it_init(&it2, fmt, ':'), fmtidx = 0;
-         '\0' != *field; field = _it_next(&it2), fmtidx++) {
+    for (field = it_init(&it2, fmt, ':'), fmtidx = 0;
+         '\0' != *field; field = it_next(&it2), fmtidx++) {
         for (j = 0; j < gmap_n; ++j) {
             if (0L == strcmp(field, gnms[j]))
                 break;
@@ -334,10 +344,10 @@ static void _vcf_parse(char *line, const int irec,
     }
 
     /* 'samples' field(s) */
-    for (sample = _it_next(&it0), sampleidx = 0;
-         '\0' != *sample; sample = _it_next(&it0), sampleidx++) {
-        for (field = _it_init(&it2, sample, ':'), fmtidx = 0;
-             '\0' != *field; field = _it_next(&it2), fmtidx++) {
+    for (sample = it_next(&it0), sampleidx = 0;
+         '\0' != *sample; sample = it_next(&it0), sampleidx++) {
+        for (field = it_init(&it2, sample, ':'), fmtidx = 0;
+             '\0' != *field; field = it_next(&it2), fmtidx++) {
             elt = VECTOR_ELT(geno, gmapidx[fmtidx]);
             idx = irec * samp_n + sampleidx;
             switch (TYPEOF(elt)) {
@@ -360,6 +370,46 @@ static void _vcf_parse(char *line, const int irec,
     }
 }
 
+static void _vcf_as_S4(struct vcf_parse_t *param)
+{
+    /* ref: DNAStringSet */
+    SEXP dna = dna_hash_as_DNAStringSet(param->ref);
+    SET_VECTOR_ELT(param->vcf, REF_IDX, dna);
+
+    /* rowData: GRanges */
+    SEXP rowData, seqnames, start, width, names;
+    PROTECT(seqnames = rle_as_Rle(param->chrom));
+    rowData = VECTOR_ELT(param->vcf, ROWDATA_IDX);
+    start = VECTOR_ELT(rowData, POS_IDX);
+    names = VECTOR_ELT(rowData, ID_IDX);
+    width = get_XVectorList_width(dna);
+
+    SEXP ranges, nmspc, fun, expr;
+    PROTECT(ranges =  new_IRanges("IRanges", start, width, names));
+    PROTECT(nmspc = get_namespace("GenomicRanges"));
+    PROTECT(fun = findFun(install("GRanges"), nmspc));
+    PROTECT(expr = lang3(fun, seqnames, ranges));
+
+    SET_VECTOR_ELT(param->vcf, ROWDATA_IDX, eval(expr, R_GlobalEnv));
+    UNPROTECT(5);
+}
+
+static void _vcf_types_tidy(struct vcf_parse_t *param)
+{
+    if (NULL == param->inms) {
+        param->inms = (const char **) R_alloc(sizeof(const char *), 1);
+        param->inms[0] = "INFO";
+    }
+    param->info = _trim_null(param->info, param->inms);
+    SET_VECTOR_ELT(param->vcf, INFO_IDX, param->info);
+
+    param->geno = _trim_null(param->geno, param->gnms);
+    SET_VECTOR_ELT(param->vcf, GENO_IDX, param->geno);
+
+    param->geno = _types_transpose(param->geno);
+    SET_VECTOR_ELT(param->vcf, GENO_IDX, param->geno);
+}
+
 SEXP scan_vcf_connection(SEXP txt, SEXP sample, SEXP fmap, SEXP imap,
                          SEXP gmap)
 {
@@ -369,20 +419,24 @@ SEXP scan_vcf_connection(SEXP txt, SEXP sample, SEXP fmap, SEXP imap,
 
     param.vcf = _vcf_allocate(vcf_n, sample, fmap, imap, gmap);
     SET_VECTOR_ELT(result, 0, param.vcf);
+    param.info = VECTOR_ELT(param.vcf, INFO_IDX);
+    param.geno = VECTOR_ELT(param.vcf, GENO_IDX);
 
-    param.info = VECTOR_ELT(param.vcf, N_FLDS - 2);
     param.imap_n = Rf_length(imap);
-    param.inms = (const char **) R_alloc(sizeof(char *), param.imap_n);
+    param.inms =
+        (const char **) R_alloc(sizeof(const char *), param.imap_n);
     for (int j = 0; j < param.imap_n; ++j)
         param.inms[j] = CHAR(STRING_ELT(GET_NAMES(imap), j));
 
     param.samp_n = Rf_length(sample);
-    param.geno = VECTOR_ELT(param.vcf, N_FLDS - 1);
     param.gmap_n = Rf_length(gmap);
-    param.gnms = (const char **) R_alloc(sizeof(char *), param.gmap_n);
+    param.gnms =
+        (const char **) R_alloc(sizeof(const char *), param.gmap_n);
     for (int j = 0; j < param.gmap_n; ++j)
         param.gnms[j] = CHAR(STRING_ELT(GET_NAMES(gmap), j));
     param.gmapidx = (int *) R_alloc(sizeof(int), param.gmap_n);
+    param.chrom = rle_new(vcf_n);
+    param.ref = dna_hash_new(vcf_n);
 
     /* parse each line */
     for (int irec = 0; irec < vcf_n; irec++) {
@@ -391,16 +445,11 @@ SEXP scan_vcf_connection(SEXP txt, SEXP sample, SEXP fmap, SEXP imap,
         free(line);
     }
 
-    if (NULL == param.inms) {
-        param.inms = (const char **) R_alloc(sizeof(const char *), 1);
-        param.inms[0] = "INFO";
-    }
-    SET_VECTOR_ELT(param.vcf, N_FLDS - 2,
-                   _trim_null(param.info, param.inms));
-    SET_VECTOR_ELT(param.vcf, N_FLDS - 1,
-                   _trim_null(param.geno, param.gnms));
-    _types_transpose(VECTOR_ELT(param.vcf, N_FLDS - 1));
+    _vcf_as_S4(&param);
+    _vcf_types_tidy(&param);
 
+    rle_free(param.chrom);
+    dna_hash_free(param.ref);
     UNPROTECT(1);
     return result;
 }
@@ -417,8 +466,9 @@ SEXP tabix_as_vcf(tabix_t *tabix, ti_iter_t iter,
 
     param.vcf = _vcf_allocate(vcf_n, sample, fmap, imap, gmap);
     PROTECT(param.vcf);
+    param.info = VECTOR_ELT(param.vcf, INFO_IDX);
+    param.geno = VECTOR_ELT(param.vcf, GENO_IDX);
 
-    param.info = VECTOR_ELT(param.vcf, N_FLDS - 2);
     param.imap_n = Rf_length(imap);
     param.inms =
         (const char **) R_alloc(sizeof(const char *), param.imap_n);
@@ -426,13 +476,14 @@ SEXP tabix_as_vcf(tabix_t *tabix, ti_iter_t iter,
         param.inms[j] = CHAR(STRING_ELT(GET_NAMES(imap), j));
 
     param.samp_n = Rf_length(sample);
-    param.geno = VECTOR_ELT(param.vcf, N_FLDS - 1);
     param.gmap_n = Rf_length(gmap);
     param.gnms =
         (const char **) R_alloc(sizeof(const char *), param.gmap_n);
     for (int j = 0; j < param.gmap_n; ++j)
         param.gnms[j] = CHAR(STRING_ELT(GET_NAMES(gmap), j));
     param.gmapidx = (int *) R_alloc(sizeof(int), param.gmap_n);
+    param.chrom = rle_new(vcf_n);
+    param.ref = dna_hash_new(vcf_n);
 
     const double SCALE = 1.6;
     int buflen = 4096;
@@ -471,16 +522,11 @@ SEXP tabix_as_vcf(tabix_t *tabix, ti_iter_t iter,
     }
 
     _vcf_grow(param.vcf, irec, samp_n);
-    if (NULL == param.inms) {
-        param.inms = (const char **) R_alloc(sizeof(const char *), 1);
-        param.inms[0] = "INFO";
-    }
-    SET_VECTOR_ELT(param.vcf, N_FLDS - 2,
-                   _trim_null(param.info, param.inms));
-    SET_VECTOR_ELT(param.vcf, N_FLDS - 1,
-                   _trim_null(param.geno, param.gnms));
-    _types_transpose(VECTOR_ELT(param.vcf, N_FLDS - 1));
+    _vcf_as_S4(&param);
+    _vcf_types_tidy(&param);
 
+    rle_free(param.chrom);
+    dna_hash_free(param.ref);
     Free(buf);
     UNPROTECT(1);
     return param.vcf;

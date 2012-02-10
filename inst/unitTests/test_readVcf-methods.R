@@ -24,7 +24,6 @@ test_readVcf_ranges <- function()
 {
     vcf <- readVcf(f1, genome="hg19")
     checkEquals(width(rowData(vcf)), width(values(ref(vcf))[["REF"]]))
-    checkEquals(scanVcf(f1)[[1]]$POS, start(rowData(vcf))) 
 }
 
 test_readVcf_param <- function()

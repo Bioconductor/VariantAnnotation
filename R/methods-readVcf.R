@@ -87,10 +87,7 @@ setMethod(readVcf, c(file="character", param="missing"),
 .scanVcfToLongGRanges <- function(vcf, file, param, genome, ...)
 {
     vcf <- vcf[[1]]
-    ref <- .toDNAStringSet(vcf$REF)
-    rowData <- GRanges(seqnames=Rle(vcf$CHROM), 
-        ranges=IRanges(start=vcf$POS, width=width(ref)))
-    rowData <- .rowDataNames(vcf, rowData)
+    rowData <- vcf$rowData
 
     elts <- na.omit(c(vcfInfo(param), vcfGeno(param)))
     dat <- c(vcf$INFO[names(vcf$INFO) %in% elts],
@@ -145,23 +142,23 @@ setMethod(readVcf, c(file="character", param="missing"),
     vcf <- vcf[[1]]
     hdr <- scanVcfHeader(file)[[1]][["Header"]]
 
+    ## rowData
+    rowData <- vcf$rowData
+    rowData <- .rowDataNames(vcf, rowData)
+    genome(seqinfo(rowData)) <- genome 
+
     ## fixed fields
+    REF <- vcf$REF
     structural <- grep("<", vcf$ALT, fixed=TRUE)
     if (!identical(integer(0), structural))
         ALT <- seqsplit(vcf$ALT, seq_len(length(vcf$ALT)))
     else
         ALT <- .toDNAStringSetList(vcf$ALT)
-    REF <- .toDNAStringSet(vcf$REF)
+    REF <- vcf$REF
     QUAL <- DataFrame(vcf$QUAL)
     FILTER <- DataFrame(vcf$FILTER)
     fixed <- DataFrame(REF, ALT, QUAL, FILTER)
     dimnames(fixed) <- list(NULL, c("REF", "ALT", "QUAL", "FILTER"))
-
-    ## rowData
-    rowData <- GRanges(seqnames=Rle(vcf$CHROM), ranges=IRanges(start=vcf$POS,
-        width=width(REF)))
-    rowData <- .rowDataNames(vcf, rowData)
-    genome(seqinfo(rowData)) <- genome
 
     ## info 
     info <- .formatInfo(vcf$INFO, length(rowData))
@@ -169,7 +166,8 @@ setMethod(readVcf, c(file="character", param="missing"),
     ## colData
     if (length(vcf$GENO) > 0) {
         samples <- colnames(vcf$GENO[[1]]) 
-        colData <- DataFrame(Samples=seq_len(length(samples)), row.names=samples)
+        colData <- DataFrame(Samples=seq_len(length(samples)),
+                             row.names=samples)
     } else {
         colData <- DataFrame(Samples=character(0))
     }
@@ -181,17 +179,18 @@ setMethod(readVcf, c(file="character", param="missing"),
 .rowDataNames <- function(vcf, rowData, ...)
 ## create chrom:start rownames for records with no ID
 {
-    idx <- vcf$ID == "."
-    vcf$ID[idx] <- paste("chr", seqnames(rowData[idx]), ":", 
-        start(rowData[idx]), sep="") 
-    names(rowData) <- vcf$ID
+    nms <- names(rowData)
+    idx <- nms == "."
+    nms[idx] <- paste(seqnames(rowData)[idx], start(rowData)[idx],
+        sep=":")
+    names(rowData) <- nms
     rowData
 }
 
 .toDNAStringSet <- function(x)
 {
     xx <- unlist(strsplit(x, ",", fixed = TRUE))
-    ulist <- gsub(".", "", xx, fixed = TRUE)
+    ulist <- sub(".", "", xx, fixed = TRUE)
     ulist[is.na(ulist)] <- ""
     DNAStringSet(ulist)
 }

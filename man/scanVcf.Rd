@@ -32,27 +32,27 @@
 }
 
 \usage{
-  scanVcfHeader(file, ...)
-  \S4method{scanVcfHeader}{character}(file, ...)
+scanVcfHeader(file, ...)
+\S4method{scanVcfHeader}{character}(file, ...)
 
-  scanVcf(file, ..., param)
-  \S4method{scanVcf}{character,ScanVcfParam}(file, ..., param)
-  \S4method{scanVcf}{character,missing}(file, ..., param)
-  \S4method{scanVcf}{connection,missing}(file, ..., param)
+scanVcf(file, ..., param)
+\S4method{scanVcf}{character,ScanVcfParam}(file, ..., param)
+\S4method{scanVcf}{character,missing}(file, ..., param)
+\S4method{scanVcf}{connection,missing}(file, ..., param)
 
-  \S4method{scanVcfHeader}{TabixFile}(file, ...)
-  \S4method{scanVcf}{TabixFile,missing}(file, ..., param)
-  \S4method{scanVcf}{TabixFile,ScanVcfParam}(file, ..., param)
-  \S4method{scanVcf}{TabixFile,GRanges}(file, ..., param)
-  \S4method{scanVcf}{TabixFile,RangedData}(file, ..., param)
-  \S4method{scanVcf}{TabixFile,RangesList}(file, ..., param)
+\S4method{scanVcfHeader}{TabixFile}(file, ...)
+\S4method{scanVcf}{TabixFile,missing}(file, ..., param)
+\S4method{scanVcf}{TabixFile,ScanVcfParam}(file, ..., param)
+\S4method{scanVcf}{TabixFile,GRanges}(file, ..., param)
+\S4method{scanVcf}{TabixFile,RangedData}(file, ..., param)
+\S4method{scanVcf}{TabixFile,RangesList}(file, ..., param)
 
-  \S4method{scanVcfHeader}{TabixFile}(file, ...)
-  \S4method{scanVcf}{TabixFile,missing}(file, ..., param)
-  \S4method{scanVcf}{TabixFile,ScanVcfParam}(file, ..., param)
-  \S4method{scanVcf}{TabixFile,GRanges}(file, ..., param)
-  \S4method{scanVcf}{TabixFile,RangedData}(file, ..., param)
-  \S4method{scanVcf}{TabixFile,RangesList}(file, ..., param)
+\S4method{scanVcfHeader}{TabixFile}(file, ...)
+\S4method{scanVcf}{TabixFile,missing}(file, ..., param)
+\S4method{scanVcf}{TabixFile,ScanVcfParam}(file, ..., param)
+\S4method{scanVcf}{TabixFile,GRanges}(file, ..., param)
+\S4method{scanVcf}{TabixFile,RangedData}(file, ..., param)
+\S4method{scanVcf}{TabixFile,RangesList}(file, ..., param)
 }
 
 \arguments{
@@ -103,10 +103,11 @@
   a character() vector of the header lines (preceeded by \dQuote{##}) 
   present in the VCF file.
 
-  \code{scanVcf} returns a list, with one element per file. Each list has 
-  9 elements, corresponding to the columns of the VCF specification: 
-  \code{CHROM}, \code{POS}, \code{ID}, \code{REF}, \code{ALT}\code{QUAL}, 
-  \code{FILTER}, \code{INFO}, \code{FORMAT}, \code{GENO}.
+  \code{scanVcf} returns a list, with one element per range. Each list
+  has 7 elements, obtained from the columns of the VCF specification:
+  \code{rowData} (a \code{GRanges} instance derived from \code{CHROM},
+  \code{POS}, \code{ID}, and the width of \code{REF}), \code{REF},
+  \code{ALT}, \code{QUAL}, \code{FILTER}, \code{INFO}, \code{GENO}.
 
   The \code{GENO} element is itself a list, with elements corresponding
   to those defined in the VCF file header. For \code{scanVcf}, elements

@@ -5,16 +5,14 @@ scn <- scanVcf(fl)
 test_FixedTypes <- function()
 {
     .vcf_fixed <- VariantAnnotation:::.vcf_fixed
-    exp <- exp0 <- list(CHROM=character(), POS=integer(),
-                        ID=character(), REF=character(),
-                        ALT=character(), QUAL=numeric(),
-                        FILTER=character())
+    exp <- exp0 <- list(rowData=NULL, REF=NULL, ALT=character(),
+                        QUAL=numeric(), FILTER=character())
     checkIdentical(exp, .vcf_fixed(character()))
     exp[] <- list(NULL)
     checkIdentical(exp, .vcf_fixed(NA))
     exp <- exp0
     exp[1] <- list(NULL)
-    checkIdentical(exp, .vcf_fixed(names(exp)[-1]))
+    checkIdentical(exp, .vcf_fixed(names(exp)[-(1:2)]))
     warn <- FALSE
     exp[] <- list(NULL)
     obs <- withCallingHandlers({
