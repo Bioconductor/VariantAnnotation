@@ -9,10 +9,10 @@
 \description{Variant location with respect to gene functionality}
 
 \usage{
-  locateVariants(query, subject, ...)
-  \S4method{locateVariants}{Ranges,TranscriptDb}(query, subject, ...)
-  \S4method{locateVariants}{GRanges,TranscriptDb}(query, subject, ...)
-  \S4method{locateVariants}{VCF,TranscriptDb}(query, subject, ...)
+locateVariants(query, subject, ...)
+\S4method{locateVariants}{Ranges,TranscriptDb}(query, subject, ...)
+\S4method{locateVariants}{GRanges,TranscriptDb}(query, subject, ...)
+\S4method{locateVariants}{VCF,TranscriptDb}(query, subject, ...)
 }
 
 \arguments{
@@ -23,7 +23,15 @@
   \item{subject}{A \link[GenomicFeatures]{TranscriptDb} object that serves
     as the annotation reference.
   }
-  \item{\dots}{Additional arguments passed to methods.
+  \item{\dots}{Additional arguments passed to methods, in particular:
+    \describe{
+
+      \item{cache:}{An \code{environment} into which required components
+	of \code{subject} are loaded. Provide, and re-use, a cache to
+	speed repeated queries to the same \code{subject} across
+	different \code{query} instances.}
+
+    }
   }
 }
 

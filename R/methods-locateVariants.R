@@ -27,75 +27,88 @@ setMethod("locateVariants", c(query="VCF", subject="TranscriptDb"),
 
 setMethod("locateVariants", c("GRanges", "TranscriptDb"),
     function(query, subject, ...)
-    {
-        queryseq <- seqlevels(query)
-        subseq <- seqlevels(subject)
-        if (!any(queryseq %in% subseq))
-            warning("none of seqlevels(query) match seqlevels(subject)")
+{
+    .locateVariants(query, subject, ...)
+})
 
-        ## mask chromosomes not in query
-        masks <- isActiveSeq(subject)
-        on.exit(isActiveSeq(subject) <- masks)
-        .setActiveSubjectSeq(query, subject)
+.locateVariants <-
+    function(query, subject, ..., cache=new.env(parent=emptyenv()))
+{
+    queryseq <- seqlevels(query)
+    subseq <- seqlevels(subject)
+    if (!any(queryseq %in% subseq))
+        warning("none of seqlevels(query) match seqlevels(subject)")
 
-        tx <- transcripts(subject, columns=c("tx_id", "gene_id"))
-        cdsByTx <- cdsBy(subject)
-        fiveUTR <- fiveUTRsByTranscript(subject)
-        threeUTR <- threeUTRsByTranscript(subject)
-        txbygn <- transcriptsBy(subject, "gene")
-        
-        map <- data.frame(
-            txid=rep(names(cdsByTx), elementLengths(cdsByTx)),
-            cdsid=values(unlist(cdsByTx, use.names=FALSE))[["cds_id"]])
+    ## mask chromosomes not in query
+    masks <- isActiveSeq(subject)
+    on.exit(isActiveSeq(subject) <- masks)
+    .setActiveSubjectSeq(query, subject)
 
-        ## ranges with width=0 :
-        ## de-increment start to equal end value 
-        if (any(insertion <- width(query) == 0))
-            start(query)[insertion] <- start(query)[insertion] - 1
-
-        cdsCO <- countOverlaps(query, cdsByTx, type="within")
-        txFO <- findOverlaps(query, tx, type="within")
-        txCO <- tabulate(queryHits(txFO), length(query))
-
-        if (length(txFO) == 0) {
-            mat1 <- DataFrame(queryID=integer(), location=.location(),
-                txID=integer(), geneID=character(),
-                precedesID=character(), followsID=character(),
-                cdsID=integer())
-        } else {
-            qhits <- queryHits(txFO)
-            txID <- values(tx)["tx_id"][subjectHits(txFO),]
-            cdsID <- map$cdsid[match(txID, map$txid)]
-            geneID <- values(tx)[["gene_id"]][subjectHits(txFO)]
-
-            ## coding :
-            coding <- cdsCO > 0 
-
-            ## intron :
-            intron <- txCO != 0 & cdsCO == 0
-
-            ## UTRs :
-            utr5 <- countOverlaps(query, fiveUTR, type="within") > 0
-            utr3 <- countOverlaps(query, threeUTR, type="within") > 0
-
-            location <- .location(length(qhits), "transcript_region")
-            location[qhits %in% which(intron)] <- "intron"
-            location[qhits %in% which(utr5)] <- "5'UTR"
-            location[qhits %in% which(utr3)] <- "3'UTR"
-            location[qhits %in% which(coding)] <- "coding"
-            mat1 <- DataFrame(queryID=qhits, location, txID, geneID,
-                precedesID=NA_character_, followsID=NA_character_, cdsID)
-        }
-
-        ## intergenic :
-        mat2 <- .intergenic(txCO, tx, query, txbygn, map) 
-
-        ans <- rbind(mat1, mat2)
-        ans[order(ans$queryID), ]
+    if (!exists(".__init__", cache, inherits=FALSE)) {
+        cache[["tx"]] <- transcripts(subject,
+            columns=c("tx_id", "gene_id"))
+        cache[["cdsByTx"]] <- cdsBy(subject)
+        cache[["fiveUTR"]] <- fiveUTRsByTranscript(subject)
+        cache[["threeUTR"]] <- threeUTRsByTranscript(subject)
+        cache[["txByGn"]] <- transcriptsBy(subject, "gene")
+        cache[[".__init__"]] <- TRUE
     }
-)
+    
+    map <- data.frame(
+        txid=rep(names(cache[["cdsByTx"]]),
+          elementLengths(cache[["cdsByTx"]])),
+        cdsid=values(unlist(cache[["cdsByTx"]],
+          use.names=FALSE))[["cds_id"]])
 
-.intergenic <- function(txCO, tx, query, txbygn, map, ...)
+    ## ranges with width=0 :
+    ## de-increment start to equal end value 
+    if (any(insertion <- width(query) == 0))
+        start(query)[insertion] <- start(query)[insertion] - 1
+
+    cdsCO <- countOverlaps(query, cache[["cdsByTx"]], type="within")
+    txFO <- findOverlaps(query, cache[["tx"]], type="within")
+    txCO <- tabulate(queryHits(txFO), length(query))
+
+    if (length(txFO) == 0) {
+        mat1 <- DataFrame(queryID=integer(), location=.location(),
+            txID=integer(), geneID=character(),
+            precedesID=character(), followsID=character(),
+            cdsID=integer())
+    } else {
+        qhits <- queryHits(txFO)
+        txID <- values(cache[["tx"]])["tx_id"][subjectHits(txFO),]
+        cdsID <- map$cdsid[match(txID, map$txid)]
+        geneID <- values(cache[["tx"]])[["gene_id"]][subjectHits(txFO)]
+
+        ## coding :
+        coding <- cdsCO > 0 
+
+        ## intron :
+        intron <- txCO != 0 & cdsCO == 0
+
+        ## UTRs :
+        utr5 <-
+            countOverlaps(query, cache[["fiveUTR"]], type="within") > 0
+        utr3 <-
+            countOverlaps(query, cache[["threeUTR"]], type="within") > 0
+
+        location <- .location(length(qhits), "transcript_region")
+        location[qhits %in% which(intron)] <- "intron"
+        location[qhits %in% which(utr5)] <- "5'UTR"
+        location[qhits %in% which(utr3)] <- "3'UTR"
+        location[qhits %in% which(coding)] <- "coding"
+        mat1 <- DataFrame(queryID=qhits, location, txID, geneID,
+            precedesID=NA_character_, followsID=NA_character_, cdsID)
+    }
+
+    ## intergenic
+    mat2 <- .intergenic(txCO, query, cache, map) 
+
+    ans <- rbind(mat1, mat2)
+    ans[order(ans$queryID), ]
+}
+
+.intergenic <- function(txCO, query, cache, map)
 {
     intergenic <- txCO == 0
     if (all(intergenic)) {
@@ -106,7 +119,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
         query <- query[intergenic]
 
         ## gene ranges
-        rnglst <- range(txbygn)
+        rnglst <- range(cache[["txByGn"]])
         rng <- unlist(rnglst, use.names=FALSE)
         genes <- rep(names(rnglst), elementLengths(rnglst))
         ## query precedes subject; get index for following gene 
