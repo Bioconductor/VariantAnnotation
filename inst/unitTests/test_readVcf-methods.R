@@ -34,21 +34,21 @@ test_readVcf_param <- function()
     ## geno
     g <- gnms[2:3]
     param <- ScanVcfParam(geno=g)
-    vcf <- readVcf(f2, param, "hg19")
+    vcf <- readVcf(f2, "hg19", param)
     checkTrue(length(names(geno(vcf))) == length(g))
     checkTrue(all(names(geno(vcf)) %in% g))
 
     ## info 
     i <- inms[c(1,4)]
     param <- ScanVcfParam(info=i)
-    vcf <- readVcf(f2, param, "hg19")
+    vcf <- readVcf(f2, "hg19", param)
     checkTrue(ncol(values(info(vcf))) == length(i))
     checkTrue(all(names(values(info(vcf))) %in% i))
 
     ## geno, info combined
     param <- ScanVcfParam()
-    vcf_a <- readVcf(f1, param, "hg19")
-    vcf_b <- readVcf(f1, genome="hg19")
+    vcf_a <- readVcf(f1, "hg19", param)
+    vcf_b <- readVcf(f1, "hg19")
     checkIdentical(names(geno(vcf_a)), names(geno(vcf_b))) 
     checkIdentical(rowData(vcf_a), rowData(vcf_b))
 
@@ -60,14 +60,14 @@ test_readVcf_param <- function()
     compressVcf <- bgzip(f2, tempfile())
     idx <- indexTabix(compressVcf, "vcf")
     tab <- TabixFile(compressVcf, idx)
-    vcf <- readVcf(tab, param, "hg19")
+    vcf <- readVcf(tab, "hg19",  param)
     checkTrue(all(names(values(info(vcf))) %in% i))
     checkTrue(all(names(geno(vcf)) %in% g))
     checkTrue(length(rowData(vcf)) == 3)
 
     ## no info, geno
-    checkTrue(validObject(readVcf(f2, ScanVcfParam(geno=NA), "hg19")))
-    checkTrue(validObject(readVcf(f2, ScanVcfParam(info=NA), "hg19")))
+    checkTrue(validObject(readVcf(f2, "hg19", ScanVcfParam(geno=NA))))
+    checkTrue(validObject(readVcf(f2, "hg19", ScanVcfParam(info=NA))))
 }
 
 test_readVcf_tabix <- function()

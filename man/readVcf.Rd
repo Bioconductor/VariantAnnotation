@@ -1,12 +1,12 @@
 \name{readVcf}
 \alias{readVcf}
-\alias{readVcf,character,ScanVcfParam-method}
-\alias{readVcf,character,missing-method}
-\alias{readVcf,TabixFile,ScanVcfParam-method}
-\alias{readVcf,TabixFile,RangedData-method}
-\alias{readVcf,TabixFile,RangesList-method}
-\alias{readVcf,TabixFile,GRanges-method}
-\alias{readVcf,TabixFile,missing-method}
+\alias{readVcf,character,character,ScanVcfParam-method}
+\alias{readVcf,character,character,missing-method}
+\alias{readVcf,TabixFile,character,ScanVcfParam-method}
+\alias{readVcf,TabixFile,character,RangedData-method}
+\alias{readVcf,TabixFile,character,RangesList-method}
+\alias{readVcf,TabixFile,character,GRanges-method}
+\alias{readVcf,TabixFile,character,missing-method}
 
 
 \title{Read VCF files}
@@ -14,13 +14,13 @@
 \description{Read Variant Call Format (VCF) files}
 
 \usage{
-  \S4method{readVcf}{TabixFile,ScanVcfParam}(file, param, genome, ...)
-  \S4method{readVcf}{TabixFile,RangedData}(file, param, genome, ...)
-  \S4method{readVcf}{TabixFile,RangesList}(file, param, genome, ...)
-  \S4method{readVcf}{TabixFile,GRanges}(file, param, genome, ...)
-  \S4method{readVcf}{TabixFile,missing}(file, param, genome, ...)
-  \S4method{readVcf}{character,ScanVcfParam}(file, param, genome, ...)
-  \S4method{readVcf}{character,missing}(file, param, genome, ...)
+  \S4method{readVcf}{TabixFile,character,ScanVcfParam}(file, genome, param, ...)
+  \S4method{readVcf}{TabixFile,character,RangedData}(file, genome, param, ...)
+  \S4method{readVcf}{TabixFile,character,RangesList}(file, genome, param, ...)
+  \S4method{readVcf}{TabixFile,character,GRanges}(file, genome, param, ...)
+  \S4method{readVcf}{TabixFile,character,missing}(file, genome, param, ...)
+  \S4method{readVcf}{character,character,ScanVcfParam}(file, genome, param, ...)
+  \S4method{readVcf}{character,character,missing}(file, genome, param, ...)
 }
 
 \arguments{
@@ -32,15 +32,15 @@
     more efficient than the character() methods. See ?\code{TabixFile} and
     ?\code{indexTabix} for help creating a \code{\link{TabixFile}}.
   }
+  \item{genome}{The character() name of the genome the variants are mapped 
+    to. This information is stored in the genome slot of the \code{seqinfo}
+    associated with the \code{\linkS4class{GRanges}} object in \code{rowData}.
+  }
   \item{param}{A instance of \code{\linkS4class{ScanVcfParam}}, \code{GRanges},
     \code{RangedData} or \code{RangesList}. VCF files can be subset on genomic
     coordinates (ranges) or elements in the INFO and FORMAT fields of the VCF
     file. The \code{\linkS4class{ScanVcfParam}} can specify both ranges and
     elements of INFO and FORMAT. See ?\code{ScanVcfParam} for details.
-  }
-  \item{genome}{The character() name of the genome the variants are mapped 
-    to. This information is stored in the genome slot of the \code{seqinfo}
-    associated with the \code{\linkS4class{GRanges}} object in \code{rowData}.
   }
   \item{\dots}{Additional arguments, passed to methods.
   }
@@ -160,7 +160,7 @@
 
 \examples{
   fl <- system.file("extdata", "ex1.vcf", package="VariantAnnotation") 
-  vcf <- readVcf(fl, genome="hg19")
+  vcf <- readVcf(fl, "hg19")
 
   ## ---------------------------------
   ## Header and genome information 
@@ -205,19 +205,19 @@
   compressVcf <- bgzip(fl, tempfile())
   idx <- indexTabix(compressVcf, "vcf")
   tab <- TabixFile(compressVcf, idx)
-  vcf <- readVcf(tab, param, "hg19")
+  vcf <- readVcf(tab, "hg19", param)
 
   ## Subset on 'info' or 'geno' elements :
   ## An index file is not required if no ranges (genome coordinates) 
   ## are specified.
   param <- ScanVcfParam(geno=c("GT", "HQ"), info=c("NS", "AF"))
-  vcf_tab <- readVcf(tab, param, "hg19")
-  vcf_fname <- readVcf(fl, param, "hg19")
+  vcf_tab <- readVcf(tab, "hg19", param)
+  vcf_fname <- readVcf(fl, "hg19", param)
   identical(vcf_tab, vcf_fname) 
 
   ## Subsetting on both genome coordinates and 'info' or 'geno' elements : 
   param <- ScanVcfParam(geno="HQ", info="AF", which=rngs)
-  vcf <- readVcf(tab, param, "hg19")
+  vcf <- readVcf(tab, "hg19", param)
 
   ## When either of 'fixed', 'info' or 'geno' are omitted (i.e., no
   ## elements specified) all records are retrieved. Use NA to indicate
@@ -255,12 +255,12 @@
   ## for this variant with the same ranges but unique elementMetadata.
 
   param <- ScanVcfParam(asGRanges=TRUE, info=c("NS", "AF", "H2"))
-  #readVcf(fl, param, "hg19")
+  #readVcf(fl, "hg19", param)
 
   ## When creating a long form GRanges only one 'geno' element can be
   ## specified at a time.
   param <- ScanVcfParam(asGRanges=TRUE, geno="GT")
-  #readVcf(fl, param, "hg19")
+  #readVcf(fl, "hg19", param)
 }
 
 \keyword{manip}

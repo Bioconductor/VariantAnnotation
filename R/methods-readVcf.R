@@ -4,50 +4,57 @@
 
 ## TabixFile
 
-setMethod(readVcf, c(file="TabixFile", param="ScanVcfParam"), 
-    function(file, param, genome, ...)
+setMethod(readVcf, c(file="TabixFile", genome="character", 
+          param="ScanVcfParam"), 
+    function(file, genome, param, ...)
 {
-    .readVcf(file, param, genome)
+    .readVcf(file, genome, param)
 })
 
-setMethod(readVcf, c(file="TabixFile", param="GRanges"),
-    function(file, param, genome,  ...)
+setMethod(readVcf, c(file="TabixFile", genome="character",
+          param="GRanges"),
+    function(file, genome, param, ...)
 {
-    .readVcf(file, param=ScanVcfParam(which=param), genome)
+    .readVcf(file, genome, param=ScanVcfParam(which=param))
 })
 
-setMethod(readVcf, c(file="TabixFile", param="RangedData"),
-    function(file, param, genome, ...)
+setMethod(readVcf, c(file="TabixFile", genome="character",
+          param="RangedData"),
+    function(file, genome, param, ...)
 {
-    .readVcf(file, param=ScanVcfParam(which=param), genome)
+    .readVcf(file, genome, param=ScanVcfParam(which=param))
 })
 
-setMethod(readVcf, c(file="TabixFile", param="RangesList"),
-    function(file, param, genome, ...)
+setMethod(readVcf, c(file="TabixFile", genome="character",
+          param="RangesList"),
+    function(file, genome, param, ...)
 {
-    .readVcf(file, param=ScanVcfParam(which=param), genome)
+    .readVcf(file, genome, param=ScanVcfParam(which=param))
 })
 
-setMethod(readVcf, c(file="TabixFile", param="missing"), 
-    function(file, param, genome, ...)
+setMethod(readVcf, c(file="TabixFile", genome="character",
+          param="missing"), 
+    function(file, genome, param, ...)
 {
-    .readVcf(file, genome=genome)
+    .readVcf(file, genome)
 })
 
 ## character
 
-setMethod(readVcf, c(file="character", param="ScanVcfParam"),
-    function(file, param, genome, ...)
+setMethod(readVcf, c(file="character", genome="character",
+          param="ScanVcfParam"),
+    function(file, genome, param, ...)
 {
     file <- .checkTabix(file)
-    .readVcf(file, param, genome)
+    .readVcf(file, genome, param)
 })
 
-setMethod(readVcf, c(file="character", param="missing"),
-    function(file, param, genome, ...)
+setMethod(readVcf, c(file="character", genome="character",
+          param="missing"),
+    function(file, genome, param, ...)
 {
     file <- .checkTabix(file)
-    .readVcf(file, genome=genome)
+    .readVcf(file, genome)
 })
 
 .checkTabix <- function(x)
@@ -62,7 +69,7 @@ setMethod(readVcf, c(file="character", param="missing"),
 
 ## .readVcf internal
 
-.readVcf <- function(file, param, genome, ...)
+.readVcf <- function(file, genome, param, ...)
 {
     if (missing(param)) {
         .scanVcfToVCF(scanVcf(file), file, genome)
@@ -75,7 +82,7 @@ setMethod(readVcf, c(file="character", param="missing"),
             else if (identical(character(0), vcfGeno(param))) 
                 slot(param, "geno") <- NA_character_
             .scanVcfToLongGRanges(scanVcf(file, param=param),
-                                  file, param=param, genome)
+                                  file, genome, param=param)
         } else {
             .scanVcfToVCF(scanVcf(file, param=param), file, genome)
         }
@@ -84,7 +91,7 @@ setMethod(readVcf, c(file="character", param="missing"),
 
 ## helpers
 
-.scanVcfToLongGRanges <- function(vcf, file, param, genome, ...)
+.scanVcfToLongGRanges <- function(vcf, file, genome, param, ...)
 {
     vcf <- vcf[[1]]
     rowData <- vcf$rowData
@@ -161,7 +168,7 @@ setMethod(readVcf, c(file="character", param="missing"),
     dimnames(fixed) <- list(NULL, c("REF", "ALT", "QUAL", "FILTER"))
 
     ## info 
-    info <- .formatInfo(vcf$INFO, length(rowData))
+    info <- .formatInfo(vcf$INFO, hdr[["INFO"]])
 
     ## colData
     if (length(vcf$GENO) > 0) {
@@ -204,17 +211,33 @@ setMethod(readVcf, c(file="character", param="missing"),
         unlistData=dna, end=end(pbw))
 }
 
-.formatInfo <- function(x, nrow)
+.newCompressedList <- IRanges:::newCompressedList
+.formatInfo <- function(x, hdr)
 {
     if (length(x) == 0L)
         return(DataFrame())
-    for (i in seq_len(length(x))) {
-        if (is(x[[i]], "matrix"))
-            x[[i]] <- DataFrame(I(matrix(x[[i]], nrow=nrow)))
-        else
-            x[[i]] <- DataFrame(x[[i]])
+    if (is.null(hdr)) {
+        DF <- DataFrame(x)
+        names(DF) <- names(x)
+        return(DF)
     }
+    type <- hdr$Type[match(names(x), rownames(hdr))]
+    idx <- which(lapply(x, is.list) == TRUE)
+    if (length(idx) != 0) {
+        for (i in idx) {
+            x[[i]] <- switch(type[[i]],
+                Integer = .newCompressedList("CompressedIntegerList", x[[i]]),
+                Float = .newCompressedList("CompressedNumericList", x[[i]]),
+                String = .newCompressedList("CompressedCharacterList", x[[i]]),
+                Logical = .newCompressedList("CompressedLogicalList", x[[i]]))
+        }
+    }
+    idx <- which(lapply(x, is.array) == TRUE)
+    if (length(idx) != 0)
+        for (i in idx)
+            x[[i]] <- DataFrame(I(matrix(x[[i]], ncol=dim(x[[i]])[3])))
     DF <- DataFrame(x)
     names(DF) <- names(x)
     DF
 }
+

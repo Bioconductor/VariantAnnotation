@@ -162,6 +162,3 @@ test_VCF_seqlevels <- function()
     vcf3 <- keepSeqlevels(vcf, "16")
     checkIdentical(seqlevels(vcf3), "16")
 }
-
-
-

@@ -56,14 +56,6 @@ locateVariants(query, subject, ...)
       A variant location will be \sQuote{NA} if the variant was called on a 
       chromosome present in the \code{query} but not in the \code{subject}
     }
-    \item{Values of txID, geneID and cdsID :}{
-      Variants that fall in a trancscript regions will have values for all of 
-      \code{txID}, \code{geneID} and \code{cdsID} if they are present in the 
-      annotation. \sQuote{intergenic} variants will have \code{geneID} values 
-      for preceding and following genes and \code{NA} for \code{txID} and 
-      \code{cdsID}. All ID values will be NA for variants with a location of
-      \code{transcript_region} or \code{NA}.
-    }
   }
 }
 
@@ -80,22 +72,30 @@ locateVariants(query, subject, ...)
       slot. 
     }
     \item{\code{location}}{
-      Possible values for the \code{consequence} column are \sQuote{synonymous},
-      \sQuote{nonsynonymous}, or \sQuote{frameshift}. Variant sequences are 
-      transcribed only if they are divisible by 3. When a sequence is not 
-      transcribed the \code{varAA} column will be empty and the 
-      \code{consequence} will be a \sQuote{frameshift}.
+      Possible locations are \sQuote{coding}, \sQuote{intron}, 
+      \sQuote{3'UTR}, \sQuote{5'UTR}, \sQuote{intergenic},
+      \sQuote{transcript_region} or \sQuote{NA}. 
     }
-   \item{\code{txID}}{
+    \item{\code{txID}}{
       The transcript id taken from the \code{TranscriptDb} object.
-    }
-    \item{\code{geneID}}{
-      The gene id taken from the \code{TranscriptDb} object.
     }
     \item{\code{cdsID}}{
       The coding sequence id taken from the \code{TranscriptDb} object.
     }
-  }
+    \item{\code{geneID}}{
+      The gene id taken from the \code{TranscriptDb} object.
+    }
+    \item{\code{precedesID}}{
+      The id of the gene the query precedes. Only present for
+      \sQuote{intergenic} variants.
+    }
+    \item{\code{followsID}}{
+      The id of the gene the query follows. Only present for 
+      \sQuote{intergenic} variants.
+    }
+    All ID values will be \sQuote{NA} for variants with a location of
+    \code{transcript_region} or \code{NA}.
+  } 
 }
 
 \author{Valerie Obenchain <vobencha@fhcrc.org>}
@@ -111,7 +111,7 @@ locateVariants(query, subject, ...)
 
   ## Read variants from a VCF file 
   fl <- system.file("extdata", "ex1.vcf", package="VariantAnnotation")
-  vcf <- readVcf(fl, genome="hg19")
+  vcf <- readVcf(fl, "hg19")
 
   ## Note the variant seqlevels do not match those in the TxDb
   rd <- rowData(vcf)

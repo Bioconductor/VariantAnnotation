@@ -9,10 +9,8 @@ test_locateVariants <- function()
     loc <- locateVariants(data, txdb)
 
     checkIdentical(colnames(loc), 
-        c("queryID", "location", "txID", "geneID", "cdsID"))
-    cls <- unlist(lapply(loc, class), use.names=FALSE)
-    checkIdentical(cls, c("integer", "factor", "integer", 
-        "CompressedCharacterList", "integer"))
+        c("queryID", "location", "txID", "cdsID", "geneID", "precedesID",
+          "followsID"))
     checkTrue(all(unique(loc$queryID) %in% seq_len(length(data))))
     checkTrue(all(unique(loc$location) %in% c("intron", "coding", "3UTR",
         "5UTR", "transcript_region", "intergenic", "NA")))

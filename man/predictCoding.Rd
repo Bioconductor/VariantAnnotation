@@ -139,7 +139,7 @@
 
   ## Read variants from a VCF file 
   fl <- system.file("extdata", "ex1.vcf", package="VariantAnnotation")
-  vcf <- readVcf(fl, genome="hg19")
+  vcf <- readVcf(fl, "hg19")
 
   ## Rename seqlevels in the VCF object to match those in the TxDb
   vcf_adj <- renameSeqlevels(vcf, c("16"="chr16", "21"="chr21"))

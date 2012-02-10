@@ -64,7 +64,7 @@ a 'long form' \Robject{GRanges} which is an expanded form of the VCF data.
 <<readVcf>>=
 library(VariantAnnotation)
 vcffile <- system.file("extdata", "chr22.vcf.gz", package="VariantAnnotation")
-vcf <- readVcf(vcffile, genome="hg19")
+vcf <- readVcf(vcffile, "hg19")
 @
 
 Data are parsed into a \Robject{VCF} object with \Rfunction{readVcf}. 
@@ -175,7 +175,7 @@ Once the \Robject{TabixFile} is created \Rfunction{readVcf} is called with the
 \Robject{param}. The resulting \Robject{VCF} object shows that 27 of the total 
 1000 variants overlaped with our defined ranges and were read in. 
 <<subset_call>>= 
-vcf_rng <- readVcf(tab, rng, "hg19")
+vcf_rng <- readVcf(tab, "hg19", rng)
 vcf_rng
 @
 
@@ -230,7 +230,7 @@ the names of the elements listed in the the 'info' and 'geno' of the
 \Robject{VCF} object. 
 
 <<subset_ScanVcfParam2>>=
-vcf_flds <- readVcf(vcffile, svp, "hg19")
+vcf_flds <- readVcf(vcffile, "hg19", svp)
 vcf_flds
 @
 
@@ -254,7 +254,7 @@ Part of our subsetting here will be on genomic coordinates so again we need a
 Tabix index file. We will use the \Robject{TabixFile} we created previously.
 
 <<subset_both>>=
-readVcf(tab, svp_all, "hg19") 
+readVcf(tab, "hg19", svp_all) 
 @
 
 \subsection{Adjusting chromosome names}
@@ -599,14 +599,14 @@ Specify \Rcode{asGRanges=TRUE} and the \Rcode{info} or \Rcode{geno} fields to
 be expanded. Here we specify two fields of \Rcode{info}, 
 <<expand_info, eval=FALSE>>=
 param <- ScanVcfParam(asGRanges=TRUE, info=c("LDAF", "HOMSEQ"))
-#iflat <- readVcf(vcffile, param, "hg19")
+#iflat <- readVcf(vcffile, "hg19", param)
 #head(iflat)
 @
 
 
 <<expand_geno, eval=FALSE>>=
 param <- ScanVcfParam(asGRanges=TRUE, geno="GT")
-#gflat <- readVcf(vcffile, param, "hg19")
+#gflat <- readVcf(vcffile, "hg19", param)
 @
 
 \subsection{Write out VCF files - under construction}
