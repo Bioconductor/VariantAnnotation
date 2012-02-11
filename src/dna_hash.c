@@ -10,8 +10,7 @@ KHASH_MAP_INIT_STR(ref, int);
 
 struct dna_hash_t {
     khash_t(ref) *hash;
-    int len, size, hash_idx;
-    SEXP offset;
+    int len, size, hash_idx, *offset;
 };
 
 static const double DNA_GROW = 1.6;
@@ -20,10 +19,9 @@ struct dna_hash_t *dna_hash_new(const int size)
 {
     struct dna_hash_t *dna = Calloc(1, struct dna_hash_t);
     dna->hash = kh_init(ref);
-    dna->offset = Rf_allocVector(INTSXP, size);
+    dna->offset = Calloc(size, int);
     dna->size = size;
     dna->len = dna->hash_idx = 0;
-    R_PreserveObject(dna->offset);
     return dna;
 }
 
@@ -35,16 +33,13 @@ void dna_hash_free(struct dna_hash_t *dna)
             Free(kh_key(dna->hash, key));
     }
     kh_destroy(ref, dna->hash);
-    R_ReleaseObject(dna->offset);
+    Free(dna->offset);
     Free(dna);
 }
 
 void dna_hash_grow(struct dna_hash_t *dna, int size)
 {
-    SEXP updt = Rf_lengthgets(dna->offset, size);
-    R_PreserveObject(updt);
-    R_ReleaseObject(dna->offset);
-    dna->offset = updt;
+    dna->offset = Realloc(dna->offset, size, int);
     dna->size = size;
 }
 
@@ -62,7 +57,7 @@ void dna_hash_append(struct dna_hash_t *dna, const char *value)
 
     if (dna->len == dna->size)
         dna_hash_grow(dna, DNA_GROW * dna->size);
-    INTEGER(dna->offset)[dna->len] = kh_value(dna->hash, key);
+    dna->offset[dna->len] = kh_value(dna->hash, key);
     dna->len++;
 }
 
@@ -107,7 +102,7 @@ SEXP dna_hash_as_DNAStringSet(struct dna_hash_t *dna)
     PROTECT(start = NEW_INTEGER(dna->len));
     PROTECT(width = NEW_INTEGER(dna->len));
     for (i = 0; i < dna->len; ++i) {
-        int idx = INTEGER(dna->offset)[i];
+        int idx = dna->offset[i];
         INTEGER(start)[i] = istart[idx];
         INTEGER(width)[i] = iwidth[idx];
     }

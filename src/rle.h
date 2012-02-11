@@ -4,9 +4,8 @@
 #include <Rdefines.h>
 
 struct rle_t {
-    int len, size;
-    SEXP rle, *value;
-    int *length;
+    int len, size, *length;
+    char **value;
 };
 
 struct rle_t *rle_new(const int size);

@@ -25,7 +25,7 @@ enum { POS_IDX = 0, ID_IDX };
 const int N_FLDS = sizeof(FLD_FMT) / sizeof(FLD_FMT[0]);
 
 struct vcf_parse_t {
-    SEXP vcf, fixed, info, geno;
+    SEXP vcf, info, geno;
     const char **inms, **gnms;
     int vcf_n, imap_n, gmap_n, samp_n, *gmapidx;
     struct rle_t *chrom;
