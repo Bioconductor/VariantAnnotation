@@ -45,6 +45,7 @@ void dna_hash_grow(struct dna_hash_t *dna, int size)
     R_PreserveObject(updt);
     R_ReleaseObject(dna->offset);
     dna->offset = updt;
+    dna->size = size;
 }
 
 void dna_hash_append(struct dna_hash_t *dna, const char *value)
