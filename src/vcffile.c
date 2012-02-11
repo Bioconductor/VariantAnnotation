@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <zlib.h>
 #include "vcffile.h"
 #include "rle.h"
 #include "dna_hash.h"
@@ -26,7 +27,7 @@ const int N_FLDS = sizeof(FLD_FMT) / sizeof(FLD_FMT[0]);
 struct vcf_parse_t {
     SEXP vcf, fixed, info, geno;
     const char **inms, **gnms;
-    int imap_n, gmap_n, samp_n, *gmapidx;
+    int vcf_n, imap_n, gmap_n, samp_n, *gmapidx;
     struct rle_t *chrom;
     struct dna_hash_t *ref;
 };
@@ -410,46 +411,146 @@ static void _vcf_types_tidy(struct vcf_parse_t *param)
     SET_VECTOR_ELT(param->vcf, GENO_IDX, param->geno);
 }
 
+static struct vcf_parse_t *_vcf_parse_new(int vcf_n, SEXP sample,
+                                          SEXP fmap, SEXP imap,
+                                          SEXP gmap)
+{
+    struct vcf_parse_t *param = Calloc(1, struct vcf_parse_t);
+    SEXP elt;
+
+    param->vcf_n = vcf_n;
+
+    elt = _vcf_allocate(param->vcf_n, sample, fmap, imap, gmap);
+    PROTECT(param->vcf = elt);
+    param->info = VECTOR_ELT(param->vcf, INFO_IDX);
+    param->geno = VECTOR_ELT(param->vcf, GENO_IDX);
+
+    param->imap_n = Rf_length(imap);
+    param->inms =
+        (const char **) R_alloc(sizeof(const char *), param->imap_n);
+    for (int j = 0; j < param->imap_n; ++j)
+        param->inms[j] = CHAR(STRING_ELT(GET_NAMES(imap), j));
+
+    param->samp_n = Rf_length(sample);
+    param->gmap_n = Rf_length(gmap);
+    param->gnms =
+        (const char **) R_alloc(sizeof(const char *), param->gmap_n);
+    for (int j = 0; j < param->gmap_n; ++j)
+        param->gnms[j] = CHAR(STRING_ELT(GET_NAMES(gmap), j));
+    param->gmapidx = (int *) R_alloc(sizeof(int), param->gmap_n);
+    param->chrom = rle_new(param->vcf_n);
+    param->ref = dna_hash_new(param->vcf_n);
+
+    UNPROTECT(1);
+    return param;
+}
+
+static void _vcf_parse_free(struct vcf_parse_t *param)
+{
+    rle_free(param->chrom);
+    dna_hash_free(param->ref);
+    Free(param);
+}
+
+static void _vcf_parse_grow(struct vcf_parse_t *param, int size)
+{
+    static const double SCALE = 1.6;
+    if (0 == size)
+        size = param->vcf_n < 2 ? 2 : param->vcf_n * SCALE;
+    _vcf_grow(param->vcf, size, param->samp_n);
+    param->info = VECTOR_ELT(param->vcf, N_FLDS - 2);
+    param->geno = VECTOR_ELT(param->vcf, N_FLDS - 1);
+    param->vcf_n = size;
+}
+
 SEXP scan_vcf_connection(SEXP txt, SEXP sample, SEXP fmap, SEXP imap,
                          SEXP gmap)
 {
-    struct vcf_parse_t param;
-    const int vcf_n = Rf_length(txt);
-    SEXP result = PROTECT(Rf_allocVector(VECSXP, 1));
+    struct vcf_parse_t *param;
+    SEXP result;
 
-    param.vcf = _vcf_allocate(vcf_n, sample, fmap, imap, gmap);
-    SET_VECTOR_ELT(result, 0, param.vcf);
-    param.info = VECTOR_ELT(param.vcf, INFO_IDX);
-    param.geno = VECTOR_ELT(param.vcf, GENO_IDX);
-
-    param.imap_n = Rf_length(imap);
-    param.inms =
-        (const char **) R_alloc(sizeof(const char *), param.imap_n);
-    for (int j = 0; j < param.imap_n; ++j)
-        param.inms[j] = CHAR(STRING_ELT(GET_NAMES(imap), j));
-
-    param.samp_n = Rf_length(sample);
-    param.gmap_n = Rf_length(gmap);
-    param.gnms =
-        (const char **) R_alloc(sizeof(const char *), param.gmap_n);
-    for (int j = 0; j < param.gmap_n; ++j)
-        param.gnms[j] = CHAR(STRING_ELT(GET_NAMES(gmap), j));
-    param.gmapidx = (int *) R_alloc(sizeof(int), param.gmap_n);
-    param.chrom = rle_new(vcf_n);
-    param.ref = dna_hash_new(vcf_n);
+    PROTECT(result = Rf_allocVector(VECSXP, 1));
+    param = _vcf_parse_new(Rf_length(txt), sample, fmap, imap, gmap);
+    SET_VECTOR_ELT(result, 0, param->vcf);
 
     /* parse each line */
-    for (int irec = 0; irec < vcf_n; irec++) {
+    for (int irec = 0; irec < param->vcf_n; irec++) {
         char *line = strdup(CHAR(STRING_ELT(txt, irec)));
-        _vcf_parse(line, irec, &param);
+        _vcf_parse(line, irec, param);
         free(line);
     }
 
-    _vcf_as_S4(&param);
-    _vcf_types_tidy(&param);
+    _vcf_as_S4(param);
+    _vcf_types_tidy(param);
+    _vcf_parse_free(param);
 
-    rle_free(param.chrom);
-    dna_hash_free(param.ref);
+    UNPROTECT(1);
+    return result;
+}
+
+SEXP scan_vcf_character(SEXP file, SEXP yield,
+                        /* SEXP grow, */
+                        SEXP sample, SEXP fmap, SEXP imap, SEXP gmap)
+{
+    struct vcf_parse_t *param;
+    SEXP result;
+
+    if (!IS_INTEGER(yield) || 1L != Rf_length(yield))
+        Rf_error("'yield' must be integer(1)");
+    if (!IS_CHARACTER(file) || 1L != Rf_length(file))
+        Rf_error("'file' must be character(1) or as on ?scanVcf");
+
+    PROTECT(result = Rf_allocVector(VECSXP, 1));
+    param = _vcf_parse_new(INTEGER(yield)[0], sample, fmap, imap,
+                           gmap);
+    SET_VECTOR_ELT(result, 0, param->vcf);
+
+    const int BUFLEN = 4096;
+    char *buf0 = Calloc(BUFLEN, char);
+    char *buf = buf0, *end = buf0 + BUFLEN;
+
+    gzFile gz = gzopen(CHAR(STRING_ELT(file, 0)), "rb");
+    int curr, prev, irec = 0;
+
+    if (Z_NULL == gz) {
+        Free(param);
+        Rf_error("failed to open file");
+    }
+
+    prev = gztell(gz);
+    while (Z_NULL != gzgets(gz, buf, end - buf)) {
+        curr = gztell(gz);
+        if (curr - prev == end - buf0 - 1 && *(end - 1) == '\0') {
+            const int len0 = end - buf0, len1 = len0 * 1.6;
+            buf0 = Realloc(buf0, len1, char);
+            buf = buf0 + len0 - 1;
+            end = buf0 + len1;
+            continue;
+        }
+        if ('#' == *buf || '\0' == *buf)
+            continue;
+
+        if (irec == param->vcf_n) {
+            /* if (!grow_b) */
+            /*     break; */
+            _vcf_parse_grow(param, 0);
+        }
+
+        _vcf_parse(buf, irec, param);
+        irec += 1;
+
+        prev = curr;
+        buf = buf0;
+    }
+
+    gzclose(gz);
+    free(buf0);
+
+    _vcf_grow(param->vcf, irec, param->samp_n);
+    _vcf_as_S4(param);
+    _vcf_types_tidy(param);
+    _vcf_parse_free(param);
+
     UNPROTECT(1);
     return result;
 }
@@ -458,36 +559,16 @@ SEXP tabix_as_vcf(tabix_t *tabix, ti_iter_t iter,
                   const int *keep, const int size,
                   const Rboolean grow, SEXP state)
 {
-    SEXP sample = VECTOR_ELT(state, 0), fmap = VECTOR_ELT(state, 1),
-        imap = VECTOR_ELT(state, 2), gmap = VECTOR_ELT(state, 3);
-    int vcf_n = size;
-    const int samp_n = Rf_length(sample);
-    struct vcf_parse_t param;
+    struct vcf_parse_t *param;
+    SEXP result;
 
-    param.vcf = _vcf_allocate(vcf_n, sample, fmap, imap, gmap);
-    PROTECT(param.vcf);
-    param.info = VECTOR_ELT(param.vcf, INFO_IDX);
-    param.geno = VECTOR_ELT(param.vcf, GENO_IDX);
+    param = _vcf_parse_new(size, VECTOR_ELT(state, 0),
+                           VECTOR_ELT(state, 1), VECTOR_ELT(state, 2),
+                           VECTOR_ELT(state, 3));
+    PROTECT(result = param->vcf);
 
-    param.imap_n = Rf_length(imap);
-    param.inms =
-        (const char **) R_alloc(sizeof(const char *), param.imap_n);
-    for (int j = 0; j < param.imap_n; ++j)
-        param.inms[j] = CHAR(STRING_ELT(GET_NAMES(imap), j));
-
-    param.samp_n = Rf_length(sample);
-    param.gmap_n = Rf_length(gmap);
-    param.gnms =
-        (const char **) R_alloc(sizeof(const char *), param.gmap_n);
-    for (int j = 0; j < param.gmap_n; ++j)
-        param.gnms[j] = CHAR(STRING_ELT(GET_NAMES(gmap), j));
-    param.gmapidx = (int *) R_alloc(sizeof(int), param.gmap_n);
-    param.chrom = rle_new(vcf_n);
-    param.ref = dna_hash_new(vcf_n);
-
-    const double SCALE = 1.6;
-    int buflen = 4096;
-    char *buf = Calloc(buflen, char);
+    int BUFLEN = 4096;
+    char *buf = Calloc(BUFLEN, char);
 
     int linelen;
     const char *line;
@@ -495,13 +576,10 @@ SEXP tabix_as_vcf(tabix_t *tabix, ti_iter_t iter,
     int irec = 0, trec=1;
     while (NULL != (line = ti_read(tabix, iter, &linelen))) {
 
-        if (irec == vcf_n) {
+        if (irec == param->vcf_n) {
             if (!grow)
                 break;
-            vcf_n = vcf_n < 2 ? 2 : vcf_n * SCALE;
-            _vcf_grow(param.vcf, vcf_n, samp_n);
-            param.info = VECTOR_ELT(param.vcf, N_FLDS - 2);
-            param.geno = VECTOR_ELT(param.vcf, N_FLDS - 1);
+            _vcf_parse_grow(param, 0);
         }
 
         if (NULL != keep) {
@@ -509,25 +587,24 @@ SEXP tabix_as_vcf(tabix_t *tabix, ti_iter_t iter,
             keep++;
         }
 
-        if (linelen + 1 > buflen) {
+        if (linelen + 1 > BUFLEN) {
             Free(buf);
-            buflen = 2 * linelen;
-            buf = Calloc(buflen, char);
+            BUFLEN = 2 * linelen;
+            buf = Calloc(BUFLEN, char);
         }
         memcpy(buf, line, linelen);
         buf[linelen] = '\0';
 
-        _vcf_parse(buf, irec, &param);
+        _vcf_parse(buf, irec, param);
         irec += 1;
     }
-
-    _vcf_grow(param.vcf, irec, samp_n);
-    _vcf_as_S4(&param);
-    _vcf_types_tidy(&param);
-
-    rle_free(param.chrom);
-    dna_hash_free(param.ref);
     Free(buf);
+
+    _vcf_grow(param->vcf, irec, param->samp_n);
+    _vcf_as_S4(param);
+    _vcf_types_tidy(param);
+    _vcf_parse_free(param);
+
     UNPROTECT(1);
-    return param.vcf;
+    return result;
 }

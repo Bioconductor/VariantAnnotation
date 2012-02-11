@@ -5,6 +5,7 @@ import(Rsamtools)
 import(Biostrings)
 import(GenomicRanges)
 import(AnnotationDbi)
+import(zlibbioc)
 
 importFrom(BiocGenerics, rbind, cbind, paste, order, lapply, sapply, mapply)
 

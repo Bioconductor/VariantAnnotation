@@ -66,6 +66,32 @@
     .unpackVcf(result, hdr)
 }
 
+.vcf_scan_character <-
+    function(file, ..., fixed=character(), info=character(),
+             geno=character(), yieldSize=100000L)
+{
+    res <- tryCatch({
+        file <- normalizePath(path.expand(file))
+        if (!file.exists(file))
+            stop("file does not exist")
+        hdr <- scanVcfHeader(file)[[1]]
+        samples <- hdr$Sample
+        fmap <- .vcf_fixed(fixed)
+        imap <- .vcf_map(hdr$Header[["INFO"]], info, "info")
+        gmap <- .vcf_map(hdr$Header[["FORMAT"]], geno, "geno")
+        result <- .Call(.scan_vcf_character, file,
+                        as.integer(yieldSize), samples,
+                        fmap, imap, gmap)
+        names(result) <- "*:*-*"
+        result
+    }, error = function(err) {
+        stop("scanVcf: ", conditionMessage(err), "\n  path: ", 
+             file, call. = FALSE)
+    })
+
+    .unpackVcf(res, hdr)
+}
+
 .vcf_scan_connection <-
     function(file, ..., fixed=character(), info=character(),
              geno=character())
@@ -133,7 +159,7 @@ setMethod(scanVcf, c("TabixFile", "ScanVcfParam"),
 setMethod(scanVcf, c("TabixFile", "missing"),
     function(file, ..., param)
 {
-    callGeneric(path(file))
+    callGeneric(path(file), ...)
 })
 
 setMethod(scanVcf, c("character", "ScanVcfParam"),
@@ -141,9 +167,7 @@ setMethod(scanVcf, c("character", "ScanVcfParam"),
 {
     ## no ranges
     if (length(vcfWhich(param)) == 0) {
-        con <- file(file)
-        on.exit(close(con))
-        .vcf_scan_connection(con, ..., fixed=vcfFixed(param), 
+        .vcf_scan_character(file, ..., fixed=vcfFixed(param), 
             info=vcfInfo(param), geno=vcfGeno(param))
     } else {
     ## ranges
@@ -154,9 +178,7 @@ setMethod(scanVcf, c("character", "ScanVcfParam"),
 setMethod(scanVcf, c("character", "missing"),
     function(file, ..., param)
 {
-    con <- file(file)
-    on.exit(close(con))
-    callGeneric(con, ...)
+    callGeneric(file, ..., param=ScanVcfParam())
 })
 
 setMethod(scanVcf, c("connection", "missing"),
