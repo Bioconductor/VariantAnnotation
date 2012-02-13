@@ -151,7 +151,6 @@ setMethod(readVcf, c(file="character", genome="character",
 
     ## rowData
     rowData <- vcf$rowData
-    rowData <- .rowDataNames(vcf, rowData)
     genome(seqinfo(rowData)) <- genome 
 
     ## fixed fields
@@ -181,17 +180,6 @@ setMethod(readVcf, c(file="character", genome="character",
 
     VCF(rowData=rowData, colData=colData, exptData=SimpleList(HEADER=hdr), 
         fixed=fixed, info=info, geno=SimpleList(vcf$GENO))
-}
-
-.rowDataNames <- function(vcf, rowData, ...)
-## create chrom:start rownames for records with no ID
-{
-    nms <- names(rowData)
-    idx <- nms == "."
-    nms[idx] <- paste(seqnames(rowData)[idx], start(rowData)[idx],
-        sep=":")
-    names(rowData) <- nms
-    rowData
 }
 
 .toDNAStringSet <- function(x)

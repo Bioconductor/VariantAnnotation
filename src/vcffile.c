@@ -254,17 +254,20 @@ static void _vcf_parse(char *line, const int irec,
     char *sample, *field, *ifld, *ikey, *fmt;
 
     /* fixed fields */
-    /* CHROM */
-    field = it_init(&it0, line, '\t');
-    rle_append(param->chrom, field);
-    /* POS, ID */
+    char *chrom = it_init(&it0, line, '\t'); /* CHROM */
+    rle_append(param->chrom, chrom);
     rowData = VECTOR_ELT(vcf, ROWDATA_IDX);
-    field = it_next(&it0);
+    field = it_next(&it0);      /* POS */
     INTEGER(VECTOR_ELT(rowData, POS_IDX))[irec] = atoi(field);
-    field = it_next(&it0);
+    field = it_next(&it0);      /* ID */
+    if ('.' == *field && '\0' == *(field + 1)) {
+        /* construct ID if missing */
+        const int len = strlen(chrom);
+        field = chrom;
+        *(field + len) = ':';   /* chrom\0pos\0 ==> chrom:pos\0 */
+    }
     SET_STRING_ELT(VECTOR_ELT(rowData, ID_IDX), irec, mkChar(field));
-    /* REF */
-    field = it_next(&it0);
+    field = it_next(&it0);      /* REF */
     dna_hash_append(param->ref, field);
     for (field = it_next(&it0), j = ALT_IDX; j <= FILTER_IDX;
          field = it_next(&it0), ++j)
