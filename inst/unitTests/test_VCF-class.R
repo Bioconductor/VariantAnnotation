@@ -4,7 +4,7 @@ test_VCF_construction <- function() {
     m1 <- matrix(0, 0, 0)
     checkTrue(validObject(VCF()))
     checkTrue(validObject(new("VCF")))
-    checkTrue(validObject(VCF(assays=SimpleList(m1))))
+    checkTrue(validObject(VCF(geno=SimpleList(m1))))
 
     ## substance
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")

@@ -13,10 +13,8 @@ VCF <-
              ..., verbose=FALSE)
 {
     rownames(info) <- rownames(fixed) <- NULL
-    sx <- SummarizedExperiment(assays=geno, rowData=rowData,
-                               colData=colData, exptData=exptData,
-                               verbose=verbose)
-    new("VCF", sx, fixed=fixed, info=info, ...)
+    new("VCF", fixed=fixed, info=info, assays=geno, rowData=rowData,
+        colData=colData, exptData=exptData, ...)
  }
  
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
