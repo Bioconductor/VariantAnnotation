@@ -38,6 +38,13 @@
 }
 
 \arguments{
+  \item{fixed}{A character() vector of fixed fields to be returned. Possible
+    values are \sQuote{ALT}, \sQuote{QUAL} and \sQuote{FILTER}. The 
+    \sQuote{CHROM}, \sQuote{POS}, \sQuote{ID} and \sQuote{REF} fields are 
+    needed to create the \code{GRanges} in the \code{rowData} slot of the
+    \code{VCF} object created by a call to \code{readVcf}. Because these
+    are essential fields there is no option to request or omit them.
+  }
   \item{info}{A character() vector of \sQuote{INFO} fields (see
     \code{\link{scanVcfHeader}}) to be returned. If not specified,
     all fields are returned; if \code{info=NA} no fields 
@@ -72,8 +79,6 @@
   }
   \item{\dots}{Arguments passed to methods.
   }
-  \item{fixed}{Internal use only.
-  }
 }
 
 \section{Objects from the Class}{
@@ -85,6 +90,9 @@
   \describe{
     \item{\code{which}:}{Object of class \code{"RangesList"} indicating
       which reference sequence and coordinate variants must overlap.
+    }
+    \item{\code{fixed}:}{Object of class \code{"character"} indicating
+      fixed fields to be returned.
     }
     \item{\code{info}:}{Object of class \code{"character"} indicating
       portions of \sQuote{INFO} to be returned.
@@ -98,8 +106,6 @@
     \item{\code{asGRanges}:}{Object of class \code{"character"} indicating
       the return of a long form \code{GRanges} with either
       the \sQuote{INFO} or \sQuote{GENO} fields expanded in the elementMetadata.
-    }
-    \item{\code{fixed}:}{Internal use only.
     }
   }
 }
@@ -153,23 +159,24 @@
   ## -----------------------------
   ## Subsets of INFO or FORMAT field elements are specified in the 'info'
   ## and 'geno' arguments. This call specifies the return of the "GT" 'geno' 
-  ## field and the subset of ranges in 'which'. All 'info' fields will be 
-  ## returned. 
+  ## field and the subset of ranges in 'which'. All 'fixed' and 'info' 
+  ## fields will be returned. 
   ScanVcfParam(geno="GT", which=which)
  
-  ## This param specifies the geno 'GT' and none of the 'info' fields.
+  ## Specify the geno 'GT' and none of the 'info' fields.
   ScanVcfParam(geno="GT", info=NA) 
+
+  ## Return only the 'fixed' fields
+  ScanVcfParam(geno=NA, info=NA) 
 
   ## -----------------------------
   ## 'asGRanges' argument 
   ## -----------------------------
-  ## When asGRanges=TRUE only one of 'info' or 'geno' can be provided.
-  ## Specifying values for both is wrong and will generate an error :
-  ## ScanVcfParam(info="DP", geno="GT", asGranges=TRUE)
-
-  ## When asGRanges=TRUE only a single element can be provided to 'geno' 
+  ## When asGranges=TRUE a long form GRanges is returned from readVcf
+  ## instead of a VCF object. One or more fields of 'fixed', 'info'
+  ## or 'geno' can be specified.
   ScanVcfParam(geno="GT", asGranges=TRUE)
-  ## but multiple can be provided to 'info'.
   ScanVcfParam(info=c("DP", "NS"), asGranges=TRUE)
+  ScanVcfParam(fixed="ALT", geno="GT", asGranges=TRUE)
 } 
 \keyword{classes}

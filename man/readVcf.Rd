@@ -2,6 +2,7 @@
 \alias{readVcf}
 \alias{readVcf,character,character,ScanVcfParam-method}
 \alias{readVcf,character,character,missing-method}
+\alias{readVcf,character,missing,missing-method}
 \alias{readVcf,TabixFile,character,ScanVcfParam-method}
 \alias{readVcf,TabixFile,character,RangedData-method}
 \alias{readVcf,TabixFile,character,RangesList-method}
@@ -21,6 +22,7 @@
   \S4method{readVcf}{TabixFile,character,missing}(file, genome, param, ...)
   \S4method{readVcf}{character,character,ScanVcfParam}(file, genome, param, ...)
   \S4method{readVcf}{character,character,missing}(file, genome, param, ...)
+  \S4method{readVcf}{character,missing,missing}(file, genome, param, ...)
 }
 
 \arguments{
@@ -207,60 +209,48 @@
   tab <- TabixFile(compressVcf, idx)
   vcf <- readVcf(tab, "hg19", param)
 
-  ## Subset on 'info' or 'geno' elements :
-  ## An index file is not required if no ranges (genome coordinates) 
-  ## are specified.
-  param <- ScanVcfParam(geno=c("GT", "HQ"), info=c("NS", "AF"))
+  ## Subset on 'fixed', 'info' or 'geno' VCF elements :
+  ## An index file is not required if genome coordinates (ranges)
+  ## are not specified.
+  param <- ScanVcfParam(fixed="ALT", geno=c("GT", "HQ"), info=c("NS", "AF"))
   vcf_tab <- readVcf(tab, "hg19", param)
   vcf_fname <- readVcf(fl, "hg19", param)
   identical(vcf_tab, vcf_fname) 
 
-  ## Subsetting on both genome coordinates and 'info' or 'geno' elements : 
+  ## Subsetting on both genome coordinates and VCF field elements : 
   param <- ScanVcfParam(geno="HQ", info="AF", which=rngs)
   vcf <- readVcf(tab, "hg19", param)
 
-  ## When either of 'fixed', 'info' or 'geno' are omitted (i.e., no
+  ## When any of 'fixed', 'info' or 'geno' are omitted (i.e., no
   ## elements specified) all records are retrieved. Use NA to indicate
-  ## that no records should be retrieved. This param object specifies
-  ## the "GT" 'geno' field and none of 'info' fields.
+  ## that no records should be retrieved. This object specifies
+  ## all 'fixed fields, the "GT" 'geno' field and none of 'info'.
   ScanVcfParam(geno="GT", info=NA)
 
   ## ---------------------------------
   ## Long form GRanges : 
   ## ---------------------------------
-  ##
-  ## -  under construction - 
+  ## A 'long form' GRanges is one that has been expanded to accomodate
+  ## the 'unlisted' length of the 'fixed', 'info' or 'geno' fields
+  ## requested. This results in a GRanges with multiple rows per record 
+  ## where each row represents a unique combination of the elementMetadata 
+  ## columns. The elementMetadata columns are the values supplied to 
+  ## 'fixed', 'info' or 'geno' in the ScanVcfParam object.
 
-  ## A 'long form' GRanges has been expanded to match the expanded
-  ## length of elements in the 'info' or 'geno' fields that have more
-  ## than one value per record. This results in a GRanges with
-  ## potentially multiple rows per record but each row represents a
-  ## unique combination of the elementMetadata columns. The
-  ## elementMetadata columns are the values supplied in 'info' or 'geno'
-  ## in the ScanVcfParam object.
-  ## To specify a long form GRanges, set asGRanges=TRUE and specify one
-  ## or more elements in the 'info' filed OR specify one element in the
-  ## 'geno' field.  In this usage only one of 'info' or 'geno' can be
-  ## specified and 'info' can accept multiple elements but 'geno' can
-  ## take only one. See ?ScanVcfParam for more details.
-  ##
-  ## View available INFO and FORMAT fields from the file
+  ## To specify a long form GRanges, set asGRanges=TRUE in the ScanVcfParam
+  ## object and specify 'fixed', 'info' and/or 'geno' elements.
+  ## Possible values for 'fixed' are ALT, QUAL or FILTER. To see available
+  ## INFO and FORMAT fields use scanVcfHeader. 
   fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
   hdr <- scanVcfHeader(fl)
   hdr[[1]]$Header$INFO
   hdr[[1]]$Header$FORMAT
 
-  ## Specify one or more fields to 'info'. The "AF" element has two
-  ## values for variant rs6040355. In the result there are now two rows
-  ## for this variant with the same ranges but unique elementMetadata.
-
-  param <- ScanVcfParam(asGRanges=TRUE, info=c("NS", "AF", "H2"))
-  #readVcf(fl, "hg19", param)
-
-  ## When creating a long form GRanges only one 'geno' element can be
-  ## specified at a time.
-  param <- ScanVcfParam(asGRanges=TRUE, geno="GT")
-  #readVcf(fl, "hg19", param)
+  ## Request all 'fixed' fields, "GT" from 'geno' and "H2" from 'info'.
+  ## See ?ScanVcfParam for more details.
+  param <- ScanVcfParam(asGRanges=TRUE, info="H2", geno="GT")
+  vcf <- readVcf(fl, "hg19", param)
+  head(vcf)
 }
 
 \keyword{manip}

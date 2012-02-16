@@ -145,15 +145,12 @@ setMethod(scanVcf, c("TabixFile", "ScanVcfParam"),
         result <- callGeneric(path(file), ..., param=param)
     else 
     ## ranges
-        result <- scanVcf(file, ..., fixed=character(), info=vcfInfo(param), 
-            geno=vcfGeno(param), param=vcfWhich(param))
-    if (vcfTrimEmpty(param))
-        lapply(result, function(rng) {
-            rng[["GENO"]] <- Filter(Negate(is.null), rng[["GENO"]])
-            rng
-        })
-    else 
-        result
+        result <- scanVcf(file, ..., fixed=vcfFixed(param), 
+            info=vcfInfo(param), geno=vcfGeno(param), param=vcfWhich(param))
+
+    if (vcfTrimEmpty(param)) 
+        result[["GENO"]] <- Filter(Negate(is.null), result[["GENO"]])
+    result
 })
 
 setMethod(scanVcf, c("TabixFile", "missing"),
@@ -244,7 +241,6 @@ setMethod(scanVcf, c("connection", "missing"),
                            nm)
             stop(msg)
         }
-        ## handle NULL elements
         if (is.null(elt))
             elt
         else
@@ -291,5 +287,5 @@ setMethod(scanVcf, c("connection", "missing"),
             }, rownames(geno), geno$Number, geno$Type)
         }
     }
-    x
+    x[[1]]
 }

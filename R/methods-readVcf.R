@@ -57,6 +57,13 @@ setMethod(readVcf, c(file="character", genome="character",
     .readVcf(file, genome)
 })
 
+setMethod(readVcf, c(file="character", genome="missing",
+          param="missing"),
+    function(file, genome, param, ...)
+{
+    stop("'genome' argument is missing") 
+})
+
 .checkTabix <- function(x)
 {
     if (1L != length(x)) 
@@ -75,78 +82,66 @@ setMethod(readVcf, c(file="character", genome="character",
         .scanVcfToVCF(scanVcf(file), file, genome)
     } else {
         if (vcfAsGRanges(param)) {
+            if (all(identical(character(0), vcfFixed(param)), 
+                    identical(character(0), vcfInfo(param)), 
+                    identical(character(0), vcfGeno(param))))
+                stop("when asGRanges=TRUE at least one of 'fixed', 'info' ",
+                     "or 'geno' must be specified")
+
             if (identical(character(0), vcfFixed(param))) 
-                slot(param, "fixed") <- NA_character_
+                slot(param, "fixed") <- NA_character_ 
             else if (identical(character(0), vcfInfo(param))) 
                 slot(param, "info") <- NA_character_
             else if (identical(character(0), vcfGeno(param))) 
                 slot(param, "geno") <- NA_character_
             .scanVcfToLongGRanges(scanVcf(file, param=param),
-                                  file, genome, param=param)
+                file, genome, param=param)
         } else {
-            .scanVcfToVCF(scanVcf(file, param=param), file, genome)
+            .scanVcfToVCF(scanVcf(file, param=param), file, genome, param)
         }
     }
 }
 
 ## helpers
 
-.scanVcfToLongGRanges <- function(vcf, file, genome, param, ...)
+.scanVcfToLongGRanges <- function(vcf, file, genome, ...)
 {
-    vcf <- vcf[[1]]
+    hdr <- scanVcfHeader(file)[[1]][["Header"]]
     rowData <- vcf$rowData
+    genome(rowData) <- genome
 
-    elts <- na.omit(c(vcfInfo(param), vcfGeno(param)))
-    dat <- c(vcf$INFO[names(vcf$INFO) %in% elts],
-         vcf$GENO[names(vcf$GENO) %in% elts])
-    eltrep <- lapply(dat, function(elt, dim0) {
-               if (is.list(elt))
-                   elementLengths(elt)
-               else
-                   rep(1, dim0)
-           }, dim0=length(rowData)) 
-    maxrep <- apply(do.call(cbind, eltrep), 1, max)
-    unwind <- .unwind(maxrep, dat)
-    gr <- rowData[rep(seq_len(length(rowData)), maxrep)]
-    values(gr) <- unwind 
+    ## multi valued
+    gdat <- .formatGeno(vcf$GENO)
+    glen <- lapply(gdat, elementLengths) 
+    nsmp <- ifelse(length(gdat) > 0, length(unique(gdat$SAMPLES)), 1)
+
+    idat <- .formatInfo(vcf$INFO, hdr[["INFO"]])
+    idat <- c(ALT=.formatALT(vcf$ALT), as.list(idat))
+    ilen <- lapply(idat, function(x) rep(elementLengths(x), nsmp)) 
+    idat <- lapply(idat, function(x) rep(x, nsmp)) 
+
+    ## single valued
+    sdat <- list(REF=vcf$REF, QUAL=vcf$QUAL, FILTER=vcf$FILTER)
+    sdat <- DataFrame(sdat[lapply(sdat, is.null) == FALSE]) 
+
+    ## elementLengths for multi
+    eltlen <- c(ilen, glen)
+    maxlen <- apply(do.call(cbind, eltlen), 1, prod)
+
+    ## replicate
+    single <- lapply(sdat, function(elt, maxlen, nsmp) {
+                  rep(rep(elt, nsmp), maxlen)
+              }, maxlen, nsmp)
+    multi <- Map(function(elt, eltlen, maxlen) {
+                 unlist(rep(elt, maxlen/eltlen), use.names=FALSE)
+             }, c(idat, gdat), eltlen, MoreArgs=list(maxlen))
+    gr <- rep(rep(rowData, nsmp), maxlen)
+    values(gr) <- DataFrame(single, multi) 
     gr 
 }
 
-.unwind <- function(reps, lst, ...)
-{
-    ## replication of rows
-    ll <- lapply(lst, 
-        function(elt, reps) {
-            if (is(elt, "list")) {
-                mt <- elementLengths(elt) == reps 
-                newrep <- rep(1, length(mt))
-                newrep[mt == FALSE] <- reps[mt == FALSE]
-                unlist(rep(elt, newrep), use.names=FALSE) 
-            } else if (is(elt, "array")) {
-                slen <- rep(seq_len(length(reps)), reps)
-                if (length(dim(elt)) == 3)
-                    matrix(elt, ncol=dim(elt)[3])[slen, ]
-                else
-                    matrix(elt[slen, ], ncol=ncol(elt), nrow=length(slen))
-            } else {
-                rep(elt, reps)
-            }
-        }, reps)
-
-    ## FIXME: DF in list via lapply above
-    idx <- which(lapply(lst, is.array) == TRUE) 
-    if (length(idx) != 0)
-        for (i in idx) 
-            ll[[i]] <- DataFrame(I(matrix(ll[[i]], nrow=nrow(lst[[i]]))))
-    DF <- DataFrame(ll)
-    names(DF) <- names(lst)
-    DF
-}
-
-
 .scanVcfToVCF <- function(vcf, file, genome, ...)
 {
-    vcf <- vcf[[1]]
     hdr <- scanVcfHeader(file)[[1]][["Header"]]
 
     ## rowData
@@ -154,31 +149,26 @@ setMethod(readVcf, c(file="character", genome="character",
     genome(seqinfo(rowData)) <- genome 
 
     ## fixed fields
-    REF <- vcf$REF
-    structural <- grep("<", vcf$ALT, fixed=TRUE)
-    if (!identical(integer(0), structural))
-        ALT <- seqsplit(vcf$ALT, seq_len(length(vcf$ALT)))
+    if (!is.null(vcf$ALT))
+        ALT <- .formatALT(vcf$ALT)
     else
-        ALT <- .toDNAStringSetList(vcf$ALT)
-    REF <- vcf$REF
-    QUAL <- DataFrame(vcf$QUAL)
-    FILTER <- DataFrame(vcf$FILTER)
-    fixed <- DataFrame(REF, ALT, QUAL, FILTER)
-    dimnames(fixed) <- list(NULL, c("REF", "ALT", "QUAL", "FILTER"))
+        ALT <- vcf$ALT
+    fx <- list(REF=vcf$REF, ALT=ALT, QUAL=vcf$QUAL, FILTER=vcf$FILTER)
+    fixed <- DataFrame(fx[lapply(fx, is.null) == FALSE]) 
 
     ## info 
     info <- .formatInfo(vcf$INFO, hdr[["INFO"]])
 
     ## colData
     if (length(vcf$GENO) > 0) {
-        samples <- colnames(vcf$GENO[[1]]) 
+        samples <- colnames(vcf$GENO[[1]])
         colData <- DataFrame(Samples=seq_len(length(samples)),
                              row.names=samples)
     } else {
         colData <- DataFrame(Samples=character(0))
     }
 
-    VCF(rowData=rowData, colData=colData, exptData=SimpleList(HEADER=hdr), 
+    VCF(rowData=rowData, colData=colData, exptData=SimpleList(HEADER=hdr),
         fixed=fixed, info=info, geno=SimpleList(vcf$GENO))
 }
 
@@ -199,7 +189,17 @@ setMethod(readVcf, c(file="character", genome="character",
         unlistData=dna, end=end(pbw))
 }
 
-.newCompressedList <- IRanges:::newCompressedList
+.formatALT <- function(x)
+{
+    if (is.null(x))
+        return(NULL)
+    structural <- grep("<", x, fixed=TRUE)
+    if (!identical(integer(0), structural))
+        seqsplit(x, seq_len(length(x)))
+    else
+        .toDNAStringSetList(x)
+}
+
 .formatInfo <- function(x, hdr)
 {
     if (length(x) == 0L)
@@ -210,22 +210,46 @@ setMethod(readVcf, c(file="character", genome="character",
         return(DF)
     }
     type <- hdr$Type[match(names(x), rownames(hdr))]
-    idx <- which(lapply(x, is.list) == TRUE)
-    if (length(idx) != 0) {
+    idx <- which(lapply(x, function(elt) is.null(dim(elt))) == FALSE)
+    if (0L != length(idx)) {
         for (i in idx) {
-            x[[i]] <- switch(type[[i]],
-                Integer = .newCompressedList("CompressedIntegerList", x[[i]]),
-                Float = .newCompressedList("CompressedNumericList", x[[i]]),
-                String = .newCompressedList("CompressedCharacterList", x[[i]]),
-                Logical = .newCompressedList("CompressedLogicalList", x[[i]]))
+            x[[i]] <- .formatList(x[[i]], type[i])
         }
     }
-    idx <- which(lapply(x, is.array) == TRUE)
-    if (length(idx) != 0)
-        for (i in idx)
-            x[[i]] <- DataFrame(I(matrix(x[[i]], ncol=dim(x[[i]])[3])))
     DF <- DataFrame(x)
     names(DF) <- names(x)
     DF
 }
 
+.formatList <- function(data, type)
+{
+    ncol <- ifelse(!is.na(dim(data)[3]), dim(data)[3], dim(data)[2])
+    if (ncol > 1) 
+       data <- split(unlist(data, use.names=FALSE), 
+           rep(seq_len(dim(data)[1]), ncol))
+ 
+    switch(type, 
+        Integer = IntegerList(data),
+        Float = NumericList(data),
+        String = CharacterList(data),
+        Logical = LogicalList(data))
+}
+
+.formatGeno <- function(x)
+{
+    if (length(x) == 0L)
+        return(DataFrame())
+    cls <- lapply(x, class)
+    nvar <- dim(x[[1]])[1]
+    nsmp <- dim(x[[1]])[2]
+    nms <- colnames(x[[1]]) 
+
+    for (i in which(cls == "array")) {
+        dim(x[[i]]) <- c(nvar*nsmp, dim(x[[i]])[3])
+        x[[i]] <- split(x[[i]], seq_len(nvar*nsmp))
+    }
+    for (i in which(cls == "matrix")) {
+        dim(x[[i]]) <- c(nvar*nsmp, 1)
+    }
+    c(list(SAMPLES=rep(nms, each=nvar)), x)
+}

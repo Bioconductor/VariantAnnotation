@@ -1,4 +1,4 @@
-\name{VcfInput}
+\name{scanVcf}
 \Rdversion{1.1}
 
 \alias{scanVcfHeader}
@@ -24,11 +24,11 @@
 
 
 \title{
-  Operations on `VCF' (variant call) files.
+  Import VCF files
 }
 
 \description{
-  Import or coerce variant call files in text or binary format.
+  Import Variant Call Format (VCF) files in text or binary format
 }
 
 \usage{
@@ -56,7 +56,6 @@ scanVcf(file, ..., param)
 }
 
 \arguments{
-
   \item{file}{For \code{scanVcf} and \code{scanVcfHeader}, the character() 
     file name, \code{\link{TabixFile}}, or class \code{connection} 
     (\code{file()} or \code{bgzip()}) of the \sQuote{VCF} file to be 
@@ -94,7 +93,6 @@ scanVcf(file, ..., param)
 }
 
 \value{
-
   \code{scanVcfHeader} returns a list, with one element for each file 
   named in \code{file}. Each element of the list is itself a list 
   containing three elements. The \code{reference} element is a character() 
@@ -119,7 +117,6 @@ scanVcf(file, ..., param)
 }
 
 \references{
-
   \url{http://vcftools.sourceforge.net/specs.html} outlines the VCF
   specification.
 
@@ -129,7 +126,6 @@ scanVcf(file, ..., param)
 
   \url{http://samtools.sourceforge.net/} provides information on
   \code{samtools}.
-
 }
 
 \seealso{
@@ -148,8 +144,8 @@ scanVcf(file, ..., param)
   vcf <- scanVcf(fl)
   ## value: list-of-lists
   str(vcf)
-  names(vcf[[1]][["GENO"]])
-  vcf[[1]][["GENO"]][["GT"]]
+  names(vcf[["GENO"]])
+  vcf[["GENO"]][["GT"]]
 }
 
 \keyword{ manip }
