@@ -143,29 +143,33 @@ setMethod(readVcf, c(file="character", genome="missing",
 .scanVcfToVCF <- function(vcf, file, genome, ...)
 {
     hdr <- scanVcfHeader(file)[[1]][["Header"]]
-    with(vcf, {
-        ## rowData
-        genome(seqinfo(rowData)) <- genome 
 
-        ## fixed fields
-        fixed <- DataFrame(REF=REF, ALT=.formatALT(ALT), QUAL=QUAL,
-            FILTER=FILTER)
+    ## rowData
+    rowData <- vcf$rowData
+    genome(seqinfo(rowData)) <- genome 
 
-        ## info
-        info <- .formatInfo(INFO, hdr[["INFO"]])
+    ## fixed fields
+    if (!is.null(vcf$ALT))
+        ALT <- .formatALT(vcf$ALT)
+    else
+        ALT <- vcf$ALT
+    fx <- list(REF=vcf$REF, ALT=ALT, QUAL=vcf$QUAL, FILTER=vcf$FILTER)
+    fixed <- DataFrame(fx[lapply(fx, is.null) == FALSE]) 
 
-        ## colData
-        colData <- if (length(GENO) > 0) {
-            nms <- colnames(GENO[[1]]) 
-            DataFrame(Samples=seq_along(nms), row.names=nms)
-        } else {
-            DataFrame(Samples=character(0))
-        }
+    ## info 
+    info <- .formatInfo(vcf$INFO, hdr[["INFO"]])
 
-        VCF(rowData=rowData, colData=colData,
-            exptData=SimpleList(HEADER=hdr), fixed=fixed, info=info,
-            geno=SimpleList(GENO))
-    })
+    ## colData
+    if (length(vcf$GENO) > 0) {
+        samples <- colnames(vcf$GENO[[1]])
+        colData <- DataFrame(Samples=seq_len(length(samples)),
+                             row.names=samples)
+    } else {
+        colData <- DataFrame(Samples=character(0))
+    }
+
+    VCF(rowData=rowData, colData=colData, exptData=SimpleList(HEADER=hdr),
+        fixed=fixed, info=info, geno=SimpleList(vcf$GENO))
 }
 
 .toDNAStringSet <- function(x)
