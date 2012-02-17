@@ -617,7 +617,7 @@ In the \Robject{ScanVcfParam} we specify \Rcode{asGRanges=TRUE} and the desired
 fields. We will request one \Rcode{info} field and one \Rcode{fixed}. Keep in 
 mind the data are expanded to accomodate all combinations of the requested 
 fields and can get big very quickly. 
-<<expand_info, eval=FALSE>>=
+<<expand_info>>=
 param <- ScanVcfParam(asGRanges=TRUE, fixed="ALT", info="HOMSEQ")
 lf <- readVcf(vcffile, "hg19", param)
 head(lf, 4)

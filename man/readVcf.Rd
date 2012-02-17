@@ -40,9 +40,9 @@
   }
   \item{param}{A instance of \code{\linkS4class{ScanVcfParam}}, \code{GRanges},
     \code{RangedData} or \code{RangesList}. VCF files can be subset on genomic
-    coordinates (ranges) or elements in the INFO and FORMAT fields of the VCF
-    file. The \code{\linkS4class{ScanVcfParam}} can specify both ranges and
-    elements of INFO and FORMAT. See ?\code{ScanVcfParam} for details.
+    coordinates (ranges) or elements in the VCF fields. Both genomic coordinates
+    and VCF elements can be specified in a \code{\linkS4class{ScanVcfParam}}.
+    See ?\code{ScanVcfParam} for details.
   }
   \item{\dots}{Additional arguments, passed to methods.
   }
@@ -50,26 +50,44 @@
 
 \details{
   \describe{
-    \item{Data Import}{
-          VCF object :
+    \item{Data Import :}{
+      \describe{
+        \item{VCF object :}{
           \code{readVcf} imports records from bzip compressed or uncompressed 
           VCF files. Data are parsed into a \code{\linkS4class{VCF}} object 
-          using the VCF file header information if available. To import a 
-          subset of ranges the VCF file must have a Tabix index file. An index 
-          file can be created with \code{bzip} and \code{indexTabix} functions. 
-          See examples below.
- 
-          Long Form GRanges :
+          using the file header information if available. To import a subset 
+          of ranges the VCF must have a Tabix index file. An index file can be 
+          created with \code{bzip} and \code{indexTabix} functions. See examples 
+          below.
+          }
+        \item{Long Form GRanges :}{
           Data from a VCF file can be parsed into an expanded \code{GRanges}
-          instead of a \code{VCF} obeject by setting \code{asGRanges=TRUE} in 
-          the \code{\linkS4class{ScanVcfParam}}. In this form, each row 
-          represents a genomic position(variant) with the \sQuote{fixed},
-          \sQuote{info} or \sQuote{geno} data expanded elementMetadata columns.
- 
+          instead of a \code{VCF} object by setting \code{asGRanges=TRUE} in 
+          the \code{\linkS4class{ScanVcfParam}} and specifying VCF elements in
+          the \sQuote{fixed}, \sQuote{info} and \sQuote{geno} arguments. In 
+          this form, the \code{GRanges} of variant locations is expanded
+          (replicated) to the length of the \sQuote{unlisted} elements. The 
+          result is a \code{GRanges} with multiple rows per variant, each with 
+          a unique combination of elementMetadata columns. Be mindful that
+          the dimension of the data grows rapidly with the number of VCF 
+          elements requested. See ?\code{\linkS4class{ScanVcfParam}} for details 
+          specifying the \sQuote{fixed}, \sQuote{info} and \sQuote{geno} 
+          arguments.
+
+          The minimal data returned when no \sQuote{fixed}, \sQuote{info} or 
+          \sQuote{geno} are specified is a \code{GRanges} with elementMetadata
+          columns of ID, rangeID and REF. ID and REF are from the VCF file.
+          The rangeID column is meaningful when specific ranges are requested
+          through the \code{ScanVcfParam}. \code{readVcf} calls \code{scanVcf}
+          which returns the data as a named list. These names correspond
+          to the ranges requested.
+        }
+      } 
       \code{readVcf} calls \code{\link{scanVcf}}, the details of which can be 
       found with \code{?scanVcf}.
     }
-    \item{Data Representation}{
+    \item{Data Representation :}{
+
       CHROM, POS, ID and REF fields are used to create the \code{GRanges}
       stored in the \code{rowData} slot of the \code{VCF} object. REF, ALT, 
       QUAL and FILTER are parsed into the \code{DataFrame} in the \code{fixed} 
@@ -80,7 +98,7 @@
       Data from the INFO and FORMAT (genotype) fields can be accessed with the 
       \code{info} and \code{geno} accessors. Data types are determined 
       according to the \sQuote{Number} and \sQuote{Type} information in the 
-      file header.
+      file header as follows :
 
       If \sQuote{Number} is 1, \sQuote{info} data are parsed into a 
       \code{vector}. \sQuote{geno} data are parsed into a \code{matrix} where 
@@ -118,9 +136,9 @@
       One elementMetadata column, \code{rangeID}, is included with the
       \code{rowData}. This ID is meaningful when specific ranges are requested
       in the \code{ScanVcfParam}. When multiple ranges are requested 
-      \code{scanVcf} returns the data as named list corresponding to the 
-      ranges requested. This ID distinguishes which records came from which
-      range request.
+      \code{scanVcf} returns the data as a list with name corresponding to
+      the ranges requested. This ID distinguishes the records from each range 
+      request.
     }
     \item{fixed:}{
       REF, ALT, QUAL and FILTER fields of the VCF are parsed into a 
@@ -244,13 +262,12 @@
   ## the 'unlisted' length of the 'fixed', 'info' or 'geno' fields
   ## requested. This results in a GRanges with multiple rows per record 
   ## where each row represents a unique combination of the elementMetadata 
-  ## columns. The elementMetadata columns are the values supplied to 
-  ## 'fixed', 'info' or 'geno' in the ScanVcfParam object.
+  ## columns. 
 
   ## To specify a long form GRanges, set asGRanges=TRUE in the ScanVcfParam
   ## object and specify 'fixed', 'info' and/or 'geno' elements.
   ## Possible values for 'fixed' are ALT, QUAL or FILTER. To see available
-  ## INFO and FORMAT fields use scanVcfHeader. 
+  ## values for INFO and FORMAT use scanVcfHeader. 
   fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
   hdr <- scanVcfHeader(fl)
   hdr[[1]]$Header$INFO

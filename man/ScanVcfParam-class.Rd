@@ -19,8 +19,8 @@
   Use \code{ScanVcfParam()} to create a parameter object influencing 
   which records and fields are imported from a VCF file. Record
   parsing is based on genomic coordinates and requires a Tabix index
-  file. Individual elements can be selected from the \sQuote{INFO} and 
-  \sQuote{GENO} fields.
+  file. Individual VCF elements can be specified in the \sQuote{fixed},
+  \sQuote{info} and \sQuote{geno} arguments.
 }
 
 \usage{
@@ -39,21 +39,19 @@
 
 \arguments{
   \item{fixed}{A character() vector of fixed fields to be returned. Possible
-    values are \sQuote{ALT}, \sQuote{QUAL} and \sQuote{FILTER}. The 
-    \sQuote{CHROM}, \sQuote{POS}, \sQuote{ID} and \sQuote{REF} fields are 
-    needed to create the \code{GRanges} in the \code{rowData} slot of the
-    \code{VCF} object created by a call to \code{readVcf}. Because these
-    are essential fields there is no option to request or omit them.
+    values are ALT, QUAL and FILTER. The CHROM, POS, ID and REF fields are 
+    needed to create the \code{GRanges} of variant locations. Because these 
+    are essential fields there is no option to request or omit them. If not 
+    specified, all fields are returned; if \code{fixed=NA} only REF is 
+    returned. 
   }
   \item{info}{A character() vector of \sQuote{INFO} fields (see
-    \code{\link{scanVcfHeader}}) to be returned. If not specified,
-    all fields are returned; if \code{info=NA} no fields 
-    are returned.
+    \code{\link{scanVcfHeader}}) to be returned. If not specified, all fields 
+    are returned; if \code{info=NA} no fields are returned.
   }
   \item{geno}{A character() vector of \sQuote{GENO} fields (see
-    \code{\link{scanVcfHeader}}) to be returned. If not specified,
-    all fields are returned; if \code{geno=NA} no fields 
-    are returned.
+    \code{\link{scanVcfHeader}}) to be returned. If not specified, all fields 
+    are returned; if \code{geno=NA} no fields are returned.
   }
   \item{trimEmpty}{A logical(1) indicating whether \sQuote{GENO} fields
     with no values should be returned.
@@ -65,15 +63,8 @@
   }
   \item{asGRanges}{A logical(1) indicating whether a long form (expanded) 
     \code{GRanges} should be returned instead of a \code{VCF} object. For 
-    use with \code{readVcf} only; ignored by \code{scanVcf}.
-
-    The return value is a \code{GRanges} expanded to match the dimensions
-    of the unlisted elements specified in \sQuote{info} or \sQuote{geno}.
-    The \sQuote{info} or \sQuote{geno} elements are included as elementMetadata
-    columns. When \code{asGRanges=TRUE} multiple elements can be provided to 
-    the \sQuote{info} argument but only a single element can be provided to 
-    \sQuote{geno}. This restriction is due to the dimension of the \sQuote{geno} 
-    data.
+    use with \code{readVcf} only; ignored by \code{scanVcf}. See 
+    ?\code{readVcf} for details about the long form \code{GRanges}.
   }
   \item{object}{An instance of class \code{ScanVcfParam}.
   }

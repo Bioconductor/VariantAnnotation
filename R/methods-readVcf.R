@@ -82,18 +82,6 @@ setMethod(readVcf, c(file="character", genome="missing",
         .scanVcfToVCF(scanVcf(file), file, genome)
     } else {
         if (vcfAsGRanges(param)) {
-            if (all(identical(character(0), vcfFixed(param)), 
-                    identical(character(0), vcfInfo(param)), 
-                    identical(character(0), vcfGeno(param))))
-                stop("when asGRanges=TRUE at least one of 'fixed', 'info' ",
-                     "or 'geno' must be specified")
-
-            if (identical(character(0), vcfFixed(param))) 
-                slot(param, "fixed") <- NA_character_ 
-            else if (identical(character(0), vcfInfo(param))) 
-                slot(param, "info") <- NA_character_
-            else if (identical(character(0), vcfGeno(param))) 
-                slot(param, "geno") <- NA_character_
             .scanVcfToLongGRanges(scanVcf(file, param=param),
                 file, genome, param=param)
         } else {
@@ -113,38 +101,43 @@ setMethod(readVcf, c(file="character", genome="missing",
     hdr <- scanVcfHeader(file)[[1]][["Header"]]
 
     ## single valued
-    sdat <- list(REF=lst[["REF"]], QUAL=lst[["QUAL"]], FILTER=lst[["FILTER"]])
     rnglen <- lapply(vcf, function(rng) length(rng[["rowData"]])) 
-    sdat <- DataFrame(rangeID=as.factor(rep(names(vcf), rnglen)), 
+    rangeID <- as.factor(rep(names(vcf), rnglen)) 
+    sdat <- list(REF=lst[["REF"]], QUAL=lst[["QUAL"]], FILTER=lst[["FILTER"]])
+    sdat <- DataFrame(ID=names(lst[["rowData"]]), rangeID=rangeID, 
                       DataFrame(sdat[lapply(sdat, is.null) == FALSE])) 
 
     ## multi valued
-    gdat <- .formatGeno(lst[["GENO"]])
+    gdat <- .formatGeno(.combineLists(lst[["GENO"]]))
     glen <- lapply(gdat, elementLengths) 
     nsmp <- ifelse(length(gdat) > 0, length(unique(gdat$SAMPLES)), 1)
 
-    idat <- .formatInfo(lst[["INFO"]], hdr[["INFO"]])
+    idat <- .formatInfo(.combineLists(lst[["INFO"]]), hdr[["INFO"]])
     idat <- c(ALT=.formatALT(lst[["ALT"]]), as.list(idat))
     ilen <- lapply(idat, function(x) rep(elementLengths(x), nsmp)) 
     idat <- lapply(idat, function(x) rep(x, nsmp)) 
 
-    ## multi-valued
-    eltlen <- c(ilen, glen)
-    maxlen <- apply(do.call(cbind, eltlen), 1, prod)
-
     ## replicate field elements
+    eltlen <- c(ilen, glen)
+    if (identical(list(), eltlen)) {
+        eltlen <- maxlen <- rep(1, nrow(sdat))
+        multi <- list()
+    } else {
+        maxlen <- apply(do.call(cbind, eltlen), 1, prod)
+        multi <- Map(function(elt, eltlen, maxlen) {
+                     unlist(rep(elt, maxlen/eltlen), use.names=FALSE)
+                 }, c(idat, gdat), eltlen, MoreArgs=list(maxlen))
+    }
     single <- lapply(sdat, function(elt, maxlen, nsmp) {
                   rep(rep(elt, nsmp), maxlen)
               }, maxlen, nsmp)
-    multi <- Map(function(elt, eltlen, maxlen) {
-                 unlist(rep(elt, maxlen/eltlen), use.names=FALSE)
-             }, c(idat, gdat), eltlen, MoreArgs=list(maxlen))
 
     ## replicate rowData
     rowData <- lst[["rowData"]]
+    names(rowData) <- NULL
     genome(rowData) <- genome
     gr <- rep(rep(rowData, nsmp), maxlen)
-    values(gr) <- DataFrame(single, multi) 
+    values(gr) <- DataFrame(c(single, multi)) 
     gr 
 }
 
@@ -252,7 +245,7 @@ setMethod(readVcf, c(file="character", genome="missing",
 .formatGeno <- function(x)
 {
     if (length(x) == 0L)
-        return(DataFrame())
+        return(list())
     cls <- lapply(x, class)
     nvar <- dim(x[[1]])[1]
     nsmp <- dim(x[[1]])[2]
