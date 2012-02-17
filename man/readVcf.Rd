@@ -51,13 +51,22 @@
 \details{
   \describe{
     \item{Data Import}{
-      \code{readVcf} imports records from bzip compressed or uncompressed VCF 
-      files. Data are parsed into a \code{\linkS4class{VCF}} object using the 
-      VCF file header information if available. To import a subset of ranges 
-      the VCF file must have a Tabix index file. An index file can be created 
-      with \code{bzip} and \code{indexTabix} functions. See examples below.
-
-      The function calls \code{\link{scanVcf}}, the details of which can be 
+          VCF object :
+          \code{readVcf} imports records from bzip compressed or uncompressed 
+          VCF files. Data are parsed into a \code{\linkS4class{VCF}} object 
+          using the VCF file header information if available. To import a 
+          subset of ranges the VCF file must have a Tabix index file. An index 
+          file can be created with \code{bzip} and \code{indexTabix} functions. 
+          See examples below.
+ 
+          Long Form GRanges :
+          Data from a VCF file can be parsed into an expanded \code{GRanges}
+          instead of a \code{VCF} obeject by setting \code{asGRanges=TRUE} in 
+          the \code{\linkS4class{ScanVcfParam}}. In this form, each row 
+          represents a genomic position(variant) with the \sQuote{fixed},
+          \sQuote{info} or \sQuote{geno} data expanded elementMetadata columns.
+ 
+      \code{readVcf} calls \code{\link{scanVcf}}, the details of which can be 
       found with \code{?scanVcf}.
     }
     \item{Data Representation}{
@@ -89,13 +98,6 @@
       \sQuote{INFO} or \sQuote{GENO} elements the data are returned as a single
       unparsed column named as \sQuote{INFO} or \sQuote{GENO}.
     }
-    \item{Flat Format}{
-      When the \code{asGRanges} argument to \code{\linkS4class{ScanVcfParam}} 
-      is \code{TRUE}, the return value from \code{readVcf} is a 'long form'
-      \code{GRanges} instead of a \code{VCF} object. In this form, each row 
-      represents a genomic position(variant) with the \sQuote{info} or
-      \sQuote{geno} data expanded elementMetadata columns.
-    }
   }
 }
 
@@ -105,16 +107,24 @@
 
   \describe{
     \item{rowData:}{
-      The first 7 required fields of the VCF file are parsed into a 
-      \code{GRanges}. CHROM, POS and ID fields are the seqnames, ranges and 
-      rownames. If the ID is missing (i.e., \sQuote{.}) a colon separated
-      string of chromosome and start position will be used as the rowname.
-      REF, ALT, QUAL and FILTER are included as elementMetadata.
-
-      The ranges are created using the position (POS) and width of the 
-      reference allele (REF). The \code{genome} argument is stored in the 
-      seqinfo of the \code{GRanges} and can be accessed with 
+      The CHROM, POS, ID and REF fields are used to create a \code{GRanges}
+      object. The ranges are created using POS as the start value and width of 
+      the reference allele (REF). The IDs become the rownames. If they are 
+      missing (i.e., \sQuote{.}) a colon separated string of chromosome and 
+      start position will be used instead. The \code{genome} argument is stored 
+      in the seqinfo of the \code{GRanges} and can be accessed with 
       \code{genome(<VCF>)}.
+
+      One elementMetadata column, \code{rangeID}, is included with the
+      \code{rowData}. This ID is meaningful when specific ranges are requested
+      in the \code{ScanVcfParam}. When multiple ranges are requested 
+      \code{scanVcf} returns the data as named list corresponding to the 
+      ranges requested. This ID distinguishes which records came from which
+      range request.
+    }
+    \item{fixed:}{
+      REF, ALT, QUAL and FILTER fields of the VCF are parsed into a 
+      \code{DataFrame}.
     }
     \item{info:}{
       Data from the INFO field of the VCF is parsed into a \code{DataFrame}.
@@ -174,10 +184,10 @@
   ## ---------------------------------
   ## Accessors
   ## ---------------------------------
-  ## Fixed fields together
+  ## fixed fields together
   head(fixed(vcf), 5)
 
-  ## Fixed fields separately 
+  ## fixed fields separately 
   filt(vcf)
   ref(vcf) 
 
@@ -217,13 +227,13 @@
   vcf_fname <- readVcf(fl, "hg19", param)
   identical(vcf_tab, vcf_fname) 
 
-  ## Subsetting on both genome coordinates and VCF field elements : 
+  ## Subsetting on both genome coordinates and VCF fields : 
   param <- ScanVcfParam(geno="HQ", info="AF", which=rngs)
   vcf <- readVcf(tab, "hg19", param)
 
   ## When any of 'fixed', 'info' or 'geno' are omitted (i.e., no
   ## elements specified) all records are retrieved. Use NA to indicate
-  ## that no records should be retrieved. This object specifies
+  ## that no records should be retrieved. This param specifies
   ## all 'fixed fields, the "GT" 'geno' field and none of 'info'.
   ScanVcfParam(geno="GT", info=NA)
 

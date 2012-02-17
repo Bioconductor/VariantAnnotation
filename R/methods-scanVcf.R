@@ -241,7 +241,7 @@ setMethod(scanVcf, c("connection", "missing"),
                            nm)
             stop(msg)
         }
-        if (is.null(elt))
+        if (0L == length(elt) || is.null(elt))
             elt
         else
             .unpackVcfField(elt, id[idx], n[idx], type[idx])
@@ -287,5 +287,5 @@ setMethod(scanVcf, c("connection", "missing"),
             }, rownames(geno), geno$Number, geno$Type)
         }
     }
-    x[[1]]
+    x
 }

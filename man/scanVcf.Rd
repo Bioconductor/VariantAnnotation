@@ -144,8 +144,8 @@ scanVcf(file, ..., param)
   vcf <- scanVcf(fl)
   ## value: list-of-lists
   str(vcf)
-  names(vcf[["GENO"]])
-  vcf[["GENO"]][["GT"]]
+  names(vcf[[1]][["GENO"]])
+  vcf[[1]][["GENO"]][["GT"]]
 }
 
 \keyword{ manip }

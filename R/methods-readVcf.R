@@ -106,35 +106,43 @@ setMethod(readVcf, c(file="character", genome="missing",
 
 .scanVcfToLongGRanges <- function(vcf, file, genome, ...)
 {
+    lst <- lapply(names(vcf[[1]]), function(elt) {
+        do.call(c, unname(lapply(vcf, "[[", elt)))
+    })
+    names(lst) <- names(vcf[[1]])
     hdr <- scanVcfHeader(file)[[1]][["Header"]]
-    rowData <- vcf$rowData
-    genome(rowData) <- genome
+
+    ## single valued
+    sdat <- list(REF=lst[["REF"]], QUAL=lst[["QUAL"]], FILTER=lst[["FILTER"]])
+    rnglen <- lapply(vcf, function(rng) length(rng[["rowData"]])) 
+    sdat <- DataFrame(rangeID=as.factor(rep(names(vcf), rnglen)), 
+                      DataFrame(sdat[lapply(sdat, is.null) == FALSE])) 
 
     ## multi valued
-    gdat <- .formatGeno(vcf$GENO)
+    gdat <- .formatGeno(lst[["GENO"]])
     glen <- lapply(gdat, elementLengths) 
     nsmp <- ifelse(length(gdat) > 0, length(unique(gdat$SAMPLES)), 1)
 
-    idat <- .formatInfo(vcf$INFO, hdr[["INFO"]])
-    idat <- c(ALT=.formatALT(vcf$ALT), as.list(idat))
+    idat <- .formatInfo(lst[["INFO"]], hdr[["INFO"]])
+    idat <- c(ALT=.formatALT(lst[["ALT"]]), as.list(idat))
     ilen <- lapply(idat, function(x) rep(elementLengths(x), nsmp)) 
     idat <- lapply(idat, function(x) rep(x, nsmp)) 
 
-    ## single valued
-    sdat <- list(REF=vcf$REF, QUAL=vcf$QUAL, FILTER=vcf$FILTER)
-    sdat <- DataFrame(sdat[lapply(sdat, is.null) == FALSE]) 
-
-    ## elementLengths for multi
+    ## multi-valued
     eltlen <- c(ilen, glen)
     maxlen <- apply(do.call(cbind, eltlen), 1, prod)
 
-    ## replicate
+    ## replicate field elements
     single <- lapply(sdat, function(elt, maxlen, nsmp) {
                   rep(rep(elt, nsmp), maxlen)
               }, maxlen, nsmp)
     multi <- Map(function(elt, eltlen, maxlen) {
                  unlist(rep(elt, maxlen/eltlen), use.names=FALSE)
              }, c(idat, gdat), eltlen, MoreArgs=list(maxlen))
+
+    ## replicate rowData
+    rowData <- lst[["rowData"]]
+    genome(rowData) <- genome
     gr <- rep(rep(rowData, nsmp), maxlen)
     values(gr) <- DataFrame(single, multi) 
     gr 
@@ -142,26 +150,31 @@ setMethod(readVcf, c(file="character", genome="missing",
 
 .scanVcfToVCF <- function(vcf, file, genome, ...)
 {
+    lst <- lapply(names(vcf[[1]]), function(elt) {
+        do.call(c, unname(lapply(vcf, "[[", elt)))
+    })
+    names(lst) <- names(vcf[[1]])
     hdr <- scanVcfHeader(file)[[1]][["Header"]]
 
     ## rowData
-    rowData <- vcf$rowData
+    rowData <- lst[["rowData"]]
     genome(seqinfo(rowData)) <- genome 
+    rnglen <- lapply(vcf, function(rng) length(rng[["rowData"]]))
+    values(rowData) <- DataFrame(rangeID=as.factor(rep(names(vcf), rnglen)))
+
 
     ## fixed fields
-    if (!is.null(vcf$ALT))
-        ALT <- .formatALT(vcf$ALT)
-    else
-        ALT <- vcf$ALT
-    fx <- list(REF=vcf$REF, ALT=ALT, QUAL=vcf$QUAL, FILTER=vcf$FILTER)
+    ALT <- .formatALT(lst[["ALT"]])
+    fx <- list(REF=lst[["REF"]], ALT=ALT, QUAL=lst[["QUAL"]],
+               FILTER=lst[["FILTER"]])
     fixed <- DataFrame(fx[lapply(fx, is.null) == FALSE]) 
 
     ## info 
-    info <- .formatInfo(vcf$INFO, hdr[["INFO"]])
+    info <- .formatInfo(.combineLists(lst[["INFO"]]), hdr[["INFO"]])
 
     ## colData
-    if (length(vcf$GENO) > 0) {
-        samples <- colnames(vcf$GENO[[1]])
+    if (length(lst[["GENO"]]) > 0) {
+        samples <- colnames(lst[["GENO"]][[1]])
         colData <- DataFrame(Samples=seq_len(length(samples)),
                              row.names=samples)
     } else {
@@ -169,7 +182,7 @@ setMethod(readVcf, c(file="character", genome="missing",
     }
 
     VCF(rowData=rowData, colData=colData, exptData=SimpleList(HEADER=hdr),
-        fixed=fixed, info=info, geno=SimpleList(vcf$GENO))
+        fixed=fixed, info=info, geno=SimpleList(.combineLists(lst[["GENO"]])))
 }
 
 .toDNAStringSet <- function(x)
@@ -209,6 +222,7 @@ setMethod(readVcf, c(file="character", genome="missing",
         names(DF) <- names(x)
         return(DF)
     }
+    ## ragged arrays become compressed lists
     type <- hdr$Type[match(names(x), rownames(hdr))]
     idx <- which(lapply(x, function(elt) is.null(dim(elt))) == FALSE)
     if (0L != length(idx)) {
@@ -244,6 +258,7 @@ setMethod(readVcf, c(file="character", genome="missing",
     nsmp <- dim(x[[1]])[2]
     nms <- colnames(x[[1]]) 
 
+    ## collapse matrices and arrays
     for (i in which(cls == "array")) {
         dim(x[[i]]) <- c(nvar*nsmp, dim(x[[i]])[3])
         x[[i]] <- split(x[[i]], seq_len(nvar*nsmp))
@@ -251,5 +266,27 @@ setMethod(readVcf, c(file="character", genome="missing",
     for (i in which(cls == "matrix")) {
         dim(x[[i]]) <- c(nvar*nsmp, 1)
     }
+    ## sample names become a data column
     c(list(SAMPLES=rep(nms, each=nvar)), x)
 }
+
+.combineLists <- function(x)
+{
+    ## combine elements across a list
+    ## retain data structures
+    sp <- split(x, unique(names(x)))
+    lapply(sp, function(elt) {
+        if (is(elt[[1]], "matrix")) {
+            do.call(rbind, unname(elt))
+        } else if (is(elt[[1]], "array")) { 
+            d <- dim(elt[[1]])
+            dat <- lapply(seq_len(d[3]), function(i)
+                do.call(rbind, unname(lapply(elt, "[",,,i))))
+            array(unlist(dat, use.names=FALSE),
+                c(nrow(dat[[1]]), ncol(dat[[1]]), length(dat))) 
+        } else {
+            do.call(c, unname(elt))
+        }
+    })
+}
+

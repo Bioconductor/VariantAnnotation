@@ -144,9 +144,9 @@
 \examples{
   ScanVcfParam()
 
-  ## -----------------------------
+  ## --------------------------------------
   ## 'which' argument
-  ## -----------------------------
+  ## --------------------------------------
   ## To subset on genomic coordinates, create a GRanges, RangedData or 
   ## RangesList with the ranges of interest. This object is supplied
   ## to ScanVcfParam() as the 'which' argument.
@@ -154,24 +154,23 @@
       seq2=IRanges(c(100, 1000), c(1000, 2000)))
   ScanVcfParam(which=which)
  
-  ## -----------------------------
-  ## 'info' and 'geno' arguments
-  ## -----------------------------
-  ## Subsets of INFO or FORMAT field elements are specified in the 'info'
-  ## and 'geno' arguments. This call specifies the return of the "GT" 'geno' 
-  ## field and the subset of ranges in 'which'. All 'fixed' and 'info' 
-  ## fields will be returned. 
+  ## --------------------------------------
+  ## 'fixed', 'info' and 'geno' arguments
+  ## --------------------------------------
+  ## This param specifies the return of the "GT" 'geno' field and the 
+  ## subset of ranges in 'which'. All 'fixed' and 'info' fields will be 
+  ## returned. 
   ScanVcfParam(geno="GT", which=which)
  
-  ## Specify the geno 'GT' and none of the 'info' fields.
-  ScanVcfParam(geno="GT", info=NA) 
+  ## Here two 'fixed' and one 'geno' field are specified
+  ScanVcfParam(fixed=c("ALT", "QUAL"), geno="GT", info=NA) 
 
   ## Return only the 'fixed' fields
   ScanVcfParam(geno=NA, info=NA) 
 
-  ## -----------------------------
+  ## --------------------------------------
   ## 'asGRanges' argument 
-  ## -----------------------------
+  ## --------------------------------------
   ## When asGranges=TRUE a long form GRanges is returned from readVcf
   ## instead of a VCF object. One or more fields of 'fixed', 'info'
   ## or 'geno' can be specified.

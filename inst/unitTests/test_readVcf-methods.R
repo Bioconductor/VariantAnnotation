@@ -22,8 +22,20 @@ test_readVcf_format <- function()
 
 test_readVcf_ranges <- function()
 {
-    vcf <- readVcf(f1, genome="hg19")
+    vcf <- readVcf(f2, "hg19")
     checkEquals(width(rowData(vcf)), width(values(ref(vcf))[["REF"]]))
+
+    compressVcf <- bgzip(f2, tempfile())
+    idx <- indexTabix(compressVcf, "vcf")
+    tab <- TabixFile(compressVcf, idx)
+    rd <- rowData(vcf)
+    param <- ScanVcfParam(which=rd) 
+    vcf_rd <- readVcf(tab, "hg19", param) 
+    checkIdentical(info(vcf), info(vcf_rd))
+
+    param <- ScanVcfParam(which=rd[c(3,5)]) 
+    vcf_rd <- readVcf(tab, "hg19", param) 
+    checkEquals(2L, dim(vcf_rd)[1])
 }
 
 test_readVcf_param <- function()
