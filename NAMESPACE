@@ -2,56 +2,55 @@ useDynLib(VariantAnnotation, .registration=TRUE)
 
 import(methods)
 import(Rsamtools)
-import(Biostrings)
 import(GenomicRanges)
-import(AnnotationDbi)
 import(zlibbioc)
 
 importFrom(BiocGenerics, rbind, cbind, paste, order, lapply, sapply, mapply)
 
+importClassesFrom(Biostrings, DNAStringSet, DNAStringSetList)
+importFrom(Biostrings, AAStringSet, DNAStringSet)
+importMethodsFrom(Biostrings, 
+                  "%in%", as.list, as.matrix, duplicated,
+                  end, head, intersect, match, nchar, order, setdiff,
+                  sort, start, "subseq<-", substr, substring, summary,
+                  translate, unique, unlist, width)
+
 importClassesFrom(Biobase, ScalarCharacter)
 importFrom(Biobase, mkScalar, selectSome)
 
-importClassesFrom(BSgenome, BSgenome)
-importClassesFrom(snpStats, SnpMatrix)
+importClassesFrom(AnnotationDbi, AnnotationDb)
+importMethodsFrom(AnnotationDbi, colnames, cols, exists, keys, ncol,
+                  nrow, select)
 
 importClassesFrom(GenomicFeatures, TranscriptDb)
-importMethodsFrom(
-    GenomicFeatures, cdsBy, exons, transcripts,
-    fiveUTRsByTranscript, threeUTRsByTranscript,
-    isActiveSeq, "isActiveSeq<-")
+importMethodsFrom(GenomicFeatures, cdsBy, exons, transcripts,
+                  fiveUTRsByTranscript, threeUTRsByTranscript,
+                  isActiveSeq, "isActiveSeq<-")
 importFrom(GenomicFeatures, extractTranscriptsFromGenome)
 
 importClassesFrom(IRanges, DataFrame, Ranges, RangesList, RangedData)
-importMethodsFrom(
-    IRanges, "%in%", append, as.matrix, as.vector,
-    countOverlaps, elementLengths, end, eval,
-    findOverlaps, follow, gsub, lapply, match,
-    "metadata<-", narrow, order, precede,
-    queryHits, rev, Rle, runValue, sapply, shift,
-    split, start, "start<-", subjectHits, "subseq<-",
-    substring, unique, unlist, values, "values<-", which,
-    width)
-importFrom(
-    IRanges, CharacterList, DataFrame, IRanges,
-    PartitioningByWidth, successiveViews)
+importMethodsFrom(IRanges, "%in%", append, as.matrix, as.vector,
+                  countOverlaps, elementLengths, end, eval, findOverlaps, 
+                  follow, gsub, lapply, match, "metadata<-", narrow, order, 
+                  precede, queryHits, rev, Rle, runValue, sapply, shift,
+                  split, start, "start<-", subjectHits, "subseq<-", substring, 
+                  unique, unlist, values, "values<-", which, width)
+importFrom(IRanges, CharacterList, DataFrame, IRanges, PartitioningByWidth, 
+           successiveViews)
 
-importMethodsFrom(
-    DBI, dbCommit, dbConnect,
-    dbDisconnect, dbExistsTable, dbGetQuery,
-    dbReadTable, dbWriteTable, dbListTables, dbListFields)
+importMethodsFrom(DBI, dbCommit, dbConnect, dbDisconnect, dbExistsTable, 
+                  dbGetQuery, dbReadTable, dbWriteTable, dbListTables, 
+                  dbListFields)
+
+importClassesFrom(BSgenome, BSgenome)
+
+importClassesFrom(snpStats, SnpMatrix)
 
 exportClassPattern("^.*$")
 
-exportMethods(
-    predictCoding, getTranscriptSeqs,
-    show, c, 
-    keys, cols, select)
+exportMethods(predictCoding, getTranscriptSeqs, show, c, keys, cols, select)
 
-export(
-    locateVariants, 
-    getTranscriptSeqs, globalToLocal,
-    readVcf, MatrixToSnpMatrix,
-    keys, cols, select)
+export(locateVariants, getTranscriptSeqs, globalToLocal, readVcf, 
+       MatrixToSnpMatrix, keys, cols, select)
 
 exportPattern("^[^\\.]")
