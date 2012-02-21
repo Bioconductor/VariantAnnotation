@@ -46,11 +46,19 @@ importClassesFrom(BSgenome, BSgenome)
 
 importClassesFrom(snpStats, SnpMatrix)
 
+#exportPattern("^[^\\.]")
+
 exportClassPattern("^.*$")
 
-exportMethods(predictCoding, getTranscriptSeqs, show, c, keys, cols, select)
+export(VAFilterResult, dbSNPFilter, regionFilter, compose,
+       globalToLocal, duplicateRSID,
+       VCF) 
 
-export(locateVariants, getTranscriptSeqs, globalToLocal, readVcf, 
-       MatrixToSnpMatrix, keys, cols, select)
-
-exportPattern("^[^\\.]")
+exportMethods(scanVcf, readVcf, ScanVcfParam, scanVcfHeader, writeVcf,
+              locateVariants, predictCoding, getTranscriptSeqs, 
+              MatrixToSnpMatrix,
+              fixed, "fixed<-", ref, "ref<-", alt, "alt<-", qual, "qual<-",
+              filt, "filt<-", info, "info<-", geno, "geno<-", "[", "[<-", 
+              "genome", "seqlevels", "renameSeqlevels", "keepSeqlevels", 
+              keys, cols, select, 
+              vaFilter, name, stats, Logic, show)

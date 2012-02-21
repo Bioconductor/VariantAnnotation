@@ -22,7 +22,7 @@ setMethod(name, "VAFilterResult", function(x, ...) slot(x, "name"))
 
 setMethod(stats, "VAFilterResult", function(x, ...) slot(x, "stats"))
 
-setMethod("Logic", c("VAFilterResult", "VAFilterResult"),
+setMethod(Logic, c("VAFilterResult", "VAFilterResult"),
     function(e1, e2)
 {
     x <- callNextMethod()
