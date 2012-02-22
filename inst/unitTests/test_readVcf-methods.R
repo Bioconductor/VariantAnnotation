@@ -11,7 +11,7 @@ test_readVcf_format <- function()
 
     ## duplicate header lines, missing INFO
     vcf <- suppressWarnings(readVcf(f3, genome="hg19"))
-    checkTrue(ncol(values(info(vcf))) == 1L)
+    checkTrue(ncol(values(info(vcf))) == 2L)
     checkTrue(class(values(alt(vcf))[["ALT"]]) == "DNAStringSetList")
 
     ## structural 
@@ -31,7 +31,8 @@ test_readVcf_ranges <- function()
     rd <- rowData(vcf)
     param <- ScanVcfParam(which=rd) 
     vcf_rd <- readVcf(tab, "hg19", param) 
-    checkIdentical(info(vcf), info(vcf_rd))
+    checkIdentical(values(info(vcf))[c("AA", "AF", "DB", "DP", "H2")], 
+                   values(info(vcf_rd))[c("AA", "AF", "DB", "DP", "H2")])
 
     param <- ScanVcfParam(which=rd[c(3,5)]) 
     vcf_rd <- readVcf(tab, "hg19", param) 
@@ -54,8 +55,8 @@ test_readVcf_param <- function()
     i <- inms[c(1,4)]
     param <- ScanVcfParam(info=i)
     vcf <- readVcf(f2, "hg19", param)
-    checkTrue(ncol(values(info(vcf))) == length(i))
-    checkTrue(all(names(values(info(vcf))) %in% i))
+    checkTrue(ncol(values(info(vcf))) == length(i) + 1)
+    checkTrue(all(i %in% names(values(info(vcf)))))
 
     ## geno, info combined
     param <- ScanVcfParam()
@@ -73,7 +74,7 @@ test_readVcf_param <- function()
     idx <- indexTabix(compressVcf, "vcf")
     tab <- TabixFile(compressVcf, idx)
     vcf <- readVcf(tab, "hg19",  param)
-    checkTrue(all(names(values(info(vcf))) %in% i))
+    checkTrue(all(i %in% names(values(info(vcf)))))
     checkTrue(all(names(geno(vcf)) %in% g))
     checkTrue(length(rowData(vcf)) == 3)
 

@@ -76,7 +76,7 @@
 
           The minimal data returned when no \sQuote{fixed}, \sQuote{info} or 
           \sQuote{geno} are specified is a \code{GRanges} with elementMetadata
-          columns of ID, rangeID and REF. ID and REF are from the VCF file.
+          columns of rangeID, ID and REF. ID and REF are from the VCF file.
           The rangeID column is meaningful when specific ranges are requested
           through the \code{ScanVcfParam}. \code{readVcf} calls \code{scanVcf}
           which returns the data as a named list. These names correspond

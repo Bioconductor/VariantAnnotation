@@ -27,7 +27,8 @@ setMethod("ref", "VCF",
 {
     gr <- rowData(x)
     if (length(slot(x, "fixed")$REF) != 0L)
-        values(gr) <- DataFrame(REF=slot(x, "fixed")$REF)
+        values(gr) <- append(values(gr), 
+            DataFrame(REF=slot(x, "fixed")$REF))
     gr
 })
 
@@ -44,7 +45,8 @@ setMethod("alt", "VCF",
 {
     gr <- rowData(x)
     if (length(slot(x, "fixed")$ALT) != 0L)
-        values(gr) <- DataFrame(ALT=slot(x, "fixed")$ALT)
+        values(gr) <- append(values(gr),
+            DataFrame(ALT=slot(x, "fixed")$ALT))
     gr
 })
 
@@ -68,7 +70,8 @@ setMethod("qual", "VCF",
 {
     gr <- rowData(x)
     if (length(slot(x, "fixed")$QUAL) != 0L)
-        values(gr) <- DataFrame(QUAL=slot(x, "fixed")$QUAL)
+        values(gr) <- append(values(gr), 
+            DataFrame(QUAL=slot(x, "fixed")$QUAL))
     gr
 })
 
@@ -85,7 +88,8 @@ setMethod("filt", "VCF",
 {
     gr <- rowData(x)
     if (length(slot(x, "fixed")$FILTER) != 0L)
-        values(gr) <- DataFrame(FILTER=slot(x, "fixed")$FILTER)
+        values(gr) <- append(values(gr), 
+            DataFrame(FILTER=slot(x, "fixed")$FILTER))
     gr
 })
 
@@ -102,7 +106,7 @@ setMethod("fixed", "VCF",
 {
     gr <- rowData(x)
     if (length(slot(x, "fixed")) != 0L)
-        values(gr) <- slot(x, "fixed")
+        values(gr) <- append(values(gr), slot(x, "fixed"))
     gr
 })
 
@@ -120,7 +124,7 @@ setMethod("info", "VCF",
 {
     gr <- rowData(x)
     if (length(slot(x, "info")) != 0L)
-        values(gr) <- slot(x, "info")
+        values(gr) <- append(values(gr), slot(x, "info"))
     gr
 })
 
@@ -183,8 +187,8 @@ setReplaceMethod("geno", c("VCF", "missing", "SimpleList"),
                rowData=rowData(x)[i,,drop=FALSE],
                colData=colData(x)[j,,drop=FALSE],
                assays=geno, 
-               info=values(info(x))[i,,drop=FALSE],
-               fixed=values(fixed(x))[i,])
+               info=values(info(x))[i,-1,drop=FALSE],
+               fixed=values(fixed(x))[i,-1])
 }
 
 setMethod("[", c("VCF", "ANY", "ANY"),

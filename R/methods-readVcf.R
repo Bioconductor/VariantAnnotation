@@ -94,26 +94,31 @@ setMethod(readVcf, c(file="character", genome="missing",
 
 .scanVcfToLongGRanges <- function(vcf, file, genome, ...)
 {
-    lst <- lapply(names(vcf[[1]]), function(elt) {
-        do.call(c, unname(lapply(vcf, "[[", elt)))
-    })
-    names(lst) <- names(vcf[[1]])
+    if (1L < length(vcf)) {
+        rnglen <- lapply(vcf, function(rng) length(rng[["rowData"]])) 
+        rangeID <- as.factor(rep(names(vcf), rnglen))
+        vcf <- lapply(names(vcf[[1]]), function(elt) {
+            do.call(c, unname(lapply(vcf, "[[", elt)))
+        })
+        names(vcf) <- names(vcf[[1]]) 
+    } else {
+        rangeID <- as.factor(rep(names(vcf), length(vcf[[1]][["rowData"]])))
+        vcf <- vcf[[1]]
+    } 
     hdr <- scanVcfHeader(file)[[1]][["Header"]]
 
     ## single valued
-    rnglen <- lapply(vcf, function(rng) length(rng[["rowData"]])) 
-    rangeID <- as.factor(rep(names(vcf), rnglen)) 
-    sdat <- list(REF=lst[["REF"]], QUAL=lst[["QUAL"]], FILTER=lst[["FILTER"]])
-    sdat <- DataFrame(ID=names(lst[["rowData"]]), rangeID=rangeID, 
+    sdat <- list(REF=vcf[["REF"]], QUAL=vcf[["QUAL"]], FILTER=vcf[["FILTER"]])
+    sdat <- DataFrame(rangeID=rangeID, ID=names(vcf[["rowData"]]), 
                       DataFrame(sdat[lapply(sdat, is.null) == FALSE])) 
 
     ## multi valued
-    gdat <- .formatGeno(.combineLists(lst[["GENO"]]))
+    gdat <- .formatGeno(.combineLists(vcf[["GENO"]]))
     glen <- lapply(gdat, elementLengths) 
     nsmp <- ifelse(length(gdat) > 0, length(unique(gdat$SAMPLES)), 1)
 
-    idat <- .formatInfo(.combineLists(lst[["INFO"]]), hdr[["INFO"]])
-    idat <- c(ALT=.formatALT(lst[["ALT"]]), as.list(idat))
+    idat <- .formatInfo(.combineLists(vcf[["INFO"]]), hdr[["INFO"]])
+    idat <- c(ALT=.formatALT(vcf[["ALT"]]), as.list(idat))
     ilen <- lapply(idat, function(x) rep(elementLengths(x), nsmp)) 
     idat <- lapply(idat, function(x) rep(x, nsmp)) 
 
@@ -133,7 +138,7 @@ setMethod(readVcf, c(file="character", genome="missing",
               }, maxlen, nsmp)
 
     ## replicate rowData
-    rowData <- lst[["rowData"]]
+    rowData <- vcf[["rowData"]]
     names(rowData) <- NULL
     genome(rowData) <- genome
     gr <- rep(rep(rowData, nsmp), maxlen)
@@ -143,31 +148,38 @@ setMethod(readVcf, c(file="character", genome="missing",
 
 .scanVcfToVCF <- function(vcf, file, genome, ...)
 {
-    lst <- lapply(names(vcf[[1]]), function(elt) {
-        do.call(c, unname(lapply(vcf, "[[", elt)))
-    })
-    names(lst) <- names(vcf[[1]])
+    if (1L < length(vcf)) {
+        rnglen <- lapply(vcf, function(rng) length(rng[["rowData"]]))
+        rangeID <- as.factor(rep(names(vcf), rnglen))
+        nms <- names(vcf[[1]])
+        vcf <- lapply(nms, function(elt) {
+            do.call(c, unname(lapply(vcf, "[[", elt)))
+        })
+        names(vcf) <- nms 
+    } else {
+        rangeID <- as.factor(rep(names(vcf), length(vcf[[1]][["rowData"]])))
+        vcf <- vcf[[1]]
+    }
     hdr <- scanVcfHeader(file)[[1]][["Header"]]
 
     ## rowData
-    rowData <- lst[["rowData"]]
+    rowData <- vcf[["rowData"]]
     genome(seqinfo(rowData)) <- genome 
-    rnglen <- lapply(vcf, function(rng) length(rng[["rowData"]]))
-    values(rowData) <- DataFrame(rangeID=as.factor(rep(names(vcf), rnglen)))
+    values(rowData) <- DataFrame(rangeID=rangeID)
 
 
     ## fixed fields
-    ALT <- .formatALT(lst[["ALT"]])
-    fx <- list(REF=lst[["REF"]], ALT=ALT, QUAL=lst[["QUAL"]],
-               FILTER=lst[["FILTER"]])
+    ALT <- .formatALT(vcf[["ALT"]])
+    fx <- list(REF=vcf[["REF"]], ALT=ALT, QUAL=vcf[["QUAL"]],
+               FILTER=vcf[["FILTER"]])
     fixed <- DataFrame(fx[lapply(fx, is.null) == FALSE]) 
 
     ## info 
-    info <- .formatInfo(.combineLists(lst[["INFO"]]), hdr[["INFO"]])
+    info <- .formatInfo(.combineLists(vcf[["INFO"]]), hdr[["INFO"]])
 
     ## colData
-    if (length(lst[["GENO"]]) > 0) {
-        samples <- colnames(lst[["GENO"]][[1]])
+    if (length(vcf[["GENO"]]) > 0) {
+        samples <- colnames(vcf[["GENO"]][[1]])
         colData <- DataFrame(Samples=seq_len(length(samples)),
                              row.names=samples)
     } else {
@@ -175,7 +187,7 @@ setMethod(readVcf, c(file="character", genome="missing",
     }
 
     VCF(rowData=rowData, colData=colData, exptData=SimpleList(HEADER=hdr),
-        fixed=fixed, info=info, geno=SimpleList(.combineLists(lst[["GENO"]])))
+        fixed=fixed, info=info, geno=SimpleList(.combineLists(vcf[["GENO"]])))
 }
 
 .toDNAStringSet <- function(x)
@@ -215,7 +227,7 @@ setMethod(readVcf, c(file="character", genome="missing",
         names(DF) <- names(x)
         return(DF)
     }
-    ## ragged arrays become compressed lists
+    ## matrices become compressed lists
     type <- hdr$Type[match(names(x), rownames(hdr))]
     idx <- which(lapply(x, function(elt) is.null(dim(elt))) == FALSE)
     if (0L != length(idx)) {

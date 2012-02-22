@@ -66,7 +66,7 @@ setMethod("predictCoding", signature(query="GRanges", subject="TranscriptDb",
         txLocal <- globalToLocal(queryAdj, cdsByTx)
         midx <- which(width(varAllele) == 0)
         if (length(midx) > 0) {
-            warning("ranges with missing values in the varAllele column ",
+            warning("records with missing 'varAllele' values ",
                     "will be ignored")
             txLocal <- txLocal[!txLocal$globalInd %in% midx, ] 
         }
@@ -88,8 +88,13 @@ setMethod("predictCoding", signature(query="GRanges", subject="TranscriptDb",
 
         ## construct variant sequences 
         varWidth <- width(xAllele)
-        indels <- originalWidth == 0 | varWidth == 0 
+        indels <- originalWidth == 0 | varWidth == 0
         translateIdx <- abs(varWidth - originalWidth) %% 3 == 0 
+        n <- grep("N", as.character(xAllele, use.names=FALSE), fixed=TRUE)
+        if (length(n) > 0) {
+            warning("varAllele values containing 'N' will not be translated")
+            translateIdx[n] <- FALSE
+        }
         varSeq <- codons
         subseq(varSeq, start=varPosition, width=originalWidth) <- xAllele 
 
