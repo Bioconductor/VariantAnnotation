@@ -40,10 +40,11 @@
   \item{varAllele}{A \link[Biostrings]{DNAStringSet} containing the variant
     (alternate) alleles. The length of \code{varAllele} must equal the length
     of \code{query}. Missing values are represented by a zero width empty 
-    element. Ranges with missing values will be ignored. 
+    element. Ranges with missing \code{varAllele} values are ignored; those with 
+    an \sQuote{N} character are not translated.
 
-    When the \code{query} is a \code{VCF} object the \code{varAllele} will
-    be missing. This value is taken internally from the \code{VCF} with
+    When the \code{query} is a \code{VCF} object the \code{varAllele} argument 
+    will be missing. This value is taken internally from the \code{VCF} with
     \code{values(alt(<VCF>))[["ALT"]]}.
   }
   \item{\dots}{Additional arguments passed to methods.
@@ -52,18 +53,19 @@
 
 \details{
   This function returns the amino acid coding for variants that fall in
-  coding regions. The reference sequences are not required as input, rather 
-  the ranges in the \code{query} must represent the width of the reference 
-  allele. For guidance on how to represent an insertion, deletion or
-  substitution see the 1000 Genomes VCF format (references). Reference 
-  sequences are retrieved from a fasta file or \link[BSgenome]{BSgenome}. 
-  Variant alleles are substituted into the reference sequences and transcribed. 
-  Sequences are transcribed only if the substitution, insertion or deletion 
-  results in a new sequence length divisible by 3.
+  coding regions. The reference sequences are taken from a fasta file or 
+  \link[BSgenome]{BSgenome}. The width of the reference is determined
+  from the start postion and width of the range in the \code{query}.
+  For guidance on how to represent an insertion, deletion or substitution 
+  see the 1000 Genomes VCF format (references). 
 
+  Variant alleles are taken from the \code{varAllele} when supplied.
   When the \code{query} is a \code{VCF} object the \code{varAllele} will
   be missing. This value is taken internally from the \code{VCF} with
-  \code{values(alt(<VCF>))[["ALT"]]}. 
+  \code{values(alt(<VCF>))[["ALT"]]}. The variant allele is substituted 
+  into the reference sequences and transcribed. Transcription only 
+  occurs if the substitution, insertion or deletion results in a new sequence 
+  length divisible by 3.
 } 
 
 \value{
@@ -75,12 +77,12 @@
   and \code{cdsID}.
 
   \describe{
-    \item{\code{queryHits}}{
-      The \code{queryHits} column provides a map back to the variants in the 
+    \item{\code{queryID}}{
+      The \code{queryID} column provides a map back to the variants in the 
       original \code{query}. If the \code{query} was a \code{VCF} object this
       index corresponds to the row in the \code{GRanges} in the \code{rowData}
-      slot. If \code{query} was an expanded \code{GRanges}, \code{RangedData} or
-      \code{RangesList} the index corresponds to the row in the expanded object.
+      slot. If \code{query} was a \code{GRanges}, \code{RangedData} or
+      \code{RangesList} the index corresponds to the row in the object.
     }
     \item{\code{consequence}}{
       Possible values for the \code{consequence} column are `synonymous',
@@ -143,7 +145,10 @@
 
   ## Rename seqlevels in the VCF object to match those in the TxDb
   vcf_adj <- renameSeqlevels(vcf, c("16"="chr16", "21"="chr21"))
-  
+  ## Confirm common seqlevels
+  intersect(seqlevels(vcf_adj), seqlevels(txdb19))
+
+ 
   ## Note that when 'query' is a VCF object the varAllele argument is missing.
   coding <- predictCoding(vcf_adj, txdb19, Hsapiens)
 
@@ -159,7 +164,7 @@
   ## The seqlevels have been adjusted in the VCF object so the GRanges we
   ## extract has the correct seqlevels.
   rd <- rowData(vcf_adj)
-  
+ 
   ## The GRanges provided as the 'query' must have one row for each alternate
   ## allele. We see we that variants 1, 2 and 10 have two alternate alleles.
   altallele <- values(alt(vcf_adj))[["ALT"]]

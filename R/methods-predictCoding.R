@@ -61,29 +61,29 @@ setMethod("predictCoding", signature(query="GRanges", subject="TranscriptDb",
                   refAA=AAStringSet(), varAA=AAStringSet(), 
                   txID=integer(), geneID=character(), cdsID=integer())) 
 
-        ## map transcript indices to genome indices
+        ## map genome position to transcript position
         cdsByTx <- cdsByTx[unique(subjectHits(fo))]
-        txLocal <- globalToLocal(queryAdj, cdsByTx)
+        txlocal <- globalToLocal(queryAdj, cdsByTx)
         midx <- which(width(varAllele) == 0)
         if (length(midx) > 0) {
             warning("records with missing 'varAllele' values ",
                     "will be ignored")
-            txLocal <- txLocal[!txLocal$globalInd %in% midx, ] 
+            txlocal <- txlocal[!txlocal$qindex %in% midx, ] 
         }
-        xCoding <- query[txLocal$globalInd]
-        xAllele <- varAllele[txLocal$globalInd]
+        xCoding <- query[txlocal$qindex]
+        xAllele <- varAllele[txlocal$qindex]
  
         ## construct original sequences 
         originalWidth <- width(xCoding)
-        codonStart <- ((start(txLocal$local) - 1L) %/% 3L) * 3L + 1L
+        codonStart <- ((start(txlocal$local) - 1L) %/% 3L) * 3L + 1L
         ## codonEnd must be adjusted for 
         ## (1) the width of the reference sequence and
         ## (2) the position in the codon of the alternate allele substitution
-        varPosition <- (start(txLocal$local) - 1L) %% 3L + 1L
+        varPosition <- (start(txlocal$local) - 1L) %% 3L + 1L
         codonEnd <- 
             codonStart + (((varPosition + originalWidth) %/% 3L) * 3L + 2L)
         txseqs <- getTranscriptSeqs(cdsByTx, seqSource)
-        codons <- DNAStringSet(substring(txseqs[txLocal$rangesInd], 
+        codons <- DNAStringSet(substring(txseqs[txlocal$sindex], 
             codonStart, codonEnd))
 
         ## construct variant sequences 
@@ -99,14 +99,15 @@ setMethod("predictCoding", signature(query="GRanges", subject="TranscriptDb",
         subseq(varSeq, start=varPosition, width=originalWidth) <- xAllele 
 
         ## results
-        queryID <- txLocal$globalInd
-        txID <- names(cdsByTx)[txLocal$rangesInd]
-        fromSubject <-
-            values(cdsByTx@unlistData)[txLocal$rangesInd,]
-        if (any(names(fromSubject) %in% "cds_id"))
-            cdsID <- fromSubject$cds_id
-        else
-            cdsID <- rep(NA, length(txID))
+        queryID <- txlocal$qindex
+        txID <- names(cdsByTx)[txlocal$sindex]
+        cdsID <- txlocal$cdsid 
+        #fromSubject <-
+        #    values(cdsByTx@unlistData)[txlocal$sindex,]
+        #if (any(names(fromSubject) %in% "cds_id"))
+        #    cdsID <- fromSubject$cds_id
+        #else
+        #    cdsID <- rep(NA, length(txID))
  
         txByGene <- transcriptsBy(subject, "gene")
         map <- data.frame(

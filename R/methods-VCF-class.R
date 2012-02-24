@@ -316,19 +316,19 @@ setMethod(show, "VCF",
     }
     cat("class:", class(object), "\n")
     cat("dim:", dim(object), "\n")
-    cat("genome:", genome(rowData(object)), "\n")
+    cat("genome:", unique(genome(rowData(object))), "\n")
 
     expt <- names(exptData(object))
     if (is.null(expt))
         expt <- character(length(exptData(object)))
     scat("exptData(%d): %s\n", expt)
 
-    fixed <- names(values(fixed(object)))
+    fixed <- names(slot(object, "fixed")) 
     if (is.null(fixed))
         fixed <- character(ncol(values(fixed(object))))
     scat("fixed(%d): %s\n", fixed)
 
-    info <- names(values(info(object)))
+    info <- names(slot(object, "info")) 
     if (is.null(info))
         info <- character(ncol(values(info(object))))
     scat("info(%d): %s\n", info)

@@ -277,6 +277,8 @@ setMethod(readVcf, c(file="character", genome="missing",
 
 .combineLists <- function(x)
 {
+    if (length(names(x)) == length(unique(names(x))))
+        return(x)
     ## combine elements across a list
     ## retain data structures
     sp <- split(x, unique(names(x)))

@@ -1,24 +1,26 @@
-globalToLocal <- function(global, ranges) 
+globalToLocal <- function(query, subject) 
 {
-    gr <- unlist(ranges, use.names=FALSE)
-    #gr <- ranges@unlistData
-    ol <- findOverlaps(global, gr, type = "within")
-    shits <- subjectHits(ol)
-    qhits <- queryHits(ol)
-    local <- ranges(global)[qhits]
-    bounds <- ranges(gr)[shits]
- 
-    ## location wrt start of coding region 
-    neg <- as.vector(strand(gr)[shits] == "-")
-    local[!neg] <- shift(local[!neg], - start(bounds)[!neg])
-    local[neg] <- IRanges(end(bounds)[neg] - end(local)[neg],
-        width = width(local)[neg])
+    ## convert genome coordinates to transcript coordinates
+    ## subject must be a cdsbytx object
+    gr <- unlist(subject, use.names=FALSE)
+    fo <- findOverlaps(query, gr, type = "within")
+    shit <- subjectHits(fo)
+    qhit <- queryHits(fo)
 
-    ## location wrt transcript 
-    cumsums <- .listCumsumShifted(width(ranges))
-    local <- shift(local, 1L + cumsums[shits])
+    ## position of query in coding region 
+    qrng <- ranges(query)[qhit]
+    cds_bounds <- ranges(gr)[shit]
+    neg <- as.vector(strand(gr)[shit] == "-")
+    qrng[!neg] <- shift(qrng[!neg], - start(cds_bounds)[!neg])
+    qrng[neg] <- IRanges(end(cds_bounds)[neg] - end(qrng)[neg],
+        width = width(qrng)[neg])
 
-    rangesInd <- rep(seq(length(ranges)), elementLengths(ranges))[shits]
-    DataFrame(globalInd = qhits, rangesInd, local)
+    ## position of query in transcript 
+    cumsums <- .listCumsumShifted(width(subject))
+    txshift <- shift(qrng, 1L + cumsums[shit])
+
+    sindex <- rep(seq(length(subject)), elementLengths(subject))[shit]
+    cdsid <- values(gr[shit])[["cds_id"]]
+    DataFrame(qindex=qhit, sindex, cdsid, local=txshift)
 }
 

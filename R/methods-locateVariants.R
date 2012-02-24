@@ -55,7 +55,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
     }
  
     map <- data.frame(
-        txid=rep(names(cache[["cdsByTx"]]),
+        txid=rep(as.integer(names(cache[["cdsByTx"]])),
           elementLengths(cache[["cdsByTx"]])),
         cdsid=values(unlist(cache[["cdsByTx"]],
           use.names=FALSE))[["cds_id"]])
@@ -77,7 +77,8 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
         qhits <- queryHits(txFO)
         txID <- values(cache[["tx"]])["tx_id"][subjectHits(txFO),]
         cdsID <- map$cdsid[match(txID, map$txid)]
-        geneID <- values(cache[["tx"]])[["gene_id"]][subjectHits(txFO)]
+        geneID <- .unlistSaveLength(values(cache[["tx"]])
+            [["gene_id"]][subjectHits(txFO)])
 
         ## coding :
         coding <- cdsCO > 0 
@@ -112,7 +113,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
     intergenic <- txCO == 0
     if (all(intergenic == FALSE)) {
         DataFrame(queryID=integer(), location=.location(),
-            txID=integer(), cdsID=integer(), geneID=CharacterList(), 
+            txID=integer(), cdsID=integer(), geneID=character(), 
             precedesID=character(), followsID=character())
     } else {
         query <- query[intergenic]
@@ -131,7 +132,16 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
 
         DataFrame(queryID=which(intergenic), location=location, 
             txID=NA_integer_, cdsID=NA_integer_,
-            geneID=CharacterList(NA_character_),
+            geneID=NA_character_,
             precedesID=genes[pidx], followsID=genes[fidx])
     }
 }
+
+.unlistSaveLength <- function(x)
+{
+    x[elementLengths(x) == 0] <- NA
+    x@unlistData
+}
+
+
+

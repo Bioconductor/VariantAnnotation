@@ -121,6 +121,7 @@ locateVariants(query, subject, ...)
 
   ## Use the renameSeqlevels() helper to rename seqlevels
   rd_adj <- renameSeqlevels(rd, c("16"="chr16", "21"="chr21"))
+  ## Confirm common seqlevels
   intersect(seqlevels(rd_adj), seqlevels(txdb19))
 
   ## Call locateVariants() with GRanges as the query 
