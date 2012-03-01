@@ -25,12 +25,10 @@ locateVariants(query, subject, ...)
   }
   \item{\dots}{Additional arguments passed to methods, in particular:
     \describe{
-
       \item{cache:}{An \code{environment} into which required components
-	of \code{subject} are loaded. Provide, and re-use, a cache to
-	speed repeated queries to the same \code{subject} across
-	different \code{query} instances.}
-
+        of \code{subject} are loaded. Provide, and re-use, a cache to
+        speed repeated queries to the same \code{subject} across
+        different \code{query} instances.}
     }
   }
 }
@@ -56,9 +54,17 @@ locateVariants(query, subject, ...)
       A variant location will be \sQuote{NA} if the variant was called on a 
       chromosome present in the \code{query} but not in the \code{subject}
     }
+    \item{Using the cache :}{
+      When processing multiple VCF files performance is enhanced by specifying
+      an enviornment as the \code{cache} argument. This cache is used to store 
+      and reuse extracted components of the subject (TxDb) required by the 
+      function. The first call to the function (i.e., processing the first
+      VCF file in a list of many) populates the cache; repeated calls
+      to \code{locateVariants} will access these objects from the cache vs
+      re-extracting the same information.
+    }
   }
 }
-
 \value{
   A \link[IRanges]{DataFrame} with a row for each variant-transcript match.
   Columns are \code{queryID}, \code{location}, \code{txID}, \code{geneID} and 
@@ -137,6 +143,22 @@ locateVariants(query, subject, ...)
   ##
   ## vcf_adj <- renameSeqlevels(vcf, c("16"="chr16", "21"="chr21")) 
   ## loc <- locateVariants(vcf_adj, txdb19)
+
+  ## Using the cache with multiple VCF files
+  ## library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+  ## txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene 
+  ## myenv <- new.enviornment()
+  ## filelst <- list(file1, file2, file3)
+  ## lapply(filelst, function(fl) {
+  ##        vcf <- readVcf(i, "hg19")
+  ##        ## modify seqlevels to match TxDb
+  ##        ## here we prefix with 'chr' 
+  ##        oldnms <- seqlevels(vcf)
+  ##        newnms <- paste("chr", oldnms, sep="")
+  ##        names(newnms) <- oldnms
+  ##        vcf_mod <- renameSeqlevels(vcf, newnms)
+  ##        locateVariants(vcf_mod, txdb, Hsapiens, cache=myenv)
+  ## }) 
 }
 
 \keyword{methods}
