@@ -75,11 +75,11 @@ setMethod("predictCoding", signature(query="GRanges", subject="TranscriptDb",
  
         ## construct original sequences 
         originalWidth <- width(xCoding)
-        codonStart <- ((start(txlocal$local) - 1L) %/% 3L) * 3L + 1L
+        codonStart <- ((start(txlocal$txloc) - 1L) %/% 3L) * 3L + 1L
         ## codonEnd must be adjusted for 
         ## (1) the width of the reference sequence and
         ## (2) the position in the codon of the alternate allele substitution
-        varPosition <- (start(txlocal$local) - 1L) %% 3L + 1L
+        varPosition <- (start(txlocal$txloc) - 1L) %% 3L + 1L
         codonEnd <- 
             codonStart + (((varPosition + originalWidth) %/% 3L) * 3L + 2L)
         txseqs <- getTranscriptSeqs(cdsByTx, seqSource)
@@ -100,15 +100,9 @@ setMethod("predictCoding", signature(query="GRanges", subject="TranscriptDb",
 
         ## results
         queryID <- txlocal$qindex
+        txLoc <- txlocal$txloc
         txID <- names(cdsByTx)[txlocal$sindex]
         cdsID <- txlocal$cdsid 
-        #fromSubject <-
-        #    values(cdsByTx@unlistData)[txlocal$sindex,]
-        #if (any(names(fromSubject) %in% "cds_id"))
-        #    cdsID <- fromSubject$cds_id
-        #else
-        #    cdsID <- rep(NA, length(txID))
- 
         txByGene <- transcriptsBy(subject, "gene")
         map <- data.frame(
             geneid=rep(names(txByGene), elementLengths(txByGene)),
@@ -127,8 +121,8 @@ setMethod("predictCoding", signature(query="GRanges", subject="TranscriptDb",
         consequence[!translateIdx] <- "frameshift" 
         consequence <- factor(consequence) 
  
-        DataFrame(queryID, consequence, refSeq, varSeq, 
-            refAA, varAA, txID, geneID, cdsID) 
+        DataFrame(queryID, txLoc, consequence, refSeq, varSeq, 
+            refAA, varAA, txID, cdsID, geneID) 
     }
 )
 

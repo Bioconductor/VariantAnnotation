@@ -72,8 +72,9 @@
   A \link[IRanges]{DataFrame} with a row for each variant-transcript 
   match. This includes only variants that fell in a coding regions.
 
-  Columns include \code{queryID}, \code{consequence}, \code{refSeq}, 
-  \code{varSeq}, \code{refAA}, \code{varAA}, \code{txID}, \code{geneID},
+  Columns include \code{queryID}, \code{txLoc}, \code{consequence}, 
+  \code{refSeq}, \code{varSeq}, \code{refAA}, \code{varAA}, \code{txID}, 
+  \code{geneID},
   and \code{cdsID}.
 
   \describe{
@@ -83,6 +84,9 @@
       index corresponds to the row in the \code{GRanges} in the \code{rowData}
       slot. If \code{query} was a \code{GRanges}, \code{RangedData} or
       \code{RangesList} the index corresponds to the row in the object.
+    }
+    \item{\code{txLoc}}{
+      The variant location in transcript-based coordinates.
     }
     \item{\code{consequence}}{
       Possible values for the \code{consequence} column are `synonymous',
@@ -113,11 +117,11 @@
     \item{\code{txID}}{
       The transcript id taken from the \code{TranscriptDb} object.
     }
-    \item{\code{geneID}}{
-      The gene id taken from the \code{TranscriptDb} object.
-    }
     \item{\code{cdsID}}{
       The coding sequence id taken from the \code{TranscriptDb} object.
+    }
+    \item{\code{geneID}}{
+      The gene id taken from the \code{TranscriptDb} object.
     }
   }
 }
