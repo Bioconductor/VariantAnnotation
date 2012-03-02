@@ -24,9 +24,29 @@
 }
 
 \value{
-  A \link[IRanges]{DataFrame} with columns of \sQuote{qindex}, \sQuote{sindex},
-  \sQuote{cdsid} and \sQuote{txloc}. The \sQuote{txloc} column contains the 
-  transcript-based range coordinates of the \code{query}.
+  A \link[IRanges]{DataFrame} with the following columns of \sQuote{qindex}, \sQuote{sindex},
+  \sQuote{cdsid}, \sQuote{strand}, \sQuote{txloc}, and \sQuote{cdsloc}. The 
+  \sQuote{txloc} column contains the transcript-based range coordinates of the \code{query}.
+  \describe{
+    \item{\code{qindex}}{
+      Row number of original \code{query}.
+    }
+    \item{\code{sindex}}{
+      Row number of original \code{subject}.
+    }
+    \item{\code{cdsid}}{
+      cds_id taken from the \code{subject}.
+    }
+    \item{\code{strand}}{
+      Strand of the \code{subject} the \code{query} overlapped.
+    }
+    \item{\code{txloc}}{
+      Location of \code{query} in transcript-based coordinates.
+    }
+    \item{\code{cdsloc}}{
+      Location of \code{query} in cds-based coordinates.
+    }
+  }
 }
 
 \author{Michael Lawrence and Valerie Obenchain <vobencha@fhcrc.org>}

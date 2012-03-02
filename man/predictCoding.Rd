@@ -72,9 +72,9 @@
   A \link[IRanges]{DataFrame} with a row for each variant-transcript 
   match. This includes only variants that fell in a coding regions.
 
-  Columns include \code{queryID}, \code{txLoc}, \code{consequence}, 
-  \code{refSeq}, \code{varSeq}, \code{refAA}, \code{varAA}, \code{txID}, 
-  \code{geneID},
+  Columns include \code{queryID}, \code{consequence}, \code{refSeq}, 
+  \code{varSeq}, \code{seqTxLoc}, \code{varTxLoc}, \code{varCdsLoc},
+  \code{subjStrand}, \code{refAA}, \code{varAA}, \code{txID}, \code{geneID},
   and \code{cdsID}.
 
   \describe{
@@ -84,9 +84,6 @@
       index corresponds to the row in the \code{GRanges} in the \code{rowData}
       slot. If \code{query} was a \code{GRanges}, \code{RangedData} or
       \code{RangesList} the index corresponds to the row in the object.
-    }
-    \item{\code{txLoc}}{
-      The variant location in transcript-based coordinates.
     }
     \item{\code{consequence}}{
       Possible values for the \code{consequence} column are `synonymous',
@@ -113,6 +110,27 @@
     \item{\code{varAA}}{
       The variant amino acid column contains the translated \code{varSeq}. When
       translation is not possible this value is missing.
+    }
+    \item{\code{seqTxLoc}}{
+      Location in transcript-based coordinates of the first nucleotide in
+      the codon sequence to be translated. This position corresponds to the
+      first nucleotide in both the \code{refSeq} and \code{varSeq} columns.
+    }
+    \item{\code{varTxLoc}}{
+      Location in transcript-based coordinates of the first nucleotide in
+      the variant. This value will be the same as \code{seqTxLoc} when the 
+      variant starts exactly at the beginning of a codon. 
+    }
+    \item{\code{varCdsLoc}}{
+      Location in cds-based coordinates of the first nucleotide in
+      the variant. This position is relative to the start of the cds region
+      defined in the \code{subject} annotation. 
+    }
+    \item{\code{subjStrand}}{
+      The strand of the \code{subject} the variant matched. \code{predictCoding} 
+      determines which variants fall in a coding region by finding the overlaps 
+      between the \code{query} and \code{subject}. The \code{query} may be 
+      un-stranded \sQuote{*} but the \code{subject} annotation will have a strand. 
     }
     \item{\code{txID}}{
       The transcript id taken from the \code{TranscriptDb} object.

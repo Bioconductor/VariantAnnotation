@@ -12,10 +12,14 @@ globalToLocal <- function(query, subject)
     qrng <- ranges(query)[qhit]
     cds_bounds <- ranges(gr)[shit]
     neg <- as.vector(strand(gr)[shit] == "-")
-    qrng[!neg] <- shift(qrng[!neg], - start(cds_bounds)[!neg])
+    if (any(neg == FALSE))
+        qrng[!neg] <- shift(qrng[!neg], - start(cds_bounds)[!neg])
     if (any(neg))
         qrng[neg] <- IRanges(end(cds_bounds)[neg] - end(qrng)[neg],
             width=width(qrng)[neg])
+    cdsloc <- start(qrng)
+    strand <- rep("+", length(neg))
+    strand[neg] <- "-"
 
     ## position of query in transcript 
     cumsums <- .listCumsumShifted(width(subject))
@@ -23,6 +27,6 @@ globalToLocal <- function(query, subject)
 
     sindex <- rep(seq(length(subject)), elementLengths(subject))[shit]
     cdsid <- values(gr[shit])[["cds_id"]]
-    DataFrame(qindex=qhit, sindex, cdsid, txloc)
+    DataFrame(qindex=qhit, sindex, strand, cdsid, txloc, cdsloc)
 }
 

@@ -100,7 +100,10 @@ setMethod("predictCoding", signature(query="GRanges", subject="TranscriptDb",
 
         ## results
         queryID <- txlocal$qindex
-        txLoc <- txlocal$txloc
+        varTxLoc <-  start(txlocal$txloc) 
+        varCdsLoc <- txlocal$cdsloc
+        subjStrand <- Rle(txlocal$strand)
+        seqTxLoc <- codonStart 
         txID <- names(cdsByTx)[txlocal$sindex]
         cdsID <- txlocal$cdsid 
         txByGene <- transcriptsBy(subject, "gene")
@@ -121,8 +124,9 @@ setMethod("predictCoding", signature(query="GRanges", subject="TranscriptDb",
         consequence[!translateIdx] <- "frameshift" 
         consequence <- factor(consequence) 
  
-        DataFrame(queryID, txLoc, consequence, refSeq, varSeq, 
-            refAA, varAA, txID, cdsID, geneID) 
+        DataFrame(queryID, consequence, refSeq, varSeq, refAA, varAA, 
+                  seqTxLoc, varTxLoc, varCdsLoc, subjStrand, 
+                  txID, cdsID, geneID) 
     }
 )
 
