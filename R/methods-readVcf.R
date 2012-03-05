@@ -113,11 +113,11 @@ setMethod(readVcf, c(file="character", genome="missing",
                       DataFrame(sdat[lapply(sdat, is.null) == FALSE])) 
 
     ## multi valued
-    gdat <- .formatGeno(.combineLists(vcf[["GENO"]]))
+    gdat <- .formatGeno(vcf[["GENO"]])
     glen <- lapply(gdat, elementLengths) 
     nsmp <- ifelse(length(gdat) > 0, length(unique(gdat$SAMPLES)), 1)
 
-    idat <- .formatInfo(.combineLists(vcf[["INFO"]]), hdr[["INFO"]])
+    idat <- .formatInfo(vcf[["INFO"]], hdr[["INFO"]])
     idat <- c(ALT=.formatALT(vcf[["ALT"]]), as.list(idat))
     ilen <- lapply(idat, function(x) rep(elementLengths(x), nsmp)) 
     idat <- lapply(idat, function(x) rep(x, nsmp)) 
@@ -146,27 +146,69 @@ setMethod(readVcf, c(file="character", genome="missing",
     gr 
 }
 
+
+.collapseLists <- function(vcf)
+{
+    if (1L == length(vcf)) {
+        vcf[[1]][["rangeID"]] <- as.factor(rep(names(vcf), 
+            length(vcf[[1]][["rowData"]])))
+        vcf[[1]]
+    } else {
+        ## collapse list of lists
+        lst <- lapply(names(vcf[[1]]), function(elt) {
+                   do.call(c, unname(lapply(vcf, "[[", elt)))
+               })
+        names(lst) <- names(vcf[[1]])
+        rangeID <- as.factor(rep(names(vcf), lapply(vcf, function(elt) 
+            length(elt$rowData))))
+
+        ## collapse info and geno
+        info <- lst$INFO
+        sp <- split(unname(info), unique(names(info)))
+        sp <- sp[unique(names(info))] 
+        lst[["INFO"]] <- lapply(sp, function(elt) {
+                             if (is(elt[[1]], "list"))
+                                 as.matrix(elt)
+                             else
+                                 do.call(c, elt)
+                         }) 
+        geno <- lst[["GENO"]]
+        colnms <- colnames(geno[[1]])
+        sp <- split(geno, unique(names(geno)))
+        lst[["GENO"]] <- 
+            lapply(sp, function(elt) {
+                d <- dim(elt[[1]])
+                if (!is.na(d[3])) {
+                    pc <- lapply(seq_len(d[3]), function(i) {
+                              do.call(rbind, lapply(elt, "[", ,,i)) 
+                          })
+                    cmb <- array(do.call(c, pc), 
+                                 c(length(lst[["rowData"]]), d[2], d[3]))
+                    ## FIXME : need colnames? 
+                    colnames(cmb) <- colnms
+                    cmb
+                } else {
+                    trans <- lapply(elt, t)
+                    cmb <- matrix(t(do.call(c, trans)), 
+                                  c(length(elt), d[2]))
+                    colnames(cmb) <- colnms
+                    cmb
+                }
+            }) 
+        lst$rangeID <- rangeID
+        lst
+    }
+}
+
 .scanVcfToVCF <- function(vcf, file, genome, ...)
 {
-    if (1L < length(vcf)) {
-        rnglen <- lapply(vcf, function(rng) length(rng[["rowData"]]))
-        rangeID <- as.factor(rep(names(vcf), rnglen))
-        nms <- names(vcf[[1]])
-        vcf <- lapply(nms, function(elt) {
-            do.call(c, unname(lapply(vcf, "[[", elt)))
-        })
-        names(vcf) <- nms 
-    } else {
-        rangeID <- as.factor(rep(names(vcf), length(vcf[[1]][["rowData"]])))
-        vcf <- vcf[[1]]
-    }
     hdr <- scanVcfHeader(file)[[1]][["Header"]]
+    vcf <- .collapseLists(vcf)
 
     ## rowData
     rowData <- vcf[["rowData"]]
     genome(seqinfo(rowData)) <- genome 
-    values(rowData) <- DataFrame(rangeID=rangeID)
-
+    values(rowData) <- DataFrame(rangeID=vcf[["rangeID"]])
 
     ## fixed fields
     ALT <- .formatALT(vcf[["ALT"]])
@@ -175,7 +217,7 @@ setMethod(readVcf, c(file="character", genome="missing",
     fixed <- DataFrame(fx[lapply(fx, is.null) == FALSE]) 
 
     ## info 
-    info <- .formatInfo(.combineLists(vcf[["INFO"]]), hdr[["INFO"]])
+    info <- .formatInfo(vcf[["INFO"]], hdr[["INFO"]])
 
     ## colData
     if (length(vcf[["GENO"]]) > 0) {
@@ -187,7 +229,7 @@ setMethod(readVcf, c(file="character", genome="missing",
     }
 
     VCF(rowData=rowData, colData=colData, exptData=SimpleList(HEADER=hdr),
-        fixed=fixed, info=info, geno=SimpleList(.combineLists(vcf[["GENO"]])))
+        fixed=fixed, info=info, geno=SimpleList(vcf[["GENO"]]))
 }
 
 .toDNAStringSet <- function(x)
@@ -227,31 +269,30 @@ setMethod(readVcf, c(file="character", genome="missing",
         names(DF) <- names(x)
         return(DF)
     }
-    ## matrices become compressed lists
+    ## matrices and arrays
     type <- hdr$Type[match(names(x), rownames(hdr))]
-    idx <- which(lapply(x, function(elt) is.null(dim(elt))) == FALSE)
+    idx <- which(lapply(x, is.array) == TRUE) 
     if (0L != length(idx)) {
         for (i in idx) {
+            dat <- x[[i]]
+            d <- dim(dat)
+            ncol <- ifelse(!is.na(d[3]), d[3], d[2])
+            if (ncol > 1)
+                 dat <- split(unlist(dat, use.names=FALSE),
+                               rep(seq_len(d[1]), ncol))
+            x[[i]] <- .formatList(dat, type[i])
+        }
+    }
+    ## ragged lists 
+    lx <- which(lapply(x, is.list) == TRUE)
+    if (0L != length(lx)) {
+        for (i in lx) {
             x[[i]] <- .formatList(x[[i]], type[i])
         }
     }
     DF <- DataFrame(x)
     names(DF) <- names(x)
     DF
-}
-
-.formatList <- function(data, type)
-{
-    ncol <- ifelse(!is.na(dim(data)[3]), dim(data)[3], dim(data)[2])
-    if (ncol > 1) 
-       data <- split(unlist(data, use.names=FALSE), 
-           rep(seq_len(dim(data)[1]), ncol))
- 
-    switch(type, 
-        Integer = IntegerList(data),
-        Float = NumericList(data),
-        String = CharacterList(data),
-        Logical = LogicalList(data))
 }
 
 .formatGeno <- function(x)
@@ -275,25 +316,13 @@ setMethod(readVcf, c(file="character", genome="missing",
     c(list(SAMPLES=rep(nms, each=nvar)), x)
 }
 
-.combineLists <- function(x)
+.formatList <- function(data, type)
 {
-    if (length(names(x)) == length(unique(names(x))))
-        return(x)
-    ## combine elements across a list
-    ## retain data structures
-    sp <- split(x, unique(names(x)))
-    lapply(sp, function(elt) {
-        if (is(elt[[1]], "matrix")) {
-            do.call(rbind, unname(elt))
-        } else if (is(elt[[1]], "array")) { 
-            d <- dim(elt[[1]])
-            dat <- lapply(seq_len(d[3]), function(i)
-                do.call(rbind, unname(lapply(elt, "[",,,i))))
-            array(unlist(dat, use.names=FALSE),
-                c(nrow(dat[[1]]), ncol(dat[[1]]), length(dat))) 
-        } else {
-            do.call(c, unname(elt))
-        }
-    })
+    switch(type, 
+        Integer = IntegerList(data),
+        Float = NumericList(data),
+        String = CharacterList(data),
+        Logical = LogicalList(data))
 }
+
 
