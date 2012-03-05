@@ -22,11 +22,18 @@ setMethod(writeVcf, c("VCF", "character"),
     CHROM <- as.vector(seqnames(rd))
     POS <- start(rd)
     ID <- .makeVcfID(names(rd))
-    REF <- as.character(values(rd)[["REF"]])
-    ALT <- unlist(values(rd)[["ALT"]])
-    QUAL <- values(rd)[["QUAL"]]
-    FILTER <- values(rd)[["FILTER"]]
-    INFO <- .makeVcfInfo(info(obj))
+    REF <- as.character(values(ref(obj))[["REF"]])
+    ALT <- values(alt(obj))[["ALT"]]
+    if (is(ALT, "DNAStringSetList")) {
+        lt <- rep(seq_len(length(ALT)), width(partitioning(ALT)))
+        wd <- do.call(c, (lapply(ALT, width)))
+        sp <- split(as.character(unlist(ALT, use.names=FALSE)), lt)
+        sp[lt[wd == 0]] <- "." 
+        ALT <- unlist(lapply(sp, function(i) paste(i, collapse=",")))
+    }
+    QUAL <- values(qual(obj))[["QUAL"]]
+    FILTER <- values(filt(obj))[["FILTER"]]
+    INFO <- .makeVcfInfo(values(info(obj))[-1])
     GENO <- .makeVcfGeno(geno(obj))
 
     dat <- c(CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, GENO)
@@ -98,9 +105,7 @@ setMethod(writeVcf, c("VCF", "character"),
 
 .makeVcfInfo <- function(info, ...)
 {
-    ## FIXME: NA vs NULL handle in C
     cls <- lapply(info, class)
-
     ## CompressedLists
     cmp <- grep("Compressed", cls, fixed=TRUE)
     for (i in cmp)
@@ -111,7 +116,6 @@ setMethod(writeVcf, c("VCF", "character"),
                 else
                     paste(as.list(elt), collapse=",")
             }) 
-
     ## arrays
     arr <- which(cls == "array") 
     for (i in arr) {
@@ -124,7 +128,6 @@ setMethod(writeVcf, c("VCF", "character"),
                     paste(elt, collapse=",")
             })
     }
-
     map <- Map(function(elt, nms, cls) {
         if (is(elt, "logical")) {
             lapply(elt, function(x) if(x) nms)
