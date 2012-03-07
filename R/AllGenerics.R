@@ -107,6 +107,29 @@ setGeneric("geno<-", signature = c("x", "i", "value"),
     standardGeneric("geno<-")
 )
 
+## VCFHeader class
+
+setGeneric("reference", signature = "x",
+    function(x) standardGeneric("reference"),
+)
+
+setGeneric("samples", signature = "x",
+    function(x) standardGeneric("samples"),
+)
+
+setGeneric("header", signature = "x",
+    function(x) standardGeneric("header"),
+)
+
+
+setGeneric("contig", signature = "x",
+    function(x) standardGeneric("contig"),
+)
+
+setGeneric("meta", signature = "x",
+    function(x) standardGeneric("meta"),
+)
+
 ## VAFilter and VAFilterResult 
 
 setGeneric("name", 

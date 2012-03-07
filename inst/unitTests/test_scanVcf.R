@@ -27,7 +27,7 @@ test_FixedTypes <- function()
 
 test_InfoTypes <- function()
 {
-    fmt <- scanVcfHeader(fl)[[1]][["Header"]][["INFO"]]
+    fmt <- info(scanVcfHeader(fl))
     info <- scn[[1]]$INFO 
 
     checkIdentical(as.integer(c(3, 3, 2, 3, 3)), info$NS)
@@ -39,7 +39,7 @@ test_InfoTypes <- function()
 
 test_GenoTypes <- function()
 {
-    fmt <- scanVcfHeader(fl)[[1]][["Header"]][["FORMAT"]]
+    fmt <- geno(scanVcfHeader(fl))
     geno <- scn[[1]]$GENO
 
     checkEquals(typeof(unlist(geno$GT)), "character")

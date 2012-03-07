@@ -58,6 +58,15 @@ setValidity2("VCF", .valid.VCF, where=asNamespace("VariantAnnotation"))
 
 setClass("ScanVcfParam", contains="ScanBVcfParam")
 
+## vcfHeader 
+
+setClass("VCFHeader", 
+    representation(
+        reference="character",
+        samples="character",
+        header="SimpleDataFrameList"
+    )
+)
 
 ## VAFilters 
 

@@ -2,8 +2,8 @@ Package:     VariantAnnotation
 Type:        Package
 Title:       Annotation of Genetic Variants 
 Description: Annotate variants with respect to location and amino acid coding 
-Version:     1.1.59
-Author:      Valerie Obenchain, Martin Morgan and Michael Lawrence 
+Version:     1.1.60
+Author:      Valerie Obenchain, Martin Morgan, Michael Lawrence 
 Maintainer:  Valerie Obenchain <vobencha@fhcrc.org> 
 License:     Artistic-2.0 
 biocViews:   DataImport, Sequencing, HighThroughputSequencing, SNP,

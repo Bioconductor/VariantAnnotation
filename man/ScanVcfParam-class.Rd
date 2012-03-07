@@ -1,5 +1,4 @@
 \name{ScanVcfParam-class}
-\Rdversion{1.1}
 \docType{class}
 
 \alias{ScanVcfParam}

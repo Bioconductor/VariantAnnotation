@@ -180,29 +180,32 @@ vcf_rng
 @
 
 \subsubsection{VCF fields}
-Data can also be subset on the \Rcode{fixed}, \Rcode{info} and/or \Rcode{geno} fields 
-in the VCF file. Possible fixed values are 'ALT', 'QUAL' and 'FILTER'. To discover 
-available \Rcode{info} and \Rcode{geno} fields use \Rfunction{ScanVcfHeader} to 
-inspect the header information. The return value is a list of length 3 with names of 
-'Reference', 'Sample' and 'Header'. 
+Data can also be subset on the \Rcode{fixed}, \Rcode{info} and/or \Rcode{geno} 
+fields in the VCF file. Possible fixed values are 'ALT', 'QUAL' and 'FILTER'. 
+To discover available \Rcode{info} and \Rcode{geno} fields read in the header
+information with \Rfunction{ScanVcfHeader}. The return value is \Rclass{vcfHeader} 
+instance. Accessors for this class are the same as for the \Rclass{VCF} class,
+\Rcode{fixed}, \Rcode{info} and \Rcode{geno}. Other accessors and more
+information can be found at ?\Rcode{vcfHeader}.
 
 <<subset_scanVcfHeader>>=
 hdr <- scanVcfHeader(vcffile)
-hdr
-hdr[[1]]$Header
+info(hdr)
+geno(hdr)
 @ 
 
-INFO and FORMAT elements of 'Header' are \Robject{DataFrames} which contain a
-description of the fields as well as the data type and number of values. All
-possible elements can be listed by looking at the rownames.
+The \Rcode{info} and \Rcode{geno} accessors return \Robject{DataFrames}
+containing descriptions of the fields, data type and number of values. 
+A listing of all possible \Rcode{info} or \Rcode{geno} values is 
+constructed by selecting the rownames of the \Rcode{DataFrames}.
 
 <<subset_infoformat>>=
 ## INFO fields
-info_DF <- hdr[[1]]$Header$INFO
-rownames(info_DF)
+info_DF <- info(hdr) 
+rownames(info_DF) 
 ## FORMAT fields
-geno_DF <- hdr[[1]]$Header$FORMAT
-rownames(geno_DF)
+geno_DF <- geno(hdr) 
+rownames(geno_DF) 
 @
 
 We are interested in "LDAF" in INFO which is 'allele frequency accounting 

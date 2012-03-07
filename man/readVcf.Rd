@@ -270,8 +270,8 @@
   ## values for INFO and FORMAT use scanVcfHeader. 
   fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
   hdr <- scanVcfHeader(fl)
-  hdr[[1]]$Header$INFO
-  hdr[[1]]$Header$FORMAT
+  info(hdr)
+  geno(hdr) 
 
   ## Request all 'fixed' fields, "GT" from 'geno' and "H2" from 'info'.
   ## See ?ScanVcfParam for more details.

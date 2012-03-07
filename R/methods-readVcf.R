@@ -105,7 +105,7 @@ setMethod(readVcf, c(file="character", genome="missing",
         rangeID <- as.factor(rep(names(vcf), length(vcf[[1]][["rowData"]])))
         vcf <- vcf[[1]]
     } 
-    hdr <- scanVcfHeader(file)[[1]][["Header"]]
+    hdr <- header(scanVcfHeader(file))
 
     ## single valued
     sdat <- list(REF=vcf[["REF"]], QUAL=vcf[["QUAL"]], FILTER=vcf[["FILTER"]])
@@ -202,7 +202,7 @@ setMethod(readVcf, c(file="character", genome="missing",
 
 .scanVcfToVCF <- function(vcf, file, genome, ...)
 {
-    hdr <- scanVcfHeader(file)[[1]][["Header"]]
+    hdr <- header(scanVcfHeader(file))
     vcf <- .collapseLists(vcf)
 
     ## rowData

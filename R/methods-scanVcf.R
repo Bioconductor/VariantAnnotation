@@ -49,11 +49,11 @@
             open(file)
             on.exit(close(file))
         }
-        hdr <- scanVcfHeader(file)[[1]]
-        samples <- hdr$Sample
+        hdr <- scanVcfHeader(file)
+        samples <- samples(hdr) 
         fmap <- .vcf_fixed(fixed)
-        imap <- .vcf_map(hdr$Header[["INFO"]], info, nm="info")
-        gmap <- .vcf_map(hdr$Header[["FORMAT"]], geno, nm="geno")
+        imap <- .vcf_map(info(hdr), info, nm="info")
+        gmap <- .vcf_map(geno(hdr), geno, nm="geno")
         tbxstate <- list(samples, fmap, imap, gmap)
         tbxsym <- getNativeSymbolInfo(".tabix_as_vcf",
                                       "VariantAnnotation")
@@ -74,11 +74,11 @@
         file <- normalizePath(path.expand(file))
         if (!file.exists(file))
             stop("file does not exist")
-        hdr <- scanVcfHeader(file)[[1]]
-        samples <- hdr$Sample
+        hdr <- scanVcfHeader(file)
+        samples <- samples(hdr) 
         fmap <- .vcf_fixed(fixed)
-        imap <- .vcf_map(hdr$Header[["INFO"]], info, "info")
-        gmap <- .vcf_map(hdr$Header[["FORMAT"]], geno, "geno")
+        imap <- .vcf_map(info(hdr), info, "info")
+        gmap <- .vcf_map(geno(hdr), geno, "geno")
         result <- .Call(.scan_vcf_character, file,
                         as.integer(yieldSize), samples,
                         fmap, imap, gmap)
@@ -99,11 +99,11 @@
     res <- 
         tryCatch({
             fl <- summary(file)$description
-            hdr <- scanVcfHeader(fl)[[1]]
-            samples <- hdr$Sample
+            hdr <- scanVcfHeader(fl)
+            samples <- samples(hdr) 
             fmap <- .vcf_fixed(fixed)
-            imap <- .vcf_map(hdr$Header[["INFO"]], info, "info")
-            gmap <- .vcf_map(hdr$Header[["FORMAT"]], geno, "geno")
+            imap <- .vcf_map(info(hdr), info, "info")
+            gmap <- .vcf_map(geno(hdr), geno, "geno")
 
             txt <- readLines(file, ...)
             txt <- txt[!grepl("^#", txt)] # FIXME: handle header lines better
@@ -267,7 +267,7 @@ setMethod(scanVcf, c("connection", "missing"),
 .unpackVcf <- function(x, hdr, ...)
 {
     if (length(x[[1]]$INFO) != 0) {
-        info <- hdr[["Header"]][["INFO"]]
+        info <- info(hdr) 
         if (is.null(info)) {
             warning("'INFO' vcf header info not found in file")
         } else {
@@ -279,7 +279,7 @@ setMethod(scanVcf, c("connection", "missing"),
     }
 
     if (length(unlist(x[[1]]$GENO, use.names=FALSE)) != 0) {
-        geno <- hdr[["Header"]][["FORMAT"]]
+        geno <- geno(hdr) 
         if (is.null(geno)) {
             warning("'FORMAT' vcf header info not found in file")
         } else {

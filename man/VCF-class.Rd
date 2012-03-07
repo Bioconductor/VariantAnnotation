@@ -3,7 +3,6 @@
 
 % Class
 \alias{VCF-class}
-\alias{VCF}
 
 % Constructor-like function:
 \alias{VCF}
@@ -49,6 +48,7 @@
 \alias{[<-,VCF,ANY,ANY,VCF-method}
 
 % Other methods
+\alias{genome,VCF-method}
 \alias{seqlevels,VCF-method}
 \alias{renameSeqlevels,VCF,character-method}
 \alias{keepSeqlevels,VCF,character-method}
