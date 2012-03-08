@@ -147,10 +147,11 @@ setMethod(writeVcf, c("VCF", "character"),
 .pasteCollapse <- rtracklayer:::pasteCollapse
  
 .makeVcfHeader <- function(obj, ...)
+## FIXME : not writing out reference or sample
 {
-    hdr <- exptData(obj)[["HEADER"]]
-    header <- Map(.formatHeader, as.list(hdr), names(hdr))
-    samples <- colnames(obj) 
+    hdr <- exptData(obj)[["header"]]
+    header <- Map(.formatHeader, as.list(header(hdr)), names(header(hdr)))
+    samples <- samples(hdr) 
     colnms <- paste(c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER",
                     "INFO", "FORMAT", samples[!is.null(samples)]), collapse="\t")
 

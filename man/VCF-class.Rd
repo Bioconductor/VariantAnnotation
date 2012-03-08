@@ -71,8 +71,9 @@
 \section{Constructor}{
   \describe{
     \item{}{
-      \code{VCF(rowData = GRanges(), colData = DataFrame(), exptData = SimpleList(), 
-                fixed = DataFrame(), info = DataFrame(), geno = SimpleList(), 
+      \code{VCF(rowData = GRanges(), colData = DataFrame(), 
+                exptData = SimpleList(), fixed = DataFrame(), 
+                info = DataFrame(), geno = SimpleList(), 
                 ..., verbose = FALSE)
       }
     }
@@ -81,45 +82,38 @@
 
 \section{Accessors}{
   In the following code snippets \code{x} is a VCF object. All accessors except
-  \code{geno} return the specified data as elementMetadata column(s) of the
-  \code{rowData} \code{GRanges} object. The \code{geno} accessor returns
-  a \code{SimpleList}.
+  \code{geno} return the data as elementMetadata column(s) of the \code{rowData} 
+  \code{GRanges} object. The \code{geno} accessor returns a \code{SimpleList}.
 
   \describe{
     \item{}{
       \code{ref(x)}, \code{ref(x) <- value}:
-
       Returns or sets the reference allele data from the REF column of the VCF
       file. \code{value} must be a \code{DNAStringSet}. 
     }
     \item{}{
       \code{alt(x)}, \code{alt(x) <- value}:
-
       Returns or sets the alternate allele data from the ALT column of the VCF
       file. \code{value} can be a \code{DNAStringSet} or a \code{CharacterList}
       (for a structural VCF file). 
     }
     \item{}{
       \code{qual(x)}, \code{qual(x) <- value}:
-
       Returns or sets the quality scores from the QUAL column of the VCF
       file. \code{value} must be an \code{integer(1L)}.
     }
     \item{}{
       \code{filt(x)}, \code{filt(x) <- value}:
-
       Returns or sets the filter data from the FILTER column of the VCF
       file. \code{value} must be a \code{character(1L)}.
     }
     \item{}{
       \code{fixed(x)}, \code{fixed(x) <- value}:
-
       Returns or sets a \code{DataFrame} of the REF, ALT, QUAL, and FILTER fields 
       from the VCF file. \code{value} must be a \code{DataFrame}.
     }
     \item{}{
       \code{info(x)}, \code{info(x) <- value}:
-
       Returns or sets \code{info} data. Contains the information
       stored in the INFO field of a VCF file. \code{value} must be a 
       \code{DataFrame}. If no \code{info} fields are present the
@@ -128,27 +122,23 @@
     }
     \item{}{
       \code{geno(x)}, \code{geno(x) <- value}:
-
       Returns or sets \code{geno} data. Contains the genotype information 
       from the samples in a VCF file. \code{value} must be a \code{SimpleList} 
       of \code{matrices} or \code{arrays}. An optional \code{withDimnames}
       argument controls the return of dimnames (default = TRUE).
 
       \code{geno(x)[[i]]}, \code{geno(x)[[i]] <- value}:
-
       Returns or sets elements of geno. \code{value} can be a \code{matrix},
       or \code{array}. 
     }
     \item{}{
       \code{exptData(x)}, \code{exptData(x) <- value}:
-
       Returns or sets \code{exptData} data. Contains the header information 
       from a VCF file as well as any other experiment-specific information.
       \code{value} must be a \code{SimpleList}.
     }
     \item{}{
       \code{rowData(x)}, \code{rowData(x) <- value}:
-
       Returns or sets \code{rowData} data. Contains a \code{GRanges} constructed
       from the CHROM, POS and ID fields of the VCF file. The ID's serve as the
       \code{rownames}; if they are NULL, \code{rownames} are constructed from 
@@ -157,7 +147,6 @@
     }
     \item{}{
       \code{colData(x)}, \code{colData(x) <- value}:
-
       Returns or sets \code{colData} data. Contains a \code{DataFrame} of 
       sample-specific information. Each row represents a sample in the VCF
       file. \code{value} must be a \code{DataFrame} with rownames representing
@@ -172,7 +161,6 @@
   \describe{
     \item{}{
       \code{x[i, j]}, \code{x[i, j] <- value}:
-
       Gets or sets rows \code{i} and columns \code{j}. \code{i} and \code{j}
       can be integer or logical vectors. \code{value} is a replacement
       \code{VCF} object.
@@ -184,26 +172,22 @@
   \describe{
     \item{}{
       \code{genome(x)}:
-
-      Extract the \code{genome} from a \code{VCF} object. This information is
-      taken from the \code{GRanges} \code{seqinfo} in the \code{rowData} slot.
+      Extract the \code{genome} information from the \code{GRanges} in 
+      the \code{rowData} slot.
     }
     \item{}{
       \code{seqlevels(x)}:
-
-      Extract the \code{seqlevels} from a \code{VCF} object. Seqlevels are
-      taken from the \code{GRanges} in the \code{rowData} slot.
+      Extract the \code{seqlevels} from the \code{GRanges} in the 
+      \code{rowData} slot.
     }
     \item{}{
       \code{renameSeqlevels(x, value)}:
-
       Rename the seqlevels in the \code{GRanges} in the \code{rowData} slot
       of the VCF object. \code{value} is a named character vector where
       the names are the old seqlevels and the values are the new.
     }
     \item{}{
       \code{keepSeqlevels(x, value)}:
-
       Subset the \code{GRanges} in the \code{rowData} slot of the VCF object. 
       \code{value} is a character vector of seqlevels to keep.
     }

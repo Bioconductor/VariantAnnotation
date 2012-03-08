@@ -10,7 +10,6 @@
 \alias{vcfGeno}
 \alias{vcfTrimEmpty}
 \alias{vcfWhich}
-\alias{vcfAsGRanges}
 
 \title{Parameters for scanning VCF files}
 
@@ -24,7 +23,7 @@
 
 \usage{
   ScanVcfParam(fixed=character(), info=character(), geno=character(), 
-               trimEmpty=TRUE, which, asGRanges=FALSE, ...)
+               trimEmpty=TRUE, which, ...)
 
   ## Accessors
  
@@ -33,7 +32,6 @@
   vcfGeno(object)
   vcfTrimEmpty(object)
   vcfWhich(object)
-  vcfAsGRanges(object)
 }
 
 \arguments{
@@ -59,11 +57,6 @@
     above), describing the sequences and ranges to be queried. Variants
     whose \code{POS} lies in the interval(s) \code{[start, end]} are
     returned. 
-  }
-  \item{asGRanges}{A logical(1) indicating whether a long form (expanded) 
-    \code{GRanges} should be returned instead of a \code{VCF} object. For 
-    use with \code{readVcf} only; ignored by \code{scanVcf}. See 
-    ?\code{readVcf} for details about the long form \code{GRanges}.
   }
   \item{object}{An instance of class \code{ScanVcfParam}.
   }
@@ -93,10 +86,6 @@
     \item{\code{trimEmpty}:}{Object of class \code{"logical"} indicating
       whether empty \sQuote{GENO} fields are to be returned.
     }
-    \item{\code{asGRanges}:}{Object of class \code{"character"} indicating
-      the return of a long form \code{GRanges} with either
-      the \sQuote{INFO} or \sQuote{GENO} fields expanded in the elementMetadata.
-    }
   }
 }
 
@@ -113,7 +102,7 @@
 
   Accessors:
   \describe{
-    \item{vcfFixed, vcfInfo, vcfGeno, vcfTrimEmpty, vcfWhich, vcfAsGRanges:}{
+    \item{vcfFixed, vcfInfo, vcfGeno, vcfTrimEmpty, vcfWhich:}{
       Return the corresponding field from \code{object}.
     }
   }
@@ -157,15 +146,6 @@
 
   ## Return only the 'fixed' fields
   ScanVcfParam(geno=NA, info=NA) 
+}
 
-  ## --------------------------------------
-  ## 'asGRanges' argument 
-  ## --------------------------------------
-  ## When asGranges=TRUE a long form GRanges is returned from readVcf
-  ## instead of a VCF object. One or more fields of 'fixed', 'info'
-  ## or 'geno' can be specified.
-  ScanVcfParam(geno="GT", asGranges=TRUE)
-  ScanVcfParam(info=c("DP", "NS"), asGranges=TRUE)
-  ScanVcfParam(fixed="ALT", geno="GT", asGranges=TRUE)
-} 
 \keyword{classes}

@@ -58,7 +58,6 @@
   in3 <- readVcf(out2.vcf, "hg19")
 
   identical(in2, in3)
-  #system("diff out1.vcf out2.vcf")
 }
 
 \keyword{manip}

@@ -196,7 +196,14 @@
   ## Header and genome information 
   ## ---------------------------------
   vcf
-  exptData(vcf)[["HEADER"]]
+
+  ## extract the VCFHeader object from exptData
+  hdr <- exptData(vcf)[["header"]]
+  ## use accessors to extract the data
+  info(hdr)
+  fixed(hdr)
+
+  ## genome information is stored in the GRanges
   unique(genome(rowData(vcf)))
 
   ## ---------------------------------
@@ -210,12 +217,12 @@
   ref(vcf) 
 
   ## info data 
-  exptData(vcf)[["HEADER"]][["INFO"]]
+  info(hdr)
   info(vcf)
   values(info(vcf))[["DP"]]
 
   ## geno data 
-  exptData(vcf)[["HEADER"]][["FORMAT"]]
+  geno(hdr)
   geno(vcf)
   head(geno(vcf)$GT)
 

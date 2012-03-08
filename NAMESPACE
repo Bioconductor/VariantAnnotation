@@ -50,16 +50,21 @@ importClassesFrom(snpStats, SnpMatrix)
 
 exportClassPattern("^.*$")
 
-export(VAFilterResult, dbSNPFilter, regionFilter, compose,
-       globalToLocal, duplicateRSID,
-       VCF, VCFHeader) 
+export(VCF, VCFHeader, vcfWhich, vcfFixed, vcfInfo, vcfGeno,
+       VAFilterResult, dbSNPFilter, regionFilter, compose,
+       globalToLocal, duplicateRSID)
 
-exportMethods(scanVcf, readVcf, writeVcf, ScanVcfParam, scanVcfHeader,
-              locateVariants, predictCoding, getTranscriptSeqs, 
+exportMethods(scanVcf, readVcf, readVcfLongForm, writeVcf, ScanVcfParam, 
+              scanVcfHeader, locateVariants, predictCoding, getTranscriptSeqs, 
               MatrixToSnpMatrix,
+
               fixed, "fixed<-", ref, "ref<-", alt, "alt<-", qual, "qual<-",
               filt, "filt<-", info, "info<-", geno, "geno<-", "[", "[<-", 
+
               genome, seqlevels, renameSeqlevels, keepSeqlevels,
-              reference, header, meta, 
-              keys, cols, select, 
+
+              reference, samples, header, meta,
+
+              keys, cols, select,
+ 
               vaFilter, name, stats, Logic, show)

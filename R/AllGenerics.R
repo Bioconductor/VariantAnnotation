@@ -26,6 +26,11 @@ setGeneric("readVcf", signature = c("file", "genome", "param"),
     standardGeneric("readVcf")
 )
 
+setGeneric("readVcfLongForm", signature = c("file", "genome", "param"),
+    function(file, genome, param, ...)
+    standardGeneric("readVcfLongForm")
+)
+
 setGeneric("writeVcf", signature = c("obj", "filename"),
     function(obj, filename, ...)
     standardGeneric("writeVcf")
@@ -35,7 +40,7 @@ setGeneric("writeVcf", signature = c("obj", "filename"),
 
 setGeneric("ScanVcfParam", signature = "which",
            function(fixed=character(), info=character(), geno=character(), 
-                    trimEmpty=TRUE, which, asGRanges=FALSE, ...)
+                    trimEmpty=TRUE, which, ...)
            standardGeneric("ScanVcfParam")
 )
 

@@ -18,9 +18,9 @@ setClass("VCF",
         if (nrow(ffld) != xlen)
             return(paste("'fixed(x)' and 'rowData(x) must have the same ",
                    "number of rows", sep=""))
-        if (!all(nms %in% c("rangeID", "REF", "ALT", "QUAL", "FILTER")))
-            return(paste("'values(fixed(x))' colnames must be 'REF', ",
-                   "'ALT', 'QUAL' and 'FILTER'", sep=""))
+        if (!all(nms %in% c("paramRangeID", "REF", "ALT", "QUAL", "FILTER")))
+            return(paste("'values(fixed(x))' colnames must be ",
+                   "'REF', 'ALT', 'QUAL' and 'FILTER'", sep=""))
         if ("REF" %in% nms) 
             if (!is(ffld$REF, "DNAStringSet"))
                 return("'values(fixed(x))[['REF']] must be a DNAStringSet")
