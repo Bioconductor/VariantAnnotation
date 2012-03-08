@@ -15,7 +15,7 @@ importMethodsFrom(Biostrings,
                   sort, start, "subseq<-", substr, substring, summary,
                   translate, unique, unlist, width)
 
-importClassesFrom(Biobase, ScalarCharacter)
+importClassesFrom(Biobase, ScalarCharacter, AssayData)
 importFrom(Biobase, mkScalar, selectSome)
 
 importClassesFrom(AnnotationDbi, AnnotationDb)

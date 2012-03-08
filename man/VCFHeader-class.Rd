@@ -47,11 +47,6 @@
   In the following code snippets \code{x} is a VCFHeader object.
   \describe{
     \item{}{
-      \code{reference(x)}:
-      Returns a character() vector with names of reference sequences.
-      Not relavent for \code{scanVcfHeader}.
-    }
-    \item{}{
       \code{samples(x)}:
       Returns a character() vector of names of samples. 
     }
@@ -78,6 +73,11 @@
     \item{}{
       \code{geno(x)}:
       Returns a \code{DataFrame} of \sQuote{FORMAT} information.
+    }
+    \item{}{
+      \code{reference(x)}:
+      Returns a character() vector with names of reference sequences.
+      Not relevant for \code{scanVcfHeader}.
     }
   }
 }

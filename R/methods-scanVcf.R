@@ -140,7 +140,7 @@ setMethod(scanVcf, c("TabixFile", "GRanges"),
 setMethod(scanVcf, c("TabixFile", "ScanVcfParam"),
     function(file, ..., param)
 {
-    result <- if (length(vcfWhich(param)) == 0) # no ranges
+    result <- if (0L == length(vcfWhich(param))) # no ranges
         scanVcf(path(file), ..., param=param)
     else                                # ranges
         scanVcf(file, ..., fixed=vcfFixed(param),
@@ -165,7 +165,7 @@ setMethod(scanVcf, c("character", "ScanVcfParam"),
     function(file, ..., param)
 {
     ## no ranges
-    if (length(vcfWhich(param)) == 0) {
+    if (0L == length(vcfWhich(param))) {
         .vcf_scan_character(file, ..., fixed=vcfFixed(param), 
             info=vcfInfo(param), geno=vcfGeno(param))
     } else {
@@ -198,7 +198,7 @@ setMethod(scanVcf, c("connection", "missing"),
             if (1L < d) {
             ## >1 
                 idx <- as.integer(!is.na(x))
-                idx[idx == 0] <- d
+                idx[0L == idx] <- d
                 xrep <- rep(x, idx)
                 x <- array(unlist(strsplit(xrep, ",", fixed=TRUE)),
                            dim=c(d, nrow(x), ncol(x)),
@@ -266,9 +266,9 @@ setMethod(scanVcf, c("connection", "missing"),
 
 .unpackVcf <- function(x, hdr, ...)
 {
-    if (length(x[[1]]$INFO) != 0) {
+    if (0L != length(x[[1]]$INFO)) {
         info <- info(hdr) 
-        if (is.null(info)) {
+        if (0L == length(info)) {
             warning("'INFO' vcf header info not found in file")
         } else {
             x <- lapply(x, function(elt, id, n, type) {
@@ -278,9 +278,9 @@ setMethod(scanVcf, c("connection", "missing"),
         }
     }
 
-    if (length(unlist(x[[1]]$GENO, use.names=FALSE)) != 0) {
+    if (0L != length(unlist(x[[1]]$GENO, use.names=FALSE))) {
         geno <- geno(hdr) 
-        if (is.null(geno)) {
+        if (0L == length(geno)) {
             warning("'FORMAT' vcf header info not found in file")
         } else {
             x <- lapply(x, function(elt, id, n, type) {

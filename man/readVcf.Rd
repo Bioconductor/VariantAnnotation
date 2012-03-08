@@ -57,31 +57,9 @@
           VCF files. Data are parsed into a \code{\linkS4class{VCF}} object 
           using the file header information if available. To import a subset 
           of ranges the VCF must have a Tabix index file. An index file can be 
-          created with \code{bzip} and \code{indexTabix} functions. See examples 
-          below.
+          created with \code{bzip} and \code{indexTabix} functions. See
+          examples. 
           }
-        \item{Long Form GRanges :}{
-          Data from a VCF file can be parsed into an expanded \code{GRanges}
-          instead of a \code{VCF} object by setting \code{asGRanges=TRUE} in 
-          the \code{\linkS4class{ScanVcfParam}} and specifying VCF elements in
-          the \sQuote{fixed}, \sQuote{info} and \sQuote{geno} arguments. In 
-          this form, the \code{GRanges} of variant locations is expanded
-          (replicated) to the length of the \sQuote{unlisted} elements. The 
-          result is a \code{GRanges} with multiple rows per variant, each with 
-          a unique combination of elementMetadata columns. Be mindful that
-          the dimension of the data grows rapidly with the number of VCF 
-          elements requested. See ?\code{\linkS4class{ScanVcfParam}} for details 
-          specifying the \sQuote{fixed}, \sQuote{info} and \sQuote{geno} 
-          arguments.
-
-          The minimal data returned when no \sQuote{fixed}, \sQuote{info} or 
-          \sQuote{geno} are specified is a \code{GRanges} with elementMetadata
-          columns of rangeID, ID and REF. ID and REF are from the VCF file.
-          The rangeID column is meaningful when specific ranges are requested
-          through the \code{ScanVcfParam}. \code{readVcf} calls \code{scanVcf}
-          which returns the data as a named list. These names correspond
-          to the ranges requested.
-        }
       } 
       \code{readVcf} calls \code{\link{scanVcf}}, the details of which can be 
       found with \code{?scanVcf}.
@@ -120,7 +98,7 @@
 }
 
 \value{
-  The object returned is a \code{\linkS4class{VCF}}.
+  The object returned is a \code{\linkS4class{VCF}} class instance.
   See ?\code{VCF} for complete details of the class structure.
 
   \describe{
@@ -133,12 +111,10 @@
       in the seqinfo of the \code{GRanges} and can be accessed with 
       \code{genome(<VCF>)}.
 
-      One elementMetadata column, \code{rangeID}, is included with the
-      \code{rowData}. This ID is meaningful when specific ranges are requested
-      in the \code{ScanVcfParam}. When multiple ranges are requested 
-      \code{scanVcf} returns the data as a list with name corresponding to
-      the ranges requested. This ID distinguishes the records from each range 
-      request.
+      One elementMetadata column, \code{paramRangeID}, is included with the
+      \code{rowData}. This ID is meaningful when multiple ranges are specified 
+      in the \code{ScanVcfParam}. This ID distinguishes which records match
+      each range.
     }
     \item{fixed:}{
       REF, ALT, QUAL and FILTER fields of the VCF are parsed into a 
@@ -185,7 +161,8 @@
   \code{\link{indexTabix}},
   \code{\link{TabixFile}},
   \code{\link{scanTabix}},
-  \code{\link{scanBcf}}
+  \code{\link{scanBcf}},
+  \code{readVcfLongForm}
 }
 
 \examples{
@@ -229,30 +206,30 @@
   identical(geno(vcf)[["GQ"]], geno(vcf)$GQ)
 
   ## ---------------------------------
-  ## Reading in subsets
+  ## Data subsets 
   ## ---------------------------------
   fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
 
   ## Subset on genome coordinates :
-  ## Range subsets are specified in a GRanges, RangedData or RangesList
-  ## and supplied as the 'which' argument to ScanVcfParam().
-  ## When range subsets are specified the 'file' must have a Tabix index.
-  rngs <- GRanges("20", IRanges(1110000, 1234600))
+  ## 'file' must have a Tabix index
+  rngs <- GRanges("20", IRanges(c(14370, 1110000), c(17330, 1234600)))
+  names(rngs) <- c("geneA", "geneB")
   param <- ScanVcfParam(which=rngs) 
   compressVcf <- bgzip(fl, tempfile())
   idx <- indexTabix(compressVcf, "vcf")
   tab <- TabixFile(compressVcf, idx)
   vcf <- readVcf(tab, "hg19", param)
 
+  ## 'paramRangeID' associates the records to the ranges in the param
+  rowData(vcf)
+
   ## Subset on 'fixed', 'info' or 'geno' VCF elements :
-  ## An index file is not required if genome coordinates (ranges)
-  ## are not specified.
   param <- ScanVcfParam(fixed="ALT", geno=c("GT", "HQ"), info=c("NS", "AF"))
   vcf_tab <- readVcf(tab, "hg19", param)
   vcf_fname <- readVcf(fl, "hg19", param)
   identical(vcf_tab, vcf_fname) 
 
-  ## Subsetting on both genome coordinates and VCF fields : 
+  ## Subset on both genome coordinates and VCF elements : 
   param <- ScanVcfParam(geno="HQ", info="AF", which=rngs)
   vcf <- readVcf(tab, "hg19", param)
 
@@ -261,30 +238,6 @@
   ## that no records should be retrieved. This param specifies
   ## all 'fixed fields, the "GT" 'geno' field and none of 'info'.
   ScanVcfParam(geno="GT", info=NA)
-
-  ## ---------------------------------
-  ## Long form GRanges : 
-  ## ---------------------------------
-  ## A 'long form' GRanges is one that has been expanded to accomodate
-  ## the 'unlisted' length of the 'fixed', 'info' or 'geno' fields
-  ## requested. This results in a GRanges with multiple rows per record 
-  ## where each row represents a unique combination of the elementMetadata 
-  ## columns. 
-
-  ## To specify a long form GRanges, set asGRanges=TRUE in the ScanVcfParam
-  ## object and specify 'fixed', 'info' and/or 'geno' elements.
-  ## Possible values for 'fixed' are ALT, QUAL or FILTER. To see available
-  ## values for INFO and FORMAT use scanVcfHeader. 
-  fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
-  hdr <- scanVcfHeader(fl)
-  info(hdr)
-  geno(hdr) 
-
-  ## Request all 'fixed' fields, "GT" from 'geno' and "H2" from 'info'.
-  ## See ?ScanVcfParam for more details.
-  param <- ScanVcfParam(asGRanges=TRUE, info="H2", geno="GT")
-  vcf <- readVcf(fl, "hg19", param)
-  head(vcf)
 }
 
 \keyword{manip}

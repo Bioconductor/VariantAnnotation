@@ -98,9 +98,9 @@
 
 .formatInfo <- function(x, hdr)
 {
-    if (length(x) == 0L)
+    if (0L ==length(x))
         return(DataFrame())
-    if (is.null(hdr)) {
+    if (0L == length(hdr)) {
         DF <- DataFrame(x)
         names(DF) <- names(x)
         return(DF)
@@ -155,7 +155,7 @@
 
 .sqlIn <- function(vals)
 {
-    if (length(vals) == 0L)
+    if (0L == length(vals))
         return("")
     sql <-
       lapply(seq_len(length(vals)), 

@@ -56,14 +56,20 @@ setMethod("fixed", "VCFHeader",
 setMethod("info", "VCFHeader", 
     function(x) 
 {
-    slot(x, "header")$INFO
+    info <- slot(x, "header")$INFO
+    if (is.null(info))
+        info <- DataFrame()
+    info
 })
 
 ## geno
 setMethod("geno", "VCFHeader",
     function(x)
 {
-    slot(x, "header")$FORMAT 
+    geno <- slot(x, "header")$FORMAT
+    if (is.null(geno))
+        geno <- DataFrame()
+    geno 
 })
 
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -84,22 +90,14 @@ setMethod(show, "VCFHeader",
     cat("class:", class(object), "\n")
 
     meta <- rownames(meta(object)) 
-    if (is.null(meta))
-        meta <- DataFrame()
     scat("meta(%d): %s\n", meta)
 
     fixed <- names(fixed(object)) 
-    if (is.null(fixed))
-        fixed <- SimpleDataFrameList()
     scat("fixed(%d): %s\n", fixed)
 
     info <- rownames(info(object)) 
-    if (is.null(info))
-        info <- DataFrame()
     scat("info(%d): %s\n", info)
 
     geno <- rownames(geno(object))
-    if (is.null(geno))
-        nms <- DataFrame()
     scat("geno(%d): %s\n", geno)
 })

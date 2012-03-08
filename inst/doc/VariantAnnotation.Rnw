@@ -623,33 +623,48 @@ unlist(allele2)
 
 \subsection{Long form GRanges}
 
-The alternate allele (ALT) in the VCF file often has more than one 
-value per record. A long form \Robject{GRanges} is one where the 
-rows are replicated to match the length of the `unlisted' alternate 
-allele column. This format provides a row for each REF and ALT 
-combination for all variants.
+The \Rcode{readVcfLongForm} function reads data from a VCF file in the same 
+manner as \Rcode{readVcf} but outputs a long form \Rcode{GRanges} instead of 
+a \Rclass{VCF} class. This format is driven by the fact that the alternate 
+allele (ALT) in the VCF file often has more than one value per record. In the 
+long form \Robject{GRanges}, the rows of the \Robject{GRanges} are replicated 
+to match the length of the `unlisted' alternate allele. This format provides 
+access to each possible REF, ALT pair for each variant.
 
-The \Rcode{readVcfLongForm} function reads data from a VCF file in the 
-same manner as \Rcode{readVcf}. Input arguments and the ability to subset 
-data on ranges or VCF fields are the same. Data from the \Rcode{fixed} and 
-\Rcode{info} fields are also expanded as elementMetadata columns. Currently 
-no \Rcode{geno} information is included.
+Input arguments and data subsetting is the same for \Rcode{readVcfLongForm} 
+as for \Rcode{readVcf}. The \Rcode{fixed} and \Rcode{info} fields are included 
+as elementMetadata columns. Currently no \Rcode{geno} information is included.
 
-\Rcode{info} and \Rcode{geno} information was previously collected from the 
-file header. We revisit these variables to select fields available for 
-import.
+\Rcode{info} information was previously collected from the file header. We 
+import `HOMSEQ' and `ALT'.
 <<longform_header>>=
 rownames(info_DF)
-rownames(geno_DF)
 @
 
 <<expand_info>>=
-param <- ScanVcfParam(asGRanges=TRUE, fixed="ALT", info="HOMSEQ")
+param <- ScanVcfParam(fixed="ALT", info="HOMSEQ")
 gr <- readVcfLongForm(vcffile, "hg19", param)
 head(gr, 4)
 @
 
-\subsection{Write out VCF files - under construction}
+\subsection{Write out VCF files}
+
+A VCF file can be written out from data stored in a \Rcode{VCF} class. Methods 
+to write out from  more general structures are in progress.
+
+<<eval=FALSE>>=
+fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
+
+out1.vcf <- tempfile()
+out2.vcf <- tempfile()
+in1 <- readVcf(fl, "hg19")
+writeVcf(in1, out1.vcf)
+in2 <- readVcf(out1.vcf, "hg19")
+writeVcf(in2, out2.vcf)
+in3 <- readVcf(out2.vcf, "hg19")
+
+identical(in2, in3)
+@
 
 \section{References}
 Wang K, Li M, Hakonarson H, (2010), ANNOVAR: functional annotation of genetic 

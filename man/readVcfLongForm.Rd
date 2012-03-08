@@ -91,68 +91,25 @@
 }
 
 \examples{
-  fl <- system.file("extdata", "ex1.vcf", package="VariantAnnotation") 
-  vcf <- readVcfLongForm(fl, "hg19")
-
-  ## 
-
-  ## ---------------------------------
-  ## Reading in subsets
-  ## ---------------------------------
+  ## All data
   fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
+  gr1 <- readVcfLongForm(fl, "hg19")
 
-  ## Subset on genome coordinates :
-  ## Range subsets are specified in a GRanges, RangedData or RangesList
-  ## and supplied as the 'which' argument to ScanVcfParam().
-  ## When range subsets are specified the 'file' must have a Tabix index.
-  rngs <- GRanges("20", IRanges(1110000, 1234600))
+  ## Subset on ranges :
+  rngs <- GRanges("20", IRanges(c(14370, 1234567), c(17330, 1234567)))
+  names(rngs) <- c("geneA", "geneB")
   param <- ScanVcfParam(which=rngs) 
   compressVcf <- bgzip(fl, tempfile())
   idx <- indexTabix(compressVcf, "vcf")
   tab <- TabixFile(compressVcf, idx)
-  vcf <- readVcfLongForm(tab, "hg19", param)
+  gr2 <- readVcfLongForm(tab, "hg19", param)
 
-  ## Subset on 'fixed', 'info' or 'geno' VCF elements :
-  ## An index file is not required if genome coordinates (ranges)
-  ## are not specified.
-  param <- ScanVcfParam(fixed="ALT", geno=c("GT", "HQ"), info=c("NS", "AF"))
-  vcf_tab <- readVcfLongForm(tab, "hg19", param)
-  vcf_fname <- readVcfLongForm(fl, "hg19", param)
-  identical(vcf_tab, vcf_fname) 
+  ## 'paramRangeID' associates the records to the ranges in the param
+  gr2 
 
-  ## Subsetting on both genome coordinates and VCF fields : 
-  param <- ScanVcfParam(geno="HQ", info="AF", which=rngs)
-  vcf <- readVcfLongForm(tab, "hg19", param)
-
-  ## When any of 'fixed', 'info' or 'geno' are omitted (i.e., no
-  ## elements specified) all records are retrieved. Use NA to indicate
-  ## that no records should be retrieved. This param specifies
-  ## all 'fixed fields, the "GT" 'geno' field and none of 'info'.
-  ScanVcfParam(geno="GT", info=NA)
-
-  ## ---------------------------------
-  ## Long form GRanges : 
-  ## ---------------------------------
-  ## A 'long form' GRanges is one that has been expanded to accomodate
-  ## the 'unlisted' length of the 'fixed', 'info' or 'geno' fields
-  ## requested. This results in a GRanges with multiple rows per record 
-  ## where each row represents a unique combination of the elementMetadata 
-  ## columns. 
-
-  ## To specify a long form GRanges, set asGRanges=TRUE in the ScanVcfParam
-  ## object and specify 'fixed', 'info' and/or 'geno' elements.
-  ## Possible values for 'fixed' are ALT, QUAL or FILTER. To see available
-  ## values for INFO and FORMAT use scanVcfHeader. 
-  fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
-  hdr <- scanVcfHeader(fl)
-  info(hdr)
-  geno(hdr) 
-
-  ## Request all 'fixed' fields, "GT" from 'geno' and "H2" from 'info'.
-  ## See ?ScanVcfParam for more details.
-  param <- ScanVcfParam(asGRanges=TRUE, info="H2", geno="GT")
-  vcf <- readVcfLongForm(fl, "hg19", param)
-  head(vcf)
+  ## Subset on 'fixed' or 'info' VCF elements :
+  param <- ScanVcfParam(which=rngs, fixed="ALT", info=c("NS", "AF"))
+  gr3 <- readVcfLongForm(tab, "hg19", param)
 }
 
 \keyword{manip}

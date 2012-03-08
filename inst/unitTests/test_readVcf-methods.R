@@ -6,16 +6,16 @@ st <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
 test_readVcf_format <- function()
 {
     ## arrays in geno
-    vcf <- readVcf(f2, genome="hg19")
+    vcf <- readVcf(f2, "hg19")
     checkTrue(class(geno(vcf)$HQ) == "array")
 
     ## duplicate header lines, missing INFO
-    vcf <- suppressWarnings(readVcf(f3, genome="hg19"))
+    vcf <- suppressWarnings(readVcf(f3, "hg19"))
     checkTrue(ncol(values(info(vcf))) == 2L)
     checkTrue(class(values(alt(vcf))[["ALT"]]) == "DNAStringSetList")
 
     ## structural 
-    vcf <- readVcf(st, genome="hg19")
+    vcf <- readVcf(st, "hg19")
     checkTrue(class(values(alt(vcf))[["ALT"]]) == "CompressedCharacterList")
     checkIdentical(values(qual(vcf))[["QUAL"]], c(NA, 6, 12, 23, 14, 11))
 }

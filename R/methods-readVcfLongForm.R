@@ -81,7 +81,7 @@ setMethod(readVcfLongForm, c(file="character", genome="missing",
 
 .scanVcfToLongForm <- function(vcf, file, genome, param, ...)
 {
-    hdr <- header(scanVcfHeader(file))
+    hdr <- scanVcfHeader(file)
     vcf <- .collapseLists(vcf, param)
 
     ## rowData
@@ -96,7 +96,7 @@ setMethod(readVcfLongForm, c(file="character", genome="missing",
     fixed <- DataFrame(fx[lapply(fx, is.null) == FALSE])
 
     ## info 
-    info <- .formatInfo(vcf[["INFO"]], hdr[["INFO"]])
+    info <- .formatInfo(vcf[["INFO"]], info(hdr))
 
     ## expand to match ALT
     names(rowData) <-  NULL

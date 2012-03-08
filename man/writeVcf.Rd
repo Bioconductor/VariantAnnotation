@@ -22,10 +22,11 @@
   }
 }
 
-\details{
+\details{A VCF file can be written out from data in a \code{VCF} file. More
+  general methods to write out from lists are in progress.
 }
 
-\value{
+\value{VCF file
 }
 
 \references{
