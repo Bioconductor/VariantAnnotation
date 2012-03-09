@@ -40,6 +40,19 @@
     .vcf_usertag(map, tag, ...)
 }
 
+.vcf_scan_header_maps <-
+    function(file, fixed, info, geno)
+{
+    hdr <- scanVcfHeader(file)
+    samples <- samples(hdr) 
+    fmap <- .vcf_fixed(fixed)
+    imap <- .vcf_map(info(hdr), info, nm="info")
+    if (0L == length(imap))
+        imap <- list(character())
+    gmap <- .vcf_map(geno(hdr), geno, nm="geno")
+    list(hdr=hdr, samples=samples, fmap=fmap, imap=imap, gmap=gmap)
+}
+
 .vcf_scan <- 
    function(file, ..., fixed=character(), info=character(),
             geno=character(), param)
@@ -49,12 +62,8 @@
             open(file)
             on.exit(close(file))
         }
-        hdr <- scanVcfHeader(file)
-        samples <- samples(hdr) 
-        fmap <- .vcf_fixed(fixed)
-        imap <- .vcf_map(info(hdr), info, nm="info")
-        gmap <- .vcf_map(geno(hdr), geno, nm="geno")
-        tbxstate <- list(samples, fmap, imap, gmap)
+        maps <- .vcf_scan_header_maps(file, fixed, info, geno)
+        tbxstate <- maps[c("samples", "fmap", "imap", "gmap")]
         tbxsym <- getNativeSymbolInfo(".tabix_as_vcf",
                                       "VariantAnnotation")
         scanTabix(file, ..., param=param, tbxsym=tbxsym, tbxstate=tbxstate)
@@ -63,7 +72,7 @@
              path(file), call. = FALSE)
     })
 
-    .unpackVcf(result, hdr)
+    .unpackVcf(result, maps$hdr)
 }
 
 .vcf_scan_character <-
@@ -74,14 +83,10 @@
         file <- normalizePath(path.expand(file))
         if (!file.exists(file))
             stop("file does not exist")
-        hdr <- scanVcfHeader(file)
-        samples <- samples(hdr) 
-        fmap <- .vcf_fixed(fixed)
-        imap <- .vcf_map(info(hdr), info, "info")
-        gmap <- .vcf_map(geno(hdr), geno, "geno")
+        maps <- .vcf_scan_header_maps(file, fixed, info, geno)
         result <- .Call(.scan_vcf_character, file,
-                        as.integer(yieldSize), samples,
-                        fmap, imap, gmap)
+                        as.integer(yieldSize), maps$samples,
+                        maps$fmap, maps$imap, maps$gmap)
         names(result) <- "*:*-*"
         result
     }, error = function(err) {
@@ -89,34 +94,29 @@
              file, call. = FALSE)
     })
 
-    .unpackVcf(res, hdr)
+    .unpackVcf(res, maps$hdr)
 }
 
 .vcf_scan_connection <-
     function(file, ..., fixed=character(), info=character(),
              geno=character())
 {
-    res <- 
-        tryCatch({
-            fl <- summary(file)$description
-            hdr <- scanVcfHeader(fl)
-            samples <- samples(hdr) 
-            fmap <- .vcf_fixed(fixed)
-            imap <- .vcf_map(info(hdr), info, "info")
-            gmap <- .vcf_map(geno(hdr), geno, "geno")
+    res <- tryCatch({
+        file <- summary(file)$description
+        maps <- .vcf_scan_header_maps(file, fixed, info, geno)
 
-            txt <- readLines(file, ...)
-            txt <- txt[!grepl("^#", txt)] # FIXME: handle header lines better
-            result <- .Call(.scan_vcf_connection, txt, samples,
-                            fmap, imap, gmap)
-            names(result) <- "*:*-*"
-            result
-        }, error = function(err) {
-            stop("scanVcf: ", conditionMessage(err), "\n  path: ", 
-                 summary(file)$description, call. = FALSE)
-        })
+        txt <- readLines(file, ...)
+        txt <- txt[!grepl("^#", txt)] # FIXME: handle header lines better
+        result <- .Call(.scan_vcf_connection, txt, maps$samples,
+                        maps$fmap, maps$imap, maps$gmap)
+        names(result) <- "*:*-*"
+        result
+    }, error = function(err) {
+        stop("scanVcf: ", conditionMessage(err), "\n  path: ", 
+             summary(file)$description, call. = FALSE)
+    })
 
-    .unpackVcf(res, hdr)
+    .unpackVcf(res, maps$hdr)
 }
 
 setMethod(scanVcf, c("TabixFile", "RangesList"),

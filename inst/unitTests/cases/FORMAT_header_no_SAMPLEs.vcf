@@ -1,0 +1,13 @@
+##fileformat=VCFv4.1
+##INFO=<ID=AN,Number=1,Type=Integer,Description="Total Allele Count">
+##ALT=<ID=DEL,Description="Deletion">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=DS,Number=1,Type=Float,Description="Genotype dosage from MaCH/Thunder">
+##FORMAT=<ID=GL,Number=.,Type=Float,Description="Genotype Likelihoods">
+##reference=GRCh37
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	10523	.	TCCG	T	62	PASS	AN=2184
+1	10583	rs58108140	G	A	100	PASS	AN=2184
+1	10611	rs189107123	C	G	100	PASS	AN=2184
+1	10616	.	CCGCCGTTGCAAAGGCGCGCCG	C	172	PASS	AN=2184
+1	11540	.	T	TA	30	PASS	AN=2184

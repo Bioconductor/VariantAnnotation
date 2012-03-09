@@ -7,6 +7,7 @@
 
 struct vcftype_t {
     SEXPTYPE type;
+    Rboolean isArray;
     int nrow, ncol;
     union {
         int *logical;
@@ -17,7 +18,8 @@ struct vcftype_t {
     } u;
 };
 
-struct vcftype_t *_vcftype_new(SEXPTYPE type, int nrow, int ncol);
+struct vcftype_t *_vcftype_new(SEXPTYPE type, int nrow, int ncol,
+                               const Rboolean isArray);
 void _vcftype_free(struct vcftype_t *vcftype);
 struct vcftype_t *_vcftype_grow(struct vcftype_t *vcftype, int nrow);
 SEXP _vcftype_as_SEXP(struct vcftype_t *vcftype);

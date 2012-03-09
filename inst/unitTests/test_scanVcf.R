@@ -1,7 +1,6 @@
 fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
 scn <- scanVcf(fl)
 
-
 test_FixedTypes <- function()
 {
     .vcf_fixed <- VariantAnnotation:::.vcf_fixed
@@ -49,3 +48,32 @@ test_GenoTypes <- function()
         c("NA001", "NA002")))
     checkEquals(mat, geno$DP)
 } 
+
+test_scanVcf_no_FORMAT_column <- function()
+{
+    ## no FORMAT -- don't parse GENO
+    fl <- system.file(package="VariantAnnotation", "unitTests",
+                      "cases", "no_FORMAT_column.vcf")
+    geno <- scanVcf(fl)[[1]]$GENO
+    checkIdentical(setNames(list(), character()), geno)
+}
+
+test_scanVcf_FORMAT_header_no_SAMPLEs <- function()
+{
+    ## GENO tags, but no SAMPLE or actual samples
+    fl <- system.file(package="VariantAnnotation", "unitTests",
+                      "cases", "FORMAT_header_no_SAMPLEs.vcf")
+    geno <- scanVcf(fl)[[1]]$GENO
+    checkIdentical(c("GT", "DS", "GL"), names(geno))
+    checkTrue(all(sapply(geno, nrow) == 5L))
+    checkTrue(all(sapply(geno, ncol) == 0L))
+}
+    
+test_scanVcf_no_INFO_header <- function()
+{
+    fl <- system.file(package="VariantAnnotation", "unitTests",
+                      "cases", "no_INFO_header.vcf")
+    info <- suppressWarnings(scanVcf(fl)[[1]]$INFO$INFO)
+    checkIdentical(c(5L, 1L), dim(info))
+    checkIdentical(".", unique(as.vector(info)))
+}

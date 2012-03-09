@@ -1,8 +1,10 @@
 #include "vcftype.h"
 
-struct vcftype_t *_vcftype_new(SEXPTYPE type, int nrow, int ncol)
+struct vcftype_t *_vcftype_new(SEXPTYPE type, int nrow, int ncol,
+                               const Rboolean isArray)
 {
     struct vcftype_t *vcftype = Calloc(1, struct vcftype_t);
+    vcftype->isArray = isArray;
     vcftype->ncol = ncol;
     vcftype->type = type;
 
@@ -98,7 +100,7 @@ SEXP _vcftype_as_SEXP(struct vcftype_t *vcftype)
     if (NULL == vcftype || NILSXP == vcftype->type)
         return R_NilValue;
 
-    const int ncol = vcftype->ncol == 0 ? 1 : vcftype->ncol,
+    const int ncol = vcftype->isArray ? vcftype->ncol : 1,
         nrow = vcftype->nrow;
     SEXP ans = PROTECT(Rf_allocVector(vcftype->type, nrow * ncol));
 
@@ -148,7 +150,7 @@ SEXP _vcftype_as_SEXP(struct vcftype_t *vcftype)
         Rf_error("(internal) unhandled type '%s'",
                  type2char(vcftype->type));
     }
-    if (0 != vcftype->ncol) {
+    if (TRUE == vcftype->isArray) {
         SEXP dim = PROTECT(Rf_allocVector(INTSXP, 2));
         INTEGER(dim)[0] = vcftype->nrow;
         INTEGER(dim)[1] = vcftype->ncol;
