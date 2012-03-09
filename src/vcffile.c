@@ -400,9 +400,9 @@ SEXP scan_vcf_character(SEXP file, SEXP yield,
             else break;
         }
 
-        _parse(buf, irec, parse);
-        irec += 1;
+        _parse(buf0, irec, parse);
 
+        irec += 1;
         prev = curr;
         buf = buf0;
     }

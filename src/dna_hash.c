@@ -79,7 +79,7 @@ SEXP dna_hash_as_DNAStringSet(struct dna_hash_t *dna)
         kh_cstr_t cstr = kh_key(dna->hash, key);
         int idx = kh_value(dna->hash, key);
         istart[idx] = twidth + 1;
-        iwidth[idx] = strlen(cstr);
+        iwidth[idx] = '.' == *cstr ? 0 : strlen(cstr);
         twidth += iwidth[idx];
     }
 
@@ -91,9 +91,10 @@ SEXP dna_hash_as_DNAStringSet(struct dna_hash_t *dna)
             continue;
         kh_cstr_t cstr = kh_key(dna->hash, key);
         int idx = kh_value(dna->hash, key);
-        for (int j = 0; j < iwidth[idx]; ++j) {
+        if ('.' == *cstr)
+            continue;
+        for (int j = 0; j < iwidth[idx]; ++j)
             *tagp++ = DNAencode(cstr[j]);
-        }
     }
 
     /* ranges */
