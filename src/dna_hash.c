@@ -71,19 +71,17 @@ SEXP dna_hash_as_DNAStringSet(struct dna_hash_t *dna)
     istart = Calloc(dna->hash_idx, int);
     iwidth = Calloc(dna->hash_idx, int);
 
+    twidth = 0;
     for (key = kh_begin(dna->hash); key != kh_end(dna->hash); ++key)
     {
         if (!kh_exist(dna->hash, key))
             continue;
         kh_cstr_t cstr = kh_key(dna->hash, key);
         int idx = kh_value(dna->hash, key);
+        istart[idx] = twidth + 1;
         iwidth[idx] = strlen(cstr);
+        twidth += iwidth[idx];
     }
-
-    istart[0] = 1;
-    for (i = 1; i < dna->hash_idx; ++i)
-        istart[i] = istart[i-1] + iwidth[i - 1];
-    twidth = istart[dna->hash_idx - 1] + iwidth[dna->hash_idx - 1];
 
     /* RAW */
     PROTECT(tag = NEW_RAW(twidth)); tagp = RAW(tag);
@@ -93,7 +91,6 @@ SEXP dna_hash_as_DNAStringSet(struct dna_hash_t *dna)
             continue;
         kh_cstr_t cstr = kh_key(dna->hash, key);
         int idx = kh_value(dna->hash, key);
-        tagp = RAW(tag) + istart[idx] - 1;
         for (int j = 0; j < iwidth[idx]; ++j) {
             *tagp++ = DNAencode(cstr[j]);
         }
