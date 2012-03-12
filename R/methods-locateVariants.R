@@ -128,7 +128,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb"),
         fidx <- follow(query, rng)
 
         location <- .location(length(query))
-        location[seqlevels(query) %in% seqlevels(rng)] <- "intergenic"
+        location[as.vector(seqnames(query)) %in% seqlevels(rng)] <- "intergenic"
 
         DataFrame(queryID=which(intergenic), location=location, 
             txID=NA_integer_, cdsID=NA_integer_,

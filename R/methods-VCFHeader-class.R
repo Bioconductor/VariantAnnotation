@@ -89,6 +89,9 @@ setMethod(show, "VCFHeader",
     }
     cat("class:", class(object), "\n")
 
+    samples <- samples(object) 
+    scat("samples(%d): %s\n", samples)
+
     meta <- rownames(meta(object)) 
     scat("meta(%d): %s\n", meta)
 
