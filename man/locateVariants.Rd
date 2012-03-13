@@ -147,12 +147,11 @@ locateVariants(query, subject, ...)
   ## Using the cache with multiple VCF files
   ## library(TxDb.Hsapiens.UCSC.hg19.knownGene)
   ## txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene 
-  ## myenv <- new.enviornment()
+  ## myenv <- new.env()
   ## filelst <- list(file1, file2, file3)
   ## lapply(filelst, function(fl) {
-  ##        vcf <- readVcf(i, "hg19")
+  ##        vcf <- readVcf(fl, "hg19")
   ##        ## modify seqlevels to match TxDb
-  ##        ## here we prefix with 'chr' 
   ##        oldnms <- seqlevels(vcf)
   ##        newnms <- paste("chr", oldnms, sep="")
   ##        names(newnms) <- oldnms
