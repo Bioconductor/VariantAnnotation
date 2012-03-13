@@ -1,3 +1,23 @@
+CHANGES IN VERSION 1.2.0
+------------------------
+
+NEW FEATURES
+
+    o readVcf() has genome argument, can be subset on ranges or VCF elements
+      with ScanVcfParam()
+
+    o scanVcfHeader() returns VCFHeader class with accessors fixed, info, geno,
+      etc.
+
+    o writeVcf() writes out a VCF file from a VCF class
+
+    o locateVariants() 
+        - has cache argument for repeated calls over multiple vcf files
+        - returns txID, geneID and cdsID
+
+    o predictCoding() returns txID, geneID and cdsID
+ 
+
 CHANGES IN VERSION 1.0.0
 ------------------------
 
