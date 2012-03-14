@@ -18,56 +18,63 @@ setMethod("cols", "PolyPhenDb",
 ) 
 
 setMethod("select", "PolyPhenDb",
-    function(x, keys, cols, ...)
+    function(x, keys, cols, keytype, ...)
     {
-        if (missing(keys) & missing(cols)) {
-            sql <- "SELECT * FROM ppdata"
-        }
-        if (!missing(keys) & !missing(cols)) {
-            if (!"RSID" %in% cols)
-                cols <- c("RSID", cols) 
-            fmtcols <- paste(cols, collapse=",") 
-            fmtkeys <- .sqlIn(keys)
-            sql <- paste("SELECT ", fmtcols, " FROM ppdata WHERE RSID 
-                         IN (", fmtkeys, ")", sep="")
-        } 
-        if (!missing(keys) & missing(cols)) {
-            fmtkeys <- .sqlIn(keys)
-            sql <- paste("SELECT * FROM ppdata WHERE RSID IN (",
-                         fmtkeys, ")", sep="")
-        }
-        if (missing(keys) & !missing(cols)) {
-            if (!"RSID" %in% cols)
-                cols <- c("RSID", cols) 
-            fmtcols <- paste(cols, collapse=",") 
-            sql <- paste("SELECT ", fmtcols, " FROM ppdata", sep="")
-        }
-        if (missing(keys)) {
-            raw <- dbGetQuery(x$conn, sql)
-        } else { 
-            raw <- dbGetQuery(x$conn, sql)
-            .formatPPDbSelect(raw, keys=keys) 
-        }
+        sql <- .createPPDbQuery(keys, cols) 
+        raw <- dbGetQuery(x$conn, sql)
+        .formatPPDbSelect(raw, keys) 
     }
 )
 
+.createPPDbQuery <- function(keys, cols)
+{
+    if (missing(keys) && missing(cols)) {
+        sql <- "SELECT * FROM ppdata"
+    }
+    if (!missing(keys) && !missing(cols)) {
+        if (!"RSID" %in% cols)
+            cols <- c("RSID", cols)
+        fmtcols <- paste(cols, collapse=",")
+        fmtkeys <- .sqlIn(keys)
+        sql <- paste("SELECT ", fmtcols, " FROM ppdata WHERE RSID 
+            IN (", fmtkeys, ")", sep="")
+    }
+    if (!missing(keys) && missing(cols)) {
+        fmtkeys <- .sqlIn(keys)
+        sql <- paste("SELECT * FROM ppdata WHERE RSID IN (",
+            fmtkeys, ")", sep="")
+    }
+    if (missing(keys) & !missing(cols)) {
+        if (!"RSID" %in% cols)
+            cols <- c("RSID", cols)
+        fmtcols <- paste(cols, collapse=",")
+        sql <- paste("SELECT ", fmtcols, " FROM ppdata", sep="")
+    }
+    sql
+}
+
 .formatPPDbSelect <- function(raw, keys)
 {
-    ## restore order
-    missing <- (!keys %in% as.character(raw$RSID))
-    if (any(missing))
-        warning(paste("key not found in database : ", keys[missing],
-                      "\n", sep=""))
+    if (missing(keys)) {
+        df <- data.frame(raw)
+        rownames(df) <- NULL
+        df
+    } else {
+    ## restore key order
+        missing <- (!keys %in% as.character(raw$RSID))
+        if (any(missing))
+            warning(paste("key not found in database : ", keys[missing],
+                    "\n", sep=""))
+        lst <- as.list(rep(NA_character_, length(keys)))
+        raw <- raw[!duplicated(raw), ]
+        for (i in which(missing == FALSE))
+            lst[[i]] <- raw[raw$RSID %in% keys[i], ]
 
-    lst <- lapply(keys[!missing], 
-             function(x, raw) {
-               raw[raw$RSID %in% x, ]
-             }, raw=raw)
-    df <- do.call(rbind, lst)
-    dups <- duplicated(df)
-    if (any(dups))
-        df <- df[!dups,]
-    df
+        df <- do.call(rbind, lst)
+        df$RSID[is.na(df$RSID)] <- keys[missing]
+        rownames(df) <- NULL
+        df
+    }
 }
 
 duplicateRSID <- function(db, keys, ...)
