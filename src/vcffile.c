@@ -133,7 +133,7 @@ static void _parse(char *line, const int irec,
         field = chrom;
         *(field + strlen(chrom)) = ':';
     }
-    rowData->u.list[ID_IDX]->u.character[irec] = strdup(field);
+    rowData->u.list[ID_IDX]->u.character[irec] = Strdup(field);
 
     field = it_next(&it0);      /* REF */
     dna_hash_append(parse->ref, field);
@@ -148,7 +148,7 @@ static void _parse(char *line, const int irec,
     struct vcftype_t *info = vcf->u.list[INFO_IDX];
     if (1 == imap_n && NULL == inms) { /* no header; parse as char */
         elt = info->u.list[0];
-        elt->u.character[idx] = strdup(field);
+        elt->u.character[idx] = Strdup(field);
     } else {
         for (ifld = it_init(&it1, field, ';'); '\0' != *ifld;
              ifld = it_next(&it1)) {
@@ -334,7 +334,7 @@ SEXP scan_vcf_connection(SEXP txt, SEXP sample, SEXP fmap, SEXP imap,
 
     /* parse each line */
     for (int irec = 0; irec < parse->vcf_n; irec++) {
-        char *line = strdup(CHAR(STRING_ELT(txt, irec)));
+        char *line = Strdup(CHAR(STRING_ELT(txt, irec)));
         _parse(line, irec, parse);
         free(line);
     }

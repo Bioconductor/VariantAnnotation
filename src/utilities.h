@@ -3,6 +3,8 @@
 
 #include <Rdefines.h>
 
+#define Strdup(x) strcpy(Calloc(strlen(x) + 1, char), x)
+
 SEXP get_namespace(const char *pkg);
 
 struct it_t {

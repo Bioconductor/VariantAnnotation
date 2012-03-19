@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <Rdefines.h>
+#include "utilities.h"
 
 struct vcftype_t {
     SEXPTYPE type;
@@ -38,7 +39,7 @@ static inline void _vcftype_set(struct vcftype_t *vcftype,
             ('.' == *field) ? R_NaReal : atof(field);
         break;
     case STRSXP:
-        vcftype->u.character[idx] = strdup(field);
+        vcftype->u.character[idx] = Strdup(field);
         break;
     default:
         Rf_error("(internal) unhandled field type '%s'",

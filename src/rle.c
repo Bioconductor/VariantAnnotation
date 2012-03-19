@@ -37,7 +37,7 @@ void rle_append(struct rle_t *rle, const char *value)
     {
         if (rle->len == rle->size)
             rle_grow(rle, RLE_GROW * rle->size);
-        rle->value[rle->len] = strdup(value);
+        rle->value[rle->len] = Strdup(value);
         rle->length[rle->len] = 1;
         rle->len += 1;
     } else
