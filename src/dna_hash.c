@@ -6,7 +6,7 @@
 #include "IRanges_interface.h"
 #include "samtools/khash.h"
 
-KHASH_MAP_INIT_STR(ref, int);
+KHASH_MAP_INIT_STR(ref, int)
 
 struct dna_hash_t {
     khash_t(ref) *hash;
@@ -111,8 +111,8 @@ SEXP dna_hash_as_DNAStringSet(struct dna_hash_t *dna)
     PROTECT(xstringset = new_XRawList_from_tag(
                 "DNAStringSet", "DNAString", tag, ranges));
 
-    free(iwidth);
-    free(istart);
+    Free(iwidth);
+    Free(istart);
     UNPROTECT(5);
 
     return xstringset;

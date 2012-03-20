@@ -336,7 +336,7 @@ SEXP scan_vcf_connection(SEXP txt, SEXP sample, SEXP fmap, SEXP imap,
     for (int irec = 0; irec < parse->vcf_n; irec++) {
         char *line = Strdup(CHAR(STRING_ELT(txt, irec)));
         _parse(line, irec, parse);
-        free(line);
+        Free(line);
     }
 
     SEXP result = PROTECT(Rf_allocVector(VECSXP, 1));
@@ -367,7 +367,6 @@ SEXP scan_vcf_character(SEXP file, SEXP yield,
 
     gzFile gz = gzopen(CHAR(STRING_ELT(file, 0)), "rb");
     int curr, prev, irec = 0;
-
     if (Z_NULL == gz) {
         Free(parse);
         Rf_error("failed to open file");
@@ -408,7 +407,7 @@ SEXP scan_vcf_character(SEXP file, SEXP yield,
     }
 
     gzclose(gz);
-    free(buf0);
+    Free(buf0);
 
     _vcf_grow(parse->vcf, irec);
 
