@@ -60,11 +60,6 @@ refLocsToLocalLocs(ranges, txdb, cdsbytx, exbytx, ...)
   columns,
 
   \describe{
-    \item{\code{tx_id}}{
-      Character vector of internal transcript ids from the 
-      \link[GenomicFeatures]{TranscriptDb} or the names of the outer list 
-      elements of the \code{cdsbytx} and \code{exbytx} objects.
-    }
     \item{\code{cDNA_loc}}{
       Location in cDNA (transcript) coordinates
     }
@@ -73,6 +68,16 @@ refLocsToLocalLocs(ranges, txdb, cdsbytx, exbytx, ...)
     }
     \item{\code{protein_loc}}{
       Location in protein (codon triplet) coordinates
+    }
+    \item{\code{tx_id}}{
+      Character vector of internal transcript ids from the 
+      \link[GenomicFeatures]{TranscriptDb} or the names of the outer list 
+      elements of the \code{cdsbytx} and \code{exbytx} objects.
+    }
+    \item{\code{cds_id}}{
+      Character vector of internal coding region ids from the 
+      \link[GenomicFeatures]{TranscriptDb} or the names of the outer list 
+      elements of the \code{cdsbytx} and \code{exbytx} objects.
     }
   }
 }
@@ -87,9 +92,10 @@ refLocsToLocalLocs(ranges, txdb, cdsbytx, exbytx, ...)
 
 \examples{
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
-txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene 
-query <- GRanges("chr22", IRanges(c(16279195, 51208333), width=10))
-refLocsToLocalLocs(query, txdb)
+ranges <- GRanges(c("chr12", "chr1", "chr5"), 
+                 IRanges(c(1017956, 881906, 140532), 
+                         c(1017956, 881907, 140532)))
+refLocsToLocalLocs(ranges, TxDb.Hsapiens.UCSC.hg19.knownGene)
 }
 
 \keyword{manip}
