@@ -11,12 +11,9 @@
 }
 
 \usage{
-  \S4method{predictCoding}{VCF,TranscriptDb,ANY,missing}(query, subject, 
-    seqSource, varAllele, ...)
-  \S4method{predictCoding}{Ranges,TranscriptDb,ANY,DNAStringSet}(query, subject, 
-    seqSource, varAllele, ...)
-  \S4method{predictCoding}{GRanges,TranscriptDb,ANY,DNAStringSet}(query, subject, 
-    seqSource, varAllele, ...)
+\S4method{predictCoding}{VCF,TranscriptDb,ANY,missing}(query, subject, seqSource, varAllele, ...)
+\S4method{predictCoding}{Ranges,TranscriptDb,ANY,DNAStringSet}(query, subject, seqSource, varAllele, ...)
+\S4method{predictCoding}{GRanges,TranscriptDb,ANY,DNAStringSet}(query, subject, seqSource, varAllele, ...)
 }
 
 \arguments{
@@ -69,28 +66,44 @@
 } 
 
 \value{
-  A \link[IRanges]{DataFrame} with a row for each variant-transcript 
-  match. This includes only variants that fell in a coding regions.
+  A \link[GenomicRanges]{GRanges} with a row for each variant-transcript 
+  match. The result includes only variants that fell within coding regions.
 
-  Columns include \code{queryID}, \code{consequence}, \code{refSeq}, 
-  \code{varSeq}, \code{seqTxLoc}, \code{varTxLoc}, \code{varCdsLoc},
-  \code{subjStrand}, \code{refAA}, \code{varAA}, \code{txID}, \code{geneID},
-  and \code{cdsID}.
-
+  At a minimum, the \code{elementMetadata} columns include,
   \describe{
-    \item{\code{queryID}}{
-      The \code{queryID} column provides a map back to the variants in the 
-      original \code{query}. If the \code{query} was a \code{VCF} object this
-      index corresponds to the row in the \code{GRanges} in the \code{rowData}
-      slot. If \code{query} was a \code{GRanges}, \code{RangedData} or
-      \code{RangesList} the index corresponds to the row in the object.
+    \item{\code{varAllele}}{
+      Variant allele
+    }
+    \item{\code{tx_id}}{
+      Internal transcript id from the annotation
+    }
+    \item{\code{cds_id}}{
+      Internal coding region id from the annotation
+    }
+    \item{\code{gene_id}}{
+      Internal gene id from the annotation
+    }
+    \item{\code{cDNA_loc}}{
+      Location in cDNA (transcript-based) coordinates of the first nucleotide in
+      the codon sequence to be translated. This position corresponds to the
+      first nucleotide in both the \code{refSeq} and \code{varSeq} columns.
+    }
+    \item{\code{cds_loc}}{
+      Location in coding region-based coordinates of the first nucleotide in
+      the variant.
+    }
+    \item{\code{protein_loc}}{
+      Location in cds-based coordinates of the first nucleotide in
+      the variant. This position is relative to the start of the cds region
+      defined in the \code{subject} annotation. 
     }
     \item{\code{consequence}}{
-      Possible values for the \code{consequence} column are `synonymous',
-      `nonsynonymous', or `frameshift'. Variant sequences are transcribed only 
-      if they are divisible by 3. When a sequence is not transcribed the 
-      \code{varAA} column will be empty and the \code{consequence} will be a 
-      `frameshift'. 
+      Possible values are `synonymous', `nonsynonymous', `frameshift' and
+      `not translated'. Variant sequences are translated only when the codon
+      sequence is a multiple of 3. The value will be `frameshift' when a 
+      sequence is not translated due to incompatible length and it will be 
+      `not translated' when the \code{varAllele} is missing or there is an 
+      \sQuote{N} in the sequence.
     }
     \item{\code{refSeq}}{
       This is the reference codon sequence. This range is typically greater
@@ -110,36 +123,6 @@
     \item{\code{varAA}}{
       The variant amino acid column contains the translated \code{varSeq}. When
       translation is not possible this value is missing.
-    }
-    \item{\code{seqTxLoc}}{
-      Location in transcript-based coordinates of the first nucleotide in
-      the codon sequence to be translated. This position corresponds to the
-      first nucleotide in both the \code{refSeq} and \code{varSeq} columns.
-    }
-    \item{\code{varTxLoc}}{
-      Location in transcript-based coordinates of the first nucleotide in
-      the variant. This value will be the same as \code{seqTxLoc} when the 
-      variant starts exactly at the beginning of a codon. 
-    }
-    \item{\code{varCdsLoc}}{
-      Location in cds-based coordinates of the first nucleotide in
-      the variant. This position is relative to the start of the cds region
-      defined in the \code{subject} annotation. 
-    }
-    \item{\code{subjStrand}}{
-      The strand of the \code{subject} the variant matched. \code{predictCoding} 
-      determines which variants fall in a coding region by finding the overlaps 
-      between the \code{query} and \code{subject}. The \code{query} may be 
-      un-stranded \sQuote{*} but the \code{subject} annotation will have a strand. 
-    }
-    \item{\code{txID}}{
-      The transcript id taken from the \code{TranscriptDb} object.
-    }
-    \item{\code{cdsID}}{
-      The coding sequence id taken from the \code{TranscriptDb} object.
-    }
-    \item{\code{geneID}}{
-      The gene id taken from the \code{TranscriptDb} object.
     }
   }
 }
@@ -161,6 +144,10 @@
   library(TxDb.Hsapiens.UCSC.hg19.knownGene)
   txdb19 <- TxDb.Hsapiens.UCSC.hg19.knownGene 
 
+
+  ## ----------------------------
+  ## VCF object as query 
+  ## ----------------------------
   ## Read variants from a VCF file 
   fl <- system.file("extdata", "ex1.vcf", package="VariantAnnotation")
   vcf <- readVcf(fl, "hg19")
@@ -169,39 +156,31 @@
   vcf_adj <- renameSeqlevels(vcf, c("16"="chr16", "21"="chr21"))
   ## Confirm common seqlevels
   intersect(seqlevels(vcf_adj), seqlevels(txdb19))
-
  
-  ## Note that when 'query' is a VCF object the varAllele argument is missing.
-  coding <- predictCoding(vcf_adj, txdb19, Hsapiens)
+  ## Note when 'query' is a VCF object the varAllele argument is missing.
+  coding1 <- predictCoding(vcf_adj, txdb19, Hsapiens)
+  head(coding1, 3)
 
-  ## The queryID column in the result corresponds to the row numbers of the
-  ## of the original 'query' which was the VCF. To map the result from 
-  ## predictCoding() back to the VCF we use the rowData.
-  var <- rowData(vcf_adj)[coding$queryID]
-
-  ## Consequence for all variant-transcript matches
-  table(coding$consequence)
-
-  ## Alternatively, we can use a GRanges as the 'query' to predictCoding().
-  ## The seqlevels have been adjusted in the VCF object so the GRanges we
-  ## extract has the correct seqlevels.
+  ## ----------------------------
+  ## GRanges object as query 
+  ## ----------------------------
+  ## Alternatively, a GRanges can be the 'query' to predictCoding().
+  ## The seqlevels were previously adjusted in the VCF object so the GRanges
+  ## extracted from rowData() has the correct seqlevels.
   rd <- rowData(vcf_adj)
  
-  ## The GRanges provided as the 'query' must have one row for each alternate
-  ## allele. We see we that variants 1, 2 and 10 have two alternate alleles.
+  ## The GRanges must be expanded to have one row per alternate allele. 
+  ## Variants 1, 2 and 10 have two alternate alleles.
   altallele <- values(alt(vcf_adj))[["ALT"]]
   eltlen <- elementLengths(altallele)
   eltlen
-
-  ## Expand the GRanges by the element lengths
   rd_exp <- rep(rd, eltlen)
  
   ## Call predictCoding() with the expanded GRanges as the 'query'
-  ## and the unlisted alternate allele as the 'varAllele'
-  ## Note that the queryID values in coding2 correspond to the rows
-  ## in the expanded GRanges. 
-  coding2 <- predictCoding(query=rd_exp, subject=txdb19, seqSource=Hsapiens, 
-                           varAllele=unlist(altallele)) 
+  ## and the unlisted alternate allele as the 'varAllele'.
+  coding2 <- predictCoding(rd_exp, txdb19, Hsapiens, unlist(altallele)) 
+
+  identical(coding1, coding2)
 }
 
 \keyword{methods}

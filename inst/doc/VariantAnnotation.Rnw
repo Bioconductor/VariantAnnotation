@@ -494,10 +494,9 @@ deletion & GGCCTA & `' & acggcctaa & aca & yes\\
 \end{table}
 
 
-The return object from \Rfunction{predictCoding} is a \Robject{DataFrame} with 
-one row for each variant-transcript match. Unlike \Rfunction{locateVariants}, 
-this function only returns results for the variants that fall in a coding 
-region. 
+The result is a modified \Rcode{query} containing only variants that fell in 
+coding regions. Each row represents a variant-transcript match so more than
+one row per original variant is possible.
 
 <<predictCoding>>=
 library(BSgenome.Hsapiens.UCSC.hg19)
@@ -505,13 +504,13 @@ aacoding <- predictCoding(query=vcf, subject=txdb19, seqSource=Hsapiens)
 head(aacoding, 4)
 @
 
-If translation was possible, the value in the consequence column will be 
-`synonymous' or `nonsynonymous'. Where translation was not possible, 
-consequence will be `frameshift' and the \Robject{varAA} value will be missing. 
+If translation was possible, the consequence column will be `synonymous' or 
+`nonsynonymous'. Where translation was not possible, consequence will be 
+`frameshift' and the \Robject{varAA} value will be missing. 
 
 <<predictCoding_frameshift>>=
 ## consequence is 'frameshift' where translation is not possible
-head(aacoding[width(aacoding$varAA) == 0,], 4)
+head(aacoding[values(aacoding)[["consequence"]] == "frameshift"], 3)
 @
 
 \section{SIFT and PolyPhen Databases}
@@ -533,13 +532,10 @@ and are designed to be searched by rsid. Variants that are in dbSNP can be
 searched with these database packages. When working with novel variants, SIFT
 and PolyPhen must be called directly. See references for home pages.
 
-We identify the non-synonymous variants and obtain the rsids.
+Identify the non-synonymous variants and obtain the rsids.
 <<nonsynonymous>>=
-nonsyn <- with(aacoding, unique(queryID[consequence == "nonsynonymous"]))
-nonsyn
-
-nms <- names(rd[nonsyn])
-rsids <- nms[grep("rs", nms, fixed=TRUE)]
+nonsyn <- aacoding[values(aacoding)[["consequence"]] == "nonsynonymous"]
+rsids <- names(nonsyn)[grep("rs", names(nonsyn), fixed=TRUE)]
 rsids
 @
 

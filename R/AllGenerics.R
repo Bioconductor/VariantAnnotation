@@ -4,6 +4,12 @@ setGeneric("predictCoding",
     standardGeneric("predictCoding")
 )
 
+setGeneric("refLocsToLocalLocs",
+    signature = c("ranges", "txdb", "cdsbytx", "exbytx"),
+    function(ranges, txdb, cdsbytx, exbytx, ...)
+    standardGeneric("refLocsToLocalLocs")
+)
+
 setGeneric("locateVariants", signature = c("query", "subject"),
     function(query, subject, ...)
     standardGeneric("locateVariants")

@@ -2,8 +2,8 @@
 ### predictCoding methods 
 ### =========================================================================
 
-setMethod("predictCoding",  signature(query="Ranges", subject="TranscriptDb", 
-          seqSource="ANY", varAllele="DNAStringSet"),
+setMethod("predictCoding",  
+    signature("Ranges", "TranscriptDb", "ANY", "DNAStringSet"),
     function(query, subject, seqSource, varAllele, ...)
     {
         x <- as(query, "GRanges")
@@ -12,121 +12,114 @@ setMethod("predictCoding",  signature(query="Ranges", subject="TranscriptDb",
     }
 )
 
-setMethod("predictCoding", signature(query="VCF", subject="TranscriptDb", 
-          seqSource="ANY", varAllele="missing"),
+setMethod("predictCoding", 
+    signature("VCF", "TranscriptDb", "ANY", "missing"),
     function(query, subject, seqSource, varAllele, ...)
     {
-        rd <- rowData(query) 
         alt <- values(alt(query))[["ALT"]]
-        rdf <- rep(rd, elementLengths(alt))
-        res <- callGeneric(query=rdf, subject=subject, seqSource=seqSource, 
-             varAllele=unlist(alt, use.names=FALSE), ...) 
-        origID <- rep(seq_len(length(rd)), elementLengths(alt))
-        res$queryID <- origID[res$queryID]
-        res
+        rd <- rep(rowData(query), elementLengths(alt))
+        callGeneric(query=rd, subject=subject, seqSource=seqSource, 
+            varAllele=unlist(alt, use.names=FALSE), ...) 
     }
 )
 
-setMethod("predictCoding", signature(query="GRanges", subject="TranscriptDb", 
-          seqSource="ANY", varAllele="DNAStringSet"),
+setMethod("predictCoding", 
+    signature("GRanges", "TranscriptDb", "ANY", "DNAStringSet"),
     function(query, subject, seqSource, varAllele, ...)
-    {
-        stopifnot(length(varAllele) == length(query))
+{
+    .predictCoding(query, subject, seqSource, varAllele, ...)
+})
 
-        queryseq <- seqlevels(query)
-        subseq <- seqlevels(subject)
-        if (!any(queryseq %in% subseq))
-            warning("none of seqlevels(query) match seqlevels(subject)")
+.predictCoding <-
+    function(query, subject, seqSource, varAllele, ..., 
+             cache=new.env(parent=emptyenv()))
+{
+    stopifnot(length(varAllele) == length(query))
+    if (!any(seqlevels(query) %in% seqlevels(subject)))
+        warning("none of seqlevels(query) match seqlevels(subject)")
 
-        ## mask chromosomes not in query
-        masks <- isActiveSeq(subject)
-        on.exit(isActiveSeq(subject) <- masks)
-        .setActiveSubjectSeq(query, subject)
+    ## mask chromosomes not in query
+    masks <- isActiveSeq(subject)
+    on.exit(isActiveSeq(subject) <- masks)
+    .setActiveSubjectSeq(query, subject)
 
-        cdsByTx <- cdsBy(subject)
-        ## ranges with width=0 :
-        ## de-increment start to equal end value 
-        if (any(width(query) == 0)) {
-            queryAdj <- query
-            start(queryAdj[width(query) == 0]) <- 
-                start(query)[width(query) == 0] - 1
-        } else queryAdj <- query
-
-        fo <- findOverlaps(queryAdj, cdsByTx, type = "within")
-        if (length(fo) == 0)
-            return(
-                DataFrame(
-                  queryID=integer(), consequence=character(), 
-                  refSeq=DNAStringSet(), varSeq=DNAStringSet(), 
-                  refAA=AAStringSet(), varAA=AAStringSet(), 
-                  txID=integer(), geneID=character(), cdsID=integer())) 
-
-        ## map genome position to transcript position
-        cdsByTx <- cdsByTx[unique(subjectHits(fo))]
-        txlocal <- globalToLocal(queryAdj, cdsByTx)
-        midx <- which(width(varAllele) == 0)
-        if (length(midx) > 0) {
-            warning("records with missing 'varAllele' values ",
-                    "will be ignored")
-            txlocal <- txlocal[!txlocal$qindex %in% midx, ] 
-        }
-        xCoding <- query[txlocal$qindex]
-        xAllele <- varAllele[txlocal$qindex]
- 
-        ## construct original sequences 
-        originalWidth <- width(xCoding)
-        codonStart <- ((start(txlocal$txloc) - 1L) %/% 3L) * 3L + 1L
-        ## codonEnd must be adjusted for 
-        ## (1) the width of the reference sequence and
-        ## (2) the position in the codon of the alternate allele substitution
-        varPosition <- (start(txlocal$txloc) - 1L) %% 3L + 1L
-        codonEnd <- 
-            codonStart + (((varPosition + originalWidth) %/% 3L) * 3L + 2L)
-        txseqs <- getTranscriptSeqs(cdsByTx, seqSource)
-        codons <- DNAStringSet(substring(txseqs[txlocal$sindex], 
-            codonStart, codonEnd))
-
-        ## construct variant sequences 
-        varWidth <- width(xAllele)
-        indels <- originalWidth == 0 | varWidth == 0
-        translateIdx <- abs(varWidth - originalWidth) %% 3 == 0 
-        n <- grep("N", as.character(xAllele, use.names=FALSE), fixed=TRUE)
-        if (length(n) > 0) {
-            warning("varAllele values containing 'N' will not be translated")
-            translateIdx[n] <- FALSE
-        }
-        varSeq <- codons
-        subseq(varSeq, start=varPosition, width=originalWidth) <- xAllele 
-
-        ## results
-        queryID <- txlocal$qindex
-        varTxLoc <-  start(txlocal$txloc) 
-        varCdsLoc <- txlocal$cdsloc
-        subjStrand <- Rle(txlocal$strand)
-        seqTxLoc <- codonStart 
-        txID <- names(cdsByTx)[txlocal$sindex]
-        cdsID <- txlocal$cdsid 
-        txByGene <- transcriptsBy(subject, "gene")
-        map <- data.frame(
-            geneid=rep(names(txByGene), elementLengths(txByGene)),
-            txid=values(unlist(txByGene, use.names=FALSE))[["tx_id"]])
-        geneID <- map$geneid[match(txID, map$txid)]
-
-        refSeq <- codons
-        varSeq <- varSeq
-        refAA <- translate(codons)
-        varAA <- AAStringSet(rep("", length(queryID))) 
-        varAA[translateIdx] <- translate(varSeq[translateIdx])
- 
-        nonsynonymous <- as.character(refAA) != as.character(varAA) 
-        consequence <- rep("synonymous", length(xCoding))
-        consequence[nonsynonymous] <- "nonsynonymous" 
-        consequence[!translateIdx] <- "frameshift" 
-        consequence <- factor(consequence) 
- 
-        DataFrame(queryID, consequence, refSeq, varSeq, refAA, varAA, 
-                  seqTxLoc, varTxLoc, varCdsLoc, subjStrand, 
-                  txID, cdsID, geneID) 
+    if (!exists(".__init__", cache, inherits=FALSE)) {
+        cache[["cdsbytx"]] <- cdsBy(subject)
+        cache[["exbytx"]] <- exonsBy(subject)
+        cache[["txbygene"]] <- transcriptsBy(subject, "gene")
+        cache[[".__init__"]] <- TRUE
     }
-)
 
+    map <- data.frame(
+        geneid=rep(names(cache[["txbygene"]]), 
+                   elementLengths(cache[["txbygene"]])),
+        txid=values(unlist(cache[["txbygene"]], use.names=FALSE))[["tx_id"]])
+
+    ## FIXME : set query back after olaps
+    if (any(insertion <- width(query) == 0))
+        start(query)[insertion] <- start(query)[insertion] - 1
+
+    ## retrieve local coordinates
+    values(query) <- append(values(query), DataFrame(varAllele=varAllele))
+    txlocal <- refLocsToLocalLocs(ranges=query, cdsbytx=cache[["cdsbytx"]], 
+        exbytx=cache[["exbytx"]])
+
+    if (length(txlocal) == 0)
+        return(txlocal)
+    rwidth <- width(txlocal)
+    translateidx <- rep(TRUE, length(txlocal)) 
+    altallele <- values(txlocal)[["varAllele"]]
+    fmshift <- abs(width(altallele) - rwidth) %% 3 != 0 
+    if (any(fmshift))
+        translateidx[fmshift] <- FALSE
+    zwidth <- width(altallele) == 0
+    if (any(zwidth)) {
+        warning("records with missing 'varAllele' values will be ignored")
+        translateidx[zwidth] <- FALSE 
+        fmshift[zwidth] <- FALSE
+    }
+    codeN <- rep(FALSE, length(txlocal)) 
+    codeN[grep("N", as.character(altallele, use.names=FALSE), 
+        fixed=TRUE)] <-TRUE
+    if (any(codeN)) {
+        warning("varAllele values containing 'N' will not be translated")
+        translateidx[codeN] <- FALSE
+    }
+
+    ## reference and variant codon sequences
+    altpos <- (start(values(txlocal)[["cds_loc"]]) - 1L) %% 3L + 1L
+    refSeq <- varSeq <- .constructRefSequences(txlocal, altpos, seqSource, cache)
+    subseq(varSeq[translateidx], start=altpos[translateidx],
+        width=rwidth[translateidx]) <- altallele[translateidx] 
+
+    ## translation
+    refAA <- translate(refSeq)
+    varAA <- AAStringSet(rep("", length(txlocal))) 
+    varAA[translateidx] <- translate(varSeq[translateidx])
+
+    ## results
+    tx_id <- values(txlocal)[["tx_id"]] 
+    gene_id <- map$geneid[match(tx_id, map$txid)]
+    nonsynonymous <- as.character(refAA) != as.character(varAA) 
+    consequence <- rep("synonymous", length(txlocal))
+    consequence[nonsynonymous] <- "nonsynonymous" 
+    consequence[fmshift] <- "frameshift" 
+    consequence[zwidth | codeN] <- "not translated" 
+    consequence <- factor(consequence) 
+ 
+    values(txlocal) <- append(values(txlocal), DataFrame(gene_id, consequence, 
+        refSeq, varSeq, refAA, varAA))
+    txlocal 
+}
+
+.constructRefSequences <- function(txlocal, altpos, seqSource, cache)
+{ 
+    ## adjust codon end for 
+    ## - width of the reference sequence
+    ## - position of alt allele substitution in the codon
+    cstart <- ((start(values(txlocal)[["cds_loc"]]) - 1L) %/% 3L) * 3L + 1L
+    cend <- cstart + (((altpos + width(txlocal)) %/% 3L) * 3L + 2L)
+    txord <- match(values(txlocal)[["tx_id"]], names(cache[["cdsbytx"]]))
+    txseqs <- getTranscriptSeqs(cache[["cdsbytx"]][txord], seqSource)
+    DNAStringSet(substring(txseqs, cstart, cend))
+}
