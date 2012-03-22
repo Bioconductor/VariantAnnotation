@@ -149,11 +149,11 @@
   ## VCF object as query 
   ## ----------------------------
   ## Read variants from a VCF file 
-  fl <- system.file("extdata", "ex1.vcf", package="VariantAnnotation")
+  fl <- system.file("extdata", "chr22.vcf.gz", package="VariantAnnotation")
   vcf <- readVcf(fl, "hg19")
 
   ## Rename seqlevels in the VCF object to match those in the TxDb
-  vcf_adj <- renameSeqlevels(vcf, c("16"="chr16", "21"="chr21"))
+  vcf_adj <- renameSeqlevels(vcf, c("22"="chr22"))
   ## Confirm common seqlevels
   intersect(seqlevels(vcf_adj), seqlevels(txdb19))
  
@@ -173,7 +173,6 @@
   ## Variants 1, 2 and 10 have two alternate alleles.
   altallele <- values(alt(vcf_adj))[["ALT"]]
   eltlen <- elementLengths(altallele)
-  eltlen
   rd_exp <- rep(rd, eltlen)
  
   ## Call predictCoding() with the expanded GRanges as the 'query'
