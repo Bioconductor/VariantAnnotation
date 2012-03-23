@@ -136,6 +136,7 @@
 \seealso{
   \link{readVcf},
   \link{locateVariants},
+  \link{refLocsToLocalLocs}
   \link{getTranscriptSeqs}
 }
 
