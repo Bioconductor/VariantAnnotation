@@ -30,6 +30,7 @@ setMethod("refLocsToLocalLocs",
         return(GRanges())
     nstrand <- as.vector(strand(cdsGR)[subjectHits(cdsFO)] == "-")
     qsub <- ranges[queryHits(cdsFO)]
+    names(qsub) <- names(ranges)[queryHits(cdsFO)]
     cds <- .refLocsToCDSLocs(qsub, nstrand, cdsbytx, cdsGR, cdsFO)
     pends <- c(ceiling(start(cds)/3), ceiling(end(cds)/3))
     protein <- unique(IntegerList(split(pends, rep(seq_len(length(pends)/2)), 2)))
@@ -83,5 +84,10 @@ setMethod("refLocsToLocalLocs",
             width=width(qrngs)[nstrand])
 
     shift(qrngs, 1L + cumsums[subjectHits(olaps)])
+}
+
+globalToLocal <- function(global, ranges, ...)
+{
+    .Deprecated("refLocsToLocalLocs")
 }
 
