@@ -52,12 +52,14 @@ exportClassPattern("^.*$")
 
 export(VCF, VCFHeader, vcfWhich, vcfFixed, vcfInfo, vcfGeno,
        VAFilterResult, dbSNPFilter, regionFilter, compose,
-       duplicateRSID)
+       duplicateRSID, globalToLocal, CodingVariants, IntronVariants,
+       FiveUTRVariants, ThreeUTRVariants, IntergenicVariants,
+       SpliceSiteVariants, AllVariants)
 
-exportMethods(scanVcf, readVcf, readVcfLongForm, writeVcf, ScanVcfParam, 
-              scanVcfHeader, locateVariants, 
+exportMethods(scanVcf, scanVcfHeader, ScanVcfParam,
+              readVcf, readVcfLongForm, writeVcf,
               predictCoding, getTranscriptSeqs, refLocsToLocalLocs, 
-              MatrixToSnpMatrix,
+              MatrixToSnpMatrix, locateVariants,
 
               fixed, "fixed<-", ref, "ref<-", alt, "alt<-", qual, "qual<-",
               filt, "filt<-", info, "info<-", geno, "geno<-", "[", "[<-", 

@@ -12,10 +12,14 @@ NEW FEATURES
     o writeVcf() writes out a VCF file from a VCF class
 
     o locateVariants() 
+        - returns GRanges instead of DataFrame
+        - output includes txID, geneID and cdsID
         - has cache argument for repeated calls over multiple vcf files
-        - returns txID, geneID and cdsID
 
-    o predictCoding() returns txID, geneID and cdsID
+    o predictCoding()
+        - returns GRanges instead of DataFrame
+        - output includes txID, geneID, cdsID, 
+          cDNA-based, cds-based and protein-based coordinates
  
 
 CHANGES IN VERSION 1.0.0

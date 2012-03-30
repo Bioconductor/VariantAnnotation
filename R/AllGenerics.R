@@ -1,3 +1,7 @@
+### -------------------------------------------------------------------------
+### predictCoding 
+###
+
 setGeneric("predictCoding", 
     signature=c("query", "subject", "seqSource", "varAllele"),
     function(query, subject, seqSource, varAllele, ...)
@@ -10,22 +14,23 @@ setGeneric("refLocsToLocalLocs",
     standardGeneric("refLocsToLocalLocs")
 )
 
-setGeneric("locateVariants", signature = c("query", "subject"),
-    function(query, subject, ...)
-    standardGeneric("locateVariants")
-)
-
-setGeneric("MatrixToSnpMatrix", signature = c("callMatrix", "ref", "alt"),
-    function(callMatrix, ref, alt, ...)
-    standardGeneric("MatrixToSnpMatrix")
-)
-
 setGeneric("getTranscriptSeqs", signature = c("query", "subject"),
     function(query, subject, ...)
     standardGeneric("getTranscriptSeqs")
 )
 
-## read/write Vcf
+### -------------------------------------------------------------------------
+### locateVariants 
+###
+
+setGeneric("locateVariants", signature = c("query", "subject", "region"),
+    function(query, subject, region, ...)
+        standardGeneric("locateVariants")
+)
+
+### -------------------------------------------------------------------------
+### read/write Vcf 
+###
 
 setGeneric("readVcf", signature = c("file", "genome", "param"),
     function(file, genome, param, ...)
@@ -42,7 +47,14 @@ setGeneric("writeVcf", signature = c("obj", "filename"),
     standardGeneric("writeVcf")
 )
 
-## scanVcf
+setGeneric("MatrixToSnpMatrix", signature = c("callMatrix", "ref", "alt"),
+    function(callMatrix, ref, alt, ...)
+    standardGeneric("MatrixToSnpMatrix")
+)
+
+### -------------------------------------------------------------------------
+### scanVcf 
+###
 
 setGeneric("ScanVcfParam", signature = "which",
            function(fixed=character(), info=character(), geno=character(), 
@@ -58,7 +70,9 @@ setGeneric("scanVcf", signature = c("file", "param"),
            function(file, ..., param) standardGeneric("scanVcf")
 )
 
-## VCF class
+### -------------------------------------------------------------------------
+### VCF class 
+###
 
 setGeneric("fixed", signature = "x", 
     function(x) standardGeneric("fixed")
@@ -118,7 +132,9 @@ setGeneric("geno<-", signature = c("x", "i", "value"),
     standardGeneric("geno<-")
 )
 
-## VCFHeader class
+### -------------------------------------------------------------------------
+### VCFHeader class 
+###
 
 setGeneric("reference", signature = "x",
     function(x) standardGeneric("reference"),
@@ -141,7 +157,9 @@ setGeneric("meta", signature = "x",
     function(x) standardGeneric("meta"),
 )
 
-## VAFilter and VAFilterResult 
+### -------------------------------------------------------------------------
+### VAFilter and VAFilterResult 
+###
 
 setGeneric("name", 
     function(x, ...) 

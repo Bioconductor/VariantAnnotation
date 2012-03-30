@@ -308,8 +308,8 @@ seqlevels(rowdat)
 but in the TxDb we will be comparing to they are preceeded by 'chr'.
 <<seqlevels_TxDb>>=
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
-txdb19 <- TxDb.Hsapiens.UCSC.hg19.knownGene 
-head(seqlevels(txdb19))
+txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene 
+head(seqlevels(txdb))
 @
 
 Chromosome names can be modified with the \Rfunction{renameSeqlevels}
@@ -328,7 +328,7 @@ vcf <- renameSeqlevels(vcf, c("22"="chr22"))
 rd <- rowData(vcf)
  
 ## confirm seqlevels are the same
-intersect(seqlevels(rd), seqlevels(txdb19))
+intersect(seqlevels(rd), seqlevels(txdb))
 @
 
 Our sample data contains ranges for chromosome 22 only so there is no need for 
@@ -339,7 +339,7 @@ chromosomes in TxDb.Hsapiens.UCSC.hg19.knownGene then keep only 'chr21' and
 'chr22'. See ?\Robject{VCF} and ?\Rfunction{keepSeqlevels} for details. 
 \begin{verbatim}
 ## initially there are 93 chromosomes
-> rngs <- transcripts(txdb19)
+> rngs <- transcripts(txdb)
 > length(seqlevels(rngs))
 [1] 93
 ## keep only chr21 and chr22 
@@ -349,46 +349,43 @@ chromosomes in TxDb.Hsapiens.UCSC.hg19.knownGene then keep only 'chr21' and
 \end{verbatim}
 
 \section{Variant location}
-The \Rfunction{locateVariants} function matches ranges in a \Robject{GRanges}
-object to the coding, intron and UTR regions in a \Robject{TranscriptDb}. 
-Metadata columns may be present in the \Robject{GRanges} but they are ignored.
-When a \Robject{VCF} is provided as the \Robject{query} the variant ranges come 
-from the \Rcode{rowData} slot.
+\Rfunction{locateVariants} matches the ranges in the \Rcode{query}
+to regions in the \Robject{subject} annotation object. Metadata columns may be 
+present in the \Robject{query} but they are ignored. When the \Rcode{query} is
+a \Robject{VCF} the variant ranges come from the \Rcode{rowData} slot.
 
-\begin{verbatim}
-> loc <- locateVariants(rd, txdb19)
-> loc[515:605,]
-DataFrame with 91 rows and 5 columns
-      queryID   location      txID                    geneID     cdsID
-    <integer>   <factor> <integer> <CompressedCharacterList> <integer>
-1         249      3'UTR     73653                     85358    226441
-2         250     coding     73651                     85358    226416
-3         250     coding     73653                     85358    226441
-4         251     coding     73651                     85358    226416
-5         251     coding     73653                     85358    226441
-6         252 intergenic        NA                  85358,49        NA
-7         253 intergenic        NA                  85358,49        NA
-8         254 intergenic        NA                  85358,49        NA
-9         255 intergenic        NA                  85358,49        NA
-...       ...        ...       ...                       ...       ...
-83        329     intron     73654                                  NA
-84        330     intron     73654                                  NA
-85        331     intron     73654                                  NA
-86        332     intron     73654                                  NA
-87        333 intergenic        NA                  85358,49        NA
-88        334 intergenic        NA                  85358,49        NA
-89        335 intergenic        NA                  85358,49        NA
-90        336      5'UTR     73655                        49    226443
-91        336      5'UTR     73656                        49    226443
-\end{verbatim}
+Specific regions are queried by specifying the \Rcode{region} argument as one 
+of CodingVariants, IntronVariants, FiveUTRVariants, ThreeUTRVariants, 
+IntergenicVariants, SpliceSiteVariants or AllVariants.
 
-\Rfunction{locateVariants} returns a \Robject{DataFrame} with 5 columns. The
+The \Rcode{CodingVariants()} constructor creates an instance of a
+\Robject{CodingVariants} class and is used directly in the function call.
+<<CodingVariants>>=
+loc <- locateVariants(rd, txdb, CodingVariants())
+head(loc, 4)
+@
+
+Variants overlapping the first 2 or last 2 nucleotides of an intron are
+considered to fall in splice sites. They are specified with 
+\Rcode{SpliceSiteVariants}.
+<<SpliceSiteVariants>>=
+head(locateVariants(rd, txdb, SpliceSiteVariants()), 4)
+@
+
+To locate variants in all regions,
+<<AllVariants, eval=FALSE>>=
+locateVariants(rd, txdb, AllVariants())
+@
+
+\Rfunction{locateVariants} returns a \Robject{GRanges} with columns of 
+\Rcode{locate}, \Rcode{queryID}, \Rcode{txID}, \Rcode{cdsID}, and 
+\Rcode{geneID}. In the case of \Robject{IntergenicVariants} columns for
+\Rcode{precedesID} and \Rcode{followsID} will also be included. The
 \Rcode{queryID} column maps back to the row number in the original 
-\Robject{GRanges} of variants. Each row represents a variant-transcript overlap 
-therfore multiple rows per variant are possible. Location categories of `coding', 
-`5'UTR', `3'UTR', `intron' and `intergenic' are assigned based on the criteria 
-in Table \ref{table:location}. Intergenic variants will have gene IDs for both
-preceding and following genes.
+\Robject{query} input. Each row in the \Rfunction{locateVariants} result
+represents a variant-transcript match and therfore multiple rows per variant 
+are possible. Values in the \Rcode{location} column are one of the variant 
+regions as described in Table \ref{table:location}. 
 
 \begin{table}[h!]
 \begin{center}
@@ -396,64 +393,42 @@ preceding and following genes.
 \hline
 Location & Details \\
 \hline
-coding &  variant falls \emph{within} a coding region \\
-5'UTR &  variant falls \emph{within} a 5' untranslated region \\
-3'UTR &  variant falls \emph{within} a 3' untranslated region \\
-intron &  variant falls \emph{within} a transcript but not \emph{within} a 
-coding region \\
-intergenic & variant does not fall \emph{within} a transcript but does have
-a nearest gene match\\
-transcript\_region & variant falls \emph{within} a transcript but does not 
-fall \emph{within} a specified region\\
-NA & variant does not fall \emph{within} a transcript and has no
-nearest gene match \\
-NA & variant is on a chromosome present in \Robject{query} but not in the 
+coding &  falls \emph{within} a coding region \\
+fiveUTR &  falls \emph{within} a 5' untranslated region \\
+threeUTR &  falls \emph{within} a 3' untranslated region \\
+intron &  falls \emph{within} an intron region \\
+intergenic & does not fall \emph{within} a transcript \\
+spliceSite & overlaps any portion of the first 2 or last 2 
+nucleotides of an intron \\ 
+%transcript\_region & variant falls \emph{within} a transcript but does not 
+%fall \emph{within} a specified region\\
+%NA & variant does not fall \emph{within} a transcript and has no
+%nearest gene match \\
+%NA & variant is on a chromosome present in \Robject{query} but not in the 
 \Robject{subject}\\
 \hline
 \end{tabular}
 \end{center}
-\caption{Location of variants with respect to genes}
+\caption{Variant Regions}
 \label{table:location}
 \end{table}
 
-Each variant has the potential to match multiple transcripts and the output 
-from \Rfunction{locateVariants} can be large. Further processing may
-be necessary to better understand the data. A first step might be to summarize
-'location' by gene while accounting for the variants that hit multiple 
-transcripts in the same gene.
+Each row of the results represents a variant-transcript match. To answer 
+gene-centric questions data can be summarized by gene reguardless of transcript.
 
-%% FIXME : modify example 
-\begin{verbatim}
-> single <- loc[elementLengths(loc$geneID) == 1, ]
-> genes <- data.frame(queryID=single$queryID, geneID=unlist(single$geneID), 
-+                     location=single$location)
-> dups <- duplicated(genes)
-> genesLst <- split(genes$location[!dups], genes$geneID[!dups]) 
-> lapply(genesLst, table)
-$`11158`
+Did any variants match more than one gene?
+<<locatVariants_example1>>=
+table(sapply(split(values(loc)[["geneID"]], values(loc)[["queryID"]]), 
+    function(x) length(unique(x)) > 1))
+@
 
-     3'UTR      5'UTR     coding intergenic     intron 
-        18          3          7          0        178 
+Summarize the number of variants by gene ID
+<<locatVariants_example2>>=
+idx <- sapply(split(values(loc)[["queryID"]], values(loc)[["geneID"]]), unique)
+sapply(idx, length)
+@
 
-$`284942`
-
-     3'UTR      5'UTR     coding intergenic     intron 
-        18          3          7          0        362 
-
-$`49`
-
-     3'UTR      5'UTR     coding intergenic     intron 
-         4          1         16          0         85 
-
-$`85358`
-
-     3'UTR      5'UTR     coding intergenic     intron 
-         5          0         23          0        223 
-
-\end{verbatim}
-
-
-\section{Amino acid coding}
+\section{Amino acid coding changes}
 
 \Rfunction{predictCoding} computes amino acid coding changes for non-synonymous 
 variants. This function identifies overlaps between the variants in 
@@ -500,7 +475,7 @@ one row per original variant is possible.
 
 <<predictCoding>>=
 library(BSgenome.Hsapiens.UCSC.hg19)
-aacoding <- predictCoding(query=vcf, subject=txdb19, seqSource=Hsapiens)
+aacoding <- predictCoding(vcf, txdb, seqSource=Hsapiens)
 head(aacoding, 4)
 @
 

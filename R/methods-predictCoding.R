@@ -87,7 +87,7 @@ setMethod("predictCoding",
     }
 
     ## reference and variant codon sequences
-    altpos <- (start(values(txlocal)[["cds_loc"]]) - 1L) %% 3L + 1L
+    altpos <- (start(values(txlocal)[["cdsLoc"]]) - 1L) %% 3L + 1L
     refSeq <- varSeq <- .constructRefSequences(txlocal, altpos, seqSource, cache)
     subseq(varSeq[translateidx], start=altpos[translateidx],
         width=rwidth[translateidx]) <- altallele[translateidx] 
@@ -98,8 +98,8 @@ setMethod("predictCoding",
     varAA[translateidx] <- translate(varSeq[translateidx])
 
     ## results
-    tx_id <- values(txlocal)[["tx_id"]] 
-    gene_id <- map$geneid[match(tx_id, map$txid)]
+    txID <- values(txlocal)[["txID"]] 
+    geneID <- map$geneid[match(txID, map$txid)]
     nonsynonymous <- as.character(refAA) != as.character(varAA) 
     consequence <- rep("synonymous", length(txlocal))
     consequence[nonsynonymous] <- "nonsynonymous" 
@@ -107,7 +107,7 @@ setMethod("predictCoding",
     consequence[zwidth | codeN] <- "not translated" 
     consequence <- factor(consequence) 
  
-    values(txlocal) <- append(values(txlocal), DataFrame(gene_id, consequence, 
+    values(txlocal) <- append(values(txlocal), DataFrame(geneID, consequence, 
         refSeq, varSeq, refAA, varAA))
     txlocal 
 }
@@ -117,9 +117,9 @@ setMethod("predictCoding",
     ## adjust codon end for 
     ## - width of the reference sequence
     ## - position of alt allele substitution in the codon
-    cstart <- ((start(values(txlocal)[["cds_loc"]]) - 1L) %/% 3L) * 3L + 1L
+    cstart <- ((start(values(txlocal)[["cdsLoc"]]) - 1L) %/% 3L) * 3L + 1L
     cend <- cstart + (((altpos + width(txlocal)) %/% 3L) * 3L + 2L)
-    txord <- match(values(txlocal)[["tx_id"]], names(cache[["cdsbytx"]]))
+    txord <- match(values(txlocal)[["txID"]], names(cache[["cdsbytx"]]))
     txseqs <- getTranscriptSeqs(cache[["cdsbytx"]][txord], seqSource)
     DNAStringSet(substring(txseqs, cstart, cend))
 }

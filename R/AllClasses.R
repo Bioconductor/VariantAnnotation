@@ -1,4 +1,6 @@
-## VCF 
+### ------------------------------------------------------------------------- 
+### VCF class 
+###
 
 setClass("VCF",
     contains="SummarizedExperiment",
@@ -58,7 +60,9 @@ setValidity2("VCF", .valid.VCF, where=asNamespace("VariantAnnotation"))
 
 setClass("ScanVcfParam", contains="ScanBVcfParam")
 
-## vcfHeader 
+### ------------------------------------------------------------------------- 
+### VCFHeader class 
+###
 
 setClass("VCFHeader", 
     representation(
@@ -68,7 +72,9 @@ setClass("VCFHeader",
     )
 )
 
-## VAFilters 
+### ------------------------------------------------------------------------- 
+### VAFilters classes 
+###
 
 setClass(".VAUtil",
     representation("VIRTUAL")
@@ -91,7 +97,9 @@ setClass("VAFilterResult",
     )
 )
 
-## SIFT and PolyPhen 
+### ------------------------------------------------------------------------- 
+### SIFT and PolyPhen classes 
+###
 
 .SIFTDb <- setRefClass("SIFTDb",
     contains = "AnnotationDb",
@@ -101,4 +109,45 @@ setClass("VAFilterResult",
     contains = "AnnotationDb",
 )
 
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### VariantType class hierarchy 
+###
 
+setClass("VariantType",
+    representation(
+        "VIRTUAL"
+    )
+)
+
+setMethod("show", "VariantType",
+    function(object) 
+    {
+        cat("class:", class(object), "\n")
+    }
+)
+
+setClass("AllVariants", contains="VariantType")
+AllVariants <- function() new("AllVariants")
+
+setClass("CodingVariants", contains="VariantType")
+CodingVariants <- function() new("CodingVariants")
+
+setClass("IntronVariants", contains="VariantType")
+IntronVariants <- function() new("IntronVariants")
+
+setClass("IntergenicVariants", contains="VariantType")
+IntergenicVariants <- function() new("IntergenicVariants")
+
+setClass("ThreeUTRVariants", contains="VariantType")
+ThreeUTRVariants <- function() new("ThreeUTRVariants")
+
+setClass("FiveUTRVariants", contains="VariantType")
+FiveUTRVariants <- function() new("FiveUTRVariants")
+
+setClass("SpliceSiteVariants", contains="VariantType")
+SpliceSiteVariants <- function() new("SpliceSiteVariants")
+
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### locateVariants methods 
+###

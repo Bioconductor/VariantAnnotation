@@ -35,42 +35,11 @@ setMethod("refLocsToLocalLocs",
     pends <- c(ceiling(start(cds)/3), ceiling(end(cds)/3))
     protein <- unique(IntegerList(split(pends, rep(seq_len(length(pends)/2)), 2)))
 
-    ## cDNA
     txid <- rep(names(cdsbytx), elementLengths(cdsbytx))[subjectHits(cdsFO)]
-    exbytx <- exbytx[match(txid, names(exbytx))]
-    exGR <- unlist(exbytx, use.names=FALSE)
-    exFO <- findOverlaps(ranges, exGR, type="within")
-    cdna <- .refLocsTocDNALocs(qsub, nstrand, exbytx, exGR, exFO, cdsFO)
-
-    values(qsub) <- append(values(qsub), DataFrame(cDNA_loc=cdna, cds_loc=cds, 
-        protein_loc=protein, tx_id=txid, cds_id=cdsid))
+    values(qsub) <- append(values(qsub), DataFrame(cdsLoc=cds, 
+        proteinLoc=protein, txID=txid, cdsID=cdsid))
     qsub
 })
-
-.refLocsTocDNALocs <- function(reflocs, nstrand, grlist, lform, olaps, cdsolaps)
-{
-    ## keep one record per query-tx hit
-    tx <- rep(names(grlist), elementLengths(grlist))[subjectHits(olaps)]
-    idx <- seq_len(length(lform))[subjectHits(olaps)]
-    map <- data.frame(query=queryHits(olaps), tx=tx, idx=idx)
-    dups <- duplicated(map[,c("query", "tx")])
-    map <- map[!dups,]
-
-    ## remove ranges in exons outside cds regions
-    cds <- map$query %in% unique(queryHits(cdsolaps))
-    map <- map[cds,]
-
-    bounds <- ranges(lform)[map$idx]
-    cumsums <- .listCumsumShifted(width(grlist))
-    qrngs <- ranges(reflocs)
-    if (any(nstrand == FALSE))
-        qrngs[!nstrand] <- shift(qrngs[!nstrand], - start(bounds)[!nstrand])
-    if (any(nstrand))
-        qrngs[nstrand] <- IRanges(end(bounds)[nstrand] - end(qrngs)[nstrand],
-            width=width(qrngs)[nstrand])
-
-    shift(qrngs, 1L + cumsums[map$idx])
-}
 
 .refLocsToCDSLocs <- function(reflocs, nstrand, grlist, lform, olaps)
 {
@@ -88,6 +57,6 @@ setMethod("refLocsToLocalLocs",
 
 globalToLocal <- function(global, ranges, ...)
 {
-    .Deprecated("refLocsToLocalLocs")
+    .Deprecated("refLocsToLocalLocs or map")
 }
 

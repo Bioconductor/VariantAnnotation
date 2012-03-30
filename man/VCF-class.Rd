@@ -197,11 +197,13 @@
 \section{Arguments}{
   \describe{
     \item{geno}{A \code{list} or \code{SimpleList} of matrix elements,
-      or a \code{matrix}. Each element of the list must have the same
-      dimensions, and dimension names (if present) must be consistent
-      across elements and with the row names of \code{rowData},
-      \code{colData}. This is equivalent to the \code{assays} argument
-      in  \code{SummarizedExperiment}.
+      or a \code{matrix} containing the genotype information from a
+      VCF file. If present, these data immediately follow the FORMAT
+      field in the VCF. 
+
+      Each element of the list must have the same dimensions, and dimension 
+      names (if present) must be consistent across elements and with the row 
+      names of \code{rowData}, \code{colData}. 
     }
     \item{info}{A \code{DataFrame} of data from the INFO field of a VCF file. 
       The number of rows must match that in the \code{rowData} object.
@@ -263,10 +265,11 @@
     \item{\code{colData}}{A \link{DataFrame}-class instance describing the 
       samples and associated metadata.
     }
-    \item{\code{geno}}{A \link{SimpleList}-class instance, each
-      element of which is a matrix or array summarizing data associated with 
-      the corresponding range and sample. The \code{geno} accessor is a wrapper
-      around the \code{assays} slot in \code{SummarizedExperiment}.
+    \item{\code{geno}}{The \code{assays} slot from \code{SummarizedExperiment}
+     has been renamed as \code{geno} for the VCF class. This slot contains
+     the genotype information immediately following the FORMAT field in a VCF
+     file. Each element of the \code{list} or \code{SimpleList} is a matrix or 
+     array. 
     }
   }
 

@@ -67,16 +67,20 @@
     \item{Data Representation :}{
 
       CHROM, POS, ID and REF fields are used to create the \code{GRanges}
-      stored in the \code{rowData} slot of the \code{VCF} object. REF, ALT, 
-      QUAL and FILTER are parsed into the \code{DataFrame} in the \code{fixed} 
-      slot. Because ALT can have more than one value per variant it is
-      represented as a \code{DNAStringSetList}. REF is a \code{DNAStringSet},
-      QUAL is \code{numeric} and FILTER is a \code{character}.
+      stored in the \code{rowData} slot of the \code{VCF} object. Access
+      with \code{rowData} accessor.
 
-      Data from the INFO and FORMAT (genotype) fields can be accessed with the 
-      \code{info} and \code{geno} accessors. Data types are determined 
-      according to the \sQuote{Number} and \sQuote{Type} information in the 
-      file header as follows :
+      REF, ALT, QUAL and FILTER are parsed into the \code{DataFrame} in the 
+      \code{fixed} slot. Because ALT can have more than one value per variant 
+      it is represented as a \code{DNAStringSetList}. REF is a \code{DNAStringSet},
+      QUAL is \code{numeric} and FILTER is a \code{character}. Accessors include
+      \code{fixed}, \code{ref}, \code{alt}, \code{qual}, and \code{filt}.
+
+      Data from the INFO field can be accessed with the \code{info} accessor.
+      Genotype data (i.e., data immediately following the FORMAT field in the 
+      VCF) can be accessed with the \code{geno} accessor. INFO and genotype data 
+      types are determined according to the \sQuote{Number} and \sQuote{Type} 
+      information in the file header as follows :
 
       If \sQuote{Number} is 1, \sQuote{info} data are parsed into a 
       \code{vector}. \sQuote{geno} data are parsed into a \code{matrix} where 
@@ -90,9 +94,8 @@
       If \sQuote{Number} is \sQuote{.}, \sQuote{A} or \sQuote{G}, a \code{matrix} 
       is used for both \sQuote{info} and \sQuote{geno} data.
 
-      When the VCF header does not contain data type information for the
-      \sQuote{INFO} or \sQuote{GENO} elements the data are returned as a single
-      unparsed column named as \sQuote{INFO} or \sQuote{GENO}.
+      When the VCF header does not contain data type information, the data are 
+      returned as a single unparsed column named \sQuote{INFO} or \sQuote{GENO}.
     }
   }
 }
@@ -124,10 +127,9 @@
       Data from the INFO field of the VCF is parsed into a \code{DataFrame}.
     }
     \item{geno:}{
-      If present, genomic data from the samples specified in the FORMAT field
-      are parsed into a list of \code{matrices} or \code{arrays} with a matrix 
-      for each field in the FORMAT column. The rows are the variants, the 
-      columns the samples. 
+      If present, the genotype data are parsed into a list of \code{matrices} 
+      or \code{arrays}. Each list element represents a field in the FORMAT 
+      column of the VCF file. Rows are the variants, columns are the samples. 
     }
     \item{colData:}{
       This slot contains a \code{DataFrame} describing the samples. If present, 

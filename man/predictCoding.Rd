@@ -7,7 +7,7 @@
 \title{Predict amino acid coding changes for variants}
 
 \description{
-  Predict amino acid coding changes for variants that fall in a coding region.
+  Predict amino acid coding changes for variants a coding regions
 }
 
 \usage{
@@ -74,25 +74,23 @@
     \item{\code{varAllele}}{
       Variant allele
     }
-    \item{\code{tx_id}}{
+    \item{\code{queryID}}{
+      Map back to the row in the original query
+    }
+    \item{\code{txID}}{
       Internal transcript id from the annotation
     }
-    \item{\code{cds_id}}{
+    \item{\code{cdsID}}{
       Internal coding region id from the annotation
     }
-    \item{\code{gene_id}}{
+    \item{\code{geneID}}{
       Internal gene id from the annotation
     }
-    \item{\code{cDNA_loc}}{
-      Location in cDNA (transcript-based) coordinates of the first nucleotide in
-      the codon sequence to be translated. This position corresponds to the
-      first nucleotide in both the \code{refSeq} and \code{varSeq} columns.
-    }
-    \item{\code{cds_loc}}{
+    \item{\code{cdsLoc}}{
       Location in coding region-based coordinates of the first nucleotide in
       the variant.
     }
-    \item{\code{protein_loc}}{
+    \item{\code{proteinLoc}}{
       Location in cds-based coordinates of the first nucleotide in
       the variant. This position is relative to the start of the cds region
       defined in the \code{subject} annotation. 
@@ -143,8 +141,7 @@
 \examples{
   library(BSgenome.Hsapiens.UCSC.hg19)
   library(TxDb.Hsapiens.UCSC.hg19.knownGene)
-  txdb19 <- TxDb.Hsapiens.UCSC.hg19.knownGene 
-
+  txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene 
 
   ## ----------------------------
   ## VCF object as query 
@@ -154,12 +151,12 @@
   vcf <- readVcf(fl, "hg19")
 
   ## Rename seqlevels in the VCF object to match those in the TxDb
-  vcf_adj <- renameSeqlevels(vcf, c("22"="chr22"))
+  vcf<- renameSeqlevels(vcf, c("22"="chr22"))
   ## Confirm common seqlevels
-  intersect(seqlevels(vcf_adj), seqlevels(txdb19))
+  intersect(seqlevels(vcf), seqlevels(txdb))
  
   ## Note when 'query' is a VCF object the varAllele argument is missing.
-  coding1 <- predictCoding(vcf_adj, txdb19, Hsapiens)
+  coding1 <- predictCoding(vcf, txdb, Hsapiens)
   head(coding1, 3)
 
   ## ----------------------------
@@ -168,17 +165,17 @@
   ## Alternatively, a GRanges can be the 'query' to predictCoding().
   ## The seqlevels were previously adjusted in the VCF object so the GRanges
   ## extracted from rowData() has the correct seqlevels.
-  rd <- rowData(vcf_adj)
+  rd <- rowData(vcf)
  
   ## The GRanges must be expanded to have one row per alternate allele. 
   ## Variants 1, 2 and 10 have two alternate alleles.
-  altallele <- values(alt(vcf_adj))[["ALT"]]
+  altallele <- values(alt(vcf))[["ALT"]]
   eltlen <- elementLengths(altallele)
   rd_exp <- rep(rd, eltlen)
  
   ## Call predictCoding() with the expanded GRanges as the 'query'
   ## and the unlisted alternate allele as the 'varAllele'.
-  coding2 <- predictCoding(rd_exp, txdb19, Hsapiens, unlist(altallele)) 
+  coding2 <- predictCoding(rd_exp, txdb, Hsapiens, unlist(altallele)) 
 
   identical(coding1, coding2)
 }

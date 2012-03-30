@@ -7,7 +7,7 @@
 
 \description{
   Converts reference locations (aka chromosome-based or genomic)
-  to cDNA, coding regions, and protein based locations
+  to coding regions, and protein based locations
 }
 
 \usage{
@@ -35,8 +35,7 @@ refLocsToLocalLocs(ranges, txdb, cdsbytx, exbytx, ...)
 
 \details{
   This function translates the reference-based coordinates in \code{ranges} to 
-  \sQuote{local} coordinates in the cDNA, coding region (CDS) and protein 
-  sequences.
+  \sQuote{local} coordinates in the coding region (CDS) and protein sequences.
 
   When a \code{txdb} is suplied the \code{cdsbytx} and \code{exbytx} are created 
   from calls to the \code{cdsBy()} and \code{exonsBy()} functions. When 
@@ -49,9 +48,9 @@ refLocsToLocalLocs(ranges, txdb, cdsbytx, exbytx, ...)
   result. Output is a modified \code{GRanges} of the \code{ranges} input where 
   each row represents a range-transcript match making multiple rows per range 
   posible. The \code{elementMetadata} columns include \code{tx_id}, 
-  \code{cDNA_loc}, \code{cds_loc} and \code{protein_loc}. When a \code{txdb} is 
-  provided the \code{tx_id} is the internal transcript id from the annotation. 
-  When \code{cdsbytx} and \code{exbytx} are provided \code{tx_id} are the names 
+  \code{cdsLoc} and \code{proteinLoc}. When a \code{txdb} is provided the 
+  \code{txId} is the internal transcript id from the annotation. When 
+  \code{cdsbytx} and \code{exbytx} are provided \code{tx_id} are the names 
   on the outer list elements of the \code{GRangesList} objects.
 }
 
@@ -60,21 +59,18 @@ refLocsToLocalLocs(ranges, txdb, cdsbytx, exbytx, ...)
   columns,
 
   \describe{
-    \item{\code{cDNA_loc}}{
-      Location in cDNA (transcript) coordinates
-    }
-    \item{\code{cds_loc}}{
+    \item{\code{cdsLoc}}{
       Location in coding region coordinates
     }
-    \item{\code{protein_loc}}{
+    \item{\code{proteinLoc}}{
       Location in protein (codon triplet) coordinates
     }
-    \item{\code{tx_id}}{
+    \item{\code{txID}}{
       Character vector of internal transcript ids from the 
       \link[GenomicFeatures]{TranscriptDb} or the names of the outer list 
       elements of the \code{cdsbytx} and \code{exbytx} objects.
     }
-    \item{\code{cds_id}}{
+    \item{\code{cdsID}}{
       Character vector of internal coding region ids from the 
       \link[GenomicFeatures]{TranscriptDb} or the names of the outer list 
       elements of the \code{cdsbytx} and \code{exbytx} objects.
@@ -85,6 +81,7 @@ refLocsToLocalLocs(ranges, txdb, cdsbytx, exbytx, ...)
 \author{Michael Lawrence and Valerie Obenchain <vobencha@fhcrc.org>}
 
 \seealso{
+  \link[IRanges]{map}
   \code{predictCoding}
   \code{getTranscriptSeqs}
   \link[GenomicFeatures]{transcriptLocs2refLocs}

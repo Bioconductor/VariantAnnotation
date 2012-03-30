@@ -82,9 +82,9 @@ scanVcf(file, ..., param)
   call, providing a convenient way to stream through large VCF files.
 
   The INFO field of the scanned VCF file is returned as a single
-  \sQuote{packed} vector, as in the VCF file. The GENO field is returned
-  as a list of matricies, each matrix corresponds to a field as defined
-  in the FORMAT field of the VCF header. Each matrix has as many rows as
+  \sQuote{packed} vector, as in the VCF file. The GENO field is a list of 
+  matricies, each matrix corresponds to a field as defined in the FORMAT 
+  field of the VCF header. Each matrix has as many rows as
   scanned in the VCF file, and as many columns as there are samples. As
   with the INFO field, the elements of the matrix are
   \sQuote{packed}. The reason that INFO and GENO are returned packed is
@@ -103,10 +103,30 @@ scanVcf(file, ..., param)
 
   \code{scanVcf} returns a list, with one element per range. Each list
   has 7 elements, obtained from the columns of the VCF specification:
-  \code{rowData} (a \code{GRanges} instance derived from \code{CHROM},
-  \code{POS}, \code{ID}, and the width of \code{REF}), \code{REF},
-  \code{ALT}, \code{QUAL}, \code{FILTER}, \code{INFO}, \code{GENO}.
-
+    \describe{
+      \item{rowData}{
+        \code{GRanges} instance derived from \code{CHROM}, \code{POS}, 
+        \code{ID}, and the width of \code{REF}
+      }
+      \item{REF}{
+        reference allele
+      }
+      \item{ALT}{
+        alternate allele
+      }
+      \item{QUAL}{
+        phred-scaled quality score for the assertion made in ALT
+      }
+      \item{FILTER}{
+        indicator of whether or not the position passed all filters applied
+      }
+      \item{INFO}{
+        additional information
+      }
+      \item{GENO}{
+        genotype information immediately following the FORMAT field in the VCF
+      }
+    }
   The \code{GENO} element is itself a list, with elements corresponding
   to those defined in the VCF file header. For \code{scanVcf}, elements
   of GENO are returned as a matrix of records x samples; if the

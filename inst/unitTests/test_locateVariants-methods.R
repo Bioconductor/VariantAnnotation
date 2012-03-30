@@ -1,18 +1,41 @@
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene 
 
-test_locateVariants <- function()
+cdsbytx <- cdsBy(txdb)
+intbytx <- intronsByTranscript(txdb)
+txbygene <- transcriptsBy(txdb, "gene")
+gr <- GRanges("chr22", 
+              IRanges(c(16268137, 16287254, 16190792, 16164570,
+                        18209442, 18121652, 24314750, 25508661), 
+                      width=c(1,1,1,1,3,3,2,2)),
+              strand=c("-", "-", "-", "+", "+", "+", "+", "+"))
+ 
+test_locateVariants_subject <- function()
 {
-    data <- GRanges(seqnames=rep("chr16", 3), 
-        ranges=IRanges(start=c(97430, 363400, 90124759), 
-        end=c(97434, 363400, 90124760)))
-    loc <- locateVariants(data, txdb)
+    loc1 <- locateVariants(gr, txdb, CodingVariants())
+    loc2 <- locateVariants(gr, cdsbytx, CodingVariants())
+    checkIdentical(values(loc1)[ ,1:4], values(loc2)[, 1:4])
+ 
+    loc1 <- locateVariants(gr, txdb, IntronVariants())
+    loc2 <- locateVariants(gr, intbytx, IntronVariants())
+    checkIdentical(values(loc1)[ ,1:4], values(loc2)[, 1:4])
 
-    checkIdentical(colnames(loc), 
-        c("queryID", "location", "txID", "cdsID", "geneID", "precedesID",
-          "followsID"))
-    checkTrue(all(unique(loc$queryID) %in% seq_len(length(data))))
-    checkTrue(all(unique(loc$location) %in% c("intron", "coding", "3UTR",
-        "5UTR", "transcript_region", "intergenic", "NA")))
+    loc1 <- locateVariants(gr, txdb, SpliceSiteVariants())
+    loc2 <- locateVariants(gr, intbytx, SpliceSiteVariants())
+    checkIdentical(values(loc1)[ ,1:4], values(loc2)[, 1:4])
+ 
+    loc1 <- locateVariants(gr, txdb, IntergenicVariants())
+    loc2 <- locateVariants(gr, txbygene, IntergenicVariants())
+    checkIdentical(values(loc1)[ ,1:4], values(loc2)[, 1:4])
+}
+
+test_locateVariants_query <- function()
+{
+    fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
+    vcf <- readVcf(fl, "hg19")
+    vcf <- renameSeqlevels(vcf, c("20" = "chr20"))
+    loc1 <- locateVariants(vcf, txdb, IntergenicVariants())
+    loc2 <- locateVariants(rowData(vcf), txdb, IntergenicVariants())
+    checkIdentical(loc1, loc2) 
 }
 
