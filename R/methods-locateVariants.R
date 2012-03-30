@@ -122,8 +122,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "IntronVariants"),
     if (!exists("txbygene", cache, inherits=FALSE))
         cache[["txbygene"]] <- transcriptsBy(subject, "gene")
 
-    res <- callGeneric(query, cache[["intbytx"]], region, ...,
-                       subjectIsIntrons=TRUE)
+    res <- callGeneric(query, cache[["intbytx"]], region, ...)
     genedf <- 
       data.frame(geneid=rep(names(cache[["txbygene"]]),
                             elementLengths(cache[["txbygene"]])),
@@ -137,29 +136,8 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "IntronVariants"),
 
 
 setMethod("locateVariants", c("GRanges", "GRangesList", "IntronVariants"),
-    function(query, subject, region, ..., subjectIsIntrons = TRUE)
+    function(query, subject, region, ...)
     {
-        if (!subjectIsIntrons) {
-            rngs <- range(subject)
-            start <- start(rngs)
-            end <- end(rngs)
-            ## FIXME : when gaps,GenomicRanges is updated 
-            intlst <- mendoapply(function(ex, start, end) 
-                                     gaps(ex, start, end),
-                                 ranges(subject), start, end)
-
-            ulst <- unlist(intlst, use.names=FALSE)
-            seql <- unlist(lapply(subject, function(elt) unique(seqnames(elt))),
-                           use.names=FALSE)
-
-            gr <- GRanges(
-                    seqnames=Rle(factor(rep(seql, elementLengths(intlst)))),
-                    ranges=IRanges(start=start(ulst), width=width(ulst)),
-                    strand=unlist(rep(runValue(strand(subject)), 
-                                  elementLengths(intlst)), use.names=FALSE))
-            subject <- split(gr, rep(seq_len(length(intlst)), 
-                             elementLengths(intlst)))
-        }
         .makeResult(query, .makeMeta(query, subject, "intron"))
     }
 )
@@ -315,8 +293,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb",
         if (!exists("txbygene", cache, inherits=FALSE))
             cache[["txbygene"]] <- transcriptsBy(subject, "gene")
 
-        res <- callGeneric(query, cache[["intbytx"]], region, ...,
-                           subjectIsIntrons=TRUE)
+        res <- callGeneric(query, cache[["intbytx"]], region, ...)
         genedf <- data.frame(geneid=rep(names(cache[["txbygene"]]),
                                  elementLengths(cache[["txbygene"]])),
                              txid=values(unlist(cache[["txbygene"]],
@@ -343,16 +320,18 @@ setMethod("locateVariants", c("GRanges", "GRangesList",
 setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()))
     {
-        coding <- locateVariants(query, subject, CodingVariants(), cache=cache)
-        intron <- locateVariants(query, subject, IntronVariants(), cache=cache)
-        splice <- locateVariants(query, subject, SpliceSiteVariants(), 
-                                 cache=cache)
-        fiveUTR <- locateVariants(query, subject, FiveUTRVariants(), 
-                                  cache=cache)
-        threeUTR <- locateVariants(query, subject, ThreeUTRVariants(), 
-                                   cache=cache)
-        intergenic <- locateVariants(query, subject, IntergenicVariants(),
-                                     subjectIsIntrons=TRUE, cache=cache)
+        coding <- locateVariants(query, subject, 
+                                 CodingVariants(), cache=cache)
+        intron <- locateVariants(query, subject, 
+                                 IntronVariants(), cache=cache)
+        splice <- locateVariants(query, subject, 
+                                 SpliceSiteVariants(), cache=cache)
+        fiveUTR <- locateVariants(query, subject, 
+                                  FiveUTRVariants(), cache=cache)
+        threeUTR <- locateVariants(query, subject, 
+                                   ThreeUTRVariants(), cache=cache)
+        intergenic <- locateVariants(query, subject, 
+                                     IntergenicVariants(), cache=cache)
         base <- c(coding, intron, fiveUTR, threeUTR, splice)
         precedesID <- followsID <- rep(NA_character_, length(base)) 
         values(base) <- append(values(base), DataFrame(precedesID, followsID))

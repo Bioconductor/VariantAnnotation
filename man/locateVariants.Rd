@@ -33,7 +33,7 @@ locateVariants(query, subject, region, ...)
 \S4method{locateVariants}{Ranges,TranscriptDb,ANY}(query, subject, region, ..., cache = new.env(parent=emptyenv()))
 \S4method{locateVariants}{GRanges,TranscriptDb,ANY}(query, subject, region, ..., cache = new.env(parent=emptyenv()))
 \S4method{locateVariants}{GRanges,GRangesList,CodingVariants}(query, subject, region, ...)
-\S4method{locateVariants}{GRanges,GRangesList,IntronVariants}(query, subject, region, ..., subjectIsIntrons = TRUE)
+\S4method{locateVariants}{GRanges,GRangesList,IntronVariants}(query, subject, region, ...)
 \S4method{locateVariants}{GRanges,GRangesList,FiveUTRVariants}(query, subject, region, ...)
 \S4method{locateVariants}{GRanges,GRangesList,ThreeUTRVariants}(query, subject, region, ...)
 \S4method{locateVariants}{GRanges,GRangesList,IntergenicVariants}(query, subject, region, ...)
@@ -54,18 +54,6 @@ locateVariants(query, subject, region, ...)
     \code{IntergenicVariants}, \code{SpliceSiteVariants}, \code{AllVariants}.
     These objects are instantiated with no arguments, e.g., CodingVariants()
     will create an object of \code{CodingVariants}. 
-
-    For the locateVariants,GRanges,GRangesList,IntronVariants-method, there is
-    an optional argument, \code{subjectIsIntrons}, to indicate if the subject
-    is a \code{GRangesList} of introns by transcript or exons by transcript. 
-    The subject should be a \code{GRangesList} similar to that created with 
-    \code{intronsByTranscript} or \code{exonsBy(,"tx")}. Default is 
-    \code{subjectIsIntrons = TRUE}. Usage is as follows :
-    \describe{
-      \item{}{locateVariants(query, intronsByTranscripts(txdb), IntronVariants())}
-      \item{}{locateVariants(query, exonsBy(txdb), IntronVariants(), subjectIsIntrons=FALSE)}
-
-    }
   }
   \item{\dots}{Additional arguments passed to methods
   }
@@ -73,10 +61,6 @@ locateVariants(query, subject, region, ...)
     of \code{subject} are loaded. Provide, and re-use, a cache to
     speed repeated queries to the same \code{subject} across
     different \code{query} instances.
-  }
-  \item{subjectIsIntrons}{A \code{logical} indicating if the subject is
-    a list of exons by transcripts or introns by transcripts. Default is
-    \code{TRUE}. Used when \code{region} is IntronVariants only.
   }
 }
 
@@ -104,7 +88,22 @@ locateVariants(query, subject, region, ...)
       transcript. Gene IDs for the flanking genes are identified, if possible, 
       and recorded in the \code{precedesID} and \code{followsID} elementMetadata 
       columns of the output. 
-
+    }
+    \item{Subject as GRangesList :}{
+      The \code{subject} can be a \code{TranscriptDb} or \code{GRangesList}
+      object. When using a \code{GRangesList} the type of data required
+      is driven by the \code{VariantType} class in the \code{region} argument.
+      Below is a description of the appropriate \code{GRangesList}
+      \code{subject} for each type of \code{region}. 
+      \describe{
+        \item{CodingVariants :}{coding regions by transcript}
+        \item{IntronVariants :}{intron regions by transcript}
+        \item{IntergenicVariants :}{transcript regions by gene}
+        \item{SpliceSiteVariants :}{intron regions by transcript}
+        \item{FiveUTRVariants :}{five prime UTR regions by transcript}
+        \item{ThreeUTRVariants :}{three prime UTR regions by transcript}
+        \item{AllVariants :}{no GRangeList method available}
+      }
     }
     \item{Using the cache :}{
       When processing multiple VCF files performance is enhanced by specifying
