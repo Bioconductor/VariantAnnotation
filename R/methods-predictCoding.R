@@ -50,10 +50,11 @@ setMethod("predictCoding",
         cache[[".__init__"]] <- TRUE
     }
 
-    map <- data.frame(
-        geneid=rep(names(cache[["txbygene"]]), 
-                   elementLengths(cache[["txbygene"]])),
-        txid=values(unlist(cache[["txbygene"]], use.names=FALSE))[["tx_id"]])
+    map <- data.frame(geneid=rep(names(cache[["txbygene"]]), 
+                          elementLengths(cache[["txbygene"]])),
+                      txid=values(unlist(cache[["txbygene"]], 
+                          use.names=FALSE))[["tx_id"]],
+                      stringsAsFactors=FALSE)
 
     ## FIXME : set query back after olaps
     if (any(insertion <- width(query) == 0))

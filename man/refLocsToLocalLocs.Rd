@@ -65,6 +65,9 @@ refLocsToLocalLocs(ranges, txdb, cdsbytx, exbytx, ...)
     \item{\code{proteinLoc}}{
       Location in protein (codon triplet) coordinates
     }
+    \item{\code{queryID}}{
+      Character vector mapping to the of rows of the original \code{query}
+    }
     \item{\code{txID}}{
       Character vector of internal transcript ids from the 
       \link[GenomicFeatures]{TranscriptDb} or the names of the outer list 

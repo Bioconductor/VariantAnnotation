@@ -29,15 +29,11 @@
 
 \usage{
 locateVariants(query, subject, region, ...)
-\S4method{locateVariants}{VCF,TranscriptDb,ANY}(query, subject, region, ...,
-    cache=new.env(parent=emptyenv()))
-\S4method{locateVariants}{Ranges,TranscriptDb,ANY}(query, subject, region, ...,
-    cache=new.env(parent=emptyenv()))
-\S4method{locateVariants}{GRanges,TranscriptDb,ANY}(query, subject, region, ...,
-    cache=new.env(parent=emptyenv()))
+\S4method{locateVariants}{VCF,TranscriptDb,ANY}(query, subject, region, ..., cache = new.env(parent=emptyenv()))
+\S4method{locateVariants}{Ranges,TranscriptDb,ANY}(query, subject, region, ..., cache = new.env(parent=emptyenv()))
+\S4method{locateVariants}{GRanges,TranscriptDb,ANY}(query, subject, region, ..., cache = new.env(parent=emptyenv()))
 \S4method{locateVariants}{GRanges,GRangesList,CodingVariants}(query, subject, region, ...)
-\S4method{locateVariants}{GRanges,GRangesList,IntronVariants}(query, subject,
-    region, ..., subjectIsIntrons = TRUE)
+\S4method{locateVariants}{GRanges,GRangesList,IntronVariants}(query, subject, region, ..., subjectIsIntrons = TRUE)
 \S4method{locateVariants}{GRanges,GRangesList,FiveUTRVariants}(query, subject, region, ...)
 \S4method{locateVariants}{GRanges,GRangesList,ThreeUTRVariants}(query, subject, region, ...)
 \S4method{locateVariants}{GRanges,GRangesList,IntergenicVariants}(query, subject, region, ...)
@@ -73,12 +69,12 @@ locateVariants(query, subject, region, ...)
   }
   \item{\dots}{Additional arguments passed to methods
   }
-  \item{cache:}{An \code{environment} into which required components
+  \item{cache}{An \code{environment} into which required components
     of \code{subject} are loaded. Provide, and re-use, a cache to
     speed repeated queries to the same \code{subject} across
     different \code{query} instances.
   }
-  \item{subjectIsIntrons:}{A \code{logical} indicating if the subject is
+  \item{subjectIsIntrons}{A \code{logical} indicating if the subject is
     a list of exons by transcripts or introns by transcripts. Default is
     \code{TRUE}. Used when \code{region} is IntronVariants only.
   }

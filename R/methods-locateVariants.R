@@ -8,7 +8,7 @@
 ### 
 ### Each variant region has methods for : 
 ###   query %in% Ranges, VCF, GRanges
-###   subject %in% TRanscriptDb, GRangesList 
+###   subject %in% TranscriptDb, GRangesList 
 
 
 ### -------------------------------------------------------------------------
@@ -360,7 +360,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
     }
 )
 
-### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### -------------------------------------------------------------------------
 ### helpers 
 ###
 
