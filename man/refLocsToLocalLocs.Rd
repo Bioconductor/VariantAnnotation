@@ -1,7 +1,7 @@
 \name{refLocsToLocalLocs}
 \alias{refLocsToLocalLocs}
-\alias{refLocsToLocalLocs,GRanges,TranscriptDb,missing,missing-method}
-\alias{refLocsToLocalLocs,GRanges,missing,GRangesList,GRangesList-method}
+\alias{refLocsToLocalLocs,GRanges,TranscriptDb,missing-method}
+\alias{refLocsToLocalLocs,GRanges,missing,GRangesList-method}
 
 \title{refLocsToLocalLocs}
 
@@ -11,13 +11,13 @@
 }
 
 \usage{
-refLocsToLocalLocs(ranges, txdb, cdsbytx, exbytx, ...)
-\S4method{refLocsToLocalLocs}{GRanges,TranscriptDb,missing,missing}(ranges, txdb, cdsbytx, exbytx, ...)
-\S4method{refLocsToLocalLocs}{GRanges,missing,GRangesList,GRangesList}(ranges, txdb, cdsbytx, exbytx, ...)
+refLocsToLocalLocs(ranges, txdb, cdsbytx, ...)
+\S4method{refLocsToLocalLocs}{GRanges,TranscriptDb,missing}(ranges, txdb, cdsbytx, ...)
+\S4method{refLocsToLocalLocs}{GRanges,missing,GRangesList}(ranges, txdb, cdsbytx, ...)
 }
 
 \arguments{
-  \item{ranges}{A \link[GenomicRanges]{GRanges}es]{GRanges} object containing 
+  \item{ranges}{A \link[GenomicRanges]{GRanges} object containing 
     the variants in reference-based coordinates. 
   }
   \item{txdb}{A \link[GenomicFeatures]{TranscriptDb} object that serves
@@ -25,9 +25,6 @@ refLocsToLocalLocs(ranges, txdb, cdsbytx, exbytx, ...)
   }
   \item{cdsbytx}{A \link[GenomicRanges]{GRangesList} object with transcripts
     as the outer list elements and coding regions as the inner.
-  }
-  \item{exbytx}{A \link[GenomicRanges]{GRangesList} object with transcripts
-    as the outer list elements and exons as the inner.
   }
   \item{\dots}{Additional arguments passed to methods
   }
@@ -37,11 +34,10 @@ refLocsToLocalLocs(ranges, txdb, cdsbytx, exbytx, ...)
   This function translates the reference-based coordinates in \code{ranges} to 
   \sQuote{local} coordinates in the coding region (CDS) and protein sequences.
 
-  When a \code{txdb} is suplied the \code{cdsbytx} and \code{exbytx} are created 
-  from calls to the \code{cdsBy()} and \code{exonsBy()} functions. When 
-  \code{cdsbytx} and \code{exbytx} are provided the outer list elements must be 
-  transcripts and the inner list elements represent coding regions and exons, 
-  respectively. The \code{GRangesList} objects must have names on the outer list 
+  When a \code{txdb} is suplied the \code{cdsbytx} is created with 
+  \code{cdsBy()}. If \code{cdsbytx} is provided the outer list elements must be 
+  transcripts and the inner list elements represent coding regions. The 
+  \code{GRangesList} objects must have names on the outer list 
   elements (i.e., transcript names).
 
   Only ranges that fall \sQuote{within} coding sequences are reported in the 
@@ -50,8 +46,8 @@ refLocsToLocalLocs(ranges, txdb, cdsbytx, exbytx, ...)
   posible. The \code{elementMetadata} columns include \code{tx_id}, 
   \code{cdsLoc} and \code{proteinLoc}. When a \code{txdb} is provided the 
   \code{txId} is the internal transcript id from the annotation. When 
-  \code{cdsbytx} and \code{exbytx} are provided \code{tx_id} are the names 
-  on the outer list elements of the \code{GRangesList} objects.
+  \code{cdsbytx} is provided \code{tx_id} are the names on the outer list 
+  elements.
 }
 
 \value{
@@ -71,12 +67,12 @@ refLocsToLocalLocs(ranges, txdb, cdsbytx, exbytx, ...)
     \item{\code{txID}}{
       Character vector of internal transcript ids from the 
       \link[GenomicFeatures]{TranscriptDb} or the names of the outer list 
-      elements of the \code{cdsbytx} and \code{exbytx} objects.
+      elements of the \code{cdsbytx} object.
     }
     \item{\code{cdsID}}{
       Character vector of internal coding region ids from the 
       \link[GenomicFeatures]{TranscriptDb} or the names of the outer list 
-      elements of the \code{cdsbytx} and \code{exbytx} objects.
+      elements of the \code{cdsbytx} object.
     }
   }
 }

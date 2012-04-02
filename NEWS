@@ -13,13 +13,14 @@ NEW FEATURES
 
     o locateVariants() 
         - returns GRanges instead of DataFrame
+        - 'region' argument allows specification of variants by region 
         - output includes txID, geneID and cdsID
         - has cache argument for repeated calls over multiple vcf files
 
     o predictCoding()
         - returns GRanges instead of DataFrame
         - output includes txID, geneID, cdsID, 
-          cDNA-based, cds-based and protein-based coordinates
+          cds-based and protein-based coordinates
  
 
 CHANGES IN VERSION 1.0.0

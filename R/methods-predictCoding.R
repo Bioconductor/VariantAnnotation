@@ -45,7 +45,6 @@ setMethod("predictCoding",
 
     if (!exists(".__init__", cache, inherits=FALSE)) {
         cache[["cdsbytx"]] <- cdsBy(subject)
-        cache[["exbytx"]] <- exonsBy(subject)
         cache[["txbygene"]] <- transcriptsBy(subject, "gene")
         cache[[".__init__"]] <- TRUE
     }
@@ -62,8 +61,7 @@ setMethod("predictCoding",
 
     ## retrieve local coordinates
     values(query) <- append(values(query), DataFrame(varAllele=varAllele))
-    txlocal <- refLocsToLocalLocs(ranges=query, cdsbytx=cache[["cdsbytx"]], 
-        exbytx=cache[["exbytx"]])
+    txlocal <- refLocsToLocalLocs(ranges=query, cdsbytx=cache[["cdsbytx"]])
 
     if (length(txlocal) == 0)
         return(txlocal)
@@ -119,7 +117,8 @@ setMethod("predictCoding",
     ## - width of the reference sequence
     ## - position of alt allele substitution in the codon
     cstart <- ((start(values(txlocal)[["cdsLoc"]]) - 1L) %/% 3L) * 3L + 1L
-    cend <- cstart + (((altpos + width(txlocal)) %/% 3L) * 3L + 2L)
+    #cend <- cstart + (((altpos + width(txlocal)) %/% 3L) * 3L + 2L)
+    cend <- cstart + (((altpos + width(txlocal) - 2L) %/% 3L) * 3L + 2L)
     txord <- match(values(txlocal)[["txID"]], names(cache[["cdsbytx"]]))
     txseqs <- getTranscriptSeqs(cache[["cdsbytx"]][txord], seqSource)
     DNAStringSet(substring(txseqs, cstart, cend))

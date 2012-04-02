@@ -9,8 +9,8 @@ setGeneric("predictCoding",
 )
 
 setGeneric("refLocsToLocalLocs",
-    signature = c("ranges", "txdb", "cdsbytx", "exbytx"),
-    function(ranges, txdb, cdsbytx, exbytx, ...)
+    signature = c("ranges", "txdb", "cdsbytx"),
+    function(ranges, txdb, cdsbytx, ...)
     standardGeneric("refLocsToLocalLocs")
 )
 

@@ -3,23 +3,22 @@
 ### =========================================================================
 
 setMethod("refLocsToLocalLocs", 
-    signature("GRanges", "TranscriptDb", "missing", "missing"),
-    function(ranges, txdb, cdsbytx, exbytx, ...)
+    signature("GRanges", "TranscriptDb", "missing"),
+    function(ranges, txdb, cdsbytx, ...)
 {
     ## remove circular
     .setActiveSubjectSeq(ranges, txdb)
     cdsbytx <- cdsBy(txdb, "tx")
-    exbytx <- exonsBy(txdb, "tx")
-    callGeneric(ranges=ranges, cdsbytx=cdsbytx, exbytx=exbytx)
+    callGeneric(ranges=ranges, cdsbytx=cdsbytx)
 })
 
 setMethod("refLocsToLocalLocs", 
-    signature("GRanges", "missing", "GRangesList", "GRangesList"),
-    function(ranges, txdb, cdsbytx, exbytx, ...)
+    signature("GRanges", "missing", "GRangesList"),
+    function(ranges, txdb, cdsbytx, ...)
 {
     ## FIXME : .setActiveSubjectSeq equivalent for GRangesLists
-    if (is.null(names(cdsbytx)) || is.null(names(exbytx)))
-        stop("the outer list elements of cdsbytx and exbytx must have ",
+    if (is.null(names(cdsbytx)))
+        stop("the outer list elements of cdsbytx must have ",
              " names (i.e., transcript identifiers)") 
 
     ## cds and protein

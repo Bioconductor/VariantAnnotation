@@ -333,8 +333,9 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
         intergenic <- locateVariants(query, subject, 
                                      IntergenicVariants(), cache=cache)
         base <- c(coding, intron, fiveUTR, threeUTR, splice)
-        precedesID <- followsID <- rep(NA_character_, length(base)) 
-        values(base) <- append(values(base), DataFrame(precedesID, followsID))
+        precedesID <- followsID <- rep(NA_character_, length(base))
+        meta <- c(values(base), DataFrame(precedesID, followsID)) 
+        values(base) <- meta[with(meta, order(queryID, txID, cdsID, geneID)), ]
         c(base, intergenic)
     }
 )
