@@ -347,7 +347,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
 .location <-
     function(length=0, value=NA)
 {
-    levels <- c("transcript_region", "intron", "5'UTR", "3'UTR",
+    levels <- c("spliceSite", "intron", "fiveUTR", "threeUTR",
                 "coding", "intergenic")
     factor(rep(value, length), levels=levels)
 }
@@ -360,7 +360,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
                          IRanges(start(usub), start(usub) + 1),
                          strand=strand(usub))
     int_end <- GRanges(seqnames(usub),
-                       IRanges(end(usub), end(usub) - 1),
+                       IRanges(end(usub) - 1, end(usub)),
                        strand=strand(usub))
     fo_start <- findOverlaps(query, int_start, type="any")
     fo_end <- findOverlaps(query, int_end, type="any")

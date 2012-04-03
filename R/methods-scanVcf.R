@@ -203,7 +203,7 @@ setMethod(scanVcf, c("connection", "missing"),
                 x <- array(unlist(strsplit(xrep, ",", fixed=TRUE)),
                            dim=c(d, nrow(x), ncol(x)),
                            dimnames=list(NULL, NULL, colnames(x)))
-                x <- aperm(x, c(2, 3, 1))
+                x <- aperm(sub("\\.", NA, x), c(2, 3, 1))
             }
             ## 1 and 0 
             switch(type, 
