@@ -332,11 +332,13 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
                                    ThreeUTRVariants(), cache=cache)
         intergenic <- locateVariants(query, subject, 
                                      IntergenicVariants(), cache=cache)
+
         base <- c(coding, intron, fiveUTR, threeUTR, splice)
         precedesID <- followsID <- rep(NA_character_, length(base))
-        meta <- c(values(base), DataFrame(precedesID, followsID)) 
-        values(base) <- meta[with(meta, order(queryID, txID, cdsID, geneID)), ]
-        c(base, intergenic)
+        values(base) <- append(values(base), DataFrame(precedesID, followsID))
+        ans <- c(base, intergenic)
+        meta <- values(ans)
+        ans[order(meta$queryID, meta$txID, meta$cdsID, meta$geneID), ]
     }
 )
 
@@ -413,6 +415,8 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
 
 .makeMeta <- function(query, subject, vtype, ...)
 {
+    ## elementMetadata are not propagated
+    ## columns must match for combining in AllVariants
     usub <- unlist(subject, use.names=FALSE)
     fo <- findOverlaps(query, usub, type="within")
     queryID <- queryHits(fo)
