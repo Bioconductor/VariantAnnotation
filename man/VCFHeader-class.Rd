@@ -119,7 +119,7 @@
 }
 
 \examples{
-  fl <- system.file("extdata", "ex1.vcf", package="VariantAnnotation")
+  fl <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
   hdr <- scanVcfHeader(fl)
 
   fixed(hdr)

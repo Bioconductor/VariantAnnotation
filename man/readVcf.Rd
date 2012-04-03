@@ -168,7 +168,7 @@
 }
 
 \examples{
-  fl <- system.file("extdata", "ex1.vcf", package="VariantAnnotation") 
+  fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation") 
   vcf <- readVcf(fl, "hg19")
 
   ## ---------------------------------
@@ -210,7 +210,6 @@
   ## ---------------------------------
   ## Data subsets 
   ## ---------------------------------
-  fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
 
   ## Subset on genome coordinates :
   ## 'file' must have a Tabix index

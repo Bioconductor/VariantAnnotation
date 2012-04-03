@@ -151,14 +151,14 @@ test_VCF_subsetassign <- function()
 
 test_VCF_seqlevels <- function()
 {
-    fl <- system.file("extdata", "ex1.vcf", package="VariantAnnotation")
+    fl <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
     vcf <- readVcf(fl, genome="hg19")
     seqlev <- seqlevels(vcf)
-    checkIdentical(seqlev, c("16", "21"))
+    checkIdentical(seqlev, c("1", "2", "3", "4"))
 
-    vcf2 <- renameSeqlevels(vcf, c("16"="chr16", "21"="chr21"))
-    checkIdentical(seqlevels(vcf2), c("chr16", "chr21"))
+    vcf2 <- renameSeqlevels(vcf, c("1"="chr1"))
+    checkIdentical(seqlevels(vcf2), c("chr1", "2", "3", "4"))
  
-    vcf3 <- keepSeqlevels(vcf, "16")
-    checkIdentical(seqlevels(vcf3), "16")
+    vcf3 <- keepSeqlevels(vcf, "3")
+    checkIdentical(seqlevels(vcf3), "3")
 }

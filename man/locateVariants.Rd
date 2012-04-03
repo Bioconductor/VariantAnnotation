@@ -181,7 +181,7 @@ locateVariants(query, subject, region, ...)
   ## TranscriptDb object as subject 
   ## --------------------------------
   ## Read variants from a VCF file 
-  fl <- system.file("extdata", "ex1.vcf", package="VariantAnnotation")
+  fl <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
   vcf <- readVcf(fl, "hg19")
 
   ## Variant seqlevels do not match the TxDb seqlevels
@@ -191,27 +191,33 @@ locateVariants(query, subject, region, ...)
   intersect(seqlevels(rd), seqlevels(txdb))
 
   ## Use the renameSeqlevels helper to rename seqlevels
-  vcf_adj <- renameSeqlevels(vcf, c("16"="chr16", "21"="chr21")) 
-  rd_adj <- renameSeqlevels(rd, c("16"="chr16", "21"="chr21"))
+  newnames <- paste("chr", seqlevels(vcf), sep="")
+  names(newnames) <- seqlevels(vcf)
+  vcf_adj <- renameSeqlevels(vcf, newnames) 
+  rd_adj <- renameSeqlevels(rd, newnames)
 
   ## Confirm
   intersect(seqlevels(vcf_adj), seqlevels(txdb))
   intersect(seqlevels(rd_adj), seqlevels(txdb))
 
   ## VCF object as the query
-  loc <- locateVariants(vcf_adj, txdb, CodingVariants())
+  loc_coding <- locateVariants(vcf_adj, txdb, CodingVariants())
 
   ## GRanges as the query
-  loc <- locateVariants(rd_adj, txdb, IntronVariants())
+  loc_intron <- locateVariants(rd_adj, txdb, IntronVariants())
+  loc_splice <- locateVariants(rd_adj, txdb, SpliceSiteVariants())
 
   ## --------------------------------
   ## GRangesList object as subject 
   ## --------------------------------
-  ## cdsbytx <- cdsBy(txdb)
-  ## locateVariants(rd_adj, cdsbytx, CodingVariants())
+  ## Note the results do not include geneID. This information
+  ## is not available when a GRangesList is used in place of
+  ## a TranscriptDb.
+  cdsbytx <- cdsBy(txdb)
+  locateVariants(rd_adj, cdsbytx, CodingVariants())
 
-  ## intbytx <- intronsByTranscript(txdb)
-  ## locateVariants(rd_adj, intbytx, CodingVariants())
+  intbytx <- intronsByTranscript(txdb)
+  locateVariants(rd_adj, intbytx, IntronVariants())
 
   ## --------------------------------
   ## Using the cache 

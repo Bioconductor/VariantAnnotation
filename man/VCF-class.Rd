@@ -287,7 +287,7 @@
 }
 
 \examples{
-  fl <- system.file("extdata", "ex1.vcf", package="VariantAnnotation")
+  fl <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
   vcf <- readVcf(fl, genome="hg19")
 
   ## Access all 'fixed' fields with fixed and individual fixed fields with
@@ -307,10 +307,12 @@
   seqlevels(vcf)
  
   ## Add "chr" in front of the seqlevels using renameSeqlevels()
-  vcf <- renameSeqlevels(vcf, c("16"="chr16", "21"="chr21"))
+  newnames <- paste("chr", seqlevels(vcf), sep="")
+  names(newnames) <- seqlevels(vcf)
+  vcf <- renameSeqlevels(vcf, newnames)
   seqlevels(vcf)
  
   ## To subset on seqlevels use the keepSeqlevels() helper function
-  vcf_subset <- keepSeqlevels(vcf, "chr16")
+  vcf_subset <- keepSeqlevels(vcf, "chr2")
   seqlevels(vcf_subset)
 }
