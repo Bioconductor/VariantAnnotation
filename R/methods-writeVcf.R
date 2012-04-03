@@ -30,14 +30,15 @@ setMethod(writeVcf, c("VCF", "character"),
         sp <- split(as.character(unlist(ALT, use.names=FALSE)), lt)
         sp[lt[wd == 0]] <- "." 
         ALT <- unlist(lapply(sp, function(i) paste(i, collapse=",")))
+    } else if (is(ALT, "CharacterList")) {
+        ALT <- unlist(ALT)
     }
     QUAL <- values(qual(obj))[["QUAL"]]
+    QUAL[is.na(QUAL)] <- "."
     FILTER <- values(filt(obj))[["FILTER"]]
     INFO <- .makeVcfInfo(values(info(obj))[-1])
     GENO <- .makeVcfGeno(geno(obj))
-
     dat <- c(CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, GENO)
-    dat <- gsub("NA", ".", dat)
     lst <- split(dat, seq_len(nrow(obj)))
     .pasteCollapse(CharacterList(lst), collapse="\t")
 }
@@ -54,14 +55,17 @@ setMethod(writeVcf, c("VCF", "character"),
     if (length(idx) > 0) 
         geno[[idx]] <- matrix(unlist(geno[[idx]], use.names=FALSE), 
             nrow=nrow(geno[[idx]])) 
-    map <- Map(function(elt, nms) {
-               apply(elt, 1, function(i, nms) {
-                   if (!all(is.na(i)))
-                       nms
-                   else
-                       NA
-               }, nms)
-             }, as.list(geno), names(geno))
+    map <- Map(function(elt, nms) 
+               {
+                   apply(elt, 1, 
+                     function(i, nms) 
+                     {
+                       if (!all(is.na(i)))
+                           nms
+                       else
+                           NA
+                     }, nms)
+               }, as.list(geno), names(geno))
 
     lst <- split(unlist(map, use.names=FALSE), 
                  rep(seq_len(nrow(geno[[1]])), length(cls)))
@@ -71,7 +75,6 @@ setMethod(writeVcf, c("VCF", "character"),
 
 .makeVcfGeno <- function(geno, ...)
 {
-    ## FIXME: NA vs NULL handle in C
     cls <- lapply(geno, class) 
     idx <- which(cls == "array") 
     FORMAT <- .makeVcfFormat(geno, cls, idx)
@@ -79,27 +82,32 @@ setMethod(writeVcf, c("VCF", "character"),
     nsub <- ncol(geno[[1]])
     nrec <- nrow(geno[[1]])
     arylst <- lapply(geno[idx], 
-        function(elt, geno) {
-            ilst <- sapply(seq_len(nsub), 
-              function(i, elt) {
-                d <- c(elt[,i,])
-                s <- split(d, rep(seq_len(nrec), nsub))
-                .pasteCollapse(CharacterList(s), collapse=",")
-              }, elt, USE.NAMES=FALSE)
-            data.frame(ilst, stringsAsFactors=FALSE)
-        }, geno)
+                  function(elt, nsub) 
+                  {
+                      m <- matrix(c(elt), ncol=nsub)
+                      matrix(split(m, seq_len(nrec*nsub)), ncol=nsub)
+                  }, nsub)
     geno[idx] <- SimpleList(arylst)
 
+    fmtidx <- lapply(strsplit(FORMAT, ":"), function(x) names(geno) %in% x)
     subj <- lapply(seq_len(nsub), 
-        function(i) {
-            dat <- unlist(lapply(geno, function(fld) fld[,i]), use.names=FALSE)
-            mat <- matrix(dat, ncol=length(geno))
-            mat <- gsub("NA", NA, mat)
-            lst <- split(mat, rep(seq_len(nrec), nsub))
-            rmna <- lapply(lst, na.omit)
-            .pasteCollapse(CharacterList(rmna), collapse=":")
-        })
-
+                function(i, geno) 
+                {
+                    dat <- unlist(lapply(geno, function(fld) fld[,i]), 
+                                  use.names=FALSE, recursive=FALSE)
+                    dat <- lapply(dat, function(elt)
+                                       {
+                                           if (na <- any(is.na(elt)))
+                                               elt[na] <- "."
+                                           else
+                                               elt
+                                           paste(elt, collapse=",")
+                                        })
+                    mat <- matrix(dat, ncol=length(geno))
+                    lst <- split(mat, rep(seq_len(nrec), length(geno)))
+                    map <- Map("[", lst, fmtidx)
+                    .pasteCollapse(CharacterList(map), collapse=":")
+                }, geno)
     cbind(FORMAT, do.call(cbind, subj))
 }
 
@@ -110,8 +118,9 @@ setMethod(writeVcf, c("VCF", "character"),
     cmp <- grep("Compressed", cls, fixed=TRUE)
     for (i in cmp)
         info[[i]] <- lapply(info[[i]], 
-            function(elt) {
-                if (all(is.na(elt)))
+            function(elt) 
+            {
+                if (all(is.na(elt))) 
                     NA
                 else
                     paste(as.list(elt), collapse=",")
@@ -121,7 +130,8 @@ setMethod(writeVcf, c("VCF", "character"),
     for (i in arr) {
         mat <- matrix(info[[i]], nrow=nrow(info[[i]]))
         info[[i]] <- apply(mat, 1, 
-            function(elt) {
+            function(elt) 
+            {
                 if (all(is.na(elt)))
                     NA
                 else
@@ -132,15 +142,18 @@ setMethod(writeVcf, c("VCF", "character"),
         if (is(elt, "logical")) {
             lapply(elt, function(x) if(x) nms)
         } else {
-            lapply(elt, function(i) {
-                if (!is.na(i))
-                    paste(nms, "=", i, sep="")
-            })
+            lapply(elt, function(i) 
+                        {
+                            if (!is.na(i))
+                                paste(nms, "=", i, sep="")
+                        })
         }
     }, as.list(info), names(info), cls)
 
-    lapply(seq_len(length(map[[1]])), function(i, map) {
-        paste(unlist(lapply(map, "[", i), use.names=FALSE), collapse=";")
+    lapply(seq_len(length(map[[1]])), 
+        function(i, map) 
+        {
+            paste(unlist(lapply(map, "[", i), use.names=FALSE), collapse=";")
         }, map)
 }
 
@@ -150,7 +163,8 @@ setMethod(writeVcf, c("VCF", "character"),
 ## FIXME : not writing out reference or sample
 {
     hdr <- exptData(obj)[["header"]]
-    header <- Map(.formatHeader, as.list(header(hdr)), names(header(hdr)))
+    header <- Map(.formatHeader, as.list(header(hdr)),
+                  as.list(names(header(hdr))))
     samples <- samples(hdr) 
     colnms <- paste(c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER",
                     "INFO", "FORMAT", samples[!is.null(samples)]), collapse="\t")
@@ -162,39 +176,43 @@ setMethod(writeVcf, c("VCF", "character"),
 {
     if (nms == "META") {
         fd <- format(Sys.time(), "%Y%m%d")
-        df[rownames(df) == "fileDate", ] <- fd
+        if ("fileDate" %in% rownames(df))
+            df[rownames(df) == "fileDate", ] <- fd
+        else
+            df <- rbind(df, DataFrame(Value=fd, row.names="fileDate")) 
         paste("##", rownames(df), "=", df[,1], sep="")
     } else {
-        if (any(colnames(df) %in% "Description")) 
+        if ("Description" %in% colnames(df)) {
             df$Description <- paste("\"", df$Description, "\"", sep="")
-        prs <- paste(rep(colnames(df), each=nrow(df)), "=", unlist(df,
-                     use.names=FALSE), sep="")
-        lst <- split(prs, seq_len(nrow(df)))
-        lns <- .pasteCollapse(CharacterList(lst), collapse=",") 
-        paste("##", nms, "=<ID=", rownames(df), ",", lns, ">", sep="")
+            prs <- paste(rep(colnames(df), each=nrow(df)), "=",
+                         unlist(df, use.names=FALSE), sep="")
+            lst <- split(prs, seq_len(nrow(df)))
+            lns <- .pasteCollapse(CharacterList(lst), collapse=",") 
+            paste("##", nms, "=<ID=", rownames(df), ",", lns, ">", sep="")
+        }
     }
 }
 
-## ------------------------------------------------------------
-codeAlleleObservations <- function(ref, alt, observed, ...) {
-    if (length(ref) != length(alt))
-        stop("ref and alt must be the same length")
-
-    len <- lapply(ref, length) 
-    if (any(len > 1))
-        stop("each element of ref must be a single nucleotide") 
-
-    options <- .codeAlleleOptions(ref, alt)
-    if (length(options) != length(observed))
-        stop("ref, alt and observed must all be the same length")
-    .Call(.code_allele_observations, options, observed)
-}
-
-.codeAlleleOptions <- function(ref, alt) {
-    mapply(function(x, y) {
-      unique(c(x, y))
-    },ref, alt, USE.NAMES=FALSE)
-}
+### ------------------------------------------------------------
+#codeAlleleObservations <- function(ref, alt, observed, ...) {
+#    if (length(ref) != length(alt))
+#        stop("ref and alt must be the same length")
+#
+#    len <- lapply(ref, length) 
+#    if (any(len > 1))
+#        stop("each element of ref must be a single nucleotide") 
+#
+#    options <- .codeAlleleOptions(ref, alt)
+#    if (length(options) != length(observed))
+#        stop("ref, alt and observed must all be the same length")
+#    .Call(.code_allele_observations, options, observed)
+#}
+#
+#.codeAlleleOptions <- function(ref, alt) {
+#    mapply(function(x, y) {
+#      unique(c(x, y))
+#    },ref, alt, USE.NAMES=FALSE)
+#}
 
 
 ############

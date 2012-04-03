@@ -64,8 +64,7 @@
       \code{readVcf} calls \code{\link{scanVcf}}, the details of which can be 
       found with \code{?scanVcf}.
     }
-    \item{Data Representation :}{
-
+    \item{Data type :}{
       CHROM, POS, ID and REF fields are used to create the \code{GRanges}
       stored in the \code{rowData} slot of the \code{VCF} object. Access
       with \code{rowData} accessor.
@@ -96,6 +95,16 @@
 
       When the VCF header does not contain data type information, the data are 
       returned as a single unparsed column named \sQuote{INFO} or \sQuote{GENO}.
+    }
+    \item{Missing data  :}{
+      Missing data in VCF files are represented by a dot ("."). \code{readVcf} 
+      retains the dot as a character string for data type character and converts 
+      it to \code{NA} for data types numeric or double. 
+
+      Because the data are stored in rectangluar data structures there is a
+      value for each \code{info} and \code{geno} field element in the \code{VCF} 
+      class. If the element was missing or was not collected for a particular 
+      variant the value will be \code{NA}.
     }
   }
 }
