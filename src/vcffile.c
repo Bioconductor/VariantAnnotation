@@ -366,24 +366,25 @@ SEXP scan_vcf_character(SEXP file, SEXP yield,
     char *buf = buf0, *end = buf0 + BUFLEN;
 
     gzFile gz = gzopen(CHAR(STRING_ELT(file, 0)), "rb");
-    int curr, prev, irec = 0;
+    int irec = 0;
     if (Z_NULL == gz) {
         Free(parse);
         Rf_error("failed to open file");
     }
 
-    prev = gztell(gz);
     while (Z_NULL != gzgets(gz, buf, end - buf)) {
-        curr = gztell(gz);
-        if (curr - prev == end - buf0 - 1 && *(end - 1) == '\0') {
+        int  n = strlen(buf);
+        if (n == end - buf - 1 && (*(end - 2) != '\n' || *(end - 2) != '\r')) {
             const int len0 = end - buf0, len1 = len0 * 1.6;
             buf0 = Realloc(buf0, len1, char);
             buf = buf0 + len0 - 1;
             end = buf0 + len1;
             continue;
         }
-        if ('#' == *buf || '\0' == *buf)
+        if ('#' == *buf0 || '\0' == *buf0) {
+            buf = buf0;
             continue;
+        }
 
         if (irec == parse->vcf_n) {
             /* if (!grow_b) */
@@ -402,7 +403,6 @@ SEXP scan_vcf_character(SEXP file, SEXP yield,
         _parse(buf0, irec, parse);
 
         irec += 1;
-        prev = curr;
         buf = buf0;
     }
 
