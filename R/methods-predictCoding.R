@@ -17,6 +17,8 @@ setMethod("predictCoding",
     function(query, subject, seqSource, varAllele, ...)
     {
         alt <- values(alt(query))[["ALT"]]
+        if (!is(alt, "DNAStringSet"))
+            stop("alt(<VCF>)[['ALT']] must be a DNAStringSet")
         rd <- rep(rowData(query), elementLengths(alt))
         callGeneric(query=rd, subject=subject, seqSource=seqSource, 
             varAllele=unlist(alt, use.names=FALSE), ...) 
