@@ -105,15 +105,16 @@
     }
     \item{\code{refSeq}}{
       This is the reference codon sequence. This range is typically greater
-      than the width of the reference sequence because it includes all codons
-      involved in the sequence modification. If the reference sequence is of
-      width 2 but the alternate allele is of width 4 then at least two codons
-      must be included in the \code{refSeq}.
+      than the width of the range in the \code{GRanges} because it includes 
+      all codons involved in the sequence modification. If the reference 
+      sequence is of width 2 but the alternate allele is of width 4 then at 
+      least two codons must be included in the \code{refSeq}.
     }
     \item{\code{varSeq}}{
-      This sequence is the result of replacing the reference range with the
-      alternate allele. If the result of this substitution is not a multiple
-      of 3 no translation is performed and the \code{varAA} value will be missing.
+      This sequence is the result of inserting, deleting or replacing the 
+      position(s) in the reference sequence alternate allele. If the result 
+      of this modifiction is not a multiple of 3 no translation is performed 
+      and the \code{varAA} value will be missing.
     }
     \item{\code{refAA}}{
       The reference amino acid column contains the translated \code{refSeq}.

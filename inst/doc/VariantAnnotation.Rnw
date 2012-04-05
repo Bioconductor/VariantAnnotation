@@ -118,7 +118,7 @@ head(unlist(alternate))
 Data from the \Rcode{INFO} field is accessed with the \Rcode{info} accessor. 
 Look at the heder information related to the \Rcode{INFO} fields
 <<readVcf_info_header>>=
-info(hdr)
+head(info(hdr), 4)
 @
 
 and retrieve the first couple of the fields,
@@ -324,43 +324,12 @@ chromosomes in TxDb.Hsapiens.UCSC.hg19.knownGene then keep only 'chr21' and
 \end{verbatim}
 
 \section{Variant location}
-\Rfunction{locateVariants} identifies where the ranges in \Rcode{query}
-fall with respect to the annotation supplied in \Robject{subject}.
-Specific regions are specified with the \Rcode{region} argument and
-can be one of the following constructors: CodingVariants, IntronVariants, 
-FiveUTRVariants, ThreeUTRVariants, IntergenicVariants, or SpliceSiteVariants.
-
-<<CodingVariants>>=
-loc <- locateVariants(rd, txdb, CodingVariants())
-head(loc, 4)
-@ 
-
-\Rcode{SpliceSiteVariants} are those overlapping the first 2 or last 2 nucleotides 
-of an intron.
-<<SpliceSiteVariants>>=
-head(locateVariants(rd, txdb, SpliceSiteVariants()), 4)
-@
-
-To locate variants in all regions use the \Rcode{AllVariants()} constructor,
-<<AllVariants, eval=FALSE>>=
-allvar <- locateVariants(rd, txdb, AllVariants())
-@
-
-When the \Rcode{query} is a \Robject{VCF} the variant ranges are taken from the 
-\Rcode{rowData} slot. If \Rcode{query} is a \Robject{GRanges} it can have
-additional elementMetadata columns but they are ignored. As an alternative to a
-\Rcode{TranscriptDb}, the \Robject{subject} can be a \Robject{GRangesList}
-of the appropriate type. \Rcode{CodingVariants} would require coding regions
-by transcript, for \Rcode{IntronVariants} introns by transcripts would be
-necessary, etc. See ?\Rcode{locateVariants} man page for details.
-
-The return value is a \Robject{GRanges} of variants that fell in the specified 
-region. Each row represents a variant-transcript match which may result in 
-multiple rows for each variant. \Rcode{elementMetadata} columns returned include 
-\Rcode{location}, \Rcode{queryID}, \Rcode{txID}, \Rcode{cdsID}, and 
-\Rcode{geneID}. In the case of \Robject{IntergenicVariants} columns for
-\Rcode{precedesID} and \Rcode{followsID} are also included. The \Rcode{queryID} 
-column maps back to the row number in the original \Robject{query}. 
+\Rfunction{locateVariants} identifies where the ranges in \Rcode{query} fall 
+with respect to the annotation supplied in \Robject{subject}. Regions are 
+specified in the \Rcode{region} argument and can be one of the following 
+constructors: CodingVariants, IntronVariants, FiveUTRVariants, ThreeUTRVariants, 
+IntergenicVariants, or SpliceSiteVariants. Location definitions are shown in 
+Table \ref{table:location}. 
 
 \begin{table}[h!]
 \begin{center}
@@ -381,6 +350,40 @@ nucleotides of an intron \\
 \caption{Variant locations}
 \label{table:location}
 \end{table}
+
+When the \Rcode{query} is a \Robject{VCF} the variant ranges are taken from the 
+\Rcode{rowData} slot. If \Rcode{query} is a \Robject{GRanges} it can have
+additional elementMetadata columns but they are ignored. As an alternative to a
+\Rcode{TranscriptDb}, the \Robject{subject} can be a \Robject{GRangesList}
+of the appropriate type. \Rcode{CodingVariants} would require coding regions
+by transcript, for \Rcode{IntronVariants} introns by transcripts would be
+necessary, etc. See ?\Rcode{locateVariants} man page for details.
+
+Identify the coding variants, 
+<<CodingVariants>>=
+loc <- locateVariants(rd, txdb, CodingVariants())
+head(loc, 4)
+@ 
+
+\Rcode{SpliceSiteVariants} are those overlapping the first 2 or last 2 nucleotides 
+of an intron.
+<<SpliceSiteVariants>>=
+head(locateVariants(rd, txdb, SpliceSiteVariants()), 4)
+@
+
+To locate variants in all regions use the \Rcode{AllVariants()} constructor,
+<<AllVariants, eval=FALSE>>=
+allvar <- locateVariants(rd, txdb, AllVariants())
+@
+
+The \Robject{GRanges} output of \Rfunction{locateVariants} includes only the
+ranges that fell in the specified region. Each row is a variant-transcript 
+match which may result in multiple rows for each variant. 
+\Rcode{elementMetadata} columns returned include \Rcode{location}, 
+\Rcode{queryID}, \Rcode{txID}, \Rcode{cdsID}, and \Rcode{geneID}. In the case 
+of \Robject{IntergenicVariants} columns for \Rcode{precedesID} and 
+\Rcode{followsID} are also included. The \Rcode{queryID} column maps back to 
+the row number in the original \Robject{query}. 
 
 To answer gene-centric questions data can be summarized by gene reguardless
 of transcript. 
