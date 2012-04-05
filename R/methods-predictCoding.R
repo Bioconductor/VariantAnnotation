@@ -88,8 +88,7 @@ setMethod("predictCoding",
     ## reference and variant codon sequences
     altpos <- (start(values(txlocal)[["cdsLoc"]]) - 1L) %% 3L + 1L
     refSeq <- varSeq <- .constructRefSequences(txlocal, altpos, seqSource, cache)
-    subseq(varSeq[translateidx], start=altpos[translateidx],
-        width=rwidth[translateidx]) <- altallele[translateidx] 
+    subseq(varSeq, start=altpos, width=rwidth) <- altallele
 
     ## translation
     refAA <- translate(refSeq)
@@ -117,7 +116,6 @@ setMethod("predictCoding",
     ## - width of the reference sequence
     ## - position of alt allele substitution in the codon
     cstart <- ((start(values(txlocal)[["cdsLoc"]]) - 1L) %/% 3L) * 3L + 1L
-    #cend <- cstart + (((altpos + width(txlocal)) %/% 3L) * 3L + 2L)
     cend <- cstart + (((altpos + width(txlocal) - 2L) %/% 3L) * 3L + 2L)
     txord <- match(values(txlocal)[["txID"]], names(cache[["cdsbytx"]]))
     txseqs <- getTranscriptSeqs(cache[["cdsbytx"]][txord], seqSource)

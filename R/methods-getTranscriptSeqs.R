@@ -14,7 +14,7 @@ setMethod("getTranscriptSeqs",  c("GRangesList", "FaFile"),
     {
         ## order by exon rank, check for mixed chromosomes, mixed strand 
         txlist <- GenomicFeatures:::.makeUCSCTxListFromGRangesList(query,
-            reorder.exons.on.minus.strand=FALSE)
+            decreasing.rank.on.minus.strand=FALSE)
 
         ## back to GRanges for getSeq method 
         widthEL <- elementLengths(query)
