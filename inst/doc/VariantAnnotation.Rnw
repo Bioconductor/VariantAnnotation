@@ -341,7 +341,7 @@ coding &  falls \emph{within} a coding region \\
 fiveUTR &  falls \emph{within} a 5' untranslated region \\
 threeUTR &  falls \emph{within} a 3' untranslated region \\
 intron &  falls \emph{within} an intron region \\
-intergenic & does not fall \emph{within} a transcript \\
+intergenic & does not fall \emph{within} a transcript associated with a gene \\
 spliceSite & overlaps any portion of the first 2 or last 2 
 nucleotides of an intron \\ 
 \hline

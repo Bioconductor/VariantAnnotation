@@ -85,9 +85,8 @@ locateVariants(query, subject, region, ...)
       any portion of the first 2 or last 2 nucleotides in an intron. 
 
       \sQuote{intergenic} variants are those that do not fall within a 
-      transcript. Gene IDs for the flanking genes are identified, if possible, 
-      and recorded in the \code{precedesID} and \code{followsID} elementMetadata 
-      columns of the output. 
+      transcript associated with a gene. If available, gene IDs for the flanking 
+      genes are give as the \code{precedesID} and \code{followsID}.
     }
     \item{Subject as GRangesList :}{
       The \code{subject} can be a \code{TranscriptDb} or \code{GRangesList}
