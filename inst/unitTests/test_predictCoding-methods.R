@@ -27,19 +27,19 @@ test_predictCoding_varAllele <- function()
     checkIdentical(unlist(values(current)[["varAllele"]]), unlist(expected))
 
     ## width = 1
-    checkEquals(width(values(current)[["refSeq"]]), rep(3L, 6))
+    checkEquals(width(values(current)[["refCodon"]]), rep(3L, 6))
 
     ## width = 2
     width(data) <- rep(2, 3) 
     alt <- DNAStringSet(c("GG", "TT", ""))
     current <- suppressWarnings(predictCoding(data, txdb, Hsapiens, alt))
-    checkEquals(width(values(current)[["refSeq"]]), c(rep(3L, 4), 6L, 6L))
+    checkEquals(width(values(current)[["refCodon"]]), c(rep(3L, 4), 6L, 6L))
  
     ## width = 3 
     width(data) <- rep(3, 3) 
     alt <- DNAStringSet(c("GGG", "TTT", ""))
     current <- suppressWarnings(predictCoding(data, txdb, Hsapiens, alt))
-    checkEquals(width(values(current)[["refSeq"]]), c(3L, 3L, rep(6L, 4))) 
+    checkEquals(width(values(current)[["refCodon"]]), c(3L, 3L, rep(6L, 4))) 
 }
 
 test_refLocsToLocalLocs <- function()

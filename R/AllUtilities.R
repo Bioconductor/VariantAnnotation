@@ -10,7 +10,7 @@
     else
         paramRangeID <- names(param)
     if (is.null(paramRangeID))
-        paramRangeID <- NA_character_
+        paramRangeID <- rep(NA_character_, length(vcf))
 
     if (1L == length(vcf)) {
         vcf[[1]][["paramRangeID"]] <- 
@@ -22,8 +22,9 @@
                    do.call(c, unname(lapply(vcf, "[[", elt)))
                })
         names(lst) <- names(vcf[[1]])
-        paramRangeID <- as.factor(rep(paramRangeID, lapply(vcf, function(elt) 
-            length(elt$rowData))))
+        len <- unlist(lapply(vcf, function(elt) length(elt$rowData)),
+                      use.names=FALSE)
+        paramRangeID <- as.factor(rep(paramRangeID, len)) 
 
         ## collapse info and geno
         info <- lst$INFO

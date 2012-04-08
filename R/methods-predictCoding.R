@@ -89,13 +89,13 @@ setMethod("predictCoding",
 
     ## reference and variant codon sequences
     altpos <- (start(values(txlocal)[["cdsLoc"]]) - 1L) %% 3L + 1L
-    refSeq <- varSeq <- .constructRefSequences(txlocal, altpos, seqSource, cache)
-    subseq(varSeq, start=altpos, width=rwidth) <- altallele
+    refCodon <- varCodon <- .constructRefSequences(txlocal, altpos, seqSource, cache)
+    subseq(varCodon, start=altpos, width=rwidth) <- altallele
 
     ## translation
-    refAA <- translate(refSeq)
+    refAA <- translate(refCodon)
     varAA <- AAStringSet(rep("", length(txlocal))) 
-    varAA[translateidx] <- translate(varSeq[translateidx])
+    varAA[translateidx] <- translate(varCodon[translateidx])
 
     ## results
     txID <- values(txlocal)[["txID"]] 
@@ -108,7 +108,7 @@ setMethod("predictCoding",
     consequence <- factor(consequence) 
  
     values(txlocal) <- append(values(txlocal), DataFrame(geneID, consequence, 
-        refSeq, varSeq, refAA, varAA))
+        refCodon, varCodon, refAA, varAA))
     txlocal 
 }
 
