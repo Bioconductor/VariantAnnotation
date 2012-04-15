@@ -140,12 +140,9 @@ setMethod(scanVcf, c("TabixFile", "GRanges"),
 setMethod(scanVcf, c("TabixFile", "ScanVcfParam"),
     function(file, ..., param)
 {
-    result <- if (0L == length(vcfWhich(param))) # no ranges
-        scanVcf(path(file), ..., param=param)
-    else                                # ranges
-        scanVcf(file, ..., fixed=vcfFixed(param),
-                info=vcfInfo(param), geno=vcfGeno(param),
-                param=vcfWhich(param))
+    result <- scanVcf(file, ..., fixed=vcfFixed(param),
+                      info=vcfInfo(param), geno=vcfGeno(param),
+                      param=vcfWhich(param))
     if (vcfTrimEmpty(param))
         lapply(result, function(rng) {
             rng[["GENO"]] <- Filter(Negate(is.null), rng[["GENO"]])
@@ -158,7 +155,7 @@ setMethod(scanVcf, c("TabixFile", "ScanVcfParam"),
 setMethod(scanVcf, c("TabixFile", "missing"),
     function(file, ..., param)
 {
-    callGeneric(path(file), ...)
+    callGeneric(file, ..., param=ScanVcfParam())
 })
 
 setMethod(scanVcf, c("character", "ScanVcfParam"),

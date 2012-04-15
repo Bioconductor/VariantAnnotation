@@ -10,7 +10,8 @@ enum { ROWDATA_IDX = 0, REF_IDX, ALT_IDX, QUAL_IDX, FILTER_IDX,
        INFO_IDX, GENO_IDX };
 enum { POS_IDX = 0, ID_IDX };
 
-const int N_FLDS = 7;
+static const int N_FLDS = 7;
+static const int TBX_INIT_SIZE = 32767;
 
 struct parse_t {
     struct vcftype_t *vcf;
@@ -349,7 +350,6 @@ SEXP scan_vcf_connection(SEXP txt, SEXP sample, SEXP fmap, SEXP imap,
 }
 
 SEXP scan_vcf_character(SEXP file, SEXP yield,
-                        /* SEXP grow, */
                         SEXP sample, SEXP fmap, SEXP imap, SEXP gmap)
 {
     struct parse_t *parse;
@@ -386,11 +386,8 @@ SEXP scan_vcf_character(SEXP file, SEXP yield,
             continue;
         }
 
-        if (irec == parse->vcf_n) {
-            /* if (!grow_b) */
-            /*     break; */
+        if (irec == parse->vcf_n)
             _parse_grow(parse, 0);
-        }
 
         /* trim trailing newlines */
         int last = strlen(buf) - 1;
@@ -420,13 +417,14 @@ SEXP scan_vcf_character(SEXP file, SEXP yield,
     return result;
 }
 
-SEXP tabix_as_vcf(tabix_t *tabix, ti_iter_t iter,
-                  const int *keep, const int size,
-                  const Rboolean grow, SEXP state)
+SEXP tabix_as_vcf(tabix_t *tabix, ti_iter_t iter, const int yield,
+                  SEXP state)
 {
+    const ti_conf_t *conf = ti_get_conf(tabix->idx);
     SEXP sample = VECTOR_ELT(state, 0), fmap = VECTOR_ELT(state, 1);
+    const int nrec = NA_INTEGER == yield ? TBX_INIT_SIZE : yield;
     struct parse_t *parse =
-        _parse_new(size, sample, fmap, VECTOR_ELT(state, 2),
+        _parse_new(nrec, sample, fmap, VECTOR_ELT(state, 2),
                    VECTOR_ELT(state, 3));
 
     int BUFLEN = 4096;
@@ -435,18 +433,14 @@ SEXP tabix_as_vcf(tabix_t *tabix, ti_iter_t iter,
     int linelen;
     const char *line;
 
-    int irec = 0, trec=1;
+    int irec = 0;
     while (NULL != (line = ti_read(tabix, iter, &linelen))) {
 
-        if (irec == parse->vcf_n) {
-            if (!grow) break;
-            _parse_grow(parse, 0);
-        }
+        if (conf->meta_char == *line)
+            continue;
 
-        if (NULL != keep) {
-            if (trec++ != *keep) continue;
-            keep++;
-        }
+        if (irec == parse->vcf_n)
+            _parse_grow(parse, 0);
 
         if (linelen + 1 > BUFLEN) {
             Free(buf);
@@ -458,6 +452,8 @@ SEXP tabix_as_vcf(tabix_t *tabix, ti_iter_t iter,
 
         _parse(buf, irec, parse);
         irec += 1;
+        if (NA_INTEGER != yield && irec == parse->vcf_n)
+            break;
     }
     Free(buf);
 

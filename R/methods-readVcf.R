@@ -86,7 +86,8 @@ setMethod(readVcf, c(file="character", genome="missing",
 
     ## rowData
     rowData <- vcf[["rowData"]]
-    genome(seqinfo(rowData)) <- genome 
+    if (length(rowData))
+        genome(seqinfo(rowData)) <- genome 
     values(rowData) <- DataFrame(paramRangeID=vcf[["paramRangeID"]])
 
     ## fixed fields

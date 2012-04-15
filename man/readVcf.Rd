@@ -248,6 +248,15 @@
   ## that no records should be retrieved. This param specifies
   ## all 'fixed fields, the "GT" 'geno' field and none of 'info'.
   ScanVcfParam(geno="GT", info=NA)
+
+  ## iterate through VCF file
+  param <- ScanVcfParam(fixed="ALT", geno=c("GT", "HQ"), info=c("NS", "AF"))
+  tab <- TabixFile(compressVcf, idx, yieldSize=2)
+  open(tab)
+  while (nrow(vcf <- readVcf(tab, "hg19", param=param)))
+      cat("vcf dim:", dim(vcf), "\n")
+  close(tab)
+
 }
 
 \keyword{manip}
