@@ -250,8 +250,9 @@
   ScanVcfParam(geno="GT", info=NA)
 
   ## iterate through VCF file
-  param <- ScanVcfParam(fixed="ALT", geno=c("GT", "HQ"), info=c("NS", "AF"))
-  tab <- TabixFile(compressVcf, idx, yieldSize=2)
+  fl <- system.file("extdata", "chr22.vcf.gz", package="VariantAnnotation")
+  param <- ScanVcfParam(fixed="ALT", geno=c("GT", "GL"), info=c("LDAF", "AF"))
+  tab <- TabixFile(fl, yieldSize=4000)
   open(tab)
   while (nrow(vcf <- readVcf(tab, "hg19", param=param)))
       cat("vcf dim:", dim(vcf), "\n")
