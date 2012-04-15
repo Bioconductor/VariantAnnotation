@@ -45,6 +45,18 @@ void _vcftype_free(struct vcftype_t *vcftype)
     Free(vcftype);
 }
 
+void *vcf_Realloc(void * p, size_t n)
+{
+    /* Realloc(p, 0, *) fails inappropriately */
+    if (n == 0) {
+        Free(p);
+        p = NULL;
+    } else {
+        p = R_chk_realloc(p, n);
+    }
+    return p;
+}
+
 struct vcftype_t *_vcftype_grow(struct vcftype_t * vcftype, int nrow)
 {
     if (NULL == vcftype)
@@ -55,29 +67,32 @@ struct vcftype_t *_vcftype_grow(struct vcftype_t * vcftype, int nrow)
     case NILSXP:
         break;
     case LGLSXP:
-        vcftype->u.logical = Realloc(vcftype->u.logical, sz, int);
+        vcftype->u.logical = (int *)
+            vcf_Realloc(vcftype->u.logical, sz * sizeof(int));
         for (int i = osz; i < sz; ++i)
             vcftype->u.logical[i] = FALSE;
         break;
     case INTSXP:
-        vcftype->u.integer = Realloc(vcftype->u.integer, sz, int);
+        vcftype->u.integer = (int *)
+            vcf_Realloc(vcftype->u.integer, sz * sizeof(int));
         for (int i = osz; i < sz; ++i)
             vcftype->u.integer[i] = R_NaInt;
         break;
     case REALSXP:
-        vcftype->u.numeric = Realloc(vcftype->u.numeric, sz, double);
+        vcftype->u.numeric = (double *)
+            vcf_Realloc(vcftype->u.numeric, sz * sizeof(double));
         for (int i = osz; i < sz; ++i)
             vcftype->u.numeric[i] = R_NaReal;
         break;
     case STRSXP:
-        vcftype->u.character =
-            Realloc(vcftype->u.character, sz, char *);
+        vcftype->u.character = (char **)
+            vcf_Realloc(vcftype->u.character, sz * sizeof(char *));
         for (int i = osz; i < sz; ++i)
             vcftype->u.character[i] = NULL;
         break;
     case VECSXP:
-        vcftype->u.list =
-            Realloc(vcftype->u.list, sz, struct vcftype_t *);
+        vcftype->u.list = (struct vcftype_t **)
+            vcf_Realloc(vcftype->u.list, sz * sizeof(struct vcftype_t *));
         for (int i = osz; i < sz; ++i)
             vcftype->u.list[i] = NULL;
         break;
