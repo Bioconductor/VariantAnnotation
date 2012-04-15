@@ -77,3 +77,9 @@ test_scanVcf_no_INFO_header <- function()
     checkIdentical(c(5L, 1L), dim(info))
     checkIdentical(".", unique(as.vector(info)))
 }
+
+test_scanVcf_crlf <- function()
+{
+    writeLines(readLines(fl), xx <- tempfile(), sep="\r\n")
+    checkIdentical(scanVcfHeader(fl), scanVcfHeader(xx))
+}
