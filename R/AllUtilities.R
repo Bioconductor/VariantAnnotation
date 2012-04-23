@@ -175,7 +175,7 @@
     ## warn if query contains circular sequences
 {
     queryseq <- seqlevels(query)
-    circular <- isCircular(TxDb.Hsapiens.UCSC.hg19.knownGene)
+    circular <- isCircular(subject)
     circNames <- intersect(queryseq, names(circular)[circular])
     if (0L != length(circNames))
         warning("circular sequence(s) in query '",
