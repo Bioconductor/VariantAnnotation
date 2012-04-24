@@ -5,7 +5,8 @@ import(Rsamtools)
 import(GenomicRanges)
 import(zlibbioc)
 
-importFrom(BiocGenerics, rbind, cbind, paste, order, lapply, sapply, mapply)
+importFrom(BiocGenerics, rbind, cbind, paste, order, lapply, sapply, 
+           mapply, strand)
 
 importClassesFrom(Biostrings, DNAStringSet, DNAStringSetList)
 importFrom(Biostrings, AAStringSet, DNAStringSet)
@@ -13,7 +14,7 @@ importMethodsFrom(Biostrings,
                   "%in%", as.list, as.matrix, duplicated,
                   end, head, intersect, match, nchar, order, setdiff,
                   sort, start, "subseq<-", substr, substring, summary,
-                  translate, unique, unlist, width)
+                  translate, unlist, width)
 
 importClassesFrom(Biobase, ScalarCharacter, AssayData)
 importFrom(Biobase, mkScalar, selectSome)
@@ -62,7 +63,8 @@ exportMethods(scanVcf, scanVcfHeader, ScanVcfParam,
               MatrixToSnpMatrix, locateVariants,
 
               fixed, "fixed<-", ref, "ref<-", alt, "alt<-", qual, "qual<-",
-              filt, "filt<-", info, "info<-", geno, "geno<-", "[", "[<-", 
+              filt, "filt<-", info, "info<-", geno, "geno<-", strand, 
+              "strand<-", "[", "[<-", 
 
               genome, seqlevels, renameSeqlevels, keepSeqlevels,
 

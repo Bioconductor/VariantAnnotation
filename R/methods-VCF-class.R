@@ -53,6 +53,8 @@ setMethod("alt", "VCF",
 setReplaceMethod("alt", c("VCF", "CharacterList"),
     function(x, value)
 {
+    if (length(value) != length(rowData(x)))
+        stop("length(value) must equal length(rowData(x))")
     slot(x, "fixed")$ALT <- value
     x
 })
@@ -60,6 +62,8 @@ setReplaceMethod("alt", c("VCF", "CharacterList"),
 setReplaceMethod("alt", c("VCF", "DNAStringSetList"),
     function(x, value)
 {
+    if (length(value) != length(rowData(x)))
+        stop("length(value) must equal length(rowData(x))")
     slot(x, "fixed")$ALT <- value
     x
 })
@@ -159,6 +163,21 @@ setReplaceMethod("geno", c("VCF", "missing", "SimpleList"),
 {
     assay(x, ..., value=value)
 })
+
+## strand
+setMethod("strand", "VCF",
+    function(x, ...)
+{
+    strand(rowData(x))
+})
+
+setReplaceMethod("strand", "VCF",
+    function(x, ..., value)
+{
+    strand(rowData(x)) <- value
+    x
+})
+
 
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## Subsetting 

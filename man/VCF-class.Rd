@@ -41,6 +41,8 @@
 \alias{geno<-,VCF,character,matrix-method}
 \alias{geno<-,VCF,numeric,matrix-method}
 \alias{geno<-,VCF,missing,SimpleList-method}
+\alias{strand,VCF-method}
+\alias{strand<-,VCF-method}
 
 % Subset methods
 \alias{[,VCF-method}
@@ -94,8 +96,8 @@
     \item{}{
       \code{alt(x)}, \code{alt(x) <- value}:
       Returns or sets the alternate allele data from the ALT column of the VCF
-      file. \code{value} can be a \code{DNAStringSet} or a \code{CharacterList}
-      (for a structural VCF file). 
+      file. \code{value} can be a \code{DNAStringSetList} or a 
+      \code{CharacterList}. 
     }
     \item{}{
       \code{qual(x)}, \code{qual(x) <- value}:
@@ -178,6 +180,11 @@
     \item{}{
       \code{seqlevels(x)}:
       Extract the \code{seqlevels} from the \code{GRanges} in the 
+      \code{rowData} slot.
+    }
+    \item{}{
+      \code{strand(x)}:
+      Extract the \code{strand} from the \code{GRanges} in the 
       \code{rowData} slot.
     }
     \item{}{
