@@ -71,8 +71,8 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "CodingVariants"),
                          txid=values(unlist(cache[["txbygene"]],
                              use.names=FALSE))[["tx_id"]],
                              stringsAsFactors=FALSE)
-    values(res)[["geneID"]] <-
-        genedf$geneid[match(values(res)[["txID"]], genedf$txid)]
+    values(res)[["GENEID"]] <-
+        genedf$geneid[match(values(res)[["TXID"]], genedf$txid)]
     res
 })
 
@@ -81,14 +81,14 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "CodingVariants"),
     {
         usub <- unlist(subject, use.names=FALSE)
         fo <- findOverlaps(query, usub, type="within")
-        queryID <- queryHits(fo)
+        queryid <- queryHits(fo)
         if (length(fo) > 0) {
             txid <- rep(names(subject), elementLengths(subject))
-            meta <- DataFrame(location=.location(length(queryID), "coding"),
-                              queryID, 
-                              txID=as.integer(txid[subjectHits(fo)]), 
-                              cdsID=values(usub)[["cds_id"]][subjectHits(fo)],
-                              geneID=rep(NA_character_, length(queryID)))
+            meta <- DataFrame(LOCATION=.location(length(queryid), "coding"),
+                              QUERYID=queryid, 
+                              TXID=as.integer(txid[subjectHits(fo)]), 
+                              CDSID=values(usub)[["cds_id"]][subjectHits(fo)],
+                              GENEID=rep(NA_character_, length(queryid)))
             .makeResult(query, meta)
         } else {
             .makeResult(query, NULL)
@@ -129,8 +129,8 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "IntronVariants"),
                  txid=values(unlist(cache[["txbygene"]], 
                              use.names=FALSE))[["tx_id"]],
                  stringsAsFactors=FALSE)
-    values(res)[["geneID"]] <- 
-        genedf$geneid[match(values(res)[["txID"]], genedf$txid)]
+    values(res)[["GENEID"]] <- 
+        genedf$geneid[match(values(res)[["TXID"]], genedf$txid)]
     res
 })
 
@@ -175,7 +175,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "ThreeUTRVariants"),
                                  use.names=FALSE))[["tx_id"]], 
                                  stringsAsFactors=FALSE)
         values(res)[["geneID"]] <-
-            genedf$geneid[match(values(res)[["txID"]], genedf$txid)]
+            genedf$geneid[match(values(res)[["TXID"]], genedf$txid)]
         res
     }
 )
@@ -220,7 +220,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "FiveUTRVariants"),
                                  use.names=FALSE))[["tx_id"]],
                                  stringsAsFactors=FALSE)
         values(res)[["geneID"]] <-
-            genedf$geneid[match(values(res)[["txID"]], genedf$txid)]
+            genedf$geneid[match(values(res)[["TXID"]], genedf$txid)]
         res
     }
 )
@@ -300,7 +300,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb",
                                  use.names=FALSE))[["tx_id"]],
                                  stringsAsFactors=FALSE)
         values(res)[["geneID"]] <-
-            genedf$geneid[match(values(res)[["txID"]], genedf$txid)]
+            genedf$geneid[match(values(res)[["TXID"]], genedf$txid)]
         res
     }
 )
@@ -338,7 +338,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
         values(base) <- append(values(base), DataFrame(precedesID, followsID))
         ans <- c(base, intergenic)
         meta <- values(ans)
-        ans[order(meta$queryID, meta$txID, meta$cdsID, meta$geneID), ]
+        ans[order(meta$QUERYID, meta$TXID, meta$CDSID, meta$GENEID), ]
     }
 )
 
@@ -369,14 +369,14 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
     ## FIXME : no method for 'c' for Hits class
     fo <- data.frame(rbind(as.matrix(fo_start), as.matrix(fo_end)))
     fo <- fo[!duplicated(fo),]
-    queryID <- fo$queryHits
+    queryid <- fo$queryHits
     if (length(fo) > 0) {
         txid <- rep(names(subject), elementLengths(subject))
-        meta <- DataFrame(location=.location(length(queryID), "spliceSite"),
-                          queryID, 
-                          txID=as.integer(txid[fo$subjectHits]), 
-                          cdsID=rep(NA_integer_, length(queryID)),
-                          geneID=rep(NA_character_, length(queryID)))
+        meta <- DataFrame(LOCATION=.location(length(queryid), "spliceSite"),
+                          QUERYID=queryid, 
+                          TXID=as.integer(txid[fo$subjectHits]), 
+                          CDSID=rep(NA_integer_, length(queryid)),
+                          GENEID=rep(NA_character_, length(queryid)))
     } else {
         NULL
     }
@@ -388,9 +388,9 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
     co <- countOverlaps(query, subject, type="any")
     intergenic <- co == 0
     if (all(intergenic == FALSE)) {
-        DataFrame(location=.location(), queryID=integer(),
-                  txID=integer(), cdsID=integer(), geneID=character(),
-                  precedesID=character(), followsID=character())
+        DataFrame(LOCATION=.location(), QUERYID=integer(),
+                  TXID=integer(), CDSID=integer(), GENEID=character(),
+                  PRECEDEID=character(), FOLLOWID=character())
     } else {
         query <- query[intergenic]
 
@@ -406,10 +406,10 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
         location <- .location(length(query))
         location[as.vector(seqnames(query)) %in% seqlevels(rng)] <- "intergenic"
 
-        DataFrame(location=location, queryID=which(intergenic),
-                  txID=NA_integer_, cdsID=NA_integer_,
-                  geneID=NA_character_,
-                  precedesID=genes[pidx], followsID=genes[fidx])
+        DataFrame(LOCATION=location, QUERYID=which(intergenic),
+                  TXID=NA_integer_, CDSID=NA_integer_,
+                  GENEID=NA_character_,
+                  PRECEDEID=genes[pidx], FOLLOWID=genes[fidx])
     }
 }
 
@@ -419,14 +419,14 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
     ## columns must match for combining in AllVariants
     usub <- unlist(subject, use.names=FALSE)
     fo <- findOverlaps(query, usub, type="within")
-    queryID <- queryHits(fo)
+    queryid <- queryHits(fo)
     if (length(fo) > 0) {
         txid <- rep(names(subject), elementLengths(subject))
-        DataFrame(location=.location(length(queryID), vtype),
-                  queryID, 
-                  txID=as.integer(txid[subjectHits(fo)]), 
-                  cdsID=rep(NA_integer_, length(queryID)),
-                  geneID=rep(NA_character_, length(queryID)))
+        DataFrame(LOCATION=.location(length(queryid), vtype),
+                  QUERYID=queryid, 
+                  TXID=as.integer(txid[subjectHits(fo)]), 
+                  CDSID=rep(NA_integer_, length(queryid)),
+                  GENEID=rep(NA_character_, length(queryid)))
     } else {
         NULL
     }
@@ -439,16 +439,16 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
             res <- GRanges()
             values(res) <- meta
         } else {
-            res <- query[meta$queryID]
-            names(res) <- names(query)[meta$queryID]
+            res <- query[meta$QUERYID]
+            names(res) <- names(query)[meta$QUERYID]
             values(res) <- meta
             res
        }
     } else {
         res <- GRanges()
-        values(res) <- DataFrame(location=.location(), queryID=integer(),
-                                 txID=integer(), cdsID=integer(),
-                                 geneID=character())
+        values(res) <- DataFrame(LOCATION=.location(), QUERYID=integer(),
+                                 TXID=integer(), CDSID=integer(),
+                                 GENEID=character())
     }
     res
 }

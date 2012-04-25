@@ -12,7 +12,7 @@ gr <- GRanges("chr22",
  
 test_locateVariants_subject <- function()
 {
-    cols <- c("location", "queryID", "txID", "cdsID")
+    cols <- c("LOCATION", "QUERYID", "TXID", "CDSID")
     loc1 <- locateVariants(gr, txdb, CodingVariants())
     loc2 <- locateVariants(gr, cdsbytx, CodingVariants())
     checkIdentical(values(loc1)[ ,cols], values(loc2)[ ,cols])

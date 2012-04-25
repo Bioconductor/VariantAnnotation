@@ -88,7 +88,7 @@ setMethod("predictCoding",
     }
 
     ## reference and variant codon sequences
-    altpos <- (start(values(txlocal)[["cdsLoc"]]) - 1L) %% 3L + 1L
+    altpos <- (start(values(txlocal)[["CDSLOC"]]) - 1L) %% 3L + 1L
     refCodon <- varCodon <- .constructRefSequences(txlocal, altpos, seqSource, cache)
     subseq(varCodon, start=altpos, width=rwidth) <- altallele
 
@@ -98,8 +98,8 @@ setMethod("predictCoding",
     varAA[translateidx] <- translate(varCodon[translateidx])
 
     ## results
-    txID <- values(txlocal)[["txID"]] 
-    geneID <- map$geneid[match(txID, map$txid)]
+    txid <- values(txlocal)[["TXID"]] 
+    geneid <- map$geneid[match(txid, map$txid)]
     nonsynonymous <- as.character(refAA) != as.character(varAA) 
     consequence <- rep("synonymous", length(txlocal))
     consequence[nonsynonymous] <- "nonsynonymous" 
@@ -107,8 +107,12 @@ setMethod("predictCoding",
     consequence[zwidth | codeN] <- "not translated" 
     consequence <- factor(consequence) 
  
-    values(txlocal) <- append(values(txlocal), DataFrame(geneID, consequence, 
-        refCodon, varCodon, refAA, varAA))
+    values(txlocal) <- 
+        append(values(txlocal), DataFrame(GENEID=geneid, 
+                                          CONSEQUENCE=consequence, 
+                                          REFCODON=refCodon, 
+                                          VARCODON=varCodon, 
+                                          REFAA=refAA, VARAA=varAA))
     txlocal 
 }
 
@@ -117,9 +121,9 @@ setMethod("predictCoding",
     ## adjust codon end for 
     ## - width of the reference sequence
     ## - position of alt allele substitution in the codon
-    cstart <- ((start(values(txlocal)[["cdsLoc"]]) - 1L) %/% 3L) * 3L + 1L
+    cstart <- ((start(values(txlocal)[["CDSLOC"]]) - 1L) %/% 3L) * 3L + 1L
     cend <- cstart + (((altpos + width(txlocal) - 2L) %/% 3L) * 3L + 2L)
-    txord <- match(values(txlocal)[["txID"]], names(cache[["cdsbytx"]]))
+    txord <- match(values(txlocal)[["TXID"]], names(cache[["cdsbytx"]]))
     txseqs <- getTranscriptSeqs(cache[["cdsbytx"]][txord], seqSource)
     DNAStringSet(substring(txseqs, cstart, cend))
 }

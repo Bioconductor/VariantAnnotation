@@ -86,7 +86,7 @@ locateVariants(query, subject, region, ...)
 
       \sQuote{intergenic} variants are those that do not fall within a 
       transcript associated with a gene. If available, gene IDs for the flanking 
-      genes are give as the \code{precedesID} and \code{followsID}.
+      genes are give as the \code{PRECEDEID} and \code{FOLLOWID}.
     }
     \item{Subject as GRangesList :}{
       The \code{subject} can be a \code{TranscriptDb} or \code{GRangesList}
@@ -117,11 +117,11 @@ locateVariants(query, subject, region, ...)
 }
 \value{
   A \link[IRanges]{DataFrame} with a row for each variant-transcript match.
-  Columns are \code{location}, \code{queryID}, \code{txID}, \code{geneID} and 
-  \code{cdsID}. 
+  Columns are \code{LOCATION}, \code{QUERYID}, \code{TXID}, \code{GENEID} and 
+  \code{CDSID}. 
 
  \describe{
-    \item{\code{location}}{
+    \item{\code{LOCATION}}{
       Possible locations are \sQuote{coding}, \sQuote{intron}, 
       \sQuote{threeUTR}, \sQuote{fiveUTR}, \sQuote{intergenic}, and
       \sQuote{spliceSite}.
@@ -130,33 +130,33 @@ locateVariants(query, subject, region, ...)
       or \sQuote{fiveUTR} the variant must fall completely within the region.
 
       \sQuote{intergenic} variants do not fall within a transcript. The 
-      \sQuote{geneID} for these position are \code{NA} and instead the 
-      \sQuote{precedesID} and \sQuote{followsID} for the flanking genes are 
+      \sQuote{GENEID} for these position are \code{NA} and instead the 
+      \sQuote{PRECEDEID} and \sQuote{FOLLOWID} for the flanking genes are 
       given.
 
       A \sQuote{spliceSite} variant overlaps any portion of the first 2 or last 
       2 nucleotides of an intron.
     }
-    \item{\code{queryID}}{
-      The \code{queryID} column provides a map back to the row in the
+    \item{\code{QUERYID}}{
+      The \code{QUERYID} column provides a map back to the row in the
       original \code{query}. If the \code{query} was a \code{VCF} object this
       index corresponds to the row in the \code{GRanges} in the \code{rowData}
       slot. 
     }
-    \item{\code{txID}}{
+    \item{\code{TXID}}{
       The transcript id taken from the \code{TranscriptDb} object.
     }
-    \item{\code{cdsID}}{
+    \item{\code{CDSID}}{
       The coding sequence id taken from the \code{TranscriptDb} object.
     }
-    \item{\code{geneID}}{
+    \item{\code{GENEID}}{
       The gene id taken from the \code{TranscriptDb} object.
     }
-    \item{\code{precedesID}}{
+    \item{\code{PRECEDEID}}{
       The id of the gene the query precedes. Only present for
       \sQuote{intergenic} variants.
     }
-    \item{\code{followsID}}{
+    \item{\code{FOLLOWID}}{
       The id of the gene the query follows. Only present for 
       \sQuote{intergenic} variants.
     }
@@ -209,7 +209,7 @@ locateVariants(query, subject, region, ...)
   ## --------------------------------
   ## GRangesList object as subject 
   ## --------------------------------
-  ## Note the results do not include geneID. This information
+  ## Note the results do not include GENEID. This information
   ## is not available when a GRangesList is used in place of
   ## a TranscriptDb.
   cdsbytx <- cdsBy(txdb)

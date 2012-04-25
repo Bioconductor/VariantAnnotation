@@ -380,20 +380,20 @@ The \Robject{GRanges} output of \Rfunction{locateVariants} includes only the
 ranges that fell in the specified region. Each row is a variant-transcript 
 match which may result in multiple rows for each variant. 
 \Rcode{elementMetadata} columns returned include \Rcode{location}, 
-\Rcode{queryID}, \Rcode{txID}, \Rcode{cdsID}, and \Rcode{geneID}. In the case 
-of \Robject{IntergenicVariants} columns for \Rcode{precedesID} and 
-\Rcode{followsID} are also included. The \Rcode{queryID} column maps back to 
+\Rcode{QUERYID}, \Rcode{TXID}, \Rcode{CDSID}, and \Rcode{GENEID}. In the case 
+of \Robject{IntergenicVariants} columns for \Rcode{PRECEDEID} and 
+\Rcode{FOLLOWID} are also included. The \Rcode{QUERYID} column maps back to 
 the row number in the original \Robject{query}. 
 
 To answer gene-centric questions data can be summarized by gene reguardless
 of transcript. 
 <<locatVariants_example>>=
 ## Did any coding variants match more than one gene?
-table(sapply(split(values(loc)[["geneID"]], values(loc)[["queryID"]]), 
+table(sapply(split(values(loc)[["GENEID"]], values(loc)[["QUERYID"]]), 
     function(x) length(unique(x)) > 1))
 
 ## Summarize the number of coding variants by gene ID
-idx <- sapply(split(values(loc)[["queryID"]], values(loc)[["geneID"]]), unique)
+idx <- sapply(split(values(loc)[["QUERYID"]], values(loc)[["GENEID"]]), unique)
 sapply(idx, length)
 @
 
@@ -462,8 +462,8 @@ consequence is considered a \Rcode{frameshift} and \Robject{varAA} will be
 missing. 
 
 <<predictCoding_frameshift>>=
-## consequence is 'frameshift' where translation is not possible
-coding[values(coding)[["consequence"]] == "frameshift"]
+## CONSEQUENCE is 'frameshift' where translation is not possible
+coding[values(coding)[["CONSEQUENCE"]] == "frameshift"]
 @
 
 \section{SIFT and PolyPhen Databases}
@@ -488,7 +488,7 @@ and PolyPhen must be called directly. See references for home pages.
 Identify the non-synonymous variants and obtain the rsids.
 <<nonsynonymous>>=
 nms <- names(coding)
-idx <- values(coding)[["consequence"]] == "nonsynonymous"
+idx <- values(coding)[["CONSEQUENCE"]] == "nonsynonymous"
 nonsyn <- coding[idx]
 names(nonsyn) <- nms[idx]
 rsids <- unique(names(nonsyn)[grep("rs", names(nonsyn), fixed=TRUE)])

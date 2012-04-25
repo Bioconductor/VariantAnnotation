@@ -35,8 +35,11 @@ setMethod("refLocsToLocalLocs",
     protein <- unique(IntegerList(split(pends, rep(seq_len(length(pends)/2)), 2)))
 
     txid <- rep(names(cdsbytx), elementLengths(cdsbytx))[subjectHits(cdsFO)]
-    values(qsub) <- append(values(qsub), DataFrame(cdsLoc=cds, 
-        proteinLoc=protein, queryID=queryHits(cdsFO), txID=txid, cdsID=cdsid))
+    values(qsub) <- 
+        append(values(qsub), DataFrame(CDSLOC=cds, 
+                                       PROTEINLOC=protein, 
+                                       QUERYID=queryHits(cdsFO), 
+                                       TXID=txid, CDSID=cdsid))
     qsub
 })
 

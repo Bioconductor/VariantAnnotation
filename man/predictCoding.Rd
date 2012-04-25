@@ -74,28 +74,28 @@
     \item{\code{varAllele}}{
       Variant allele
     }
-    \item{\code{queryID}}{
+    \item{\code{QUERYID}}{
       Map back to the row in the original query
     }
-    \item{\code{txID}}{
+    \item{\code{TXID}}{
       Internal transcript id from the annotation
     }
-    \item{\code{cdsID}}{
+    \item{\code{CDSID}}{
       Internal coding region id from the annotation
     }
-    \item{\code{geneID}}{
+    \item{\code{GENEID}}{
       Internal gene id from the annotation
     }
-    \item{\code{cdsLoc}}{
+    \item{\code{CDSLOC}}{
       Location in coding region-based coordinates of the first nucleotide in
       the variant.
     }
-    \item{\code{proteinLoc}}{
+    \item{\code{PROTEINLOC}}{
       Location in cds-based coordinates of the first nucleotide in
       the variant. This position is relative to the start of the cds region
       defined in the \code{subject} annotation. 
     }
-    \item{\code{consequence}}{
+    \item{\code{CONSEQUENCE}}{
       Possible values are `synonymous', `nonsynonymous', `frameshift' and
       `not translated'. Variant sequences are translated only when the codon
       sequence is a multiple of 3. The value will be `frameshift' when a 
@@ -103,24 +103,24 @@
       `not translated' when the \code{varAllele} is missing or there is an 
       \sQuote{N} in the sequence.
     }
-    \item{\code{refSeq}}{
+    \item{\code{REFSEQ}}{
       This is the reference codon sequence. This range is typically greater
       than the width of the range in the \code{GRanges} because it includes 
       all codons involved in the sequence modification. If the reference 
       sequence is of width 2 but the alternate allele is of width 4 then at 
-      least two codons must be included in the \code{refSeq}.
+      least two codons must be included in the \code{REFSEQ}.
     }
-    \item{\code{varSeq}}{
+    \item{\code{VARSEQ}}{
       This sequence is the result of inserting, deleting or replacing the 
       position(s) in the reference sequence alternate allele. If the result 
       of this modifiction is not a multiple of 3 no translation is performed 
-      and the \code{varAA} value will be missing.
+      and the \code{VARAA} value will be missing.
     }
-    \item{\code{refAA}}{
-      The reference amino acid column contains the translated \code{refSeq}.
+    \item{\code{REEFAA}}{
+      The reference amino acid column contains the translated \code{REFSEQ}.
     }
-    \item{\code{varAA}}{
-      The variant amino acid column contains the translated \code{varSeq}. When
+    \item{\code{VARAA}}{
+      The variant amino acid column contains the translated \code{VARSEQ}. When
       translation is not possible this value is missing.
     }
   }

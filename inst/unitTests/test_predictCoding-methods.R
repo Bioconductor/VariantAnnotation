@@ -27,19 +27,19 @@ test_predictCoding_varAllele <- function()
     checkIdentical(unlist(values(current)[["varAllele"]]), unlist(expected))
 
     ## width = 1
-    checkEquals(width(values(current)[["refCodon"]]), rep(3L, 6))
+    checkEquals(width(values(current)[["REFCODON"]]), rep(3L, 6))
 
     ## width = 2
     width(data) <- rep(2, 3) 
     alt <- DNAStringSet(c("GG", "TT", ""))
     current <- suppressWarnings(predictCoding(data, txdb, Hsapiens, alt))
-    checkEquals(width(values(current)[["refCodon"]]), c(rep(3L, 4), 6L, 6L))
+    checkEquals(width(values(current)[["REFCODON"]]), c(rep(3L, 4), 6L, 6L))
  
     ## width = 3 
     width(data) <- rep(3, 3) 
     alt <- DNAStringSet(c("GGG", "TTT", ""))
     current <- suppressWarnings(predictCoding(data, txdb, Hsapiens, alt))
-    checkEquals(width(values(current)[["refCodon"]]), c(3L, 3L, rep(6L, 4))) 
+    checkEquals(width(values(current)[["REFCODON"]]), c(3L, 3L, rep(6L, 4))) 
 }
 
 test_refLocsToLocalLocs <- function()
@@ -49,10 +49,18 @@ test_refLocsToLocalLocs <- function()
         ranges=IRanges(start=c(51153371, 51153463, 51153466), width=1))
     current <- refLocsToLocalLocs(data, txdb)
     expected <- IntegerList(737, 184, 767, 214, 768, 215)
-    checkIdentical(values(current)[["proteinLoc"]], expected)
+    checkIdentical(values(current)[["PROTEINLOC"]], expected)
 
     expected <- IRanges(c(2209, 550, 2301, 642, 2304, 645),
                         c(2209, 550, 2301, 642, 2304, 645))
-    checkIdentical(values(current)[["cdsLoc"]], expected)
+    checkIdentical(values(current)[["CDSLOC"]], expected)
 } 
 
+#test_predictCoding_strand <- function()
+#{
+#    ## query = "*" matches "+"
+#
+#
+#
+#    ## query = "*" matches "-"
+#}
