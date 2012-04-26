@@ -1,66 +1,87 @@
 library(BSgenome.Hsapiens.UCSC.hg19)
-library(TxDb.Hsapiens.UCSC.hg19.knownGene)
-txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
+fun <- VariantAnnotation:::.predictCodingGRangesList
+cdsbytx <- GRangesList(tx1=GRanges(seqnames="chr1", 
+                                   IRanges(c(10001, 10010), width=5), 
+                                   strand="+"),
+                       tx2=GRanges(seqnames="chr1", 
+                                   IRanges(c(10100, 10001), width=5), 
+                                   strand="-"),
+                       tx3=GRanges(seqnames="chr1", 
+                                   IRanges(c(10010, 10001), width=5), 
+                                   strand="-"))
 
 test_predictCoding_empty <- function()
 {
-    data <- GRanges(
-        seqnames=rep("chr22", 3),
-        ranges=IRanges(start=c(263892,264258, 5538757), width=1))
+    query <- GRanges("chr1", IRanges(start=c(1, 10, 20), width=1))
     alt <- DNAStringSet(c("G", "T", "A"))
-    current <- predictCoding(data, txdb, Hsapiens, alt)
+    current <- fun(query, cdsbytx, Hsapiens, alt)
     expected <- GRanges()
     checkIdentical(current, expected)
 }
 
 test_predictCoding_varAllele <- function()
 {
-    data <- GRanges(
-        seqnames=rep("chr22", 3),
-        ranges=IRanges(start=c(51153371, 51153462, 51153466), ## altpos = 1,2,3
-        width=rep(1, 3)))
+    variant=DNAStringSet(c("G", "", "C", "AA", "GGA"))
+    query <- GRanges(seqnames="chr1",
+              ranges=IRanges(c(rep(10003, 3), 10011, 10101), 
+                             width=c(1, 1, 1, 2, 3)),
+              strand=c("+", "-", "*", "*", "*"),
+              variant=variant)
+    names(query) <- LETTERS[1:5]
+    current <- suppressWarnings(fun(query, cdsbytx[1:2], Hsapiens, variant))
 
-    ## missing alt allele
-    alt <- DNAStringSet(c("G", "T", ""))
-    current <- suppressWarnings(predictCoding(data, txdb, Hsapiens, alt))
-    expected <- DNAStringSet(c("G", "G", "T", "T", "", ""))
-    checkIdentical(unlist(values(current)[["varAllele"]]), unlist(expected))
+    current_varaa <- values(current[names(current) == "B"])[["VARAA"]]
+    checkTrue(as.character(current_varaa) == "")
 
-    ## width = 1
-    checkEquals(width(values(current)[["REFCODON"]]), rep(3L, 6))
+    current_consequence <- values(current[names(current) == "B"])[["CONSEQUENCE"]]
+    checkTrue(current_consequence == "not translated")
 
-    ## width = 2
-    width(data) <- rep(2, 3) 
-    alt <- DNAStringSet(c("GG", "TT", ""))
-    current <- suppressWarnings(predictCoding(data, txdb, Hsapiens, alt))
-    checkEquals(width(values(current)[["REFCODON"]]), c(rep(3L, 4), 6L, 6L))
- 
-    ## width = 3 
-    width(data) <- rep(3, 3) 
-    alt <- DNAStringSet(c("GGG", "TTT", ""))
-    current <- suppressWarnings(predictCoding(data, txdb, Hsapiens, alt))
-    checkEquals(width(values(current)[["REFCODON"]]), c(3L, 3L, rep(6L, 4))) 
+    ## TODO : add test for codon width based on 1,2,3 position
 }
 
 test_refLocsToLocalLocs <- function()
 {
-    data <- GRanges(
-        seqnames=rep("chr22", 3),
-        ranges=IRanges(start=c(51153371, 51153463, 51153466), width=1))
-    current <- refLocsToLocalLocs(data, txdb)
-    expected <- IntegerList(737, 184, 767, 214, 768, 215)
+    ## both in 'first' cds
+    query <- GRanges(seqnames="chr1",
+              ranges=IRanges(rep(c(10002, 10005), 2), width=1),
+              strand=c("+", "+", "-", "-"))
+    current <- refLocsToLocalLocs(query, cdsbytx=cdsbytx[c(1,3)])
+    expected <- IRanges(c(2, 5, 9, 6), width=1) 
+    checkIdentical(values(current)[["CDSLOC"]], expected)
+    expected <- IntegerList(1, 2, 3, 2) 
     checkIdentical(values(current)[["PROTEINLOC"]], expected)
 
-    expected <- IRanges(c(2209, 550, 2301, 642, 2304, 645),
-                        c(2209, 550, 2301, 642, 2304, 645))
+    ## one in each cds
+    query <- GRanges(seqnames="chr1",
+                     ranges=IRanges(rep(c(10002, 10011), 2), width=1),
+                     strand=c("+", "+", "-", "-"))
+    current <- refLocsToLocalLocs(query, cdsbytx=cdsbytx[c(1,3)])
+    expected <- IRanges(c(2, 7, 9, 4), width=1) 
     checkIdentical(values(current)[["CDSLOC"]], expected)
+    expected <- IntegerList(1, 3, 3, 2) 
+    checkIdentical(values(current)[["PROTEINLOC"]], expected)
+
+    ## both in 'last' cds
+    query <- GRanges(seqnames="chr1",
+                     ranges=IRanges(rep(c(10010, 10013), 2), width=1),
+                     strand=c("+", "+", "-", "-"))
+    current <- refLocsToLocalLocs(query, cdsbytx=cdsbytx[c(1,3)])
+    expected <- IRanges(c(6, 9, 5, 2), width=1) 
+    checkIdentical(values(current)[["CDSLOC"]], expected)
+    expected <- IntegerList(2, 3, 2, 1) 
+    checkIdentical(values(current)[["PROTEINLOC"]], expected)
 } 
 
-#test_predictCoding_strand <- function()
-#{
-#    ## query = "*" matches "+"
-#
-#
-#
-#    ## query = "*" matches "-"
-#}
+test_predictCoding_strand <- function()
+{
+    variant=DNAStringSet(c("G", "G", "C", "T", "G"))
+    query <- GRanges(seqnames="chr1",
+              ranges=IRanges(c(rep(10003, 3), 10011, 10101), width=1),
+              strand=c("+", "-", "*", "*", "*"),
+              variant=variant)
+    names(query) <- LETTERS[1:5]
+    current <- suppressWarnings(fun(query, cdsbytx, Hsapiens, variant))
+
+    expected <- c("G", "C", "C", "C", "G", "G", "T", "A", "C")
+    checkIdentical(as.character(values(current)[["varAllele"]]), expected)
+}

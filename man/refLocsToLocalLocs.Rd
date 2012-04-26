@@ -48,6 +48,9 @@ refLocsToLocalLocs(ranges, txdb, cdsbytx, ...)
   \code{txId} is the internal transcript id from the annotation. When 
   \code{cdsbytx} is provided \code{tx_id} are the names on the outer list 
   elements.
+
+  If \code{ranges} is unstranded the strand of the return value reflects the
+  strand of the subject the \code{ranges} overlapped with. 
 }
 
 \value{
@@ -55,21 +58,21 @@ refLocsToLocalLocs(ranges, txdb, cdsbytx, ...)
   columns,
 
   \describe{
-    \item{\code{cdsLoc}}{
+    \item{\code{CDSLOC}}{
       Location in coding region coordinates
     }
-    \item{\code{proteinLoc}}{
+    \item{\code{PROTEINLOC}}{
       Location in protein (codon triplet) coordinates
     }
-    \item{\code{queryID}}{
+    \item{\code{QUERYID}}{
       Character vector mapping to the of rows of the original \code{query}
     }
-    \item{\code{txID}}{
+    \item{\code{TXID}}{
       Character vector of internal transcript ids from the 
       \link[GenomicFeatures]{TranscriptDb} or the names of the outer list 
       elements of the \code{cdsbytx} object.
     }
-    \item{\code{cdsID}}{
+    \item{\code{CDSID}}{
       Character vector of internal coding region ids from the 
       \link[GenomicFeatures]{TranscriptDb} or the names of the outer list 
       elements of the \code{cdsbytx} object.

@@ -20,11 +20,13 @@ setMethod("refLocsToLocalLocs",
     if (is.null(names(cdsbytx)))
         stop("the outer list elements of cdsbytx must have ",
              " names (i.e., transcript identifiers)") 
-
     ## cds and protein
     cdsGR <- unlist(cdsbytx, use.names=FALSE)
     cdsFO <- findOverlaps(ranges, cdsGR, type="within")
-    cdsid <- values(unlist(cdsbytx, use.names=FALSE))[["cds_id"]][subjectHits(cdsFO)]
+    cdsid <- 
+        values(unlist(cdsbytx, use.names=FALSE))[["cds_id"]][subjectHits(cdsFO)]
+    if (is.null(cdsid))
+        cdsid <- NA_character_
     if (length(cdsFO) == 0)
         return(GRanges())
     nstrand <- as.vector(strand(cdsGR)[subjectHits(cdsFO)] == "-")
@@ -34,18 +36,24 @@ setMethod("refLocsToLocalLocs",
     pends <- c(ceiling(start(cds)/3), ceiling(end(cds)/3))
     protein <- unique(IntegerList(split(pends, rep(seq_len(length(pends)/2)), 2)))
 
+    ## set strand to match subject overlap
+    strand(qsub) <- strand(cdsGR[subjectHits(cdsFO)]) 
     txid <- rep(names(cdsbytx), elementLengths(cdsbytx))[subjectHits(cdsFO)]
-    values(qsub) <- 
-        append(values(qsub), DataFrame(CDSLOC=cds, 
-                                       PROTEINLOC=protein, 
-                                       QUERYID=queryHits(cdsFO), 
-                                       TXID=txid, CDSID=cdsid))
+    if (is.null(txid))
+        txid <- NA_integer_
+    values(qsub) <- append(values(qsub), 
+        DataFrame(CDSLOC=cds, 
+                  PROTEINLOC=protein, 
+                  QUERYID=queryHits(cdsFO), 
+                  TXID=txid, CDSID=cdsid))
     qsub
 })
 
 .refLocsToCDSLocs <- function(reflocs, nstrand, grlist, lform, olaps)
 {
     bounds <- ranges(lform)[subjectHits(olaps)]
+    ## assumption :
+    ## cds regions are sorted 5' to 3' (i.e., cds rank is lowest at 5' end)
     cumsums <- .listCumsumShifted(width(grlist))
     qrngs <- ranges(reflocs)
     if (any(nstrand == FALSE))

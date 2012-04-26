@@ -63,16 +63,25 @@
   into the reference sequences and transcribed. Transcription only 
   occurs if the substitution, insertion or deletion results in a new sequence 
   length divisible by 3.
+
+  When the \code{query} is an unstranded (*) \code{GRanges} \code{predictCoding} 
+  will attempt to find overlaps on both the positive and negative strands of the
+  \code{subject}. When the subject hit is on the negative strand the return 
+  \code{varAllele} is reverse complemented. The strand of the returned 
+  \code{GRanges} represents the strand of the subject hit.
 } 
 
 \value{
   A \link[GenomicRanges]{GRanges} with a row for each variant-transcript 
   match. The result includes only variants that fell within coding regions.
+  If the \code{query} was unstranded (*) the strand of the output 
+  \code{GRanges} represents the strand of the \code{subject} hit.
 
   At a minimum, the \code{elementMetadata} columns include,
   \describe{
     \item{\code{varAllele}}{
-      Variant allele
+      Variant allele. This value is reverse complemented for an unstranded 
+      \code{query} that overlaps a \code{subject} on the negative strand.
     }
     \item{\code{QUERYID}}{
       Map back to the row in the original query
@@ -96,21 +105,21 @@
       defined in the \code{subject} annotation. 
     }
     \item{\code{CONSEQUENCE}}{
-      Possible values are `synonymous', `nonsynonymous', `frameshift' and
-      `not translated'. Variant sequences are translated only when the codon
-      sequence is a multiple of 3. The value will be `frameshift' when a 
-      sequence is not translated due to incompatible length and it will be 
-      `not translated' when the \code{varAllele} is missing or there is an 
-      \sQuote{N} in the sequence.
+      Possible values are `synonymous', `nonsynonymous', `frameshift', 
+      `nonsense' and `not translated'. Variant sequences are translated only 
+      when the codon sequence is a multiple of 3. The value will be `frameshift' 
+      when a sequence is of incompatible length and it will be `not translated' 
+      when the \code{varAllele} is missing or there is an \sQuote{N} in the 
+      sequence. `nonsense' is used for premature stop codons.
     }
-    \item{\code{REFSEQ}}{
-      This is the reference codon sequence. This range is typically greater
+    \item{\code{REFCODON}}{
+      The reference codon sequence. This range is typically greater
       than the width of the range in the \code{GRanges} because it includes 
       all codons involved in the sequence modification. If the reference 
       sequence is of width 2 but the alternate allele is of width 4 then at 
       least two codons must be included in the \code{REFSEQ}.
     }
-    \item{\code{VARSEQ}}{
+    \item{\code{VARCODON}}{
       This sequence is the result of inserting, deleting or replacing the 
       position(s) in the reference sequence alternate allele. If the result 
       of this modifiction is not a multiple of 3 no translation is performed 
