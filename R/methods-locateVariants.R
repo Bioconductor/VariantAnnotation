@@ -174,7 +174,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "ThreeUTRVariants"),
                              txid = values(unlist(cache[["txbygene"]],
                                  use.names=FALSE))[["tx_id"]], 
                                  stringsAsFactors=FALSE)
-        values(res)[["geneID"]] <-
+        values(res)[["GENEID"]] <-
             genedf$geneid[match(values(res)[["TXID"]], genedf$txid)]
         res
     }
@@ -219,7 +219,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "FiveUTRVariants"),
                              txid = values(unlist(cache[["txbygene"]],
                                  use.names=FALSE))[["tx_id"]],
                                  stringsAsFactors=FALSE)
-        values(res)[["geneID"]] <-
+        values(res)[["GENEID"]] <-
             genedf$geneid[match(values(res)[["TXID"]], genedf$txid)]
         res
     }
@@ -299,7 +299,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb",
                              txid=values(unlist(cache[["txbygene"]],
                                  use.names=FALSE))[["tx_id"]],
                                  stringsAsFactors=FALSE)
-        values(res)[["geneID"]] <-
+        values(res)[["GENEID"]] <-
             genedf$geneid[match(values(res)[["TXID"]], genedf$txid)]
         res
     }
