@@ -50,12 +50,12 @@ and optional genotype information on samples for each position. A full
 description of the VCF format can be found on the 1000 Genomes page,
 \url{http://www.1000genomes.org/wiki/Analysis/Variant%20Call%20Format/vcf-variant-call-format-version-41}
 
-The sample dataare read in from a VCF file and variants are
-identified according to region such as \Rcode{coding}, \Rcode{intron}, 
-\Rcode{intergenic}, \Rcode{spliceSite} etc. Amino acid coding changes are 
-computed for the non-synonymous variants and SIFT and PolyPhen databases provide 
-predictions of how severly the coding changes affect protein function. The end 
-of the vignette covers other transformations of VCF data such as the creation 
+Sample data are read in from a VCF file and variants are identified according 
+to region such as \Rcode{coding}, \Rcode{intron}, \Rcode{intergenic}, 
+\Rcode{spliceSite} etc. Amino acid coding changes are computed for the 
+non-synonymous variants and SIFT and PolyPhen databases provide predictions 
+of how severly the coding changes affect protein function. The end of the 
+vignette covers other transformations of VCF data such as the creation 
 of a \Robject{SnpMatrix} or a `long form' \Robject{GRanges}. 
 
 \section{Variant Call Format (VCF) files}
@@ -379,7 +379,7 @@ allvar <- locateVariants(rd, txdb, AllVariants())
 The \Robject{GRanges} output of \Rfunction{locateVariants} includes only the
 ranges that fell in the specified region. Each row is a variant-transcript 
 match which may result in multiple rows for each variant. 
-\Rcode{elementMetadata} columns returned include \Rcode{location}, 
+\Rcode{elementMetadata} columns returned include \Rcode{LOCATION}, 
 \Rcode{QUERYID}, \Rcode{TXID}, \Rcode{CDSID}, and \Rcode{GENEID}. In the case 
 of \Robject{IntergenicVariants} columns for \Rcode{PRECEDEID} and 
 \Rcode{FOLLOWID} are also included. The \Rcode{QUERYID} column maps back to 

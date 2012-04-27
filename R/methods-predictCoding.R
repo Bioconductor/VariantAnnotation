@@ -57,7 +57,6 @@ setMethod("predictCoding",
                           use.names=FALSE))[["tx_id"]],
                       stringsAsFactors=FALSE)
 
-
     txlocal <- .predictCodingGRangesList(query, cache[["cdsbytx"]], seqSource, 
                                          varAllele)
     txid <- values(txlocal)[["TXID"]] 

@@ -2,13 +2,13 @@
 ### locateVariants methods 
 ### =========================================================================
 
-### There are 7 defined variant regions :
+### The 7 defined variant regions :
 ### CodingVariants, IntronVariants, ThreeUTRVariants, FiveUTRVariants,
 ### IntergenicVariants, SpliceSiteVariants, AllVariants
 ### 
-### Each variant region has methods for : 
-###   query %in% Ranges, VCF, GRanges
-###   subject %in% TranscriptDb, GRangesList 
+### Each variant region has the following methods : 
+### query %in% Ranges, VCF, GRanges
+### subject %in% TranscriptDb, GRangesList 
 
 
 ### -------------------------------------------------------------------------
@@ -138,7 +138,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "IntronVariants"),
 setMethod("locateVariants", c("GRanges", "GRangesList", "IntronVariants"),
     function(query, subject, region, ...)
     {
-        .makeResult(query, .makeMeta(query, subject, "intron"))
+        .makeResult1(query, subject, "intron")
     }
 )
 
@@ -183,7 +183,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "ThreeUTRVariants"),
 setMethod("locateVariants", c("GRanges", "GRangesList", "ThreeUTRVariants"),
     function(query, subject, region, ...)
     {
-        .makeResult(query, .makeMeta(query, subject, "threeUTR"))
+        .makeResult1(query, subject, "threeUTR")
     }
 )
 
@@ -228,7 +228,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "FiveUTRVariants"),
 setMethod("locateVariants", c("GRanges", "GRangesList", "FiveUTRVariants"),
     function(query, subject, region, ...)
 {
-    .makeResult(query, .makeMeta(query, subject, "fiveUTR"))
+    .makeResult1(query, subject, "fiveUTR")
 })
 
 ### -------------------------------------------------------------------------
@@ -451,5 +451,30 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
                                  GENEID=character())
     }
     res
+}
+
+.makeResult1 <- function(query, subject, vtype, ...)
+{
+    usub <- unlist(subject, use.names=FALSE)
+    fo <- findOverlaps(query, usub, type="within")
+    if (length(fo) > 0) {
+        queryid <- queryHits(fo)
+        txid <- rep(names(subject), elementLengths(subject))
+
+        GRanges(seqnames=seqnames(query)[queryid],
+                ranges=IRanges(ranges(query)[queryid]),
+                strand=strand(query)[queryid],
+                LOCATION=.location(length(queryid), vtype),
+                QUERYID=queryid,
+                TXID=as.integer(txid[subjectHits(fo)]),
+                CDSID=NA_integer_,
+                GENEID=NA_character_)
+    } else {
+        res <- GRanges()
+        values(res) <- DataFrame(LOCATION=.location(), QUERYID=integer(),
+                                 TXID=integer(), CDSID=integer(),
+                                 GENEID=character())
+        res
+    }
 }
 

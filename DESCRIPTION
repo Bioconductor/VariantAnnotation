@@ -12,7 +12,7 @@ Depends:     R (>= 2.8.0), methods, GenomicRanges (>= 1.7.9),
              Rsamtools (>= 1.9.4)
 Imports:     methods, BiocGenerics (>= 0.1.0), IRanges (>= 1.13.5), 
              Biobase (>= 2.15.1), Rsamtools (>= 1.9.4),
-             AnnotationDbi (>= 1.17.11), Biostrings (>= 2.23.4),
+             AnnotationDbi (>= 1.17.11), Biostrings (>= 2.25.2),
              zlibbioc, BSgenome, GenomicFeatures, snpStats, DBI
 Suggests:    RUnit, BSgenome.Hsapiens.UCSC.hg19,
              TxDb.Hsapiens.UCSC.hg19.knownGene,
