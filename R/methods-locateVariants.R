@@ -320,22 +320,32 @@ setMethod("locateVariants", c("GRanges", "GRangesList",
 setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()))
     {
-        coding <- locateVariants(query, subject, 
-                                 CodingVariants(), cache=cache)
-        intron <- locateVariants(query, subject, 
-                                 IntronVariants(), cache=cache)
-        splice <- locateVariants(query, subject, 
-                                 SpliceSiteVariants(), cache=cache)
-        fiveUTR <- locateVariants(query, subject, 
-                                  FiveUTRVariants(), cache=cache)
-        threeUTR <- locateVariants(query, subject, 
-                                   ThreeUTRVariants(), cache=cache)
-        intergenic <- locateVariants(query, subject, 
-                                     IntergenicVariants(), cache=cache)
+        coding <- locateVariants(query, subject, CodingVariants(), cache=cache)
+        intron <- locateVariants(query, subject, IntronVariants(), cache=cache)
+        splice <- locateVariants(query, subject, SpliceSiteVariants(), 
+                                 cache=cache)
+
+        ## Consolidate calls for UTR data
+        if (!exists("fiveUTRbytx", cache, inherits=FALSE)) {
+            splicings <- 
+                GenomicFeatures:::.getSplicingsForTranscriptsWithCDSs(subject)
+            cache[["fiveUTRbytx"]] <- 
+                GenomicFeatures:::.make5UTRsByTranscript(txdb, splicings)
+        }
+        if (!exists("threeUTRbytx", cache, inherits=FALSE))
+            cache[["threeUTRbytx"]] <- 
+                GenomicFeatures:::.make5UTRsByTranscript(txdb, splicings)
+
+        fiveUTR <- locateVariants(query, subject, FiveUTRVariants(), 
+                                  cache=cache)
+        threeUTR <- locateVariants(query, subject, ThreeUTRVariants(), 
+                                   cache=cache)
+        intergenic <- locateVariants(query, subject, IntergenicVariants(), 
+                                     cache=cache)
 
         base <- c(coding, intron, fiveUTR, threeUTR, splice)
-        precedesID <- followsID <- rep(NA_character_, length(base))
-        values(base) <- append(values(base), DataFrame(precedesID, followsID))
+        PRECEDEID <- FOLLOWID <- rep(NA_character_, length(base))
+        values(base) <- append(values(base), DataFrame(PRECEDEID, FOLLOWID))
         ans <- c(base, intergenic)
         meta <- values(ans)
         ans[order(meta$QUERYID, meta$TXID, meta$CDSID, meta$GENEID), ]
