@@ -35,8 +35,8 @@ setMethod("MatrixToSnpMatrix", c("matrix", "DNAStringSet", "DNAStringSetList"),
         callMatrix[!snv] <- ".|."
     }
 
-    mat <- matrix(map[callMatrix], nrow=ncol(callMatrix), byrow=TRUE,
-                  dimnames=rev(dimnames(callMatrix)))
+    mat <- matrix(map[callMatrix], nrow=ncol(callMatrix), ncol=nrow(callMatrix),
+                  byrow=TRUE, dimnames=rev(dimnames(callMatrix)))
     genotypes <- new("SnpMatrix", mat)
 
     flt <- !(diploid & snv & altelt)
