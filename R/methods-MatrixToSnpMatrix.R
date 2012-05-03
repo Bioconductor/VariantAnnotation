@@ -10,58 +10,47 @@
 
 setMethod("MatrixToSnpMatrix", c("matrix", "DNAStringSet", "DNAStringSetList"),
     function(callMatrix, ref, alt, ...)
-    {
-        diploid <- lapply(strsplit(callMatrix[,1], ""), length) == 3 
-        if (any(diploid == FALSE)) {
-            warning("only diploid calls are supported, others are set to NA")
-            callMatrix[!diploid] <- ".|." 
-        }
+{
+    map <- setNames(sapply(c(0, 1, 2, 2, 3), as.raw),
+                    c(".|.", "0|0", "0|1", "1|0", "1|1"))
 
-        altelt <- elementLengths(alt) == 1
-        if (any(altelt == FALSE)) {
-            warning("variants with >1 ALT allele are set to NA")
-            callMatrix[!altelt] <- ".|." 
-        }
-
-        altseq <- lapply(alt, function(x) sum(width(x))) == 1
-        altlen <- altelt & altseq 
-        reflen <- width(ref) == 1
-        snv <- reflen & altlen 
-        if (any(snv == FALSE)) {
-            warning("variants other than single nucleotide variations are ",
-                    "set to NA")
-            callMatrix[!snv] <- ".|." 
-        }
-
-        nsnps <- nrow(callMatrix)
-        nsamp <- ncol(callMatrix)
-        mat <-  matrix(as.raw(0), nrow=nsamp, ncol=nsnps)
-        str <- strsplit(callMatrix, "")
-        vlu <- do.call(rbind, str)[,c(1,3)]
-        vlu[vlu == "."] <- NA_character_
-        geno <- rowSums(matrix(as.integer(vlu), nrow=nrow(vlu))) + 1
-        #geno <- 2 - as.numeric(alts[,1] == 0) + as.numeric(alts[,2] == 0)
-        geno[is.na(geno)] <- 0 
-        glst <- split(as.raw(geno), rep(seq(1:nsnps), nsamp))
-        for (i in 1:nsnps) 
-            mat[,i] = glst[[i]]
-
-        dimnames(mat) <- list(rownames=colnames(callMatrix),
-                              colnames=rownames(callMatrix))
-        genotypes <- new("SnpMatrix", mat)
-        flt <- !diploid | !snv | !altelt
-        map <- .createMap(dimnames(callMatrix)[1], ref, alt, flt)
-
-        list(genotypes = genotypes, map = map)
+    diploid <- callMatrix %in% names(map)
+    if (!all(diploid)) {
+        warning("non-diploid variants are set to NA")
+        callMatrix[!diploid] <- ".|."
     }
-)
+
+    altelt <- elementLengths(alt) == 1L
+    if (!all(altelt)) {
+        warning("variants with >1 ALT allele are set to NA")
+        callMatrix[!altelt] <- ".|."
+    }
+
+    altseq <- logical(length(alt))
+    idx <- rep(altelt, elementLengths(alt))
+    altseq[altelt] = width(unlist(alt))[idx] == 1L
+    snv <- altseq & (width(ref) == 1L)
+    if (!all(snv)) {
+        warning("non-single nucleotide variations are set to NA")
+        callMatrix[!snv] <- ".|."
+    }
+
+    mat <- matrix(map[callMatrix], nrow=ncol(callMatrix), byrow=TRUE,
+                  dimnames=rev(dimnames(callMatrix)))
+    genotypes <- new("SnpMatrix", mat)
+
+    flt <- !(diploid & snv & altelt)
+    map <- .createMap(rownames(callMatrix), ref, alt, flt)
+
+    list(genotypes = genotypes, map = map)
+})
 
 .createMap <- function(nms, ref, alt, flt)
 {
     if (is.null(ref))
         DataFrame(snp.names=character(0), 
                   allele.1=DNAStringSet(), 
-                  allele.2=DNAStringSet(),
+                  allele.2=DNAStringSetList(),
                   ignore=logical())
     else 
         DataFrame(snp.names=nms, 
@@ -69,5 +58,3 @@ setMethod("MatrixToSnpMatrix", c("matrix", "DNAStringSet", "DNAStringSetList"),
                   allele.2=alt,
                   ignore=flt)
 }
-
-
