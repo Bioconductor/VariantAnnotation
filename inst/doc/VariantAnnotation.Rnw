@@ -442,20 +442,20 @@ than one row per original variant is possible.
 <<predictCoding>>=
 library(BSgenome.Hsapiens.UCSC.hg19)
 coding <- predictCoding(vcf, txdb, seqSource=Hsapiens)
-head(coding, 4)
+coding[5:9]
 @
 
-Using variant 22:50301494 as an example, we see varAllele \Rcode{A} has been 
-sustituted into the \Rcode{refCodon} \Rcode{CAC} to produce \Rcode{varCodon} 
-\Rcode{CAA}. The \Rcode{refCodon} is the sequence of codons necessary to make 
-the variant allele substitution and therefore often includes more nucleotides 
-than present in the range (i.e., 50301494, 50301494). Notice that it is the 
-third position in the \Rcode{refCodon} that has been substituted. This third 
-position in the codon, the position of substitution, corresponds to genomic 
-position 50301494. This genomic position maps to position 867 in coding 
-region-based coordinates and to triplet 289 in the protein. This is a 
-non-synonymous coding variant where the amino acid has changed from 
-\Rcode{H} (His) to \Rcode{Q} (Gln).
+Using variant rs114264124 as an example, we see varAllele \Rcode{A} has been
+substituted into the \Rcode{refCodon} \Rcode{CGG} to produce \Rcode{varCodon}
+\Rcode{CAG}. The \Rcode{refCodon} is the sequence of codons necessary to make
+the variant allele substitution and therefore often includes more nucleotides
+than indicated in the range (i.e. the range is 50302962, 50302962, width of 1).
+Notice it is the second position in the \Rcode{refCodon} that has been
+substituted. This position in the codon, the position of substitution,
+corresponds to genomic position 50302962. This genomic position maps to position
+698 in coding region-based coordinates and to triplet 233 in the protein. This
+is a non-synonymous coding variant where the amino acid has changed from
+\Rcode{R} (Arg) to \Rcode{Q} (Gln).
 
 When the resulting \Rcode{varCodon} is not a multiple of 3 it cannot be translated. The
 consequence is considered a \Rcode{frameshift} and \Robject{varAA} will be 

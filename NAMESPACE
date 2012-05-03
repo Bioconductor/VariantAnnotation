@@ -11,9 +11,9 @@ importFrom(BiocGenerics, rbind, cbind, paste, order, lapply, sapply,
 importClassesFrom(Biostrings, DNAStringSet, DNAStringSetList)
 importFrom(Biostrings, AAStringSet, DNAStringSet)
 importMethodsFrom(Biostrings, 
-                  "%in%", as.list, as.matrix, duplicated,
-                  end, head, intersect, match, nchar, order, setdiff,
-                  sort, start, "subseq<-", substr, substring, summary,
+                  as.list, as.matrix, duplicated,
+                  end, head, intersect, match, nchar, setdiff,
+                  start, "subseq<-", substr, substring, summary,
                   translate, unlist, width)
 
 importClassesFrom(Biobase, ScalarCharacter, AssayData)
