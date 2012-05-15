@@ -2,31 +2,23 @@
 ### predictCoding methods 
 ### =========================================================================
 
-setMethod("predictCoding",  
-    signature("Ranges", "TranscriptDb", "ANY", "DNAStringSet"),
+setMethod("predictCoding", c("Ranges", "TranscriptDb", "ANY", "DNAStringSet"),
     function(query, subject, seqSource, varAllele, ...)
-    {
-        x <- as(query, "GRanges")
-        callGeneric(query=x, subject=subject, seqSource, 
-            varAllele, ...) 
-    }
-)
+{
+    callGeneric(as(query, "GRanges"), subject, seqSource, varAllele, ...) 
+})
 
-setMethod("predictCoding", 
-    signature("VCF", "TranscriptDb", "ANY", "missing"),
+setMethod("predictCoding", c("VCF", "TranscriptDb", "ANY", "missing"),
     function(query, subject, seqSource, varAllele, ...)
-    {
-        alt <- values(alt(query))[["ALT"]]
-        if (!is(alt, "DNAStringSetList"))
-            stop("alt(<VCF>)[['ALT']] must be a DNAStringSetList")
-        rd <- rep(rowData(query), elementLengths(alt))
-        callGeneric(query=rd, subject=subject, seqSource=seqSource, 
-            varAllele=unlist(alt, use.names=FALSE), ...) 
-    }
-)
+{
+    alt <- values(alt(query))[["ALT"]]
+    if (!is(alt, "DNAStringSetList"))
+        stop("alt(<VCF>)[['ALT']] must be a DNAStringSetList")
+    rd <- rep(rowData(query), elementLengths(alt))
+    callGeneric(rd, subject, seqSource, unlist(alt, use.names=FALSE), ...) 
+})
 
-setMethod("predictCoding", 
-    signature("GRanges", "TranscriptDb", "ANY", "DNAStringSet"),
+setMethod("predictCoding", c("GRanges", "TranscriptDb", "ANY", "DNAStringSet"),
     function(query, subject, seqSource, varAllele, ...)
 {
     .predictCoding(query, subject, seqSource, varAllele, ...)

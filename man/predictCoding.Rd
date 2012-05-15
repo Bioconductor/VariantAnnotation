@@ -29,7 +29,10 @@
     the \code{query} must be expanded to one row per each alternate allele.
     See examples.
   }
-  \item{subject}{A \link[GenomicFeatures]{TranscriptDb}. 
+  \item{subject}{A \link[GenomicFeatures]{TranscriptDb} object that serves 
+    as the annotation. GFF files can be converted to 
+    \link[GenomicFeatures]{TranscriptDb} objects with 
+    \code{makeTranscriptDbFromGFF()} in the \code{GenomicFeatures} package.
   } 
   \item{seqSource}{A \code{\link[BSgenome]{BSgenome}} instance or an \link{FaFile}
     to be used for sequence extraction.

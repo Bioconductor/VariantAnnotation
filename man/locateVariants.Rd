@@ -46,8 +46,10 @@ locateVariants(query, subject, region, ...)
     \linkS4class{VCF} object containing the variants. Metadata columns are 
     allowed but are ignored. 
   }
-  \item{subject}{A \link[GenomicFeatures]{TranscriptDb} object that serves
-    as the annotation reference.
+  \item{subject}{A \link[GenomicFeatures]{TranscriptDb} or \code{GRangesList}
+    object that serves as the annotation. GFF files can be converted to
+    \link[GenomicFeatures]{TranscriptDb} objects with 
+    \code{makeTranscriptDbFromGFF()} in the \code{GenomicFeatures} package.
   }
   \item{region}{An instance of one of \code{CodingVariants},
     \code{IntronVariants}, \code{FiveUTRVariants}, \code{ThreeUTRVariants},
