@@ -360,10 +360,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
         strand=strand(usub))
     fo_start <- findOverlaps(query, int_start, type="any")
     fo_end <- findOverlaps(query, int_end, type="any")
-
     fo <- union(fo_start, fo_end)
-    #fo <- data.frame(rbind(as.matrix(fo_start), as.matrix(fo_end)))
-    #fo <- fo[!duplicated(fo),]
 
     if (length(fo) > 0) {
         queryid <- queryHits(fo)
