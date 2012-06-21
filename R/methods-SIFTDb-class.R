@@ -51,9 +51,8 @@ setMethod("select", "SIFTDb",
         fmtkeys <- .formatRSID(keys) 
         missing <- (!fmtkeys %in% as.character(raw$RSID))
         if (any(missing)) {
-            msg <- sprintf("key(s) not in database: %s",
-                           paste0(keys[missing], collapse=" "))
-            warning(paste(strwrap(msg, exdent=2), collapse="\n"))
+            msg <- paste(IRanges:::selectSome(keys[missing], 5), collapse=" ")
+            warning(sprintf("keys not found in database : %s", msg))
         }
     }
 

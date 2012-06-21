@@ -63,9 +63,8 @@ setMethod("select", "PolyPhenDb",
     ## restore key order
         missing <- (!keys %in% as.character(raw$RSID))
         if (any(missing)) {
-            msg <- sprintf("key(s) not in database: %s",
-                           paste0(keys[missing], collapse=" "))
-            warning(paste(strwrap(msg, exdent=2), collapse="\n"))
+            msg <- paste(IRanges:::selectSome(keys[missing], 5), collapse=" ")
+            warning(sprintf(msg, "keys not found in database : %s"))
         }
         lst <- as.list(rep(NA_character_, length(keys)))
         raw <- raw[!duplicated(raw), ]
