@@ -6,10 +6,15 @@
 \alias{ScanVcfParam,missing-method}
 \alias{ScanVcfParam,ANY-method}
 \alias{vcfFixed}
+\alias{vcfFixed<-}
 \alias{vcfInfo}
+\alias{vcfInfo<-}
 \alias{vcfGeno}
+\alias{vcfGeno<-}
 \alias{vcfTrimEmpty}
+\alias{vcfTrimEmpty<-}
 \alias{vcfWhich}
+\alias{vcfWhich<-}
 
 \title{Parameters for scanning VCF files}
 
@@ -25,13 +30,18 @@
   ScanVcfParam(fixed=character(), info=character(), geno=character(), 
                trimEmpty=TRUE, which, ...)
 
-  ## Accessors
+  ## Getters and Setters 
  
   vcfFixed(object)
+  vcfFixed(object) <- value
   vcfInfo(object)
+  vcfInfo(object) <- value
   vcfGeno(object)
+  vcfGeno(object) <- value
   vcfTrimEmpty(object)
+  vcfTrimEmpty(object) <- value
   vcfWhich(object)
+  vcfWhich(object) <- value
 }
 
 \arguments{
@@ -42,23 +52,27 @@
     specified, all fields are returned; if \code{fixed=NA} only REF is 
     returned. 
   }
-  \item{info}{A character() vector of \sQuote{INFO} fields (see
-    \code{\link{scanVcfHeader}}) to be returned. If not specified, all fields 
-    are returned; if \code{info=NA} no fields are returned.
+  \item{info}{A character() vector naming the \sQuote{INFO} fields to return.
+    \code{scanVcfHeader()} returns a vector of available fields. If not 
+    specified, all fields are returned; if \code{info=NA} no fields are returned.
   }
-  \item{geno}{A character() vector of \sQuote{GENO} fields (see
-    \code{\link{scanVcfHeader}}) to be returned. If not specified, all fields 
-    are returned; if \code{geno=NA} no fields are returned.
+  \item{geno}{A character() vector naming the \sQuote{GENO} fields to return.
+    \code{scanVcfHeader()} returns a vector of available fields. If not specified, 
+    all fields are returned; if \code{geno=NA} no fields are returned.
   }
   \item{trimEmpty}{A logical(1) indicating whether \sQuote{GENO} fields
     with no values should be returned.
   }
-  \item{which}{An object, for which a method is defined (see usage,
-    above), describing the sequences and ranges to be queried. Variants
-    whose \code{POS} lies in the interval(s) \code{[start, end]} are
-    returned. 
+  \item{which}{A \code{\linkS4class{GRanges}}, \code{\linkS4class{RangesList}}, 
+    \code{\linkS4class{RangedData}} or missing object, describing the sequences 
+    and ranges to be queried. Variants whose \code{POS} lies in the interval(s) 
+    \code{[start, end]} are returned. If \code{which} is not specified all
+    ranges are returned. 
   }
   \item{object}{An instance of class \code{ScanVcfParam}.
+  }
+  \item{value}{An instance of the corresponding slot, to be assigned to
+    \code{object}. 
   }
   \item{\dots}{Arguments passed to methods.
   }

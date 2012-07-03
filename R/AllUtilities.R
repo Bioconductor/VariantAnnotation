@@ -6,18 +6,19 @@
 .collapseLists <- function(vcf, param)
 {
     if (is(param, "ScanVcfParam"))
-        paramRangeID <- names(vcfWhich(param))
+        paramRangeID <- names(unlist(vcfWhich(param), use.names=FALSE))
     else
         paramRangeID <- names(param)
     if (is.null(paramRangeID))
         paramRangeID <- rep(NA_character_, length(vcf))
 
+    ## single 'which' (all ranges)
     if (1L == length(vcf)) {
         vcf[[1]][["paramRangeID"]] <- 
             as.factor(rep(paramRangeID, length(vcf[[1]][["rowData"]]))) 
         vcf[[1]]
     } else {
-        ## collapse list of lists
+    ## multiple ranges in 'which'
         lst <- lapply(names(vcf[[1]]), function(elt) {
                    do.call(c, unname(lapply(vcf, "[[", elt)))
                })

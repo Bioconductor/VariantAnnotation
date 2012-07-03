@@ -51,7 +51,9 @@ importClassesFrom(snpStats, SnpMatrix)
 
 exportClassPattern("^.*$")
 
-export(VCF, VCFHeader, vcfWhich, vcfFixed, vcfInfo, vcfGeno,
+export(VCF, VCFHeader, 
+       vcfWhich, "vcfWhich<-", vcfFixed, "vcfFixed<-", vcfInfo, "vcfInfo<-", 
+       vcfGeno, "vcfGeno<-", vcfTrimEmpty, "vcfTrimEmpty<-", 
        VAFilterResult, dbSNPFilter, regionFilter, compose,
        duplicateRSID, globalToLocal, CodingVariants, IntronVariants,
        FiveUTRVariants, ThreeUTRVariants, IntergenicVariants,
