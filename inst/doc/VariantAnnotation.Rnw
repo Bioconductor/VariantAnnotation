@@ -99,7 +99,6 @@ The REF, ALT, QUAL and FILTER fields can be accessed together with
 
 <<readVcf_fixed>>=
 head(fixed(vcf), 3)
-qual(vcf)[1:3,] 
 @
 
 The \Robject{ALT} column is stored as a \Robject{DNAStringSetList} unless
@@ -113,17 +112,6 @@ alternate
 ## number of ALT values per variant
 unique(elementLengths(alternate))
 head(unlist(alternate))
-@
-
-Data from the \Rcode{INFO} field is accessed with the \Rcode{info} accessor. 
-Look at the heder information related to the \Rcode{INFO} fields
-<<readVcf_info_header>>=
-head(info(hdr), 4)
-@
-
-and retrieve the first couple of the fields,
-<<readVcf_info_data>>=
-info(vcf)[1:3, 2:3]
 @
 
 Genotype data described in the \Rcode{FORMAT} field are parsed into 
@@ -187,12 +175,12 @@ vcf_rng
 The \Rcode{paramRangesID} column now has meaning as it distinguishes which
 variant records came from which param range.
 <<>>=
-rowData(vcf_rng)
+head(rowData(vcf_rng), 3)
 @
 
 \subsubsection{VCF fields}
-Data can also be subset on the \Rcode{fixed}, \Rcode{info} and/or \Rcode{geno} 
-fields in the VCF file. Fields available for import are described in the 
+In addition to specifying ranges, data can be subset on specific fields 
+in the VCF file. Fields available for import are described in the 
 header information. To view the header before reading in the data in use 
 \Rfunction{ScanVcfHeader}. 
 
@@ -500,35 +488,20 @@ databases often contain more than one row per variant. The variant may have
 been reported by multiple sources and therefore the source will differ as well
 as some of the other variables. 
 
-<<sift>>=
-library(SIFT.Hsapiens.dbSNP132)
+It is important to keep in mind the pre-computed predictions in the
+SIFT and PolyPhen packages are based on specific gene models. SIFT is
+based on Ensembl and PolyPhen on UCSC Known Gene. The \Rcode{TranscriptDb}
+we used to identify the coding snps was based on UCSC Known Gene so we
+will use PolyPhen for predictions. PolyPhen provides predictions using two 
+different training datasets and has considerable information about 3D protein 
+structure. See \Rcode{?PolyPhenDbColumns} or the PolyPhen web site listed in 
+the references for more details.
 
-## rsids in the package 
-head(keys(SIFT.Hsapiens.dbSNP132))
-
-## list available columns
-cols(SIFT.Hsapiens.dbSNP132)
-
-## select a subset of columns
-## a warning is thrown when a key is not found in the database
-subst <- c("RSID", "PREDICTION", "SCORE", "AACHANGE", "PROTEINID")
-sift <- select(SIFT.Hsapiens.dbSNP132, keys=rsids, cols=subst)
-head(sift)
-@
-
-Next we query the PolyPhen database for information on these variants.
-PolyPhen provides predictions using two different training datasets and has 
-considerable information about 3D protein structure. See 
-\Rcode{?PolyPhenDbColumns} or the PolyPhen web site listed in the references 
-for more details.
-
-Query the PolyPhen database with the rsids found in SIFT,
+Query the PolyPhen database,
 <<polyphen>>=
 library(PolyPhen.Hsapiens.dbSNP131)
 
-inSIFT <- unique(sift$RSID[!is.na(sift$PREDICTION)]) 
-
-pp <- select(PolyPhen.Hsapiens.dbSNP131, keys=inSIFT,
+pp <- select(PolyPhen.Hsapiens.dbSNP131, keys=rsids,
              cols=c("TRAININGSET", "PREDICTION", "PPH2PROB"))
 head(pp[!is.na(pp$PREDICTION), ])
 @

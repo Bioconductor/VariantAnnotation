@@ -12,7 +12,7 @@
     if (is.null(paramRangeID))
         paramRangeID <- rep(NA_character_, length(vcf))
 
-    ## single 'which' (all ranges)
+    ## single range in 'which'
     if (1L == length(vcf)) {
         vcf[[1]][["paramRangeID"]] <- 
             as.factor(rep(paramRangeID, length(vcf[[1]][["rowData"]]))) 
@@ -20,7 +20,7 @@
     } else {
     ## multiple ranges in 'which'
         lst <- lapply(names(vcf[[1]]), function(elt) {
-                   do.call(c, unname(lapply(vcf, "[[", elt)))
+                   suppressWarnings(do.call(c, unname(lapply(vcf, "[[", elt))))
                })
         names(lst) <- names(vcf[[1]])
         len <- unlist(lapply(vcf, function(elt) length(elt$rowData)),
