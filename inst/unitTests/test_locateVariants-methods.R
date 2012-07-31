@@ -40,3 +40,18 @@ test_locateVariants_query <- function()
     checkIdentical(loc1, loc2) 
 }
 
+test_locateVariants_strand <- function()
+{
+    gr <- GRanges("chr1", IRanges(c(12190, 12595, 13403), width=1), "-")
+    loc1 <- locateVariants(gr, cdsbytx, CodingVariants(), ignore.strand=TRUE)
+    checkIdentical(c(1L, 2L, 3L), values(loc1)[["QUERYID"]]) 
+    loc2 <- locateVariants(gr, cdsbytx, CodingVariants(), ignore.strand=FALSE)
+    checkIdentical(integer(), values(loc2)[["QUERYID"]]) 
+    loc1 <- locateVariants(gr, cdsbytx, SpliceSiteVariants(), ignore.strand=TRUE)
+    checkIdentical(c(1L, 2L, 3L), values(loc1)[["QUERYID"]]) 
+    loc2 <- locateVariants(gr, cdsbytx, SpliceSiteVariants(), ignore.strand=FALSE)
+    checkIdentical(integer(), values(loc2)[["QUERYID"]]) 
+}
+
+
+

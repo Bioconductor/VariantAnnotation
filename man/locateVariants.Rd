@@ -32,13 +32,13 @@ locateVariants(query, subject, region, ...)
 \S4method{locateVariants}{VCF,TranscriptDb,ANY}(query, subject, region, ..., cache = new.env(parent=emptyenv()))
 \S4method{locateVariants}{Ranges,TranscriptDb,ANY}(query, subject, region, ..., cache = new.env(parent=emptyenv()))
 \S4method{locateVariants}{GRanges,TranscriptDb,ANY}(query, subject, region, ..., cache = new.env(parent=emptyenv()))
-\S4method{locateVariants}{GRanges,GRangesList,CodingVariants}(query, subject, region, ...)
-\S4method{locateVariants}{GRanges,GRangesList,IntronVariants}(query, subject, region, ...)
-\S4method{locateVariants}{GRanges,GRangesList,FiveUTRVariants}(query, subject, region, ...)
-\S4method{locateVariants}{GRanges,GRangesList,ThreeUTRVariants}(query, subject, region, ...)
-\S4method{locateVariants}{GRanges,GRangesList,IntergenicVariants}(query, subject, region, ...)
-\S4method{locateVariants}{GRanges,GRangesList,SpliceSiteVariants}(query, subject, region, ...)
-\S4method{locateVariants}{GRanges,GRangesList,AllVariants}(query, subject, region, ...)
+\S4method{locateVariants}{GRanges,TranscriptDb,CodingVariants}(query, subject, region, ..., cache = new.env(parent=emptyenv()), ignore.strand = FALSE)
+\S4method{locateVariants}{GRanges,TranscriptDb,IntronVariants}(query, subject, region, ..., cache = new.env(parent=emptyenv()), ignore.strand = FALSE)
+\S4method{locateVariants}{GRanges,TranscriptDb,FiveUTRVariants}(query, subject, region, ..., cache = new.env(parent=emptyenv()), ignore.strand = FALSE)
+\S4method{locateVariants}{GRanges,TranscriptDb,ThreeUTRVariants}(query, subject, region, ..., cache = new.env(parent=emptyenv()), ignore.strand = FALSE)
+\S4method{locateVariants}{GRanges,TranscriptDb,IntergenicVariants}(query, subject, region, ..., cache = new.env(parent=emptyenv()), ignore.strand = FALSE)
+\S4method{locateVariants}{GRanges,TranscriptDb,SpliceSiteVariants}(query, subject, region, ..., cache = new.env(parent=emptyenv()), ignore.strand = FALSE)
+\S4method{locateVariants}{GRanges,TranscriptDb,AllVariants}(query, subject, region, ..., cache = new.env(parent=emptyenv()), ignore.strand = FALSE)
 }
 
 \arguments{
@@ -63,6 +63,9 @@ locateVariants(query, subject, region, ...)
     of \code{subject} are loaded. Provide, and re-use, a cache to
     speed repeated queries to the same \code{subject} across
     different \code{query} instances.
+  }
+  \item{ignore.strand}{A \code{logical} indicating if strand should be
+    igored when performing overlaps.
   }
 }
 

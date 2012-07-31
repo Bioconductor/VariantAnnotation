@@ -84,4 +84,16 @@ test_predictCoding_strand <- function()
 
     expected <- c("G", "C", "C", "C", "G", "G", "T", "A", "C")
     checkIdentical(as.character(values(current)[["varAllele"]]), expected)
+
+    ## ignore.strand
+    strand(query) <- "+"
+    p1 <- suppressWarnings(fun(query, cdsbytx, Hsapiens, variant,
+        ignore.strand=TRUE))
+    checkIdentical(12L, length(p1))
+    p2 <- suppressWarnings(fun(query, cdsbytx, Hsapiens, variant,
+        ignore.strand=FALSE))
+    checkIdentical(4L, length(p2))
 }
+
+
+

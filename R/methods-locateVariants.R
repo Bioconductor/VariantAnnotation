@@ -44,7 +44,8 @@ setMethod("locateVariants", c("VCF", "GRangesList", "ANY"),
 ##
 
 setMethod("locateVariants", c("GRanges", "TranscriptDb", "CodingVariants"),
-    function(query, subject, region, ..., cache=new.env(parent=emptyenv()))
+    function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
+             ignore.strand=FALSE)
 {
     queryseq <- seqlevels(query)
     subseq <- seqlevels(subject)
@@ -65,7 +66,8 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "CodingVariants"),
     if (!exists("txbygene", cache, inherits=FALSE))
         cache[["txbygene"]] <- transcriptsBy(subject, "gene")
 
-    res <- callGeneric(query, cache[["cdsbytx"]], region, ...)
+    res <- callGeneric(query, cache[["cdsbytx"]], region, ...,
+                       ignore.strand=ignore.strand)
     genedf <- data.frame(geneid=rep(names(cache[["txbygene"]]), 
                              elementLengths(cache[["txbygene"]])),
                          txid=values(unlist(cache[["txbygene"]], 
@@ -77,9 +79,9 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "CodingVariants"),
 })
 
 setMethod("locateVariants", c("GRanges", "GRangesList", "CodingVariants"),
-    function(query, subject, region, ...)
+    function(query, subject, region, ..., ignore.strand=FALSE)
     {
-        .makeResult(query, subject, "coding")
+        .makeResult(query, subject, "coding", ignore.strand=ignore.strand)
     }
 )
 
@@ -88,7 +90,8 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "CodingVariants"),
 ###
 
 setMethod("locateVariants", c("GRanges", "TranscriptDb", "IntronVariants"),
-    function(query, subject, region, ..., cache=new.env(parent=emptyenv()))
+    function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
+             ignore.strand=FALSE)
 {
     queryseq <- seqlevels(query)
     subseq <- seqlevels(subject)
@@ -109,7 +112,8 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "IntronVariants"),
     if (!exists("txbygene", cache, inherits=FALSE))
         cache[["txbygene"]] <- transcriptsBy(subject, "gene")
 
-    res <- callGeneric(query, cache[["intbytx"]], region, ...)
+    res <- callGeneric(query, cache[["intbytx"]], region, ...,
+                       ignore.strand=ignore.strand)
     genedf <- data.frame(geneid=rep(names(cache[["txbygene"]]),
                              elementLengths(cache[["txbygene"]])),
                          txid=values(unlist(cache[["txbygene"]], 
@@ -122,9 +126,9 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "IntronVariants"),
 
 
 setMethod("locateVariants", c("GRanges", "GRangesList", "IntronVariants"),
-    function(query, subject, region, ...)
+    function(query, subject, region, ..., ignore.strand=FALSE)
     {
-        .makeResult(query, subject, "intron")
+        .makeResult(query, subject, "intron", ignore.strand=ignore.strand)
     }
 )
 
@@ -133,7 +137,8 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "IntronVariants"),
 ###
 
 setMethod("locateVariants", c("GRanges", "TranscriptDb", "ThreeUTRVariants"),
-    function(query, subject, region, ..., cache=new.env(parent=emptyenv()))
+    function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
+             ignore.strand=FALSE)
     {
         queryseq <- seqlevels(query)
         subseq <- seqlevels(subject)
@@ -154,7 +159,8 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "ThreeUTRVariants"),
         if (!exists("txbygene", cache, inherits=FALSE))
             cache[["txbygene"]] <- transcriptsBy(subject, "gene")
 
-        res <- callGeneric(query, cache[["threeUTRbytx"]], region, ...)
+        res <- callGeneric(query, cache[["threeUTRbytx"]], region, ...,
+                           ignore.strand=ignore.strand)
         genedf <- data.frame(geneid = rep(names(cache[["txbygene"]]),
                                  elementLengths(cache[["txbygene"]])),
                              txid = values(unlist(cache[["txbygene"]],
@@ -167,9 +173,9 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "ThreeUTRVariants"),
 )
 
 setMethod("locateVariants", c("GRanges", "GRangesList", "ThreeUTRVariants"),
-    function(query, subject, region, ...)
+    function(query, subject, region, ..., ignore.strand=FALSE)
     {
-        .makeResult(query, subject, "threeUTR")
+        .makeResult(query, subject, "threeUTR", ignore.strand=ignore.strand)
     }
 )
 
@@ -178,7 +184,8 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "ThreeUTRVariants"),
 ###
 
 setMethod("locateVariants", c("GRanges", "TranscriptDb", "FiveUTRVariants"),
-    function(query, subject, region, ..., cache=new.env(parent=emptyenv()))
+    function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
+             ignore.strand=FALSE)
     {
         queryseq <- seqlevels(query)
         subseq <- seqlevels(subject)
@@ -199,7 +206,8 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "FiveUTRVariants"),
         if (!exists("txbygene", cache, inherits=FALSE))
             cache[["txbygene"]] <- transcriptsBy(subject, "gene")
 
-        res <- callGeneric(query, cache[["fiveUTRbytx"]], region, ...)
+        res <- callGeneric(query, cache[["fiveUTRbytx"]], region, ...,
+                           ignore.strand=ignore.strand)
         genedf <- data.frame(geneid = rep(names(cache[["txbygene"]]),
                                  elementLengths(cache[["txbygene"]])),
                              txid = values(unlist(cache[["txbygene"]],
@@ -212,9 +220,9 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "FiveUTRVariants"),
 )
 
 setMethod("locateVariants", c("GRanges", "GRangesList", "FiveUTRVariants"),
-    function(query, subject, region, ...)
+    function(query, subject, region, ..., ignore.strand=FALSE)
 {
-    .makeResult(query, subject, "fiveUTR")
+    .makeResult(query, subject, "fiveUTR", ignore.strand=ignore.strand)
 })
 
 ### -------------------------------------------------------------------------
@@ -223,7 +231,8 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "FiveUTRVariants"),
 
 setMethod("locateVariants", c("GRanges", "TranscriptDb", 
           "IntergenicVariants"),
-    function(query, subject, region, ..., cache=new.env(parent=emptyenv()))
+    function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
+             ignore.strand=FALSE)
     {
         queryseq <- seqlevels(query)
         subseq <- seqlevels(subject)
@@ -242,14 +251,15 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb",
         if (!exists("txbygene", cache, inherits=FALSE))
             cache[["txbygene"]] <- transcriptsBy(subject, "gene")
 
-        callGeneric(query, cache[["txbygene"]], region, ...)
+        callGeneric(query, cache[["txbygene"]], region, ...,
+                    ignore.strand=ignore.strand)
     }
 )
 
 setMethod("locateVariants", c("GRanges", "GRangesList", "IntergenicVariants"),
-    function(query, subject, region, ...)
+    function(query, subject, region, ..., ignore.strand=FALSE)
 {
-    .intergenic(query, subject)
+    .intergenic(query, subject, ignore.strand=ignore.strand)
 })
 
 ### -------------------------------------------------------------------------
@@ -258,7 +268,8 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "IntergenicVariants"),
 
 setMethod("locateVariants", c("GRanges", "TranscriptDb",
           "SpliceSiteVariants"),
-    function(query, subject, region, ..., cache=new.env(parent=emptyenv()))
+    function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
+             ignore.strand=FALSE)
     {
         queryseq <- seqlevels(query)
         subseq <- seqlevels(subject)
@@ -279,7 +290,8 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb",
         if (!exists("txbygene", cache, inherits=FALSE))
             cache[["txbygene"]] <- transcriptsBy(subject, "gene")
 
-        res <- callGeneric(query, cache[["intbytx"]], region, ...)
+        res <- callGeneric(query, cache[["intbytx"]], region, ...,
+                           ignore.strand=ignore.strand)
         genedf <- data.frame(geneid=rep(names(cache[["txbygene"]]),
                                  elementLengths(cache[["txbygene"]])),
                              txid=values(unlist(cache[["txbygene"]],
@@ -293,9 +305,9 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb",
 
 setMethod("locateVariants", c("GRanges", "GRangesList", 
           "SpliceSiteVariants"),
-    function(query, subject, region, ...)
+    function(query, subject, region, ..., ignore.strand=FALSE)
     {
-        .spliceSites(query, subject)
+        .spliceSites(query, subject, ignore.strand=ignore.strand)
     }
 )
 
@@ -304,12 +316,15 @@ setMethod("locateVariants", c("GRanges", "GRangesList",
 ###
 
 setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
-    function(query, subject, region, ..., cache=new.env(parent=emptyenv()))
+    function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
+             ignore.strand=FALSE)
     {
-        coding <- locateVariants(query, subject, CodingVariants(), cache=cache)
-        intron <- locateVariants(query, subject, IntronVariants(), cache=cache)
+        coding <- locateVariants(query, subject, CodingVariants(), cache=cache,
+                                 ignore.strand=ignore.strand)
+        intron <- locateVariants(query, subject, IntronVariants(), cache=cache,
+                                 ignore.strand=ignore.strand)
         splice <- locateVariants(query, subject, SpliceSiteVariants(), 
-                                 cache=cache)
+                                 cache=cache, ignore.strand=ignore.strand)
 
         ## Consolidate calls for UTR data
         if (!exists("fiveUTRbytx", cache, inherits=FALSE)) {
@@ -323,11 +338,11 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
                 GenomicFeatures:::.make5UTRsByTranscript(txdb, splicings)
 
         fiveUTR <- locateVariants(query, subject, FiveUTRVariants(), 
-                                  cache=cache)
+                                  cache=cache, ignore.strand=ignore.strand)
         threeUTR <- locateVariants(query, subject, ThreeUTRVariants(), 
-                                   cache=cache)
+                                   cache=cache, ignore.strand=ignore.strand)
         intergenic <- locateVariants(query, subject, IntergenicVariants(), 
-                                     cache=cache)
+                                     cache=cache, ignore.strand=ignore.strand)
 
         base <- c(coding, intron, fiveUTR, threeUTR, splice)
         PRECEDEID <- FOLLOWID <- rep(NA_character_, length(base))
@@ -350,7 +365,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
     factor(rep(value, length), levels=levels)
 }
 
-.spliceSites <- function(query, subject, ...)
+.spliceSites <- function(query, subject, ignore.strand, ...)
 {
     ## overlap any portion of first 2 and last 2 nucleotides of introns
     usub <- unlist(subject, use.names=FALSE)
@@ -358,8 +373,10 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
         strand=strand(usub))
     int_end <- GRanges(seqnames(usub), IRanges(end(usub) - 1, end(usub)),
         strand=strand(usub))
-    fo_start <- findOverlaps(query, int_start, type="any")
-    fo_end <- findOverlaps(query, int_end, type="any")
+    fo_start <- findOverlaps(query, int_start, type="any",
+        ignore.strand=ignore.strand)
+    fo_end <- findOverlaps(query, int_end, type="any",
+        ignore.strand=ignore.strand)
     fo <- union(fo_start, fo_end)
 
     if (length(fo) > 0) {
@@ -383,9 +400,9 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
     }
 }
 
-.intergenic <- function(query, subject, ...)
+.intergenic <- function(query, subject, ignore.strand, ...)
 {
-    co <- countOverlaps(query, subject, type="any")
+    co <- countOverlaps(query, subject, type="any", ignore.strand=ignore.strand)
     intergenic <- co == 0
     if (all(!intergenic)) {
         res <- GRanges()
@@ -401,9 +418,9 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
         rng <- unlist(subject, use.names=FALSE)
         genes <- rep(names(subject), elementLengths(subject))
         ## query precedes subject; get index for following gene 
-        pidx <- precede(res, rng)
+        pidx <- precede(res, rng, ignore.strand=ignore.strand)
         ## query follows subject; get index for preceding gene 
-        fidx <- follow(res, rng)
+        fidx <- follow(res, rng, ignore.strand=ignore.strand)
 
         values(res) <- DataFrame(LOCATION=.location(length(res), "intergenic"),
                                  QUERYID=which(intergenic), TXID=NA_integer_, 
@@ -413,10 +430,10 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
     }
 }
 
-.makeResult <- function(query, subject, vtype, ...)
+.makeResult <- function(query, subject, vtype, ignore.strand, ...)
 {
     usub <- unlist(subject, use.names=FALSE)
-    fo <- findOverlaps(query, usub, type="within")
+    fo <- findOverlaps(query, usub, type="within", ignore.strand=ignore.strand)
     if (length(fo) > 0) {
         queryid <- queryHits(fo)
         txid <- rep(names(subject), elementLengths(subject))

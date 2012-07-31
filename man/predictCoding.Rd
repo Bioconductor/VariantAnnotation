@@ -11,9 +11,9 @@
 }
 
 \usage{
-\S4method{predictCoding}{VCF,TranscriptDb,ANY,missing}(query, subject, seqSource, varAllele, ...)
-\S4method{predictCoding}{Ranges,TranscriptDb,ANY,DNAStringSet}(query, subject, seqSource, varAllele, ...)
-\S4method{predictCoding}{GRanges,TranscriptDb,ANY,DNAStringSet}(query, subject, seqSource, varAllele, ...)
+\S4method{predictCoding}{VCF,TranscriptDb,ANY,missing}(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
+\S4method{predictCoding}{Ranges,TranscriptDb,ANY,DNAStringSet}(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
+\S4method{predictCoding}{GRanges,TranscriptDb,ANY,DNAStringSet}(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 }
 
 \arguments{
@@ -49,6 +49,9 @@
   }
   \item{\dots}{Additional arguments passed to methods.
   }
+  \item{ignore.strand}{A \code{logical} indicating if strand should be ignored
+    when performing overlaps.
+  }
 }
 
 \details{
@@ -77,8 +80,9 @@
 \value{
   A \link[GenomicRanges]{GRanges} with a row for each variant-transcript 
   match. The result includes only variants that fell within coding regions.
-  If the \code{query} was unstranded (*) the strand of the output 
-  \code{GRanges} represents the strand of the \code{subject} hit.
+  If the \code{query} was unstranded (*) or \code{ignore.strand=TRUE} the 
+  strand of the output \code{GRanges} represents the strand of the 
+  \code{subject} hit.
 
   At a minimum, the \code{elementMetadata} columns include,
   \describe{

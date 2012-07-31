@@ -3,30 +3,33 @@
 ### =========================================================================
 
 setMethod("predictCoding", c("Ranges", "TranscriptDb", "ANY", "DNAStringSet"),
-    function(query, subject, seqSource, varAllele, ...)
+    function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 {
-    callGeneric(as(query, "GRanges"), subject, seqSource, varAllele, ...) 
+    callGeneric(as(query, "GRanges"), subject, seqSource, varAllele, ...,
+                ignore.strand=ignore.strand) 
 })
 
 setMethod("predictCoding", c("VCF", "TranscriptDb", "ANY", "missing"),
-    function(query, subject, seqSource, varAllele, ...)
+    function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 {
     alt <- values(alt(query))[["ALT"]]
     if (!is(alt, "DNAStringSetList"))
         stop("alt(<VCF>)[['ALT']] must be a DNAStringSetList")
     rd <- rep(rowData(query), elementLengths(alt))
-    callGeneric(rd, subject, seqSource, unlist(alt, use.names=FALSE), ...) 
+    callGeneric(rd, subject, seqSource, unlist(alt, use.names=FALSE), ...,
+                ignore.strand=ignore.strand) 
 })
 
 setMethod("predictCoding", c("GRanges", "TranscriptDb", "ANY", "DNAStringSet"),
-    function(query, subject, seqSource, varAllele, ...)
+    function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 {
-    .predictCoding(query, subject, seqSource, varAllele, ...)
+    .predictCoding(query, subject, seqSource, varAllele, ...,
+                   ignore.strand=ignore.strand)
 })
 
 .predictCoding <-
     function(query, subject, seqSource, varAllele, ..., 
-             cache=new.env(parent=emptyenv()))
+             cache=new.env(parent=emptyenv()), ignore.strand=FALSE)
 {
     stopifnot(length(varAllele) == length(query))
     if (!any(seqlevels(query) %in% seqlevels(subject)))
@@ -50,17 +53,20 @@ setMethod("predictCoding", c("GRanges", "TranscriptDb", "ANY", "DNAStringSet"),
                       stringsAsFactors=FALSE)
 
     txlocal <- .predictCodingGRangesList(query, cache[["cdsbytx"]], seqSource, 
-                                         varAllele)
+                                         varAllele, ignore.strand=ignore.strand)
     txid <- values(txlocal)[["TXID"]] 
     values(txlocal)[["GENEID"]] <- map$geneid[match(txid, map$txid)]
     txlocal
 }
 
-.predictCodingGRangesList <- function(query, cdsbytx, seqSource, varAllele, ...)
+.predictCodingGRangesList <- function(query, cdsbytx, seqSource, varAllele, ...,
+                                      ignore.strand=FALSE)
 {
     ## FIXME : set query back after olaps
     if (any(insertion <- width(query) == 0))
         start(query)[insertion] <- start(query)[insertion] - 1
+    if (ignore.strand)
+        strand(query) <- "*"
 
     ## retrieve local coordinates
     values(query) <- append(values(query), DataFrame(varAllele=varAllele))
@@ -68,6 +74,7 @@ setMethod("predictCoding", c("GRanges", "TranscriptDb", "ANY", "DNAStringSet"),
 
     if (length(txlocal) == 0)
         return(txlocal)
+    
     rwidth <- width(txlocal)
     translateidx <- rep(TRUE, length(txlocal)) 
     ## reverse complement variant alleles for "-" strand
@@ -97,12 +104,16 @@ setMethod("predictCoding", c("GRanges", "TranscriptDb", "ANY", "DNAStringSet"),
     altpos <- (start(values(txlocal)[["CDSLOC"]]) - 1L) %% 3L + 1L
     refCodon <- varCodon <- .constructRefSequences(txlocal, altpos, seqSource, 
                                                    cdsbytx)
-    subseq(varCodon, start=altpos, width=rwidth) <- altallele[translateidx]
+    if (any(translateidx)) {
+        subseq(varCodon, start=altpos, width=rwidth) <- altallele[translateidx]
 
-    ## translation
-    refAA <- translate(refCodon)
-    varAA <- AAStringSet(rep("", length(txlocal))) 
-    varAA[translateidx] <- translate(varCodon[translateidx])
+        ## translation
+        refAA <- translate(refCodon)
+        varAA <- AAStringSet(rep("", length(txlocal))) 
+        varAA[translateidx] <- translate(varCodon[translateidx])
+    } else {
+        refAA <- varAA <- AAStringSet(rep("", length(txlocal))) 
+    }
 
     ## results
     nonsynonymous <- as.character(refAA) != as.character(varAA) 
