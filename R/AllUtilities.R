@@ -83,8 +83,7 @@
     dna <- .toDNAStringSet(x)
     idx <- elementLengths(strsplit(x, ",", fixed = TRUE))
     pbw <- PartitioningByWidth(idx)
-    IRanges:::newCompressedList("DNAStringSetList",
-        unlistData=dna, end=end(pbw))
+    relist(dna, pbw)
 }
 
 .formatALT <- function(x)
