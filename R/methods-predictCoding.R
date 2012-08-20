@@ -74,7 +74,7 @@ setMethod("predictCoding", c("GRanges", "TranscriptDb", "ANY", "DNAStringSet"),
 
     if (length(txlocal) == 0)
         return(txlocal)
-    
+ 
     rwidth <- width(txlocal)
     translateidx <- rep(TRUE, length(txlocal)) 
     ## reverse complement variant alleles for "-" strand

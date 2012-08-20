@@ -126,28 +126,29 @@ setMethod("show", "VariantType",
     }
 )
 
-setClass("AllVariants", contains="VariantType")
-AllVariants <- function() new("AllVariants")
-
 setClass("CodingVariants", contains="VariantType")
-CodingVariants <- function() new("CodingVariants")
 
 setClass("IntronVariants", contains="VariantType")
-IntronVariants <- function() new("IntronVariants")
 
 setClass("IntergenicVariants", contains="VariantType")
-IntergenicVariants <- function() new("IntergenicVariants")
 
 setClass("ThreeUTRVariants", contains="VariantType")
-ThreeUTRVariants <- function() new("ThreeUTRVariants")
 
 setClass("FiveUTRVariants", contains="VariantType")
-FiveUTRVariants <- function() new("FiveUTRVariants")
 
 setClass("SpliceSiteVariants", contains="VariantType")
-SpliceSiteVariants <- function() new("SpliceSiteVariants")
 
+setClass("FlankingVariants", 
+    contains="VariantType",
+    representation(upstream="numeric",
+                   downstream="numeric"
+    )
+)
 
-### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-### locateVariants methods 
-###
+setClass("AllVariants", 
+    contains="VariantType",
+    representation(upstream="numeric",
+                   downstream="numeric"
+    )
+)
+

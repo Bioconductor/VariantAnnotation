@@ -29,6 +29,26 @@ setGeneric("locateVariants", signature = c("query", "subject", "region"),
 )
 
 ### -------------------------------------------------------------------------
+### VariantRegion classes 
+###
+
+setGeneric("upstream", signature = "x",
+    function(x) standardGeneric("upstream")
+)
+
+setGeneric("upstream<-", signature = "x",
+    function(x, value) standardGeneric("upstream<-")
+)
+
+setGeneric("downstream", signature = "x",
+    function(x) standardGeneric("downstream")
+)
+
+setGeneric("downstream<-", signature = "x",
+    function(x, value) standardGeneric("downstream<-")
+)
+
+### -------------------------------------------------------------------------
 ### read/write Vcf 
 ###
 

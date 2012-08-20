@@ -20,6 +20,8 @@
 \alias{locateVariants,GRanges,GRangesList,IntergenicVariants-method}
 \alias{locateVariants,GRanges,TranscriptDb,SpliceSiteVariants-method}
 \alias{locateVariants,GRanges,GRangesList,SpliceSiteVariants-method}
+\alias{locateVariants,GRanges,TranscriptDb,FlankingVariants-method}
+\alias{locateVariants,GRanges,GRanges,FlankingVariants-method}
 \alias{locateVariants,GRanges,TranscriptDb,AllVariants-method}
 \alias{locateVariants,GRanges,GRangesList,AllVariants-method}
 
@@ -38,6 +40,7 @@ locateVariants(query, subject, region, ...)
 \S4method{locateVariants}{GRanges,TranscriptDb,ThreeUTRVariants}(query, subject, region, ..., cache = new.env(parent=emptyenv()), ignore.strand = FALSE)
 \S4method{locateVariants}{GRanges,TranscriptDb,IntergenicVariants}(query, subject, region, ..., cache = new.env(parent=emptyenv()), ignore.strand = FALSE)
 \S4method{locateVariants}{GRanges,TranscriptDb,SpliceSiteVariants}(query, subject, region, ..., cache = new.env(parent=emptyenv()), ignore.strand = FALSE)
+\S4method{locateVariants}{GRanges,TranscriptDb,FlankingVariants}(query, subject, region, ..., cache = new.env(parent=emptyenv()), ignore.strand = FALSE)
 \S4method{locateVariants}{GRanges,TranscriptDb,AllVariants}(query, subject, region, ..., cache = new.env(parent=emptyenv()), ignore.strand = FALSE)
 }
 
@@ -53,7 +56,8 @@ locateVariants(query, subject, region, ...)
   }
   \item{region}{An instance of one of \code{CodingVariants},
     \code{IntronVariants}, \code{FiveUTRVariants}, \code{ThreeUTRVariants},
-    \code{IntergenicVariants}, \code{SpliceSiteVariants}, \code{AllVariants}.
+    \code{IntergenicVariants}, \code{SpliceSiteVariants},
+    \code{FlankingVariants}, \code{AllVariants}.
     These objects are instantiated with no arguments, e.g., CodingVariants()
     will create an object of \code{CodingVariants}. 
   }
@@ -79,8 +83,8 @@ locateVariants(query, subject, region, ...)
     }
     \item{Location :}{
       Possible locations are \sQuote{coding}, \sQuote{intron}, 
-      \sQuote{threeUTR}, \sQuote{fiveUTR}, \sQuote{intergenic}, or
-      \sQuote{spliceSite}. 
+      \sQuote{threeUTR}, \sQuote{fiveUTR}, \sQuote{intergenic},
+      \sQuote{spliceSite}, \sQuote{upstream} or \sQuote{downstream}. 
 
       Overlap operations for \sQuote{coding}, \sQuote{intron}, 
       \sQuote{threeUTR}, and \sQuote{fiveUTR} require variants to fall 
@@ -92,6 +96,13 @@ locateVariants(query, subject, region, ...)
       \sQuote{intergenic} variants are those that do not fall within a 
       transcript associated with a gene. If available, gene IDs for the flanking 
       genes are give as the \code{PRECEDEID} and \code{FOLLOWID}.
+
+      \sQuote{upstream} and \code{downstream} classifications are defined for 
+      the \code{FlankingVariants} class. These are the flanking regions on
+      either side of the start and end of the transcript region. They do not
+      contain any of the transcript region itself. Values can be modified
+      with the \code{upstream} and \code{downstream} getters and setters. 
+      Default values are 500.
     }
     \item{Subject as GRangesList :}{
       The \code{subject} can be a \code{TranscriptDb} or \code{GRangesList}
@@ -102,11 +113,19 @@ locateVariants(query, subject, region, ...)
       \describe{
         \item{CodingVariants :}{coding regions by transcript}
         \item{IntronVariants :}{intron regions by transcript}
-        \item{IntergenicVariants :}{transcript regions by gene}
-        \item{SpliceSiteVariants :}{intron regions by transcript}
         \item{FiveUTRVariants :}{five prime UTR regions by transcript}
         \item{ThreeUTRVariants :}{three prime UTR regions by transcript}
+        \item{IntergenicVariants :}{transcript regions by gene}
+        \item{SpliceSiteVariants :}{intron regions by transcript}
+        \item{FlankingVariants :}{no GRangeList method available}
         \item{AllVariants :}{no GRangeList method available}
+      }
+    }
+    \item{Subject as GRanges :}{
+      The \code{subject} can be a \code{GRanges} for \code{FlankingVariants}
+      only. 
+      \describe{
+        \item{FlankingVariants :}{transcript regions}
       }
     }
     \item{Using the cache :}{
