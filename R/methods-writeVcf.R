@@ -36,18 +36,22 @@ setMethod(writeVcf, c("VCF", "character"),
     QUAL <- values(qual(obj))[["QUAL"]]
     QUAL[is.na(QUAL)] <- "."
     FILTER <- values(filt(obj))[["FILTER"]]
+    FILTER[is.na(FILTER)] <- "."
     INFO <- .makeVcfInfo(values(info(obj))[-1])
     GENO <- .makeVcfGeno(geno(obj))
-    dat <- c(CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, GENO)
-    lst <- split(dat, seq_len(nrow(obj)))
-    .pasteCollapse(CharacterList(lst), collapse="\t")
+    paste(CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, GENO[,1], GENO[,2],
+          sep = "\t")
 }
 
 .makeVcfID <- function(id, ...)
 {
-    idx <- grep(":", id, fixed=TRUE)
-    id[idx] <- "."
-    id
+    if (is.null(id))
+        "."
+    else {
+        idx <- grep(":", id, fixed=TRUE)
+        id[idx] <- "."
+        id
+    }
 }
 
 .makeVcfFormat <- function(geno, cls, idx, ...)
@@ -150,11 +154,9 @@ setMethod(writeVcf, c("VCF", "character"),
         }
     }, as.list(info), names(info), cls)
 
-    lapply(seq_len(length(map[[1]])), 
-        function(i, map) 
-        {
-            paste(unlist(lapply(map, "[", i), use.names=FALSE), collapse=";")
-        }, map)
+    if (length(map) > 0L)
+      do.call(paste, c(map, sep = ";"))
+    else rep.int(".", nrow(info))
 }
 
 .pasteCollapse <- rtracklayer:::pasteCollapse
