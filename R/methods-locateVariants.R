@@ -4,7 +4,7 @@
 
 ### The 8 defined variant regions :
 ### CodingVariants, IntronVariants, ThreeUTRVariants, FiveUTRVariants,
-### IntergenicVariants, SpliceSiteVariants, FlankingVariants, AllVariants
+### IntergenicVariants, SpliceSiteVariants, PromoterVariants, AllVariants
 ### 
 ### Each variant region has the following methods : 
 ### query %in% Ranges, VCF, GRanges
@@ -312,11 +312,11 @@ setMethod("locateVariants", c("GRanges", "GRangesList",
 )
 
 ### -------------------------------------------------------------------------
-## region = FlankingVariants 
-##
+### region = PromoterVariants 
+###
 
 setMethod("locateVariants", c("GRanges", "TranscriptDb",
-          "FlankingVariants"),
+          "PromoterVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE)
     { 
@@ -350,18 +350,13 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb",
     }
 )
 
-setMethod("locateVariants", c("GRanges", "GRanges", "FlankingVariants"),
+setMethod("locateVariants", c("GRanges", "GRanges", "PromoterVariants"),
     function(query, subject, region, ..., ignore.strand=FALSE)
     {
-        u <- flank(subject, upstream(region), use.names=FALSE) 
-        values(u) <- DataFrame(loc=rep("upstream", length(u)))
-        d <- flank(subject, upstream(region), start=FALSE, use.names=FALSE)
-        values(d) <- DataFrame(loc=rep("downstream", length(d)))
-        cmb <- c(u, d)
-        fo <- findOverlaps(query, cmb, type="within", 
+        pm <- promoters(subject, upstream(region), downstream(region))
+        fo <- findOverlaps(query, pm, type="within", 
                            ignore.strand=ignore.strand)
         if (length(fo) > 0) {
-            values(fo) <- DataFrame(loc=values(cmb)[subjectHits(fo), ])
             fo <- fo[order(queryHits(fo))]
             queryid <- queryHits(fo)
             if (!is.null(nms <- values(subject)[["tx_id"]]))
@@ -374,8 +369,7 @@ setMethod("locateVariants", c("GRanges", "GRanges", "FlankingVariants"),
             GRanges(seqnames=seqnames(query)[queryid],
                     ranges=IRanges(ranges(query)[queryid]),
                     strand=strand(query)[queryid],
-                    LOCATION=.location(length(queryid), NA,
-                        values(fo)$loc),
+                    LOCATION=.location(length(queryid), "promoter"), 
                     QUERYID=queryid,
                     TXID=as.integer(txid[subjectHits(fo)]),
                     CDSID=NA_integer_,
@@ -405,7 +399,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
         splice <- locateVariants(query, subject, SpliceSiteVariants(), 
                                  cache=cache, ignore.strand=ignore.strand)
         flanking <- locateVariants(query, subject,
-            FlankingVariants(upstream(region), downstream(region)), 
+            PromoterVariants(upstream(region), downstream(region)), 
             cache=cache, ignore.strand=ignore.strand)
 
         ## Consolidate calls for UTR data
@@ -440,14 +434,11 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
 ###
 
 .location <-
-    function(length=0, value=NA, custom=NULL)
+    function(length=0, value=NA)
 {
     levels <- c("spliceSite", "intron", "fiveUTR", "threeUTR",
-        "coding", "intergenic", "upstream", "downstream")
-    if (!is.null(custom))
-        factor(custom, levels=levels)
-    else
-        factor(rep(value, length), levels=levels)
+        "coding", "intergenic", "promoter")
+    factor(rep(value, length), levels=levels)
 }
 
 .spliceSites <- function(query, subject, ignore.strand, ...)

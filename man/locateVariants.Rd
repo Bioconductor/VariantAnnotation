@@ -20,8 +20,8 @@
 \alias{locateVariants,GRanges,GRangesList,IntergenicVariants-method}
 \alias{locateVariants,GRanges,TranscriptDb,SpliceSiteVariants-method}
 \alias{locateVariants,GRanges,GRangesList,SpliceSiteVariants-method}
-\alias{locateVariants,GRanges,TranscriptDb,FlankingVariants-method}
-\alias{locateVariants,GRanges,GRanges,FlankingVariants-method}
+\alias{locateVariants,GRanges,TranscriptDb,PromoterVariants-method}
+\alias{locateVariants,GRanges,GRanges,PromoterVariants-method}
 \alias{locateVariants,GRanges,TranscriptDb,AllVariants-method}
 \alias{locateVariants,GRanges,GRangesList,AllVariants-method}
 
@@ -40,7 +40,7 @@ locateVariants(query, subject, region, ...)
 \S4method{locateVariants}{GRanges,TranscriptDb,ThreeUTRVariants}(query, subject, region, ..., cache = new.env(parent=emptyenv()), ignore.strand = FALSE)
 \S4method{locateVariants}{GRanges,TranscriptDb,IntergenicVariants}(query, subject, region, ..., cache = new.env(parent=emptyenv()), ignore.strand = FALSE)
 \S4method{locateVariants}{GRanges,TranscriptDb,SpliceSiteVariants}(query, subject, region, ..., cache = new.env(parent=emptyenv()), ignore.strand = FALSE)
-\S4method{locateVariants}{GRanges,TranscriptDb,FlankingVariants}(query, subject, region, ..., cache = new.env(parent=emptyenv()), ignore.strand = FALSE)
+\S4method{locateVariants}{GRanges,TranscriptDb,PromoterVariants}(query, subject, region, ..., cache = new.env(parent=emptyenv()), ignore.strand = FALSE)
 \S4method{locateVariants}{GRanges,TranscriptDb,AllVariants}(query, subject, region, ..., cache = new.env(parent=emptyenv()), ignore.strand = FALSE)
 }
 
@@ -57,7 +57,7 @@ locateVariants(query, subject, region, ...)
   \item{region}{An instance of one of \code{CodingVariants},
     \code{IntronVariants}, \code{FiveUTRVariants}, \code{ThreeUTRVariants},
     \code{IntergenicVariants}, \code{SpliceSiteVariants},
-    \code{FlankingVariants}, \code{AllVariants}.
+    \code{PromoterVariants}, \code{AllVariants}.
     These objects are instantiated with no arguments, e.g., CodingVariants()
     will create an object of \code{CodingVariants}. 
   }
@@ -98,11 +98,12 @@ locateVariants(query, subject, region, ...)
       genes are give as the \code{PRECEDEID} and \code{FOLLOWID}.
 
       \sQuote{upstream} and \code{downstream} classifications are defined for 
-      the \code{FlankingVariants} class. These are the flanking regions on
-      either side of the start and end of the transcript region. They do not
-      contain any of the transcript region itself. Values can be modified
-      with the \code{upstream} and \code{downstream} getters and setters. 
-      Default values are 500.
+      the \code{PromoterVariants} class. Upstream is defined as up to but not
+      including the start of the transcript. The downstream region does include
+      the transcript start site. These regions are merged to form a single range 
+      with no gaps that defines the promoter region. Upstream and downstream
+      values can be modified with the \code{upstream} and \code{downstream} 
+      getters and setters.
     }
     \item{Subject as GRangesList :}{
       The \code{subject} can be a \code{TranscriptDb} or \code{GRangesList}
@@ -117,15 +118,15 @@ locateVariants(query, subject, region, ...)
         \item{ThreeUTRVariants :}{three prime UTR regions by transcript}
         \item{IntergenicVariants :}{transcript regions by gene}
         \item{SpliceSiteVariants :}{intron regions by transcript}
-        \item{FlankingVariants :}{no GRangeList method available}
+        \item{PromoterVariants :}{no GRangeList method available}
         \item{AllVariants :}{no GRangeList method available}
       }
     }
     \item{Subject as GRanges :}{
-      The \code{subject} can be a \code{GRanges} for \code{FlankingVariants}
+      The \code{subject} can be a \code{GRanges} for \code{PromoterVariants}
       only. 
       \describe{
-        \item{FlankingVariants :}{transcript regions}
+        \item{PromoterVariants :}{transcript regions}
       }
     }
     \item{Using the cache :}{

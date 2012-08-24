@@ -11,7 +11,7 @@
 \alias{ThreeUTRVariants-class}
 \alias{SpliceSiteVariants-class}
 \alias{IntergenicVariants-class}
-\alias{FlankingVariants-class}
+\alias{PromoterVariants-class}
 \alias{AllVariants-class}
 
 % Constructors for subclasses :
@@ -21,27 +21,27 @@
 \alias{ThreeUTRVariants}
 \alias{SpliceSiteVariants}
 \alias{IntergenicVariants}
-\alias{FlankingVariants}
+\alias{PromoterVariants}
 \alias{AllVariants}
 
 % accessors :
 \alias{upstream}
 \alias{upstream,AllVariants-method}
-\alias{upstream,FlankingVariants-method}
+\alias{upstream,PromoterVariants-method}
 \alias{upstream<-}
 \alias{upstream<-,AllVariants-method}
-\alias{upstream<-,FlankingVariants-method}
+\alias{upstream<-,PromoterVariants-method}
 \alias{downstream}
 \alias{downstream,AllVariants-method}
-\alias{downstream,FlankingVariants-method}
+\alias{downstream,PromoterVariants-method}
 \alias{downstream<-}
 \alias{downstream<-,AllVariants-method}
-\alias{downstream<-,FlankingVariants-method}
+\alias{downstream<-,PromoterVariants-method}
 
 % show method:
 \alias{show,VariantType-method}
 \alias{show,AllVariants-method}
-\alias{show,FlankingVariants-method}
+\alias{show,PromoterVariants-method}
 
 \title{VariantType subclasses}
 
@@ -57,8 +57,8 @@
     ThreeUTRVariants()
     SpliceSiteVariants()
     IntergenicVariants()
-    FlankingVariants(upstream = 500, downstream = 500)
-    AllVariants(upstream = 500, downstream = 500)
+    PromoterVariants(upstream = 2000, downstream = 200)
+    AllVariants(upstream = 2000, downstream = 200)
 }
 
 \details{
@@ -72,7 +72,7 @@
   the annotation to match) when calling \code{locateVariants}. 
 
   The majority of subclasses have no slots and require no arguments for an 
-  instance to be created. The two exceptions are \code{FlankingVariants} and 
+  instance to be created. The two exceptions are \code{PromoterVariants} and 
   \code{AllVariants}. These class have slots for the number of base pairs 
   \code{upstream} of the 5'-end and \code{downstream} of the 3'-end of the
   transcript region.
@@ -88,7 +88,7 @@
 }
 
 \section{Accessors}{
-  In the following code, \code{x} is a \code{FlankingVariants} or a
+  In the following code, \code{x} is a \code{PromoterVariants} or a
   \code{AllVariants} object.
   \describe{
     \item{}{
@@ -109,5 +109,5 @@
 \examples{
   CodingVariants()
   SpliceSiteVariants()
-  FlankingVariants(upstream=1000, downstream=10000)
+  PromoterVariants(upstream=1000, downstream=10000)
 }

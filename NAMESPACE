@@ -57,7 +57,7 @@ export(VCF, VCFHeader,
        VAFilterResult, dbSNPFilter, regionFilter, compose,
        duplicateRSID, globalToLocal, CodingVariants, IntronVariants,
        FiveUTRVariants, ThreeUTRVariants, IntergenicVariants,
-       SpliceSiteVariants, FlankingVariants, AllVariants,
+       SpliceSiteVariants, PromoterVariants, AllVariants,
        upstream, "upstream<-", downstream, "downstream<-")
 
 exportMethods(scanVcf, scanVcfHeader, ScanVcfParam,

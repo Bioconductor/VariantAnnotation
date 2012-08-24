@@ -20,7 +20,7 @@ setMethod("show", "AllVariants",
     }
 )
 
-setMethod("show", "FlankingVariants",
+setMethod("show", "PromoterVariants",
     function(object) 
     {
         cat("class:", class(object), "\n")
@@ -47,46 +47,58 @@ SpliceSiteVariants <- function() new("SpliceSiteVariants")
 
 ## Classes with getters and setters
 
-FlankingVariants <- function(upstream = 500, downstream = 500)
+PromoterVariants <- function(upstream=2000, downstream=200)
 {
-    if (any((upstream < 1)  | (downstream < 1)))
-        stop("'upstream' and 'downstream' must be integers > 0")
-    new("FlankingVariants", upstream=as.integer(upstream), 
-        downstream=as.integer(downstream))
+    if (!isSingleNumber(upstream))
+        stop("'upstream' must be a single integer")
+    if (!is.integer(upstream))
+        upstream <- as.integer(upstream)
+    if (!isSingleNumber(downstream))
+        stop("'downstream' must be a single integer")
+    if (!is.integer(downstream))
+        downstream <- as.integer(downstream)
+    new("PromoterVariants", upstream=upstream, 
+        downstream=downstream) 
 }
 
-setMethod("upstream", "FlankingVariants",
+setMethod("upstream", "PromoterVariants",
     function(x)
 {
     slot(x, "upstream")
 })
 
-setReplaceMethod("upstream", "FlankingVariants",
+setReplaceMethod("upstream", "PromoterVariants",
     function(x, value)
 {
     slot(x, "upstream") <- value
     x
 })
 
-setMethod("downstream", "FlankingVariants",
+setMethod("downstream", "PromoterVariants",
     function(x)
 {
     slot(x, "downstream")
 })
 
-setReplaceMethod("downstream", "FlankingVariants",
+setReplaceMethod("downstream", "PromoterVariants",
     function(x, value)
 {
     slot(x, "downstream") <- value
     x
 })
 
-AllVariants <- function(upstream = 500, downstream = 500)
+AllVariants <- function(upstream=2000L, downstream=200L)
 {
-    if (any((upstream < 1)  | (downstream < 1)))
-        stop("'upstream' and 'downstream' must be integers > 0")
-    new("AllVariants", upstream=as.integer(upstream), 
-        downstream=as.integer(downstream))
+    if (!isSingleNumber(upstream))
+        stop("'upstream' must be a single integer")
+    if (!is.integer(upstream))
+        upstream <- as.integer(upstream)
+    if (!isSingleNumber(downstream))
+        stop("'downstream' must be a single integer")
+    if (!is.integer(downstream))
+        downstream <- as.integer(downstream)
+    new("AllVariants", upstream=upstream, 
+        downstream=downstream) 
 }
 
 setMethod("upstream", "AllVariants",

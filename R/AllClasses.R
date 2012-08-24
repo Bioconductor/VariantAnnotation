@@ -138,17 +138,31 @@ setClass("FiveUTRVariants", contains="VariantType")
 
 setClass("SpliceSiteVariants", contains="VariantType")
 
-setClass("FlankingVariants", 
+setClass("PromoterVariants", 
     contains="VariantType",
     representation(upstream="numeric",
-                   downstream="numeric"
-    )
+                   downstream="numeric")
+)
+
+.promoterValidity <- function(object, ...)
+{
+    if (any((upstream(object) < 0)  | (downstream(object) < 0)))
+        return("'upstream' and 'downstream' must be integers >= 0")
+    TRUE 
+}
+
+setValidity("PromoterVariants",
+    function(object)
+        .promoterValidity(object)
 )
 
 setClass("AllVariants", 
     contains="VariantType",
     representation(upstream="numeric",
-                   downstream="numeric"
-    )
+                   downstream="numeric")
 )
 
+setValidity("AllVariants",
+    function(object)
+        .promoterValidity(object)
+)
