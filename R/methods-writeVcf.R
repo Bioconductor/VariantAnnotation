@@ -117,46 +117,41 @@ setAs("DNAStringSetList", "CharacterList", function(from) {
 
 .makeVcfInfo <- function(info, ...)
 {
-    cls <- lapply(info, class)
-    ## CompressedLists
-    cmp <- grep("Compressed", cls, fixed=TRUE)
-    for (i in cmp)
-        info[[i]] <- lapply(info[[i]], 
-            function(elt) 
-            {
-                if (all(is.na(elt))) 
-                    NA
-                else
-                    paste(as.list(elt), collapse=",")
-            }) 
-    ## arrays
-    arr <- which(cls == "array") 
-    for (i in arr) {
-        mat <- matrix(info[[i]], nrow=nrow(info[[i]]))
-        info[[i]] <- apply(mat, 1, 
-            function(elt) 
-            {
-                if (all(is.na(elt)))
-                    NA
-                else
-                    paste(elt, collapse=",")
-            })
-    }
-    map <- Map(function(elt, nms, cls) {
-        if (is(elt, "logical")) {
-            lapply(elt, function(x) if(x) nms)
-        } else {
-            lapply(elt, function(i) 
-                        {
-                            if (!is.na(i))
-                                paste(nms, "=", i, sep="")
-                        })
-        }
-    }, as.list(info), names(info), cls)
+    lists <- sapply(info, is, "list")
+    info[lists] <- lapply(info[lists], as, "List")
+    
+    lists <- sapply(info, is, "List")
+    info[lists] <- lapply(info[lists], function(l) {
+      charList <- as(l, "CharacterList")
+      charList[is.na(l)] <- "."
+      collapsed <- .pasteCollapse(charList, ",")
+      ifelse(sum(!is.na(l)) > 0L, collapsed, NA_character_)
+    })
+    
+    arrays <- sapply(info, is.array)
+    info[arrays] <- lapply(info[arrays], function(a) {
+      mat <- matrix(a, nrow = nrow(a))
+      charMat <- mat
+      charMat[is.na(mat)] <- "."
+      collapsed <- do.call(paste, as.data.frame(charMat), sep = ",")
+      ifelse(rowSums(!is.na(mat)) > 0L, NA_character_, collapsed)
+    })
 
-    if (length(map) > 0L)
-      do.call(paste, c(map, sep = ";"))
-    else rep.int(".", nrow(info))
+    logicals <- sapply(info, is.logical)
+    info[logicals] <- Map(function(l, nm) {
+      ifelse(l, nm, NA_character_)
+    }, info[logicals], as(names(info)[logicals], "List"))
+
+    info[!logicals] <- Map(function(i, nm) {
+      ifelse(!is.na(i), paste0(nm, "=", i), NA_character_)
+    }, info[!logicals], as(names(info)[!logicals], "List"))
+
+    infoMat <- as.matrix(info)
+    keep <- !is.na(infoMat)
+    infoRows <- factor(row(infoMat), seq_len(nrow(infoMat)))
+    infoList <- seqsplit(infoMat[keep], infoRows[keep])
+    infoList[elementLengths(infoList) == 0L] <- "."
+    .pasteCollapse(infoList, ";")
 }
 
 .pasteCollapse <- rtracklayer:::pasteCollapse
