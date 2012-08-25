@@ -9,8 +9,8 @@ License:     Artistic-2.0
 biocViews:   DataImport, Sequencing, HighThroughputSequencing, SNP,
              Annotation, Genetics, Homo_sapiens
 Depends:     R (>= 2.8.0), methods, GenomicRanges (>= 1.9.21), 
-             Rsamtools (>= 1.9.4)
-Imports:     methods, BiocGenerics (>= 0.1.0), IRanges (>= 1.15.42), 
+             Rsamtools (>= 1.9.4), IRanges (>= 1.15.42)
+Imports:     methods, BiocGenerics (>= 0.1.0), IRanges, 
              Biobase (>= 2.15.1), Rsamtools (>= 1.9.4),
              AnnotationDbi (>= 1.17.11), Biostrings (>= 2.25.2),
              zlibbioc, BSgenome, GenomicFeatures (>= 1.9.35), snpStats, DBI
