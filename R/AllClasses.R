@@ -140,8 +140,8 @@ setClass("SpliceSiteVariants", contains="VariantType")
 
 setClass("PromoterVariants", 
     contains="VariantType",
-    representation(upstream="numeric",
-                   downstream="numeric")
+    representation(upstream="integer",
+                   downstream="integer")
 )
 
 .promoterValidity <- function(object, ...)
@@ -158,8 +158,8 @@ setValidity("PromoterVariants",
 
 setClass("AllVariants", 
     contains="VariantType",
-    representation(upstream="numeric",
-                   downstream="numeric")
+    representation(upstream="integer",
+                   downstream="integer")
 )
 
 setValidity("AllVariants",

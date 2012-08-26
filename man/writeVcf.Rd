@@ -48,17 +48,17 @@
 }
 
 \examples{
-#  fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
-# 
-#  out1.vcf <- tempfile()
-#  out2.vcf <- tempfile() 
-#  in1 <- readVcf(fl, "hg19")
-#  writeVcf(in1, out1.vcf)
-#  in2 <- readVcf(out1.vcf, "hg19")
-#  writeVcf(in2, out2.vcf)
-#  in3 <- readVcf(out2.vcf, "hg19")
-#
-#  identical(in2, in3)
+  fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
+ 
+  out1.vcf <- tempfile()
+  out2.vcf <- tempfile() 
+  in1 <- readVcf(fl, "hg19")
+  writeVcf(in1, out1.vcf)
+  in2 <- readVcf(out1.vcf, "hg19")
+  writeVcf(in2, out2.vcf)
+  in3 <- readVcf(out2.vcf, "hg19")
+
+  identical(in2, in3)
 }
 
 \keyword{manip}
