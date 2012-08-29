@@ -9,13 +9,14 @@
 
 VCF <-
     function(rowData=GRanges(), colData=DataFrame(), exptData=SimpleList(), 
-             fixed=DataFrame(), info=DataFrame(), geno=SimpleList(),
+             fixed=DataFrame(row.names=1:length(rowData)), 
+             info=DataFrame(row.names=1:length(rowData)), geno=SimpleList(),
              ..., verbose=FALSE)
 {
     rownames(info) <- rownames(fixed) <- NULL
     new("VCF", fixed=fixed, info=info, assays=geno, rowData=rowData,
         colData=colData, exptData=exptData, ...)
- }
+}
  
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## Getters and Setters
@@ -136,6 +137,7 @@ setReplaceMethod("info", c("VCF", "DataFrame"),
     function(x, value)
 {
     slot(x, "info") <- value
+    validObject(x)
     x
 })
 
@@ -198,19 +200,20 @@ setReplaceMethod("strand", "VCF",
         j <- GenomicRanges:::.SummarizedExperiment.charbound(j, colnames(x), msg)
     }
 
-    geno <- endoapply(geno(x, withDimnames=FALSE), function(elt) {
-                  if (class(elt) == "array")
-                     elt[i, j, , drop=FALSE]
-                  else
-                     elt[i, j, drop=FALSE]
-              })
+    geno <- endoapply(geno(x, withDimnames=FALSE), 
+                function(elt) {
+                    if (class(elt) == "array")
+                       elt[i, j, , drop=FALSE]
+                    else
+                       elt[i, j, drop=FALSE]
+                })
  
     initialize(x, 
                rowData=rowData(x)[i,,drop=FALSE],
                colData=colData(x)[j,,drop=FALSE],
                assays=geno, 
-               info=values(info(x))[i,-1,drop=FALSE],
-               fixed=values(fixed(x))[i,-1])
+               info=slot(x, "info")[i,,drop=FALSE],
+               fixed=slot(x, "fixed")[i,,drop=FALSE])
 }
 
 setMethod("[", c("VCF", "ANY", "ANY"),
@@ -271,12 +274,12 @@ setMethod("[", c("VCF", "ANY", "ANY"),
                       x
                    }, x=a, value=v, ...)
                }), info=local({
-                   ii <- values(info(x))
-                   ii[i,] <- values(info(value))
+                   ii <- slot(x, "info")
+                   ii[i,] <- slot(value, "info")
                    ii 
                }), fixed=local({
-                   ff <- values(fixed(x)) 
-                   ff[i,] <- values(fixed(value)) 
+                   ff <- slot(x, "fixed") 
+                   ff[i,] <- slot(value, "fixed") 
                    ff})
               )
 }

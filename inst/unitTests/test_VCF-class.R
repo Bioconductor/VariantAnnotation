@@ -8,11 +8,12 @@ test_VCF_construction <- function() {
 
     ## substance
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
-    vcf <- readVcf(fl, genome="hg19") 
-    checkTrue(validObject(VCF(rowData=rowData(vcf), colData=colData(vcf), 
-        geno=geno(vcf), info=values(info(vcf)), 
-        fixed=values(fixed(vcf))))) 
-    checkIdentical("hg19", unique(genome(rowData(vcf)))) 
+    target <- readVcf(fl, genome="hg19")
+    current <- VCF(rowData=rowData(target), colData=colData(target),
+                   geno=geno(target), info=values(info(target)),
+                   fixed=values(fixed(target))) 
+    checkTrue(validObject(current)) 
+    checkIdentical("hg19", unique(genome(rowData(target)))) 
 }
 
 test_VCF_accessors <- function() {

@@ -111,16 +111,29 @@
     }
     \item{}{
       \code{fixed(x)}, \code{fixed(x) <- value}:
-      Returns or sets a \code{DataFrame} of the REF, ALT, QUAL, and FILTER fields 
-      from the VCF file. \code{value} must be a \code{DataFrame}.
+      The 'getter' returns the \code{GRanges} in the \code{rowData} slot 
+      with the REF, ALT, QUAL, and FILTER fields as metadata columns. If
+      the data were read in with \code{readVcf()} the \code{GRanges}
+      will have an additional metadata column called \code{paramRangeID}.
+      This column distinguishes ranges when a subset of data have been
+      read in from a VCF file.
+
+      The 'setter' sets the values in the \code{info} slot of the VCF. 
+      \code{value} must be a \code{DataFrame}.
     }
     \item{}{
       \code{info(x)}, \code{info(x) <- value}:
-      Returns or sets \code{info} data. Contains the information
-      stored in the INFO field of a VCF file. \code{value} must be a 
-      \code{DataFrame}. If no \code{info} fields are present the
-      \code{rowData} \code{GRanges} will be returned with no elementMetadata
-      columns. 
+      The 'getter' returns the \code{GRanges} in the \code{rowData} slot
+      with the INFO variables from the VCF file as metadata columns.
+      If the data were read in with \code{readVcf()} the \code{GRanges}
+      will have an additional metadata column called \code{paramRangeID}.
+      This column distinguishes ranges when a subset of data have been
+      read in from a VCF file.
+
+      The 'setter' sets the values in the \code{fixed} slot of the VCF.
+      \code{value} must be a \code{DataFrame}. If no \code{info} fields 
+      are present, the \code{rowData} \code{GRanges} will be returned
+      with no metadata columns. 
     }
     \item{}{
       \code{geno(x)}, \code{geno(x) <- value}:

@@ -31,12 +31,21 @@
         info <- lst$INFO
         sp <- split(unname(info), unique(names(info)))
         sp <- sp[unique(names(info))] 
-        lst[["INFO"]] <- lapply(sp, function(elt) {
-                             if (is(elt[[1]], "list"))
-                                 as.matrix(elt)
-                             else
-                                 do.call(c, elt)
-                         }) 
+        lst[["INFO"]] <- 
+            lapply(sp, function(elt) {
+                d <- dim(elt[[1]])
+                if (is(elt[[1]], "list")) {
+                    as.matrix(elt)
+                } else if (is(elt[[1]], "array") && !is.na(d[3])) {
+                    pc <- lapply(seq_len(d[2]), function(i) {
+                              do.call(rbind, lapply(elt, "[", ,i,)) 
+                          })
+                    array(do.call(c, pc), 
+                        c(length(lst[["rowData"]]), d[2], d[3]))
+                } else {
+                    do.call(c, elt)
+                }
+            }) 
         geno <- lst[["GENO"]]
         sp <- split(geno, unique(names(geno)))
         lst[["GENO"]] <- 
