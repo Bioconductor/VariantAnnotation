@@ -7,7 +7,7 @@ setClass("VCF",
     representation(
         fixed="DataFrame",
         info="DataFrame"
-    ),
+    )
 )
 
 .valid.VCF.fixed <- function(object)

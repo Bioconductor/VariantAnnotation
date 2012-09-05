@@ -14,8 +14,8 @@ VCF <-
              ..., verbose=FALSE)
 {
     rownames(info) <- rownames(fixed) <- NULL
-    new("VCF", fixed=fixed, info=info, assays=geno, rowData=rowData,
-        colData=colData, exptData=exptData, ...)
+    new("VCF", SummarizedExperiment(assays=geno, rowData=rowData,
+        colData=colData, exptData=exptData), fixed=fixed, info=info, ...)
 }
  
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -188,122 +188,63 @@ setReplaceMethod("strand", "VCF",
 ## Subsetting 
 ##
 
-.VCF.subset <-
-    function(x, i, j, ...)
-{
-    if (is.character(i)) {
-        msg <- "<VCF>[i,] index out of bounds: %s"
-        i <- GenomicRanges:::.SummarizedExperiment.charbound(i, rownames(x), msg)
-    }
-    if (is.character(j)) {
-        msg <- "<VCF>[,j] index out of bounds: %s"
-        j <- GenomicRanges:::.SummarizedExperiment.charbound(j, colnames(x), msg)
-    }
-
-    geno <- endoapply(geno(x, withDimnames=FALSE), 
-                function(elt) {
-                    if (class(elt) == "array")
-                       elt[i, j, , drop=FALSE]
-                    else
-                       elt[i, j, drop=FALSE]
-                })
- 
-    initialize(x, 
-               rowData=rowData(x)[i,,drop=FALSE],
-               colData=colData(x)[j,,drop=FALSE],
-               assays=geno, 
-               info=slot(x, "info")[i,,drop=FALSE],
-               fixed=slot(x, "fixed")[i,,drop=FALSE])
-}
-
 setMethod("[", c("VCF", "ANY", "ANY"),
     function(x, i, j, ..., drop=TRUE)
 {
     if (1L != length(drop) || (!missing(drop) && drop))
         warning("'drop' ignored '[,VCF,ANY,ANY-method'")
+
+    if (!missing(i) && is.character(i)) {
+        msg <- "<VCF>[i,] index out of bounds: %s"
+        i <- GenomicRanges:::.SummarizedExperiment.charbound(i, rownames(x), msg)
+    }
+
     if (missing(i) && missing(j)) {
         x
     } else if (missing(i)) {
-        if (nrow(x) == 0L)
-            i <- logical(0)
-        else
-            i <- TRUE
-        .VCF.subset(x, i, j, ...)
+        callNextMethod(x, , j, ...)
     } else if (missing(j)) {
-        if (ncol(x) == 0L)
-            j <- logical(0)
-        else
-            j <- TRUE
-        .VCF.subset(x, i, j, ...)
+        callNextMethod(x, i, , info=slot(x, "info")[i,,drop=FALSE],
+                       fixed=slot(x, "fixed")[i,,drop=FALSE], ...)
     } else {
-        .VCF.subset(x, i, j, ...)
+        callNextMethod(x, i, j, info=slot(x, "info")[i,,drop=FALSE],
+                       fixed=slot(x, "fixed")[i,,drop=FALSE], ...)
     }
 })
-
-.VCF.subsetassign <-
-    function(x, i, j, ..., value)
-{
-    if (is.character(i)) {
-        msg <- "<VCF>[i,]<- index out of bounds: %s"
-        i <- GenomicRanges:::.SummarizedExperiment.charbound(i, rownames(x), msg)
-    }
-    if (is.character(j)) {
-        msg <- "<VCF>[,j]<- index out of bounds: %s"
-        j <- GenomicRanges:::.SummarizedExperiment.charbound(j, colnames(x), msg)
-    }
-    initialize(x,
-               exptData=c(exptData(x), exptData(value)),
-               rowData=local({
-                   r <- rowData(x)
-                   r[i,] <- rowData(value)
-                   names(r)[i] <- names(rowData(value))
-                   r
-               }), colData=local({
-                   c <- colData(x)
-                   c[j,] <- colData(value)
-                   rownames(c)[j] <- rownames(colData(value))
-                   c
-               }), assays=local({
-                   a <- geno(x, withDimnames=FALSE)
-                   v <- geno(value, withDimnames=FALSE)
-                   mendoapply(function(x, ..., value) {
-                      if (class(x) == "array")
-                         x[i, j, ] <- value
-                      else
-                         x[i, j] <- value
-                      x
-                   }, x=a, value=v, ...)
-               }), info=local({
-                   ii <- slot(x, "info")
-                   ii[i,] <- slot(value, "info")
-                   ii 
-               }), fixed=local({
-                   ff <- slot(x, "fixed") 
-                   ff[i,] <- slot(value, "fixed") 
-                   ff})
-              )
-}
 
 setReplaceMethod("[",
     c("VCF", "ANY", "ANY", "VCF"),
     function(x, i, j, ..., value)
 {
+    if (!missing(i) && is.character(i)) {
+        msg <- "<VCF>[i,]<- index out of bounds: %s"
+        i <- GenomicRanges:::.SummarizedExperiment.charbound(i, rownames(x), msg)
+    }
+
     if (missing(i) && missing(j)) {
         x
     } else if (missing(i)) {
-        if (nrow(x) == 0L)
-            i <- logical(0)
-        else
-            i <- TRUE
-        .VCF.subsetassign(x, i, j, ..., value=value)
+        callNextMethod(x, , j, ..., value=value)
     } else if (missing(j)) {
-       if (ncol(x) == 0L)
-            j <- logical(0)
-        else
-            j <- TRUE
-        .VCF.subsetassign(x, i, j, ..., value=value)
+        callNextMethod(x, i, , info=local({
+            ii <- slot(x, "info")
+            ii[i,] <- slot(value, "info")
+            ii 
+        }), fixed=local({
+            ff <- slot(x, "fixed") 
+            ff[i,] <- slot(value, "fixed") 
+            ff
+        }), ..., value=value)
     } else {
-        .VCF.subsetassign(x, i, j, ..., value=value)
+        callNextMethod(x, i, j, info=local({
+            ii <- slot(x, "info")
+            ii[i,] <- slot(value, "info")
+            ii 
+        }), fixed=local({
+            ff <- slot(x, "fixed") 
+            ff[i,] <- slot(value, "fixed") 
+            ff
+        }), ..., value=value)
     }
 })
 

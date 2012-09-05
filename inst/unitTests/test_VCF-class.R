@@ -118,9 +118,15 @@ test_VCF_subset <- function()
     ss1 <- vcf 
     dimnames(ss1) <- list(LETTERS[seq_len(nrow(ss1))],
                           letters[seq_len(ncol(ss1))])
-    checkIdentical(ss1, ss1[TRUE,])
+    checkEquals(as(ss1, "SummarizedExperiment"),
+                as(ss1[TRUE,], "SummarizedExperiment"))
+    checkIdentical(fixed(ss1), fixed(ss1[TRUE,]))
+    checkIdentical(info(ss1), info(ss1[TRUE,]))
     checkIdentical(c(0L, ncol(ss1)), dim(ss1[FALSE,]))
-    checkIdentical(ss1, ss1[,TRUE])
+    checkEquals(as(ss1, "SummarizedExperiment"),
+                as(ss1[,TRUE], "SummarizedExperiment"))
+    checkIdentical(fixed(ss1), fixed(ss1[,TRUE]))
+    checkIdentical(info(ss1), info(ss1[,TRUE]))
     checkIdentical(c(nrow(ss1), 0L), dim(ss1[,FALSE]))
     idx <- c(TRUE, FALSE)               # recycling
     ss2 <- ss1[idx,]
