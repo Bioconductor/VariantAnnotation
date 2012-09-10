@@ -133,7 +133,7 @@ setAs("DNAStringSetList", "CharacterList", function(from) {
       mat <- matrix(a, nrow = nrow(a))
       charMat <- mat
       charMat[is.na(mat)] <- "."
-      collapsed <- do.call(paste, as.data.frame(charMat), sep = ",")
+      collapsed <- do.call(paste, c(as.data.frame(charMat), sep = ","))
       ifelse(rowSums(!is.na(mat)) > 0L, NA_character_, collapsed)
     })
 
