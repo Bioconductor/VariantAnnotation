@@ -62,7 +62,7 @@ export(VCF, VCFHeader,
 exportMethods(scanVcf, scanVcfHeader, ScanVcfParam,
               readVcf, readVcfLongForm, writeVcf,
               predictCoding, getTranscriptSeqs, refLocsToLocalLocs, 
-              MatrixToSnpMatrix, locateVariants,
+              MatrixToSnpMatrix, locateVariants, summarizeVariants,
 
               fixed, "fixed<-", ref, "ref<-", alt, "alt<-", qual, "qual<-",
               filt, "filt<-", info, "info<-", geno, "geno<-", strand, 

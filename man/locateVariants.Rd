@@ -21,7 +21,7 @@
 \alias{locateVariants,GRanges,TranscriptDb,SpliceSiteVariants-method}
 \alias{locateVariants,GRanges,GRangesList,SpliceSiteVariants-method}
 \alias{locateVariants,GRanges,TranscriptDb,PromoterVariants-method}
-\alias{locateVariants,GRanges,GRanges,PromoterVariants-method}
+\alias{locateVariants,GRanges,GRangesList,PromoterVariants-method}
 \alias{locateVariants,GRanges,TranscriptDb,AllVariants-method}
 \alias{locateVariants,GRanges,GRangesList,AllVariants-method}
 
@@ -58,8 +58,10 @@ locateVariants(query, subject, region, ...)
     \code{IntronVariants}, \code{FiveUTRVariants}, \code{ThreeUTRVariants},
     \code{IntergenicVariants}, \code{SpliceSiteVariants},
     \code{PromoterVariants}, \code{AllVariants}.
-    These objects are instantiated with no arguments, e.g., CodingVariants()
-    will create an object of \code{CodingVariants}. 
+    All objects are instantiated with no arguments, e.g., CodingVariants()
+    will create an object of \code{CodingVariants}. \code{AllVariants}
+    and \code{PromoterVariants} classes can be given \code{upstream}
+    and \code{downstram} arguments. 
   }
   \item{\dots}{Additional arguments passed to methods
   }
@@ -84,7 +86,7 @@ locateVariants(query, subject, region, ...)
     \item{Location :}{
       Possible locations are \sQuote{coding}, \sQuote{intron}, 
       \sQuote{threeUTR}, \sQuote{fiveUTR}, \sQuote{intergenic},
-      \sQuote{spliceSite}, \sQuote{upstream} or \sQuote{downstream}. 
+      \sQuote{spliceSite}, or \sQuote{promoter}. 
 
       Overlap operations for \sQuote{coding}, \sQuote{intron}, 
       \sQuote{threeUTR}, and \sQuote{fiveUTR} require variants to fall 
@@ -97,36 +99,25 @@ locateVariants(query, subject, region, ...)
       transcript associated with a gene. If available, gene IDs for the flanking 
       genes are give as the \code{PRECEDEID} and \code{FOLLOWID}.
 
-      \sQuote{upstream} and \code{downstream} classifications are defined for 
-      the \code{PromoterVariants} class. Upstream is defined as up to but not
-      including the start of the transcript. The downstream region does include
-      the transcript start site. These regions are merged to form a single range 
-      with no gaps that defines the promoter region. Upstream and downstream
-      values can be modified with the \code{upstream} and \code{downstream} 
-      getters and setters.
+      \sQuote{promoter} variants fall within a specified range upstream and 
+      downstream of the transcription start site. Ranges values can be set 
+      with the \code{upstream} and \code{downstream} arguments when creating
+      the \code{PromoterVariants()} or \code{AllVariants()} classes.
     }
     \item{Subject as GRangesList :}{
       The \code{subject} can be a \code{TranscriptDb} or \code{GRangesList}
       object. When using a \code{GRangesList} the type of data required
-      is driven by the \code{VariantType} class in the \code{region} argument.
-      Below is a description of the appropriate \code{GRangesList}
-      \code{subject} for each type of \code{region}. 
+      is driven by the \code{VariantType} class. Below is a description of 
+      the appropriate \code{GRangesList} for each \code{VariantType}. 
       \describe{
-        \item{CodingVariants :}{coding regions by transcript}
-        \item{IntronVariants :}{intron regions by transcript}
-        \item{FiveUTRVariants :}{five prime UTR regions by transcript}
-        \item{ThreeUTRVariants :}{three prime UTR regions by transcript}
-        \item{IntergenicVariants :}{transcript regions by gene}
-        \item{SpliceSiteVariants :}{intron regions by transcript}
-        \item{PromoterVariants :}{no GRangeList method available}
+        \item{CodingVariants :}{coding (CDS) by transcript}
+        \item{IntronVariants :}{introns by transcript}
+        \item{FiveUTRVariants :}{five prime UTR by transcript}
+        \item{ThreeUTRVariants :}{three prime UTR by transcript}
+        \item{IntergenicVariants :}{transcripts by gene}
+        \item{SpliceSiteVariants :}{introns by transcript}
+        \item{PromoterVariants :}{list of transcripts}
         \item{AllVariants :}{no GRangeList method available}
-      }
-    }
-    \item{Subject as GRanges :}{
-      The \code{subject} can be a \code{GRanges} for \code{PromoterVariants}
-      only. 
-      \describe{
-        \item{PromoterVariants :}{transcript regions}
       }
     }
     \item{Using the cache :}{
@@ -141,15 +132,15 @@ locateVariants(query, subject, region, ...)
   }
 }
 \value{
-  A \link[IRanges]{DataFrame} with a row for each variant-transcript match.
+  A \code{GRanges} object with a row for each variant-transcript match.
   Columns are \code{LOCATION}, \code{QUERYID}, \code{TXID}, \code{GENEID} and 
   \code{CDSID}. 
 
  \describe{
     \item{\code{LOCATION}}{
       Possible locations are \sQuote{coding}, \sQuote{intron}, 
-      \sQuote{threeUTR}, \sQuote{fiveUTR}, \sQuote{intergenic}, and
-      \sQuote{spliceSite}.
+      \sQuote{threeUTR}, \sQuote{fiveUTR}, \sQuote{intergenic},
+      \sQuote{spliceSite} and \sQuote{promoter}.
 
       To be classified as \sQuote{coding}, \sQuote{intron}, \sQuote{threeUTR} 
       or \sQuote{fiveUTR} the variant must fall completely within the region.
@@ -194,6 +185,7 @@ locateVariants(query, subject, region, ...)
 
 \seealso{
   \code{\link{readVcf}},
+  \code{\link{summarizeVariants}},
   \code{\link{predictCoding}}
 }
 
