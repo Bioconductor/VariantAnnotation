@@ -252,18 +252,6 @@ setReplaceMethod("[",
 ## Other methods 
 ##
 
-setMethod("genome", "VCF",
-    function(x)
-{
-    genome(rowData(x))
-})
-
-setMethod("seqlevels", "VCF",
-    function(x)
-{
-    seqlevels(rowData(x))
-})
-
 setMethod("renameSeqlevels",  c("VCF", "character"),
     function(x, value, ...)
 {
