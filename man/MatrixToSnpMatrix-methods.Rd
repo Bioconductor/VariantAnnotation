@@ -7,7 +7,7 @@
 
 \description{
   Convert a matrix of genotype calls from the "GT" FORMAT field of a VCF
-  file to a \linkS4class{SnpMatrix}.
+  file to a \link[snpStats]{SnpMatrix}.
 }
 
 \usage{MatrixToSnpMatrix(callMatrix, ref, alt, ...)}
@@ -27,7 +27,7 @@
 
 \details{
   \code{MatrixToSnpMatrix} converts a matrix of genotype calls from the 
-  "GT" FORMAT field of a VCF file into a \linkS4class{SnpMatrix}. The
+  "GT" FORMAT field of a VCF file into a \link[snpStats]{SnpMatrix}. The
   following caveats apply, 
 
   - no distinction is made between phased and unphased genotypes
@@ -42,9 +42,9 @@
   represent the alternate alleles (i.e., 2, 3, 4 would indicate the 2nd, 3rd
   or 4th allele in the ALT field for a particular variant). This function only 
   supports variants with a single alternate allele and therefore the alternate 
-  values will always be 1. Genotypes are stored in the \linkS4class{SnpMatrix} 
+  values will always be 1. Genotypes are stored in the \link[snpStats]{SnpMatrix} 
   as 0, 1, 2 or 3 where 0 = missing, 1 = "0/0", 2 = "0/1" or "1/0" and 
-  3 = "1/1". In \linkS4class{SnpMatrix} terminology, "A" is the reference allele 
+  3 = "1/1". In \link[snpStats]{SnpMatrix} terminology, "A" is the reference allele 
   and "B" is the risk allele. Equivalent statements to those made with 0 and 1 
   allele values would be 0 = missing, 1 = "A/A", 2 = "A/B" or "B/A" and 3 = "B/B".
 }
@@ -54,7 +54,7 @@
 
   \item{genotypes}{The output genotype data as an object of class 
     \code{"SnpMatrix"}. The columns are snps and the rows are the samples. See 
-    the help page for \linkS4class{SnpMatrix} for complete details of the class 
+    the help page for \link[snpStats]{SnpMatrix} for complete details of the class 
     structure.}
 
   \item{map}{A \code{DataFrame} giving the snp names and alleles at each locus.
@@ -69,31 +69,32 @@
 \seealso{
   \link{readVcf},
   \linkS4class{VCF},
-  \linkS4class{SnpMatrix}
+  \link[snpStats]{SnpMatrix}
 }
 
 \examples{
-  ## Read a vcf file into a VCF object
+  ## Read a vcf file into a VCF object.
   vcfFile <- system.file("extdata", "ex2.vcf", package="VariantAnnotation") 
   vcf <- readVcf(vcfFile, "hg19")
  
-  ## Genotype calls are stored in the assays slot and the
-  ## GRanges with the map information is in the rowData slot.
+  ## Genotype calls are stored in the assays slot.
+  ## Reference and alternate (variant) alleles are in ref and
+  ## alt slots.
   geno(vcf)
   calls <- geno(vcf)$GT
   a0 <- values(ref(vcf))[["REF"]]
   a1 <- values(alt(vcf))[["ALT"]]
   mat <- MatrixToSnpMatrix(calls, a0, a1)
 
-  ## The results is a list of length 2
+  ## The result is a list of length 2.
   names(mat)
 
-  ## Compare the original coding in the VCF file to the SnpMatrix coding
+  ## Compare original coding in the VCF file to the SnpMatrix coding.
   geno(vcf)$GT
   t(as(mat$genotype, "character"))
 
-  ## The 'ignore' column of the map list element indicates which variants 
-  ## were set to 'missing' as per the criteria stated in the details section 
+  ## The 'ignore' column of the map element indicates which variants 
+  ## were set to missing as per the criteria stated in the details section. 
   mat$map
 
   ## Variant rs6040355 was ignored because it has more than one alternate
@@ -102,7 +103,7 @@
   ## Variant chr20:1230237 was ignored because the alternate allele is not
   ## of length 1. 
 
-  ## View the reference and alternate alleles 
+  ## View the reference and alternate alleles. 
   fixed <- fixed(vcf)
   DataFrame(reference = values(fixed)[["REF"]], 
             alternate = CharacterList(as.list(values(fixed)[["ALT"]])),

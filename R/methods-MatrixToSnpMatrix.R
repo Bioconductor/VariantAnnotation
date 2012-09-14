@@ -4,16 +4,19 @@
 
 ## Coding for snpMatrix :
 ## 0 = missing OR multiallelic OR multi-ALT values
-## 1 = homozygous reference (0/0) 
-## 2 = heterozygous (0/1 or 1/0) 
-## 3 = homozygous alternate (risk) allele (1/1)
+## 1 = homozygous reference (0|0) 
+## 2 = heterozygous (0|1 or 1|0) 
+## 3 = homozygous alternate (risk) allele (1|1)
 
 setMethod("MatrixToSnpMatrix", c("matrix", "DNAStringSet", "DNAStringSetList"),
     function(callMatrix, ref, alt, ...)
 {
+    ok <- suppressWarnings(require("snpStats", quietly=TRUE, 
+                                   character.only=TRUE))
+    ok || stop("'snpStats' required; try biocLite('snpStats')", call.=FALSE) 
+
     map <- setNames(sapply(c(0, 1, 2, 2, 3), as.raw),
                     c(".|.", "0|0", "0|1", "1|0", "1|1"))
-
     diploid <- callMatrix %in% names(map)
     if (!all(diploid)) {
         warning("non-diploid variants are set to NA")

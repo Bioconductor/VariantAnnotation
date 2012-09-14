@@ -46,7 +46,7 @@
 
 % Subset methods
 \alias{[,VCF-method}
-\alias{[,VCF,ANY,ANY,ANY-method}
+\alias{[,VCF,ANY,ANY-method}
 \alias{[<-,VCF,ANY,ANY,VCF-method}
 
 % Other methods

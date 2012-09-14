@@ -44,8 +44,6 @@ importMethodsFrom(DBI, dbCommit, dbConnect, dbDisconnect, dbExistsTable,
 
 importClassesFrom(BSgenome, BSgenome)
 
-importClassesFrom(snpStats, SnpMatrix)
-
 #exportPattern("^[^\\.]")
 
 exportClassPattern("^.*$")
