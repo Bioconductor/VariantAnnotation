@@ -27,7 +27,7 @@ setMethod("ref", "VCF",
     function(x) 
 {
     gr <- rowData(x)
-    if (length(slot(x, "fixed")$REF) != 0L)
+    if (!is.null(slot(x, "fixed")$REF))
         values(gr) <- append(values(gr), 
             DataFrame(REF=slot(x, "fixed")$REF))
     gr
@@ -45,7 +45,7 @@ setMethod("alt", "VCF",
     function(x) 
 {
     gr <- rowData(x)
-    if (length(slot(x, "fixed")$ALT) != 0L)
+    if (!is.null(slot(x, "fixed")$ALT))
         values(gr) <- append(values(gr),
             DataFrame(ALT=slot(x, "fixed")$ALT))
     gr
