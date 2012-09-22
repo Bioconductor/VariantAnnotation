@@ -3,8 +3,11 @@
 ### =========================================================================
 
 setMethod(writeVcf, c("VCF", "character"),
-    function(obj, filename, ...)
+    function(obj, filename, index = FALSE)
 {
+    if (!isTRUEorFALSE(index))
+        stop("'index' must be TRUE or FALSE")
+    
     hdr <- .makeVcfHeader(obj)
     mat <- .makeVcfMatrix(obj)
  
@@ -13,6 +16,15 @@ setMethod(writeVcf, c("VCF", "character"),
     writeLines(mat, con)
  
     close(con)
+
+    if (index) {
+        filenameGZ <- bgzip(filename, overwrite = TRUE)
+        indexTabix(filenameGZ, format = "vcf")
+        unlink(filename)
+        invisible(filenameGZ)
+    } else {
+        invisible(filename)
+    }
 })
 
 ### FIXME: move to Biostrings
@@ -40,7 +52,10 @@ setAs("DNAStringSetList", "CharacterList", function(from) {
     FILTER[is.na(FILTER)] <- "."
     INFO <- .makeVcfInfo(values(info(obj))[-1])
     GENO <- .makeVcfGeno(geno(obj))
-    paste(CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, GENO[,1], GENO[,2],
+    FORMAT <- GENO[,1]
+    GENO <- GENO[,-1,drop=FALSE]
+    genoPasted <- do.call(paste, c(split(GENO, col(GENO)), sep = "\t"))
+    paste(CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, FORMAT, genoPasted,
           sep = "\t")
 }
 
@@ -56,10 +71,11 @@ setAs("DNAStringSetList", "CharacterList", function(from) {
 }
 
 .makeVcfFormatMatrix <- function(geno, cls, idx) {
-### FIXME: this seem wrong; idx can be of length > 0, but [[ is used
-  if (length(idx) > 0) 
-    geno[[idx]] <- matrix(unlist(geno[[idx]], use.names=FALSE), 
-                          nrow=nrow(geno[[idx]]))
+  if (length(idx) > 0) {
+    geno[idx] <- seqapply(geno[idx], function(x) {
+      matrix(unlist(x, use.names=FALSE), nrow(x), prod(tail(dim(x), -1)))
+    })
+  }
   
   do.call(cbind, Map(function(elt, nms) {
 ### Should be discussed, but it seems like if we have a list matrix,
@@ -67,7 +83,7 @@ setAs("DNAStringSetList", "CharacterList", function(from) {
     if (is.list(elt))
       haveData <- elementLengths(elt) > 0
     else haveData <- rowSums(!is.na(elt)) > 0
-    ifelse(haveData, nms, NA_character_)
+    as.character(ifelse(haveData, nms, NA_character_))
   }, as.list(geno), names(geno)))
 }
 
@@ -96,27 +112,32 @@ setAs("DNAStringSetList", "CharacterList", function(from) {
 
     genoMat <- matrix(unlist(as.list(geno), use.names = FALSE,
                              recursive = FALSE),
-                      nsub * nrec)
+                      nsub * nrec, length(geno))
 
     ## convert NA values to '.' and get a simple character matrix
-    genoMatFlat <- unlist(genoMat)
+    genoMatFlat <- as.character(unlist(genoMat))
     genoMatFlat[is.na(genoMatFlat)] <- "."
     if (is.list(genoMat)) {
       genoMatList <- relist(genoMatFlat, PartitioningByEnd(genoMat))
       genoMatFlat <- .pasteCollapse(genoMatList, ",")
-      genoMat <- matrix(genoMatFlat, dim(genoMat)[1])
+      genoMat <- matrix(genoMatFlat, nrow(genoMat), ncol(genoMat))
     } else genoMat <- genoMatFlat
 
-    formatMatPerSub <- t(matrix(rep(t(formatMat), nsub), nrec))
+    formatMatPerSub <- matrix(rep(t(formatMat), nsub), nsub * nrec,
+                              length(geno), byrow = TRUE)
     keep <- !is.na(formatMatPerSub)
     genoListBySub <- seqsplit(genoMat[keep], row(genoMat)[keep])
-    genoMatCollapsed <- matrix(.pasteCollapse(genoListBySub, ":"), nrec)
+    genoMatCollapsed <- matrix(.pasteCollapse(genoListBySub, ":"), nrec, nsub)
     
     cbind(FORMAT, genoMatCollapsed)
 }
 
 .makeVcfInfo <- function(info, ...)
 {
+    if (ncol(info) == 0) {
+      return(rep.int(".", nrow(info)))
+    }
+    
     lists <- sapply(info, is, "list")
     info[lists] <- lapply(info[lists], as, "List")
     
@@ -147,6 +168,7 @@ setAs("DNAStringSetList", "CharacterList", function(from) {
     }, info[!logicals], as(names(info)[!logicals], "List"))
 
     infoMat <- as.matrix(info)
+    mode(infoMat) <- "character"
     keep <- !is.na(infoMat)
     infoRows <- factor(row(infoMat), seq_len(nrow(infoMat)))
     infoList <- seqsplit(infoMat[keep], infoRows[keep])

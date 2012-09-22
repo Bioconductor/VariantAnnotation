@@ -8,7 +8,7 @@
 \description{Write Variant Call Format (VCF) files - under construction - }
 
 \usage{
-  \S4method{writeVcf}{VCF,character}(obj, filename, ...)
+  \S4method{writeVcf}{VCF,character}(obj, filename, index = FALSE, ...)
 }
 
 \arguments{
@@ -18,6 +18,7 @@
   \item{filename}{The character() name of the VCF file to be
     written out.
   }
+  \item{index}{Whether to bgzip the output file and generate a tabix index.}
   \item{\dots}{Additional arguments, passed to methods.
   }
 }
