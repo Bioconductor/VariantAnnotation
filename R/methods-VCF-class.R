@@ -74,7 +74,7 @@ setMethod("qual", "VCF",
     function(x) 
 {
     gr <- rowData(x)
-    if (length(slot(x, "fixed")$QUAL) != 0L)
+    if (!is.null(slot(x, "fixed")$QUAL))
         values(gr) <- append(values(gr), 
             DataFrame(QUAL=slot(x, "fixed")$QUAL))
     gr
@@ -92,7 +92,7 @@ setMethod("filt", "VCF",
     function(x) 
 {
     gr <- rowData(x)
-    if (length(slot(x, "fixed")$FILTER) != 0L)
+    if (!is.null(slot(x, "fixed")$FILTER))
         values(gr) <- append(values(gr), 
             DataFrame(FILTER=slot(x, "fixed")$FILTER))
     gr
