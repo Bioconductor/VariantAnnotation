@@ -22,6 +22,36 @@ test_readVcf_format <- function()
     checkIdentical(values(qual(vcf))[["QUAL"]], c(NA, 6, 6, 12, 23, 14, 11))
 }
 
+test_readVcf_unspecified_INFO_FORMAT <- function()
+{
+    ## 'INFO' or 'FORMAT' fields contain values not in header
+    fl <- system.file(package="VariantAnnotation", "unitTests",
+                      "cases", "unspecified_INFO_FORMAT_fields.vcf")
+    warn <- NULL
+    vcf <- withCallingHandlers({
+        readVcf(fl, "hg19")
+    }, warning=function(w) {
+        warn <<- append(warn, conditionMessage(w))
+        invokeRestart("muffleWarning")
+    })
+    exp <- c("record 2 (and others?) INFO 'XX' not found",
+             "record 4 (and others?) FORMAT 'YY' not found")
+    checkIdentical(exp, warn)
+
+    ## columns immediately after XX entries
+    checkIdentical(exp, warn)
+    exp <- c(14L, 11L, 10L, 13L, 9L)
+    checkIdentical(exp, info(vcf)$DP)
+    exp <- list(0.5, 0.017, c(0.333, 0.667), NA_real_, NA_real_)
+    checkIdentical(exp, as(info(vcf)$AF, "list"))
+
+    ## columns immediately after FORMAT entries
+    exp <- c("0|0", "0/1", "0|0", "0/2", "0/0", "1/1")
+    checkIdentical(exp, as.vector(geno(vcf)$GT[4:5,]))
+    exp <- c(56L, NA, 51L, NA, NA, NA, 60L, NA, 51L, NA, NA, NA)
+    checkIdentical(exp, as.vector(geno(vcf)$HQ[4:5,,]))
+}
+
 test_readVcf_ranges <- function()
 {
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")

@@ -5,6 +5,7 @@
 #include "dna_hash.h"
 #include "utilities.h"
 #include "IRanges_interface.h"
+#include "samtools/khash.h"
 
 enum { ROWDATA_IDX = 0, REF_IDX, ALT_IDX, QUAL_IDX, FILTER_IDX,
        INFO_IDX, GENO_IDX };
@@ -13,12 +14,44 @@ enum { POS_IDX = 0, ID_IDX };
 static const int N_FLDS = 7;
 static const int TBX_INIT_SIZE = 32767;
 
+KHASH_SET_INIT_STR(WARNINGS)
+
+static khash_t(WARNINGS) *vcfwarn_new()
+{
+    return kh_init(WARNINGS);
+}
+
+static void vcfwarn(khash_t(WARNINGS) *warnings, const int idx,
+		     const char *field, const char *key)
+{
+    char *buf = Calloc(strlen(field) + strlen(key) + 1, char);
+    sprintf(buf, "%s%s", field, key);
+    if (kh_get(WARNINGS, warnings, buf) != kh_end(warnings)) {
+	Free(buf);
+	return;
+    }
+    int ret;
+    kh_put(WARNINGS, warnings, buf, &ret);
+    Rf_warning("record %d (and others?) %s '%s' not found", idx,
+	       field, key);
+}
+
+static void vcfwarn_free(khash_t(WARNINGS) *warnings)
+{
+    khiter_t key;
+    for (key = kh_begin(warnings); key != kh_end(warnings); ++key)
+	if (kh_exist(warnings, key))
+	    Free(kh_key(warnings, key));
+    kh_destroy(WARNINGS, warnings);
+}
+
 struct parse_t {
     struct vcftype_t *vcf;
     struct rle_t *chrom;
     struct dna_hash_t *ref;
     int vcf_n, imap_n, gmap_n, samp_n, *gmapidx;
     const char **inms, **gnms;
+    khash_t(WARNINGS) *warnings;
 };
 
 static struct vcftype_t *_types_alloc(const int vcf_n, const int col_n,
@@ -158,9 +191,10 @@ static void _parse(char *line, const int irec,
                 if (0L == strcmp(ikey, inms[imapidx]))
                     break;
             }
-            if (imap_n == imapidx)
-                Rf_error("record %d INFO '%s' not found", idx + 1,
-                         ikey);
+            if (imap_n == imapidx) {
+		vcfwarn(parse->warnings, idx + 1, "INFO", ikey);
+		continue;
+	    }
 
             elt = info->u.list[imapidx];
             if (LGLSXP == elt->type) {
@@ -182,8 +216,7 @@ static void _parse(char *line, const int irec,
                 break;
         }
         if (gmap_n == j)
-            Rf_error("record %d field %d FORMAT '%s' not found",
-                     irec + 1, fmtidx + 1, field);
+	    vcfwarn(parse->warnings, irec + 1, "FORMAT", field);
         gmapidx[fmtidx] = j;
     }
 
@@ -193,6 +226,8 @@ static void _parse(char *line, const int irec,
          '\0' != *sample; sample = it_next(&it0), sampleidx++) {
         for (field = it_init(&it2, sample, ':'), fmtidx = 0;
              '\0' != *field; field = it_next(&it2), fmtidx++) {
+	    if (gmap_n == gmapidx[fmtidx])
+		continue;	/* unknown FORMAT */
             elt = geno->u.list[ gmapidx[fmtidx] ];
             idx = irec * samp_n + sampleidx;
             _vcftype_set(elt, idx, field);
@@ -307,6 +342,8 @@ static struct parse_t *_parse_new(int vcf_n, SEXP sample, SEXP fmap,
     parse->chrom = rle_new(parse->vcf_n);
     parse->ref = dna_hash_new(parse->vcf_n);
 
+    parse->warnings = vcfwarn_new();
+
     return parse;
 }
 
@@ -314,6 +351,7 @@ static void _parse_free(struct parse_t *parse)
 {
     rle_free(parse->chrom);
     dna_hash_free(parse->ref);
+    vcfwarn_free(parse->warnings);
     Free(parse);
 }
 
