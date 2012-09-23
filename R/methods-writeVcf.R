@@ -3,7 +3,7 @@
 ### =========================================================================
 
 setMethod(writeVcf, c("VCF", "character"),
-    function(obj, filename, index = FALSE)
+    function(obj, filename, index = FALSE, ...)
 {
     if (!isTRUEorFALSE(index))
         stop("'index' must be TRUE or FALSE")
