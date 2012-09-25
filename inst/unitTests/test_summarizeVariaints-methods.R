@@ -1,25 +1,19 @@
 grl <- GRangesList(
-    A1=GRanges("20", IRanges(14370, width=1)),
+    A=GRanges("20", IRanges(14370, 17331)),
     B=GRanges("20", IRanges(17330, width=1)),
-    A2=GRanges("20", IRanges(14370, width=2)),
-    C1=GRanges("20", IRanges(1110696, width=1)), 
-    C2=GRanges("20", IRanges(1110696, width=2)), 
-    C3=GRanges("20", IRanges(1110696, width=3))) 
+    C=GRanges("20", IRanges(1110696, width=1)), 
+    D=GRanges("20", IRanges(1110696, width=2)))
 
-test_summarizeOverlaps_findOverlaps <- function()
+test_summarizeOverlaps_ <- function()
 {
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
     vcf <- readVcf(fl, "hg19")
     sv <- summarizeVariants(grl, vcf, findOverlaps)
-    current <- unname(colSums(assays(sv)$counts))
-    target <- c(3, 6, 5)
-    checkIdentical(current, target) 
+    checkIdentical(ncol(vcf), ncol(sv))
+    checkIdentical(length(grl), nrow(sv))
 
-    genes <- factor(c("A", "B", "A", "C", "C", "C"))
-    sv <- summarizeVariants(grl, vcf, findOverlaps, subjectFactor=genes)
-    current <- unname(colSums(assays(sv)$counts))
-    target <- c(1, 3, 2)
+    target <- matrix(c(0, 0, 1, 1, 2, 1, 1, 1, 1, 0, 1, 1), ncol=3)
+    current <- unname(assays(sv)$counts)
     checkIdentical(current, target) 
-    checkTrue(nrow(assays(sv)$counts) == length(levels(genes)))
 }
 

@@ -15,28 +15,36 @@
 ### methods applicable to all variant regions 
 ###
 
-setMethod("locateVariants", c("Ranges", "TranscriptDb", "ANY"),
-    function(query, subject, region, ..., cache=new.env(parent=emptyenv()))
+setMethod("locateVariants", c("Ranges", "TranscriptDb", "VariantType"),
+    function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
+             ignore.strand=FALSE, asHits=FALSE)
 {
-    callGeneric(as(query, "GRanges"), subject, region, ..., cache=cache)
-})
-setMethod("locateVariants", c("Ranges", "GRangesList", "ANY"),
-    function(query, subject, region, ..., cache=new.env(parent=emptyenv()))
-{
-    callGeneric(as(query, "GRanges"), subject, region, ..., cache=cache)
+    callGeneric(as(query, "GRanges"), subject, region, ..., cache=cache,
+        ignore.strand=ignore.strand, asHits=asHits)
 })
 
-setMethod("locateVariants", c("VCF", "TranscriptDb", "ANY"),
-    function(query, subject, region, ..., cache=new.env(parent=emptyenv()))
+setMethod("locateVariants", c("Ranges", "GRangesList", "VariantType"),
+    function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
+             ignore.strand=FALSE, asHits=FALSE)
 {
-    callGeneric(rowData(query), subject, region, 
-                ..., cache=cache)
+    callGeneric(as(query, "GRanges"), subject, region, ..., cache=cache,
+        ignore.strand=ignore.strand, asHits=asHits)
 })
-setMethod("locateVariants", c("VCF", "GRangesList", "ANY"),
-    function(query, subject, region, ..., cache=new.env(parent=emptyenv()))
+
+setMethod("locateVariants", c("VCF", "TranscriptDb", "VariantType"),
+    function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
+             ignore.strand=FALSE, asHits=FALSE)
 {
-    callGeneric(rowData(query), subject, region, 
-                ..., cache=cache)
+    callGeneric(rowData(query), subject, region, ..., cache=cache,
+        ignore.strand=ignore.strand, asHits=asHits)
+})
+
+setMethod("locateVariants", c("VCF", "GRangesList", "VariantType"),
+    function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
+             ignore.strand=FALSE, asHits=FALSE)
+{
+    callGeneric(rowData(query), subject, region, ..., cache=cache,
+        ignore.strand=ignore.strand, asHits=asHits)
 })
 
 ### -------------------------------------------------------------------------
@@ -45,7 +53,7 @@ setMethod("locateVariants", c("VCF", "GRangesList", "ANY"),
 
 setMethod("locateVariants", c("GRanges", "TranscriptDb", "CodingVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
-             ignore.strand=FALSE)
+             ignore.strand=FALSE, asHits=FALSE)
     {
         queryseq <- seqlevels(query)
         subseq <- seqlevels(subject)
@@ -60,20 +68,24 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "CodingVariants"),
         ## for width(ranges) == 0 : de-increment start to equal end value 
         if (any(insertion <- width(query) == 0))
             start(query)[insertion] <- start(query)[insertion] - 1
-
         if (!exists("cdsbytx", cache, inherits=FALSE))
             cache[["cdsbytx"]] <- cdsBy(subject)
-        res <- callGeneric(query, cache[["cdsbytx"]], region, ...,
-                           ignore.strand=ignore.strand)
-        mcols(res)$GENEID <- select(subject, mcols(res)$TXID, "GENEID", "TXID") 
-        res
+        res <- callGeneric(query, cache[["cdsbytx"]], region, ..., 
+            ignore.strand=ignore.strand, asHits=asHits)
+        if (class(res) == "Hits") {
+            res
+        } else {
+            mcols(res)$GENEID <- select(subject, mcols(res)$TXID, "GENEID", "TXID") 
+            res
+        }
     }
 )
 
 setMethod("locateVariants", c("GRanges", "GRangesList", "CodingVariants"),
-    function(query, subject, region, ..., ignore.strand=FALSE)
+    function(query, subject, region, ..., ignore.strand=FALSE, asHits=FALSE)
     {
-        .makeResult(query, subject, "coding", ignore.strand=ignore.strand)
+        .makeResult(query, subject, "coding", ignore.strand=ignore.strand,
+            asHits=asHits)
     }
 )
 
@@ -83,7 +95,7 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "CodingVariants"),
 
 setMethod("locateVariants", c("GRanges", "TranscriptDb", "IntronVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
-             ignore.strand=FALSE)
+             ignore.strand=FALSE, asHits=FALSE)
     {
         queryseq <- seqlevels(query)
         subseq <- seqlevels(subject)
@@ -102,17 +114,21 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "IntronVariants"),
         if (!exists("intbytx", cache, inherits=FALSE))
             cache[["intbytx"]] <- intronsByTranscript(subject)
         res <- callGeneric(query, cache[["intbytx"]], region, ...,
-                           ignore.strand=ignore.strand)
-        mcols(res)$GENEID <- select(subject, mcols(res)$TXID, "GENEID", "TXID") 
-        res
+            ignore.strand=ignore.strand, asHits=asHits)
+        if (class(res) == "Hits") {
+            res
+        } else {
+            mcols(res)$GENEID <- select(subject, mcols(res)$TXID, "GENEID", "TXID") 
+            res
+        }
     }
 )
 
-
 setMethod("locateVariants", c("GRanges", "GRangesList", "IntronVariants"),
-    function(query, subject, region, ..., ignore.strand=FALSE)
+    function(query, subject, region, ..., ignore.strand=FALSE, asHits=FALSE)
     {
-        .makeResult(query, subject, "intron", ignore.strand=ignore.strand)
+        .makeResult(query, subject, "intron", ignore.strand=ignore.strand,
+            asHits=asHits)
     }
 )
 
@@ -122,7 +138,7 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "IntronVariants"),
 
 setMethod("locateVariants", c("GRanges", "TranscriptDb", "ThreeUTRVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
-             ignore.strand=FALSE)
+             ignore.strand=FALSE, asHits=FALSE)
     {
         queryseq <- seqlevels(query)
         subseq <- seqlevels(subject)
@@ -141,16 +157,19 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "ThreeUTRVariants"),
         if (!exists("threeUTRbytx", cache, inherits=FALSE))
             cache[["threeUTRbytx"]] <- threeUTRsByTranscript(subject)
         res <- callGeneric(query, cache[["threeUTRbytx"]], region, ...,
-                           ignore.strand=ignore.strand)
-        mcols(res)$GENEID <- select(subject, mcols(res)$TXID, "GENEID", "TXID") 
-        res
+            ignore.strand=ignore.strand, asHits=asHits)
+        if (is(res, "GenomicRanges")) {
+            mcols(res)$GENEID <- select(subject, mcols(res)$TXID, "GENEID", "TXID") 
+            res
+        }
     }
 )
 
 setMethod("locateVariants", c("GRanges", "GRangesList", "ThreeUTRVariants"),
-    function(query, subject, region, ..., ignore.strand=FALSE)
+    function(query, subject, region, ..., ignore.strand=FALSE, asHits=FALSE)
     {
-        .makeResult(query, subject, "threeUTR", ignore.strand=ignore.strand)
+        .makeResult(query, subject, "threeUTR", ignore.strand=ignore.strand,
+                    asHits=asHits)
     }
 )
 
@@ -160,7 +179,7 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "ThreeUTRVariants"),
 
 setMethod("locateVariants", c("GRanges", "TranscriptDb", "FiveUTRVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
-             ignore.strand=FALSE)
+             ignore.strand=FALSE, asHits=FALSE)
     {
         queryseq <- seqlevels(query)
         subseq <- seqlevels(subject)
@@ -179,16 +198,19 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "FiveUTRVariants"),
         if (!exists("fiveUTRbytx", cache, inherits=FALSE))
             cache[["fiveUTRbytx"]] <- fiveUTRsByTranscript(subject)
         res <- callGeneric(query, cache[["fiveUTRbytx"]], region, ...,
-                           ignore.strand=ignore.strand)
-        mcols(res)$GENEID <- select(subject, mcols(res)$TXID, "GENEID", "TXID") 
-        res
+            ignore.strand=ignore.strand, asHits=asHits)
+        if (is(res, "GenomicRanges")) {
+            mcols(res)$GENEID <- select(subject, mcols(res)$TXID, "GENEID", "TXID") 
+            res
+        }
     }
 )
 
 setMethod("locateVariants", c("GRanges", "GRangesList", "FiveUTRVariants"),
-    function(query, subject, region, ..., ignore.strand=FALSE)
+    function(query, subject, region, ..., ignore.strand=FALSE, asHits=FALSE)
     {
-        .makeResult(query, subject, "fiveUTR", ignore.strand=ignore.strand)
+        .makeResult(query, subject, "fiveUTR", ignore.strand=ignore.strand,
+            asHits=asHits)
     }
 )
 
@@ -218,8 +240,8 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb",
         if (!exists("txbygene", cache, inherits=FALSE))
             cache[["txbygene"]] <- transcriptsBy(subject, "gene")
 
-        callGeneric(query, cache[["txbygene"]], region, ...,
-                    ignore.strand=ignore.strand)
+        callGeneric(query, cache[["txbygene"]], region, ..., 
+            ignore.strand=ignore.strand)
     }
 )
 
@@ -234,10 +256,9 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "IntergenicVariants"),
 ## region = SpliceSiteVariants 
 ##
 
-setMethod("locateVariants", c("GRanges", "TranscriptDb",
-          "SpliceSiteVariants"),
+setMethod("locateVariants", c("GRanges", "TranscriptDb", "SpliceSiteVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
-             ignore.strand=FALSE)
+             ignore.strand=FALSE, asHits=FALSE)
     {
         queryseq <- seqlevels(query)
         subseq <- seqlevels(subject)
@@ -256,17 +277,18 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb",
         if (!exists("intbytx", cache, inherits=FALSE))
             cache[["intbytx"]] <- intronsByTranscript(subject)
         res <- callGeneric(query, cache[["intbytx"]], region, ...,
-                           ignore.strand=ignore.strand)
-        mcols(res)$GENEID <- select(subject, mcols(res)$TXID, "GENEID", "TXID") 
-        res
+            ignore.strand=ignore.strand, asHits=asHits)
+        if (is(res, "GenomicRanges")) {
+            mcols(res)$GENEID <- select(subject, mcols(res)$TXID, "GENEID", "TXID") 
+            res
+        }
     }
 )
 
-setMethod("locateVariants", c("GRanges", "GRangesList", 
-          "SpliceSiteVariants"),
-    function(query, subject, region, ..., ignore.strand=FALSE)
+setMethod("locateVariants", c("GRanges", "GRangesList", "SpliceSiteVariants"),
+    function(query, subject, region, ..., ignore.strand=FALSE, asHits=FALSE)
     {
-        .spliceSites(query, subject, ignore.strand=ignore.strand)
+        .spliceSites(query, subject, ignore.strand=ignore.strand, asHits=asHits)
     }
 )
 
@@ -274,10 +296,9 @@ setMethod("locateVariants", c("GRanges", "GRangesList",
 ### region = PromoterVariants 
 ###
 
-setMethod("locateVariants", c("GRanges", "TranscriptDb",
-          "PromoterVariants"),
+setMethod("locateVariants", c("GRanges", "TranscriptDb", "PromoterVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
-             ignore.strand=FALSE)
+             ignore.strand=FALSE, asHits=FALSE)
     { 
         queryseq <- seqlevels(query)
         subseq <- seqlevels(subject)
@@ -295,26 +316,33 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb",
 
         if (!exists("tx", cache, inherits=FALSE))
             cache[["tx"]] <- transcripts(subject)
-        callGeneric(query, cache[["tx"]], region, ..., 
-                    ignore.strand=ignore.strand)
-        mcols(res)$GENEID <- select(subject, mcols(res)$TXID, "GENEID", "TXID") 
-        res
+        callGeneric(query, cache[["tx"]], region, ...,
+            ignore.strand=ignore.strand, asHits=asHits)
+        if (is(res, "GenomicRanges")) {
+            mcols(res)$GENEID <- select(subject, mcols(res)$TXID, "GENEID", "TXID") 
+            res
+        }
     }
 )
 
 setMethod("locateVariants", c("GRanges", "GRangesList", "PromoterVariants"),
-    function(query, subject, region, ..., ignore.strand=FALSE)
+    function(query, subject, region, ..., ignore.strand=FALSE, asHits=FALSE)
     {
+
         if (is.null(txid <- names(subject)))
             txid <- NA_integer_
-        subject <- unlist(subject, use.names=FALSE)
-        pm <- promoters(subject, upstream(region), downstream(region))
+        usub <- unlist(subject, use.names=FALSE)
+        pm <- promoters(usub, upstream(region), downstream(region))
         fo <- findOverlaps(query, pm, type="within", 
-                           ignore.strand=ignore.strand)
+            ignore.strand=ignore.strand)
+
+        if (asHits)
+            return(.consolidateHits(fo, length(query), length(subject),
+                elementLengths(subject)))
+
         if (length(fo) > 0) {
             fo <- fo[order(queryHits(fo))]
             queryid <- queryHits(fo)
-
             GRanges(seqnames=seqnames(query)[queryid],
                     ranges=IRanges(ranges(query)[queryid]),
                     strand=strand(query)[queryid],
@@ -342,15 +370,14 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
              ignore.strand=FALSE)
     {
         coding <- locateVariants(query, subject, CodingVariants(), cache=cache,
-                                 ignore.strand=ignore.strand)
+            ignore.strand=ignore.strand)
         intron <- locateVariants(query, subject, IntronVariants(), cache=cache,
-                                 ignore.strand=ignore.strand)
+            ignore.strand=ignore.strand)
         splice <- locateVariants(query, subject, SpliceSiteVariants(), 
-                                 cache=cache, ignore.strand=ignore.strand)
+            cache=cache, ignore.strand=ignore.strand)
         promoter <- locateVariants(query, subject,
-                                   PromoterVariants(upstream(region), 
-                                                    downstream(region)), 
-                                   cache=cache, ignore.strand=ignore.strand)
+            PromoterVariants(upstream(region), downstream(region)), 
+            cache=cache, ignore.strand=ignore.strand)
 
         ## Consolidate calls for UTR data
         if (!exists("fiveUTRbytx", cache, inherits=FALSE)) {
@@ -364,11 +391,11 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
                 GenomicFeatures:::.make5UTRsByTranscript(txdb, splicings)
 
         fiveUTR <- locateVariants(query, subject, FiveUTRVariants(), 
-                                  cache=cache, ignore.strand=ignore.strand)
+            cache=cache, ignore.strand=ignore.strand)
         threeUTR <- locateVariants(query, subject, ThreeUTRVariants(), 
-                                   cache=cache, ignore.strand=ignore.strand)
+            cache=cache, ignore.strand=ignore.strand)
         intergenic <- locateVariants(query, subject, IntergenicVariants(), 
-                                     cache=cache, ignore.strand=ignore.strand)
+            cache=cache, ignore.strand=ignore.strand)
 
         base <- c(coding, intron, fiveUTR, threeUTR, splice, promoter)
         PRECEDEID <- FOLLOWID <- rep(NA_character_, length(base))
@@ -391,7 +418,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
     factor(rep(value, length), levels=levels)
 }
 
-.spliceSites <- function(query, subject, ignore.strand, ...)
+.spliceSites <- function(query, subject, ignore.strand, asHits, ...)
 {
     ## overlap any portion of first 2 and last 2 nucleotides of introns
     usub <- unlist(subject, use.names=FALSE)
@@ -405,10 +432,12 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
         ignore.strand=ignore.strand)
     fo <- union(fo_start, fo_end)
 
+    if (asHits)
+        return(.consolidateHits(fo, length(query), length(subject),
+            elementLengths(subject))) 
     if (length(fo) > 0) {
-        queryid <- queryHits(fo)
         txid <- rep(names(subject), elementLengths(subject))
-
+        queryid <- queryHits(fo)
         GRanges(seqnames=seqnames(query)[queryid],
                 ranges=IRanges(ranges(query)[queryid]),
                 strand=strand(query)[queryid],
@@ -424,6 +453,18 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
                                  GENEID=character())
         res
     }
+}
+
+.consolidateHits <- function(hits, qlen, slen, elen, ...)
+{
+    txid <- rep(seq_len(slen), elen)
+    dat <- cbind(queryHits(hits), as.integer(txid[subjectHits(hits)]))
+    unq <- dat[!duplicated(dat),]
+    return(new("Hits", 
+           queryHits=unq[,1], 
+           subjectHits=unq[,2],
+           queryLength=qlen, 
+           subjectLength=slen)) 
 }
 
 .intergenic <- function(query, subject, ignore.strand, ...)
@@ -456,10 +497,16 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
     }
 }
 
-.makeResult <- function(query, subject, vtype, ignore.strand, ...)
+.makeResult <- function(query, subject, vtype, ignore.strand, asHits)
 {
-    usub <- unlist(subject, use.names=FALSE)
-    fo <- findOverlaps(query, usub, type="within", ignore.strand=ignore.strand)
+    if (asHits) {
+        return(findOverlaps(query, subject, type="within", 
+            ignore.strand=ignore.strand))
+    } else {
+        usub <- unlist(subject, use.names=FALSE)
+        fo <- findOverlaps(query, usub, type="within", 
+            ignore.strand=ignore.strand)
+    }
     if (length(fo) > 0) {
         queryid <- queryHits(fo)
         txid <- rep(names(subject), elementLengths(subject))

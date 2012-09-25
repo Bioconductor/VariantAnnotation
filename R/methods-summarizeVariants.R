@@ -3,109 +3,88 @@
 ### =========================================================================
 
 setMethod("summarizeVariants", c("TranscriptDb", "VCF", "CodingVariants"),
-    function(subject, query, mode, ...)
+    function(query, subject, mode, ...)
 {
-    grl <- cdsBy(subject, "tx")
-    callGeneric(grl, query, mode, ...)
+    grl <- cdsBy(query, "tx")
+    callGeneric(grl, subject, mode, ...)
 })
 
 setMethod("summarizeVariants", c("TranscriptDb", "VCF", "FiveUTRVariants"),
-    function(subject, query, mode, ...)
+    function(query, subject, mode, ...)
 {
-    grl <- fiveUTRsByTranscript(subject) 
-    callGeneric(grl, query, mode, ...)
+    grl <- fiveUTRsByTranscript(query) 
+    callGeneric(grl, subject, mode, ...)
 })
 
 setMethod("summarizeVariants", c("TranscriptDb", "VCF", "ThreeUTRVariants"),
-    function(subject, query, mode, ...)
+    function(query, subject, mode, ...)
 {
-    grl <- threeUTRsByTranscript(subject) 
-    callGeneric(grl, query, mode, ...)
+    grl <- threeUTRsByTranscript(query) 
+    callGeneric(grl, subject, mode, ...)
 })
 
 setMethod("summarizeVariants", c("TranscriptDb", "VCF", "SpliceSiteVariants"),
-    function(subject, query, mode, ...)
+    function(query, subject, mode, ...)
 {
-    grl <- intronsByTranscript(subject) 
-    callGeneric(grl, query, mode, ...)
+    grl <- intronsByTranscript(query) 
+    callGeneric(grl, subject, mode, ...)
 })
 
 setMethod("summarizeVariants", c("TranscriptDb", "VCF", "IntronVariants"),
-    function(subject, query, mode, ...)
+    function(query, subject, mode, ...)
 {
-    grl <- intronsByTranscript(subject) 
-    callGeneric(grl, query, mode, ...)
+    grl <- intronsByTranscript(query) 
+    callGeneric(grl, subject, mode, ...)
 })
 
 setMethod("summarizeVariants", c("TranscriptDb", "VCF", "PromoterVariants"),
-    function(subject, query, mode, ...)
+    function(query, subject, mode, ...)
 {
-    gr <- transcripts(subject, columns="tx_id")
+    gr <- transcripts(query, columns="tx_id")
     grl <- splitAsList(gr, seq_len(length(gr))) 
     names(grl) <- mcols(gr)$tx_id
-    callGeneric(grl, query, mode, ...)
+    callGeneric(grl, subject, mode, ...)
 })
 
-setMethod("summarizeVariants", c("GRangesList", "VCF", "ANY"),
-    function(subject, query, mode, ..., subjectFactor=factor(seq_len(length(subject))))
+setMethod("summarizeVariants", c("GRangesList", "VCF", "VariantType"),
+    function(query, subject, mode, ...)
 {
-    if (length(subjectFactor) != length(subject))
-        stop("'subjectFactor' must be the same length as 'subject'")
-    if (any(na <- is.na(subjectFactor))) {
-        warning("NA 'subjectFactor' levels were removed")
-        subject <- subject[!na]
-        subjectFactor <- subjectFactor[!na]
-    } 
-    if (!is.factor(subjectFactor))
-        subjectFactor <- factor(subjectFactor)
-    if (length(geno(query)) == 0L) {
+    callGeneric(query, subject, mode=locateVariants, ..., region=mode, 
+        asHits=TRUE)
+})
+
+setMethod("summarizeVariants", c("GRangesList", "VCF", "function"),
+    function(query, subject, mode, ...)
+{
+    if (length(geno(subject)) == 0L) {
         warning("No genotypes found in 'query'.")
         return(.baseSE(query, subject))
     }
-
-    if (is.function(mode)) {
-    ## findOverlaps() 
-        ct <- mode(rowData(query), subject, ...)
-        if (length(ct) == 0L)
+    ## count
+    hits <- mode(rowData(subject), query, ...)
+        if (length(hits) == 0L)
             return(.baseSE(query, subject))
-        hits <- unique(data.frame(queryHits(ct),
-                       subjectFactor[subjectHits(ct)])) 
-    } else {
-    ## locateVariants() 
-        ct <- locateVariants(rowData(query), subject, mode, ...)
-        if (length(ct) == 0L)
-            return(.baseSE(query, subject))
-        subid <- match(ct$TXID, names(subject))
-        hits <- unique(data.frame(ct$QUERYID, subjectFactor[subid]))
-    }
-
-    ## relist data to reflect subjectFactor
-    if (identical(subjectFactor, factor(seq_len(length(subject)))))
-        rd <- subject 
-    else
-        rd <- splitAsList(subject@unlistData, 
-                          rep(subjectFactor, elementLengths(subject)))
 
     ## genotypes
     na <- c("0|0", "0/0", "./.", ".|.")
-    gtype <- as.numeric(!(geno(query)$GT[unique(hits[,1]),]) %in% na)
+    vcf_geno <- geno(subject)$GT[unique(queryHits(hits)), ]
+    gtype <- as.numeric(!vcf_geno %in% na)
 
-    ## summarize variants factor-by-sample 
-    facbyvar <- table(hits[,2], hits[,1])
-    varbysamp <- matrix(gtype, ncol=ncol(query))
-    facbysamp <- facbyvar %*% varbysamp
+    ## summarize counts factor-by-sample 
+    fac_x_var <- table(subjectHits(hits), queryHits(hits))
+    var_x_smp <- matrix(gtype, ncol=ncol(subject))
+    fac_x_smp <- fac_x_var %*% var_x_smp
 
-    SummarizedExperiment(rowData=rd, colData=colData(query), 
-                         exptData=exptData(query),
-                         assays=SimpleList(counts=facbysamp))
+    SummarizedExperiment(rowData=query[unique(subjectHits(hits))], 
+                         colData=colData(subject), 
+                         exptData=exptData(subject),
+                         assays=SimpleList(counts=fac_x_smp))
 })
 
 .baseSE <- function(query, subject, ...)
 {
-    SummarizedExperiment(
-        rowData=subject,
-        colData=colData(query),
-        exptData=exptData(query),
-        assays=SimpleList(counts=matrix(NA_integer_, 
-            nrow=length(subject), ncol=ncol(query))))
+    SummarizedExperiment(rowData=query, colData=colData(subject),
+                         exptData=exptData(subject),
+                         assays=SimpleList(counts=matrix(NA_integer_, 
+                             nrow=length(query), ncol=ncol(subject))))
 }

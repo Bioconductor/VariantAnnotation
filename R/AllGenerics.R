@@ -32,8 +32,8 @@ setGeneric("locateVariants", signature = c("query", "subject", "region"),
 ### summarizeVariants 
 ###
 
-setGeneric("summarizeVariants", signature = c("subject", "query", "mode"),
-    function(subject, query, mode, ...)
+setGeneric("summarizeVariants", signature = c("query", "subject", "mode"),
+    function(query, subject, mode, ...)
         standardGeneric("summarizeVariants")
 )
 

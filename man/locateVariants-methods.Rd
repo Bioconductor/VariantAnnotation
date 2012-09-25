@@ -1,12 +1,12 @@
 \name{locateVariants}
 \alias{locateVariants}
 
-\alias{locateVariants,Ranges,TranscriptDb,ANY-method}
-\alias{locateVariants,Ranges,GRangesList,ANY-method}
-\alias{locateVariants,GRanges,TranscriptDb,ANY-method}
-\alias{locateVariants,GRanges,GRangesList,ANY-method}
-\alias{locateVariants,VCF,TranscriptDb,ANY-method}
-\alias{locateVariants,VCF,GRangesList,ANY-method}
+\alias{locateVariants,Ranges,TranscriptDb,VariantType-method}
+\alias{locateVariants,Ranges,GRangesList,VariantType-method}
+\alias{locateVariants,GRanges,TranscriptDb,VariantType-method}
+\alias{locateVariants,GRanges,GRangesList,VariantType-method}
+\alias{locateVariants,VCF,TranscriptDb,VariantType-method}
+\alias{locateVariants,VCF,GRangesList,VariantType-method}
 
 \alias{locateVariants,GRanges,TranscriptDb,CodingVariants-method}
 \alias{locateVariants,GRanges,GRangesList,CodingVariants-method}
@@ -31,17 +31,8 @@
 
 \usage{
 locateVariants(query, subject, region, ...)
-\S4method{locateVariants}{VCF,TranscriptDb,ANY}(query, subject, region, ..., cache = new.env(parent=emptyenv()))
-\S4method{locateVariants}{Ranges,TranscriptDb,ANY}(query, subject, region, ..., cache = new.env(parent=emptyenv()))
-\S4method{locateVariants}{GRanges,TranscriptDb,ANY}(query, subject, region, ..., cache = new.env(parent=emptyenv()))
-\S4method{locateVariants}{GRanges,TranscriptDb,CodingVariants}(query, subject, region, ..., cache = new.env(parent=emptyenv()), ignore.strand = FALSE)
-\S4method{locateVariants}{GRanges,TranscriptDb,IntronVariants}(query, subject, region, ..., cache = new.env(parent=emptyenv()), ignore.strand = FALSE)
-\S4method{locateVariants}{GRanges,TranscriptDb,FiveUTRVariants}(query, subject, region, ..., cache = new.env(parent=emptyenv()), ignore.strand = FALSE)
-\S4method{locateVariants}{GRanges,TranscriptDb,ThreeUTRVariants}(query, subject, region, ..., cache = new.env(parent=emptyenv()), ignore.strand = FALSE)
-\S4method{locateVariants}{GRanges,TranscriptDb,IntergenicVariants}(query, subject, region, ..., cache = new.env(parent=emptyenv()), ignore.strand = FALSE)
-\S4method{locateVariants}{GRanges,TranscriptDb,SpliceSiteVariants}(query, subject, region, ..., cache = new.env(parent=emptyenv()), ignore.strand = FALSE)
-\S4method{locateVariants}{GRanges,TranscriptDb,PromoterVariants}(query, subject, region, ..., cache = new.env(parent=emptyenv()), ignore.strand = FALSE)
-\S4method{locateVariants}{GRanges,TranscriptDb,AllVariants}(query, subject, region, ..., cache = new.env(parent=emptyenv()), ignore.strand = FALSE)
+\S4method{locateVariants}{VCF,TranscriptDb,VariantType}(query, subject, region, ..., cache=new.env(parent=emptyenv()), ignore.strand=FALSE, asHits=FALSE)
+\S4method{locateVariants}{GRanges,TranscriptDb,VariantType}(query, subject, region, ..., cache=new.env(parent=emptyenv()), ignore.strand=FALSE, asHits=FALSE)
 }
 
 \arguments{
@@ -54,10 +45,10 @@ locateVariants(query, subject, region, ...)
     \link[GenomicFeatures]{TranscriptDb} objects with 
     \code{makeTranscriptDbFromGFF()} in the \code{GenomicFeatures} package.
   }
-  \item{region}{An instance of one of \code{CodingVariants},
-    \code{IntronVariants}, \code{FiveUTRVariants}, \code{ThreeUTRVariants},
-    \code{IntergenicVariants}, \code{SpliceSiteVariants},
-    \code{PromoterVariants}, \code{AllVariants}.
+  \item{region}{An instance of one of the 8 VariantType classes :
+    \code{CodingVariants}, \code{IntronVariants}, \code{FiveUTRVariants}, 
+    \code{ThreeUTRVariants}, \code{IntergenicVariants}, 
+    \code{SpliceSiteVariants}, \code{PromoterVariants}, \code{AllVariants}.
     All objects are instantiated with no arguments, e.g., CodingVariants()
     will create an object of \code{CodingVariants}. \code{AllVariants}
     and \code{PromoterVariants} classes can be given \code{upstream}
@@ -72,6 +63,10 @@ locateVariants(query, subject, region, ...)
   }
   \item{ignore.strand}{A \code{logical} indicating if strand should be
     igored when performing overlaps.
+  }
+  \item{asHits}{A \code{logical} indicating if the results should be 
+    returned as a \link[IRanges]{Hits} object. Not applicable when
+    \code{region} is AllVariants or IntergenicVariants.
   }
 }
 
@@ -238,20 +233,22 @@ locateVariants(query, subject, region, ...)
   ## --------------------------------
   ## Using the cache 
   ## --------------------------------
-  ## myenv <- new.env()
-  ## files <- list(vcf1, vcf2, vcf3)
-  ## lapply(files, 
-  ##        function(fl) 
-  ##        {
-  ##            vcf <- readVcf(fl, "hg19")
-  ##            ## modify seqlevels to match TxDb
-  ##            oldnms <- seqlevels(vcf)
-  ##            newnms <- paste("chr", oldnms, sep="")
-  ##            names(newnms) <- oldnms
-  ##            vcf_mod <- renameSeqlevels(vcf, newnms)
-  ##            locateVariants(vcf_mod, txdb, AllVariants(), cache=myenv)
-  ##        }
-  ## ) 
+  \dontrun{
+   myenv <- new.env()
+   files <- list(vcf1, vcf2, vcf3)
+   lapply(files, 
+          function(fl) 
+          {
+              vcf <- readVcf(fl, "hg19")
+              ## modify seqlevels to match TxDb
+              oldnms <- seqlevels(vcf)
+              newnms <- paste("chr", oldnms, sep="")
+              names(newnms) <- oldnms
+              vcf_mod <- renameSeqlevels(vcf, newnms)
+              locateVariants(vcf_mod, txdb, AllVariants(), cache=myenv)
+          }
+   ) 
+  }
 }
 
 \keyword{methods}

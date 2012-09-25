@@ -1,33 +1,31 @@
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene 
-
 cdsbytx <- cdsBy(txdb)
 intbytx <- intronsByTranscript(txdb)
 txbygene <- transcriptsBy(txdb, "gene")
-gr <- GRanges("chr22", 
-              IRanges(c(16268137, 16287254, 16190792, 16164570,
-                        18209442, 18121652, 24314750, 25508661), 
-                      width=c(1,1,1,1,3,3,2,2)),
-              strand=c("-", "-", "-", "+", "+", "+", "+", "+"))
+
+gr <- GRanges("chr22", IRanges(c(16268137, 16287254, 16190792, 16164570,
+    18209442, 18121652, 24314750, 25508661), width=c(1,1,1,1,3,3,2,2)),
+    strand=c("-", "-", "-", "+", "+", "+", "+", "+"))
  
 test_locateVariants_subject <- function()
 {
     cols <- c("LOCATION", "QUERYID", "TXID", "CDSID")
     loc1 <- locateVariants(gr, txdb, CodingVariants())
     loc2 <- locateVariants(gr, cdsbytx, CodingVariants())
-    checkIdentical(values(loc1)[ ,cols], values(loc2)[ ,cols])
+    checkIdentical(mcols(loc1)[ ,cols], mcols(loc2)[ ,cols])
  
     loc1 <- locateVariants(gr, txdb, IntronVariants())
     loc2 <- locateVariants(gr, intbytx, IntronVariants())
-    checkIdentical(values(loc1)[ ,cols], values(loc2)[ ,cols])
+    checkIdentical(mcols(loc1)[ ,cols], mcols(loc2)[ ,cols])
 
     loc1 <- locateVariants(gr, txdb, SpliceSiteVariants())
     loc2 <- locateVariants(gr, intbytx, SpliceSiteVariants())
-    checkIdentical(values(loc1)[ ,cols], values(loc2)[ ,cols])
+    checkIdentical(mcols(loc1)[ ,cols], mcols(loc2)[ ,cols])
  
     loc1 <- locateVariants(gr, txdb, IntergenicVariants())
     loc2 <- locateVariants(gr, txbygene, IntergenicVariants())
-    checkIdentical(values(loc1)[ ,cols], values(loc2)[ ,cols])
+    checkIdentical(mcols(loc1)[ ,cols], mcols(loc2)[ ,cols])
 }
 
 test_locateVariants_query <- function()
@@ -40,25 +38,40 @@ test_locateVariants_query <- function()
     checkIdentical(loc1, loc2) 
 }
 
-test_locateVariants_strand <- function()
+test_locateVariants_ignore.strand <- function()
 {
     gr <- GRanges("chr1", IRanges(c(12190, 12595, 13403), width=1), "-")
     loc1 <- locateVariants(gr, cdsbytx, CodingVariants(), 
                            ignore.strand=TRUE)
-    checkIdentical(c(1L, 2L, 3L), values(loc1)[["QUERYID"]]) 
+    checkIdentical(c(1L, 2L, 3L), mcols(loc1)$QUERYID) 
     loc2 <- locateVariants(gr, cdsbytx, CodingVariants(), 
                            ignore.strand=FALSE)
-    checkIdentical(integer(), values(loc2)[["QUERYID"]]) 
+    checkIdentical(integer(), mcols(loc2)$QUERYID) 
     loc1 <- locateVariants(gr, cdsbytx, SpliceSiteVariants(), 
                            ignore.strand=TRUE)
-    checkIdentical(c(1L, 2L, 3L), values(loc1)[["QUERYID"]]) 
+    checkIdentical(c(1L, 2L, 3L), mcols(loc1)$QUERYID) 
     loc2 <- locateVariants(gr, cdsbytx, SpliceSiteVariants(), 
                            ignore.strand=FALSE)
-    checkIdentical(integer(), values(loc2)[["QUERYID"]]) 
+    checkIdentical(integer(), mcols(loc2)$QUERYID) 
 }
 
-.extract <- function(x, col) as.vector(values(x)[[col]])
-test_PromoterVariants <- function()
+test_locateVariants_asHits <- function()
+{
+    gr <- GRanges("chr1", IRanges(c(12190, 69091, 13403), width=1))
+    loc <- locateVariants(gr, cdsbytx, CodingVariants())
+    hit <- locateVariants(gr, cdsbytx, CodingVariants(), asHits=TRUE)
+    ## annotation element 
+    loc_nms <- as.character(mcols(loc)$TXID)
+    hit_nms <- names(cdsbytx[subjectHits(hit)])
+    checkIdentical(loc_nms, hit_nms) 
+
+    ## Hits lengths
+    checkIdentical(length(gr), queryLength(hit))
+    checkIdentical(length(cdsbytx), subjectLength(hit))
+}
+
+.extract <- function(x, col) as.vector(mcols(x)[[col]])
+test_locateVariants_PromoterVariants <- function()
 {
     s <- GRangesList(GRanges("chr1", IRanges(10, width=11), "+"),
                      GRanges("chr1", IRanges(30, width=11) , "+"))
@@ -94,3 +107,4 @@ test_PromoterVariants <- function()
     current <- locateVariants(q, s, PromoterVariants(0, 0))
     checkTrue(length(current) == 0L)
 }
+
