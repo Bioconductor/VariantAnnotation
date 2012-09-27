@@ -83,9 +83,10 @@
 }
 
 \section{Accessors}{
-  In the following code snippets \code{x} is a VCF object. All accessors except
-  \code{geno} return the data as elementMetadata column(s) of the \code{rowData} 
-  \code{GRanges} object. The \code{geno} accessor returns a \code{SimpleList}.
+  In the following code snippets \code{x} is a VCF object. The \code{info} and
+  \code{fixed} accessors returns the data as elementMetadata column(s) of the 
+  \code{rowData} \code{GRanges} object. The \code{geno} accessor returns a 
+  \code{SimpleList}.
 
   \describe{
     \item{}{
@@ -310,12 +311,11 @@
   fl <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
   vcf <- readVcf(fl, genome="hg19")
 
-  ## Access all 'fixed' fields with fixed and individual fixed fields with
-  ## ref, alt, qual and filt accessors
-  fixed(vcf)
+  ## Extract individual 'fixed' fields with ref, alt, qual and filt accessors
+  qual(vcf)
   ref(vcf)
 
-  ##  Extract 'fixed', 'info' and 'geno' fields 
+  ## Extract 'fixed', 'info' and 'geno' fields 
   head(fixed(vcf))
   head(info(vcf))
   geno(vcf)

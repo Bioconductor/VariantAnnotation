@@ -265,9 +265,7 @@ setMethod(scanVcf, c("connection", "missing"),
 {
     if (0L != length(x[[1]]$INFO)) {
         info <- info(hdr) 
-        if (0L == length(info)) {
-            warning("'INFO' vcf header info not found in file")
-        } else {
+        if (0L != length(info)) {
             x <- lapply(x, function(elt, id, n, type) {
                 elt[["INFO"]] <- .unpackVcfInfo(elt[["INFO"]], id, n, type)
                 elt
@@ -277,9 +275,7 @@ setMethod(scanVcf, c("connection", "missing"),
 
     if (0L != length(unlist(x[[1]]$GENO, use.names=FALSE))) {
         geno <- geno(hdr) 
-        if (0L == length(geno)) {
-            warning("'FORMAT' vcf header info not found in file")
-        } else {
+        if (0L != length(geno)) {
             x <- lapply(x, function(elt, id, n, type) {
                 elt[["GENO"]] <- .unpackVcfTag(elt[["GENO"]], id, n, type)
                 elt

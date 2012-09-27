@@ -45,7 +45,7 @@
 
     When the \code{query} is a \code{VCF} object the \code{varAllele} argument 
     will be missing. This value is taken internally from the \code{VCF} with
-    \code{values(alt(<VCF>))[["ALT"]]}.
+    \code{alt(<VCF>)}.
   }
   \item{\dots}{Additional arguments passed to methods.
   }
@@ -65,7 +65,7 @@
   Variant alleles are taken from the \code{varAllele} when supplied.
   When the \code{query} is a \code{VCF} object the \code{varAllele} will
   be missing. This value is taken internally from the \code{VCF} with
-  \code{values(alt(<VCF>))[["ALT"]]}. The variant allele is substituted 
+  \code{alt(<VCF>)}. The variant allele is substituted 
   into the reference sequences and transcribed. Transcription only 
   occurs if the substitution, insertion or deletion results in a new sequence 
   length divisible by 3.
@@ -186,7 +186,7 @@
  
   ## The GRanges must be expanded to have one row per alternate allele. 
   ## Variants 1, 2 and 10 have two alternate alleles.
-  altallele <- values(alt(vcf))[["ALT"]]
+  altallele <- alt(vcf)
   eltlen <- elementLengths(altallele)
   rd_exp <- rep(rd, eltlen)
  

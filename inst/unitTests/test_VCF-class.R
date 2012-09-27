@@ -21,29 +21,27 @@ test_VCF_accessors <- function() {
     vcf <- readVcf(fl, genome="hg19")
 
     ## ref
-    checkTrue(class(values(ref(vcf))[["REF"]]) == "DNAStringSet")
+    checkTrue(class(ref(vcf)) == "DNAStringSet")
     checkException(ref(vcf) <- NULL, silent=TRUE)
-    checkException(ref(vcf) <- as.character(values(ref(vcf))[["REF"]]), 
+    checkException(ref(vcf) <- as.character(ref(vcf)), 
         silent=TRUE)
 
     ## alt 
-    checkTrue(class(values(alt(vcf))[["ALT"]]) == "DNAStringSetList")
+    checkTrue(class(alt(vcf)) == "DNAStringSetList")
     checkException(alt(vcf) <- NULL, silent=TRUE)
     v1 <- vcf
     alt(v1) <- CharacterList(list("A", "A", c("G", "T"), "", c("G", "GTCT"))) 
     checkTrue(validObject(v1))
 
     ## qual 
-    checkTrue(class(values(qual(vcf))[["QUAL"]]) == "numeric")
+    checkTrue(class(qual(vcf)) == "numeric")
     checkException(qual(vcf) <- NULL, silent=TRUE)
-    checkException(qual(vcf) <- as.character(values(qual(vcf))[["QUAL"]]), 
-        silent=TRUE)
+    checkException(qual(vcf) <- as.character(qual(vcf)), silent=TRUE)
 
     ## filt 
-    checkTrue(class(values(filt(vcf))[["FILTER"]]) == "character")
+    checkTrue(class(filt(vcf)) == "character")
     checkException(filt(vcf) <- NULL, silent=TRUE)
-    checkException(filt(vcf) <- as.list(values(filt(vcf))[["FILTER"]]), 
-        silent=TRUE)
+    checkException(filt(vcf) <- as.list(filt(vcf)), silent=TRUE)
 
     ## fixed 
     checkTrue(class(values(fixed(vcf))) == "DataFrame")

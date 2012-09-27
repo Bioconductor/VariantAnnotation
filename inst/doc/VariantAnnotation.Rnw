@@ -106,7 +106,7 @@ the file is a structural VCF, in which case it is stored as a
 \Robject{CharacterList}. Extract \Robject{ALT} from the \Robject{GRanges} and
 determine the number of elements in the list. 
 <<readVcf_ALT>>=
-alternate <- values(alt(vcf))[["ALT"]]
+alternate <- alt(vcf)
 alternate
 
 ## number of ALT values per variant
@@ -332,6 +332,7 @@ intron &  falls \emph{within} an intron region \\
 intergenic & does not fall \emph{within} a transcript associated with a gene \\
 spliceSite & overlaps any portion of the first 2 or last 2 
 nucleotides of an intron \\ 
+promoter & falls \emph{within} a promoter region of a transcript \\
 \hline
 \end{tabular}
 \end{center}
@@ -532,8 +533,8 @@ See ?\Rfunction{MatrixToSnpMatrix} for more details.
 
 <<snpMatrix>>=
 calls <- geno(vcf)$GT
-a0 <- values(ref(vcf))[["REF"]]
-a1 <- values(alt(vcf))[["ALT"]] 
+a0 <- ref(vcf)
+a1 <- alt(vcf) 
 
 res <- MatrixToSnpMatrix(calls, a0, a1)
 res

@@ -11,15 +11,15 @@ test_readVcf_format <- function()
                       "cases", "no_INFO_header.vcf")
     vcf <- suppressWarnings(readVcf(fl, "hg19"))
     checkTrue(ncol(values(info(vcf))) == 2L)
-    checkTrue("DNAStringSetList" == class(values(alt(vcf))[["ALT"]]))
-    checkTrue("numeric" == class(values(qual(vcf))[["QUAL"]]))
-    checkTrue("character" == class(values(filt(vcf))[["FILTER"]]))
+    checkTrue("DNAStringSetList" == class(alt(vcf)))
+    checkTrue("numeric" == class(qual(vcf)))
+    checkTrue("character" == class(filt(vcf)))
 
     ## structural 
     fl <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
     vcf <- readVcf(fl, "hg19")
-    checkTrue(class(values(alt(vcf))[["ALT"]]) == "CompressedCharacterList")
-    checkIdentical(values(qual(vcf))[["QUAL"]], c(NA, 6, 6, 12, 23, 14, 11))
+    checkTrue(class(alt(vcf)) == "CompressedCharacterList")
+    checkIdentical(qual(vcf), c(NA, 6, 6, 12, 23, 14, 11))
 }
 
 test_readVcf_unspecified_INFO_FORMAT <- function()
@@ -56,7 +56,7 @@ test_readVcf_ranges <- function()
 {
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
     vcf <- readVcf(fl, "hg19")
-    checkEquals(width(rowData(vcf)), width(values(ref(vcf))[["REF"]]))
+    checkEquals(width(rowData(vcf)), width(ref(vcf)))
 
     compressVcf <- bgzip(fl, tempfile())
     idx <- indexTabix(compressVcf, "vcf")

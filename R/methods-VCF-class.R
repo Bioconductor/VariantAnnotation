@@ -26,11 +26,7 @@ VCF <-
 setMethod("ref", "VCF", 
     function(x) 
 {
-    gr <- rowData(x)
-    if (!is.null(slot(x, "fixed")$REF))
-        values(gr) <- append(values(gr), 
-            DataFrame(REF=slot(x, "fixed")$REF))
-    gr
+    slot(x, "fixed")$REF
 })
 
 setReplaceMethod("ref", c("VCF", "DNAStringSet"),
@@ -44,11 +40,7 @@ setReplaceMethod("ref", c("VCF", "DNAStringSet"),
 setMethod("alt", "VCF", 
     function(x) 
 {
-    gr <- rowData(x)
-    if (!is.null(slot(x, "fixed")$ALT))
-        values(gr) <- append(values(gr),
-            DataFrame(ALT=slot(x, "fixed")$ALT))
-    gr
+    slot(x, "fixed")$ALT
 })
 
 setReplaceMethod("alt", c("VCF", "CharacterList"),
@@ -73,11 +65,7 @@ setReplaceMethod("alt", c("VCF", "DNAStringSetList"),
 setMethod("qual", "VCF", 
     function(x) 
 {
-    gr <- rowData(x)
-    if (!is.null(slot(x, "fixed")$QUAL))
-        values(gr) <- append(values(gr), 
-            DataFrame(QUAL=slot(x, "fixed")$QUAL))
-    gr
+    slot(x, "fixed")$QUAL
 })
 
 setReplaceMethod("qual", c("VCF", "integer"),
@@ -91,11 +79,7 @@ setReplaceMethod("qual", c("VCF", "integer"),
 setMethod("filt", "VCF", 
     function(x) 
 {
-    gr <- rowData(x)
-    if (!is.null(slot(x, "fixed")$FILTER))
-        values(gr) <- append(values(gr), 
-            DataFrame(FILTER=slot(x, "fixed")$FILTER))
-    gr
+    slot(x, "fixed")$FILTER
 })
 
 setReplaceMethod("filt", c("VCF", "character"),

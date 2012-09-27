@@ -7,7 +7,7 @@ setMethod(writeVcf, c("VCF", "character"),
 {
     if (!isTRUEorFALSE(index))
         stop("'index' must be TRUE or FALSE")
-    
+ 
     hdr <- .makeVcfHeader(obj)
     mat <- .makeVcfMatrix(obj)
  
@@ -39,16 +39,16 @@ setAs("DNAStringSetList", "CharacterList", function(from) {
     CHROM <- as.vector(seqnames(rd))
     POS <- start(rd)
     ID <- .makeVcfID(names(rd))
-    REF <- as.character(values(ref(obj))[["REF"]])
-    ALT <- values(alt(obj))[["ALT"]]
+    REF <- as.character(ref(obj))
+    ALT <- alt(obj)
     if (is(ALT, "DNAStringSetList")) {
         ALT <- as(ALT, "CharacterList")
     }
     ALT <- .pasteCollapse(ALT, ",")
     ALT[!nzchar(ALT)] <- "."
-    QUAL <- values(qual(obj))[["QUAL"]]
+    QUAL <- qual(obj)
     QUAL[is.na(QUAL)] <- "."
-    FILTER <- values(filt(obj))[["FILTER"]]
+    FILTER <- filt(obj)
     FILTER[is.na(FILTER)] <- "."
     INFO <- .makeVcfInfo(values(info(obj))[-1])
     GENO <- .makeVcfGeno(geno(obj))

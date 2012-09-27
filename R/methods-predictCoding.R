@@ -12,7 +12,7 @@ setMethod("predictCoding", c("Ranges", "TranscriptDb", "ANY", "DNAStringSet"),
 setMethod("predictCoding", c("VCF", "TranscriptDb", "ANY", "missing"),
     function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 {
-    alt <- values(alt(query))[["ALT"]]
+    alt <- alt(query) 
     if (!is(alt, "DNAStringSetList"))
         stop("alt(<VCF>)[['ALT']] must be a DNAStringSetList")
     rd <- rep(rowData(query), elementLengths(alt))

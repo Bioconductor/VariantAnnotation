@@ -82,8 +82,8 @@
   ## alt slots.
   geno(vcf)
   calls <- geno(vcf)$GT
-  a0 <- values(ref(vcf))[["REF"]]
-  a1 <- values(alt(vcf))[["ALT"]]
+  a0 <- ref(vcf)
+  a1 <- alt(vcf)
   mat <- MatrixToSnpMatrix(calls, a0, a1)
 
   ## The result is a list of length 2.
@@ -104,9 +104,8 @@
   ## of length 1. 
 
   ## View the reference and alternate alleles. 
-  fixed <- fixed(vcf)
-  DataFrame(reference = values(fixed)[["REF"]], 
-            alternate = CharacterList(as.list(values(fixed)[["ALT"]])),
+  DataFrame(reference = ref(vcf), 
+            alternate = CharacterList(as.list(alt(vcf))),
             row.names = rownames(vcf))
 }
 
