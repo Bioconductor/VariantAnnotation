@@ -52,7 +52,7 @@ export(VCF, VCFHeader,
        vcfWhich, "vcfWhich<-", vcfFixed, "vcfFixed<-", vcfInfo, "vcfInfo<-", 
        vcfGeno, "vcfGeno<-", vcfTrimEmpty, "vcfTrimEmpty<-", 
        VAFilterResult, dbSNPFilter, regionFilter, compose,
-       duplicateRSID, globalToLocal, CodingVariants, IntronVariants,
+       duplicateRSID, CodingVariants, IntronVariants,
        FiveUTRVariants, ThreeUTRVariants, IntergenicVariants,
        SpliceSiteVariants, PromoterVariants, AllVariants,
        upstream, "upstream<-", downstream, "downstream<-")

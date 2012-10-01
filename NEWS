@@ -1,3 +1,18 @@
+CHANGES IN VERSION 1.3.0
+------------------------
+
+NEW FEATURES
+
+    o summarizeVariants() for summarizing counts by sample
+
+    o new VariantType promoterVariants() added to locateVariants()
+
+MODIFICATIONS
+
+    o ref(), alt(), filt() and  qual() accessors for VCF-class now return
+      a single variable instead of GRanges with variable as metadata 
+
+
 CHANGES IN VERSION 1.2.0
 ------------------------
 
@@ -31,13 +46,13 @@ NEW FEATURES
     o readVcf() for reading and parsing VCF files into a SummarizedExperiment 
 
     o locateVariants() and predictCoding() for identifying amino acid coding
-    changes in nonsynonymous variants
+      changes in nonsynonymous variants
  
     o dbSNPFilter() and regionFilter() for filtering variants on membership in
-    dbSNP or on a particular location in the genome
+      dbSNP or on a particular location in the genome
  
     o access to PolyPhen and SIFT predictions through keys() , cols() and
-    select() methods. See ?SIFT or ?PolyPhen.
+      select() methods. See ?SIFT or ?PolyPhen.
  
 
 BUG FIXES

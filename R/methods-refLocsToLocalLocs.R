@@ -64,9 +64,3 @@ setMethod("refLocsToLocalLocs",
 
     shift(qrngs, 1L + cumsums[subjectHits(olaps)])
 }
-
-globalToLocal <- function(global, ranges, ...)
-{
-    .Deprecated("refLocsToLocalLocs or map")
-}
-
