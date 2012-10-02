@@ -27,11 +27,6 @@ setMethod(writeVcf, c("VCF", "character"),
     }
 })
 
-### FIXME: move to Biostrings
-setAs("DNAStringSetList", "CharacterList", function(from) {
-  relist(as.character(unlist(from, use.names = FALSE)), from)
-})
-
 .makeVcfMatrix <- function(obj)
 {
     rd <- rowData(obj)
@@ -204,7 +199,8 @@ setAs("DNAStringSetList", "CharacterList", function(from) {
         if ("Description" %in% colnames(df)) {
             df$Description <- paste("\"", df$Description, "\"", sep="")
             prs <- paste(rep(colnames(df), each=nrow(df)), "=",
-                         unlist(df, use.names=FALSE), sep="")
+                         unlist(lapply(df, as.character), use.names=FALSE),
+                         sep="")
             lst <- split(prs, seq_len(nrow(df)))
             lns <- .pasteCollapse(CharacterList(lst), collapse=",") 
             paste("##", nms, "=<ID=", rownames(df), ",", lns, ">", sep="")
