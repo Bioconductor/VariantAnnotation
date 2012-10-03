@@ -46,12 +46,15 @@ setMethod(writeVcf, c("VCF", "character"),
     FILTER <- filt(obj)
     FILTER[is.na(FILTER)] <- "."
     INFO <- .makeVcfInfo(values(info(obj))[-1])
-    GENO <- .makeVcfGeno(geno(obj))
-    FORMAT <- GENO[,1]
-    GENO <- GENO[,-1,drop=FALSE]
-    genoPasted <- do.call(paste, c(split(GENO, col(GENO)), sep = "\t"))
-    paste(CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, FORMAT, genoPasted,
-          sep = "\t")
+    ans <- paste(CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, sep = "\t")
+    if (length(geno(obj)) > 0L) {
+      GENO <- .makeVcfGeno(geno(obj))
+      FORMAT <- GENO[,1]
+      GENO <- GENO[,-1,drop=FALSE]
+      genoPasted <- do.call(paste, c(split(GENO, col(GENO)), sep = "\t"))
+      ans <- paste(ans, FORMAT, genoPasted, sep = "\t")
+    }
+    ans
 }
 
 .makeVcfID <- function(id, ...)
@@ -179,10 +182,12 @@ setMethod(writeVcf, c("VCF", "character"),
     hdr <- exptData(obj)[["header"]]
     header <- Map(.formatHeader, as.list(header(hdr)),
                   as.list(names(header(hdr))))
-    samples <- samples(hdr) 
-    colnms <- paste(c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER",
-                    "INFO", "FORMAT", samples[!is.null(samples)]), collapse="\t")
-
+    samples <- samples(hdr)
+    colnms <- c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO")
+    if (length(geno(obj)) > 0L) {
+      colnms <- c(colnms, "FORMAT", samples[!is.null(samples)])
+    }
+    colnms <- paste(colnms, collapse="\t")
     unlist(c(header, colnms), use.names=FALSE) 
 }
 
