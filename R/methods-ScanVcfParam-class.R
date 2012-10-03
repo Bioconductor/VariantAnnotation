@@ -60,6 +60,6 @@ vcfWhich <- function(object)
 }
 "vcfWhich<-" <- function(object, value)
 {
-    slot(object, "which") <- value
+    slot(object, "which") <- as(value, "RangesList")
     object
 }
