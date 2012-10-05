@@ -212,14 +212,10 @@ locateVariants(query, subject, region, ...)
   intersect(seqlevels(rd_adj), seqlevels(txdb))
 
   ## VCF object as the query
-  loc_coding <- locateVariants(vcf_adj, txdb, CodingVariants())
-
-  ## GRanges as the query
-  loc_intron <- locateVariants(rd_adj, txdb, IntronVariants())
-  loc_splice <- locateVariants(rd_adj, txdb, SpliceSiteVariants())
+  loc_coding <- locateVariants(vcf_adj, txdb, AllVariants())
 
   ## --------------------------------
-  ## GRangesList object as subject 
+  ## GRangesList as subject 
   ## --------------------------------
   ## Note the results do not include GENEID. This information
   ## is not available when a GRangesList is used in place of
@@ -237,17 +233,15 @@ locateVariants(query, subject, region, ...)
    myenv <- new.env()
    files <- list(vcf1, vcf2, vcf3)
    lapply(files, 
-          function(fl) 
-          {
-              vcf <- readVcf(fl, "hg19")
-              ## modify seqlevels to match TxDb
-              oldnms <- seqlevels(vcf)
-              newnms <- paste("chr", oldnms, sep="")
-              names(newnms) <- oldnms
-              vcf_mod <- renameSeqlevels(vcf, newnms)
-              locateVariants(vcf_mod, txdb, AllVariants(), cache=myenv)
-          }
-   ) 
+       function(fl) {
+           vcf <- readVcf(fl, "hg19")
+           ## modify seqlevels to match TxDb
+           oldnms <- seqlevels(vcf)
+           newnms <- paste("chr", oldnms, sep="")
+           names(newnms) <- oldnms
+           vcf_mod <- renameSeqlevels(vcf, newnms)
+           locateVariants(vcf_mod, txdb, AllVariants(), cache=myenv)
+       }) 
   }
 }
 
