@@ -9,15 +9,24 @@ setMethod("predictCoding", c("Ranges", "TranscriptDb", "ANY", "DNAStringSet"),
                 ignore.strand=ignore.strand) 
 })
 
-setMethod("predictCoding", c("VCF", "TranscriptDb", "ANY", "missing"),
+setMethod("predictCoding", c("CollapsedVCF", "TranscriptDb", "ANY", "missing"),
     function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 {
     alt <- alt(query) 
     if (!is(alt, "DNAStringSetList"))
-        stop("alt(<VCF>)[['ALT']] must be a DNAStringSetList")
+        stop("alt(query) must be a DNAStringSetList")
     rd <- rep(rowData(query), elementLengths(alt))
     callGeneric(rd, subject, seqSource, unlist(alt, use.names=FALSE), ...,
                 ignore.strand=ignore.strand) 
+})
+
+setMethod("predictCoding", c("ExpandedVCF", "TranscriptDb", "ANY", "missing"),
+    function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
+{
+    alt <- alt(query) 
+    if (!is(alt, "DNAStringSetList"))
+        stop("alt(query) must be a DNAStringSet")
+    callGeneric(rd, subject, seqSource, alt, ..., ignore.strand=ignore.strand) 
 })
 
 setMethod("predictCoding", c("GRanges", "TranscriptDb", "ANY", "DNAStringSet"),

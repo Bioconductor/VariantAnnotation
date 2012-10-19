@@ -1,14 +1,74 @@
 ### ------------------------------------------------------------------------- 
-### VCF class 
+### VCF class hierarchy 
 ###
 
 setClass("VCF",
-    contains="SummarizedExperiment",
+    contains=c("VIRTUAL", "SummarizedExperiment"),
     representation(
         fixed="DataFrame",
         info="DataFrame"
     )
 )
+
+setClass("CollapsedVCF", contains="VCF") ## ALT is DNAStrinsSetList
+
+setClass("ExpandedVCF", contains="VCF")  ## ALT is DNAStringSet 
+
+### Coercion 
+### Recursion problem in an automatically generated coerce method requires
+### that we handle coercion from subclasses to SummarizedExperiment.
+
+setAs("ExpandedVCF", "SummarizedExperiment", 
+    def = function(from)
+    { 
+        if (strict) {
+            force(from)
+            class(from) <- "SummarizedExperiment"
+        }
+        from
+    },
+    replace = function(from, to, value)
+    {
+        firstTime <- TRUE
+        for (nm in slotNames(value)) {
+            v <- slot(value, nm)
+            if (firstTime) {
+                slot(from, nm, FALSE) <- v
+                firstTime <- FALSE
+            } else {
+                `slot<-`(from, nm, FALSE, v)
+            }
+        }
+        from
+    }
+)
+
+setAs("CollapsedVCF", "SummarizedExperiment", 
+    def = function(from)
+    { 
+        if (strict) {
+            force(from)
+            class(from) <- "SummarizedExperiment"
+        }
+        from
+    },
+    replace = function(from, to, value)
+    {
+        firstTime <- TRUE
+        for (nm in slotNames(value)) {
+            v <- slot(value, nm)
+            if (firstTime) {
+                slot(from, nm, FALSE) <- v
+                firstTime <- FALSE
+            } else {
+                `slot<-`(from, nm, FALSE, v)
+            }
+        }
+        from
+    }
+)
+
+### Validity 
 
 .valid.VCF.fixed <- function(object)
 {
@@ -21,21 +81,17 @@ setClass("VCF",
             return(paste("'fixed(object)' and 'rowData(object) must have the same ",
                    "number of rows", sep=""))
         if (!all(nms %in% c("paramRangeID", "REF", "ALT", "QUAL", "FILTER")))
-            return(paste("'values(fixed(object))' colnames must be ",
+            return(paste("'mcols(fixed(object))' colnames must be ",
                    "'REF', 'ALT', 'QUAL' and 'FILTER'", sep=""))
         if ("REF" %in% nms) 
             if (!is(ffld$REF, "DNAStringSet"))
-                return("'values(fixed(object))[['REF']] must be a DNAStringSet")
-        if ("ALT" %in% nms) 
-            if (!is(ffld$ALT, "DNAStringSetList") && !is(ffld$ALT, "CharacterList"))
-                return(paste("'values(fixed(object))[['ALT']] must be a ",
-                       "DNAStringSetList or a CharacterList", sep=""))
+                return("'ref(object)' must be a DNAStringSet")
         if ("QUAL" %in% nms) 
             if (!is(ffld$QUAL, "numeric"))
-                return("'values(fixed(object))[['QUAL']] must be numeric")
+                return("'qual(object)' must be numeric")
         if ("FILTER" %in% nms) 
             if (!is(ffld$FILTER, "character"))
-                return("'values(fixed(object))[['FILTER']] must be a character")
+                return("'filt(object)' must be a character")
     }
     NULL
 }
@@ -50,13 +106,50 @@ setClass("VCF",
     NULL
 }
 
-.valid.VCF <- function(object)
+.valid.CollapsedVCF.alt <- function(object)
 {
-    c(.valid.VCF.fixed(object),
-      .valid.VCF.info(object))
+    if (nrow(object) == 0L)
+        return(NULL)
+    alt <- alt(object)
+    if (!is(alt, "DNAStringSetList") && !is(alt, "CharacterList")) 
+        paste("'alt(object)' must be a DNAStringSetList or a ",
+              "CharacterList", sep="")
+    else
+        NULL
+}
+ 
+.valid.ExpandedVCF.alt <- function(object)
+{
+    if (nrow(object) == 0L)
+        return(NULL)
+    alt <- alt(object)
+    if (!is(alt, "DNAStringSet") && !is(alt, "CharacterList")) 
+        paste("'alt(object)' must be a DNAStringSet or a ",
+              " CharacterList", sep="")
+    else
+        NULL
 }
 
-setValidity("VCF", .valid.VCF, where=asNamespace("VariantAnnotation"))
+.valid.CollapsedVCF <- function(object)
+{
+    c(.valid.VCF.fixed(object),
+      .valid.VCF.info(object),
+      .valid.CollapsedVCF.alt(object))
+}
+
+.valid.ExpandedVCF <- function(object)
+{
+    c(.valid.VCF.fixed(object),
+      .valid.VCF.info(object),
+      .valid.ExpandedVCF.alt(object))
+}
+ 
+setValidity("CollapsedVCF", .valid.CollapsedVCF, where=asNamespace("VariantAnnotation"))
+setValidity("ExpandedVCF", .valid.ExpandedVCF, where=asNamespace("VariantAnnotation"))
+
+### ------------------------------------------------------------------------- 
+### ScanVcfParam class 
+###
 
 setClass("ScanVcfParam", contains="ScanBVcfParam")
 
@@ -76,9 +169,7 @@ setClass("VCFHeader",
 ### VAFilters classes 
 ###
 
-setClass(".VAUtil",
-    representation("VIRTUAL")
-)
+setClass(".VAUtil", representation("VIRTUAL"))
 
 .vaValidity <- function(object) TRUE
 setClass("VAFilter",
@@ -101,15 +192,11 @@ setClass("VAFilterResult",
 ### SIFT and PolyPhen classes 
 ###
 
-.SIFTDb <- setRefClass("SIFTDb",
-    contains = "AnnotationDb",
-)
+.SIFTDb <- setRefClass("SIFTDb", contains = "AnnotationDb")
 
-.PolyPhenDb <- setRefClass("PolyPhenDb",
-    contains = "AnnotationDb",
-)
+.PolyPhenDb <- setRefClass("PolyPhenDb", contains = "AnnotationDb")
 
-### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### ------------------------------------------------------------------------- 
 ### VariantType class hierarchy 
 ###
 

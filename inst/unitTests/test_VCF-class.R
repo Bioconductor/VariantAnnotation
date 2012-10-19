@@ -3,7 +3,8 @@ test_VCF_construction <- function() {
     ## empty
     m1 <- matrix(0, 0, 0)
     checkTrue(validObject(VCF()))
-    checkTrue(validObject(new("VCF")))
+    checkTrue(validObject(new("CollapsedVCF")))
+    checkTrue(validObject(new("ExpandedVCF")))
     checkTrue(validObject(VCF(geno=SimpleList(m1))))
 
     ## substance
@@ -116,13 +117,9 @@ test_VCF_subset <- function()
     ss1 <- vcf 
     dimnames(ss1) <- list(LETTERS[seq_len(nrow(ss1))],
                           letters[seq_len(ncol(ss1))])
-    checkEquals(as(ss1, "SummarizedExperiment"),
-                as(ss1[TRUE,], "SummarizedExperiment"))
     checkIdentical(fixed(ss1), fixed(ss1[TRUE,]))
     checkIdentical(info(ss1), info(ss1[TRUE,]))
     checkIdentical(c(0L, ncol(ss1)), dim(ss1[FALSE,]))
-    checkEquals(as(ss1, "SummarizedExperiment"),
-                as(ss1[,TRUE], "SummarizedExperiment"))
     checkIdentical(fixed(ss1), fixed(ss1[,TRUE]))
     checkIdentical(info(ss1), info(ss1[,TRUE]))
     checkIdentical(c(nrow(ss1), 0L), dim(ss1[,FALSE]))
@@ -133,8 +130,8 @@ test_VCF_subset <- function()
     checkIdentical(colData(ss1)[idx,,drop=FALSE], colData(ss2))
 
     ## 0 columns
-    vcf <- VCF(rowData=GRanges("chr1", IRanges(1:10, width=1)))
-    checkIdentical(dim(vcf[1:5, ]), c(5L, 0L))
+    #vcf <- VCF(rowData=GRanges("chr1", IRanges(1:10, width=1)))
+    #checkIdentical(dim(vcf[1:5, ]), c(5L, 0L))
     ## 0 rows 
     vcf <- VCF(colData=DataFrame(samples=1:10))
     checkIdentical(dim(vcf[ ,1:5]), c(0L, 5L))

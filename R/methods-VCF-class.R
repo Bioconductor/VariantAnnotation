@@ -3,26 +3,31 @@
 ### =========================================================================
 
 
-## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-## Constructor 
-##
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Constructor 
+###
 
 VCF <-
     function(rowData=GRanges(), colData=DataFrame(), exptData=SimpleList(), 
              fixed=DataFrame(row.names=1:length(rowData)), 
              info=DataFrame(row.names=1:length(rowData)), geno=SimpleList(),
-             ..., verbose=FALSE)
+             ..., collapsed=TRUE, verbose=FALSE)
 {
     rownames(info) <- rownames(fixed) <- NULL
-    new("VCF", SummarizedExperiment(assays=geno, rowData=rowData,
+    if (collapsed)
+        class <- "CollapsedVCF"
+    else
+        class <- "ExpandedVCF"
+
+    new(class, SummarizedExperiment(assays=geno, rowData=rowData,
         colData=colData, exptData=exptData), fixed=fixed, info=info, ...)
 }
  
-## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-## Getters and Setters
-##
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Getters and Setters
+###
 
-## ref 
+### ref 
 setMethod("ref", "VCF", 
     function(x) 
 {
@@ -36,7 +41,7 @@ setReplaceMethod("ref", c("VCF", "DNAStringSet"),
     x
 })
 
-## alt 
+### alt 
 setMethod("alt", "VCF", 
     function(x) 
 {
@@ -52,16 +57,7 @@ setReplaceMethod("alt", c("VCF", "CharacterList"),
     x
 })
 
-setReplaceMethod("alt", c("VCF", "DNAStringSetList"),
-    function(x, value)
-{
-    if (length(value) != length(rowData(x)))
-        stop("length(value) must equal length(rowData(x))")
-    slot(x, "fixed")$ALT <- value
-    x
-})
-
-## qual 
+### qual 
 setMethod("qual", "VCF", 
     function(x) 
 {
@@ -75,7 +71,7 @@ setReplaceMethod("qual", c("VCF", "integer"),
     x
 })
 
-## filt
+### filt
 setMethod("filt", "VCF", 
     function(x) 
 {
@@ -89,7 +85,7 @@ setReplaceMethod("filt", c("VCF", "character"),
     x
 })
 
-## fixed 
+### fixed 
 setMethod("fixed", "VCF", 
     function(x) 
 {
@@ -107,7 +103,7 @@ setReplaceMethod("fixed", c("VCF", "DataFrame"),
     x
 })
 
-## info 
+### info 
 setMethod("info", "VCF", 
     function(x) 
 {
@@ -125,7 +121,7 @@ setReplaceMethod("info", c("VCF", "DataFrame"),
     x
 })
 
-## geno
+### geno
 setMethod("geno", "VCF",
     function(x, ..., withDimnames = TRUE)
 {
@@ -153,7 +149,7 @@ setReplaceMethod("geno", c("VCF", "missing", "SimpleList"),
     x
 })
 
-## strand
+### strand
 setMethod("strand", "VCF",
     function(x, ...)
 {
@@ -168,9 +164,9 @@ setReplaceMethod("strand", "VCF",
 })
 
 
-## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-## Subsetting 
-##
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Subsetting 
+###
 
 setMethod("[", c("VCF", "ANY", "ANY"),
     function(x, i, j, ..., drop=TRUE)
@@ -232,9 +228,9 @@ setReplaceMethod("[",
     }
 })
 
-## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-## Other methods 
-##
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Other methods 
+###
 
 setMethod("renameSeqlevels",  c("VCF", "character"),
     function(x, value, ...)
@@ -255,12 +251,19 @@ setMethod("keepSeqlevels",  c("VCF", "character"),
 })
 
 
-## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-## Show
-##
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### show
+###
 
 setMethod(show, "VCF",
     function(object)
+{
+    paste0("This object is no longer valid. Please use updateObeject() to ",
+          " create a valid instance of CollapsedVCF or ExpandedVCF.")
+})
+
+### show method for CollapsedVCF and ExapandedVCF
+.showVCFSubclass <- function(object)
 {
     selectSome <- IRanges:::selectSome
     scat <- function(fmt, vals=character(), exdent=2, ...)
@@ -303,5 +306,21 @@ setMethod(show, "VCF",
     if (dlen[[2]]) scat("colnames(%d): %s\n", dimnames[[2]])
     else cat("colnames: NULL\n")
     scat("colData names(%d): %s\n", names(colData(object)))
- 
-})
+}
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### updateObject 
+###
+
+setMethod("updateObject", "VCF",
+    function(object, ..., verbose=FALSE)
+    {
+        if (verbose)
+            message("updateObject(object = 'VCF')")
+        as(object, "CompressedVCF")
+    }
+)
+
+
+
+

@@ -2,7 +2,8 @@
 \alias{predictCoding}
 \alias{predictCoding,Ranges,TranscriptDb,ANY,DNAStringSet-method}
 \alias{predictCoding,GRanges,TranscriptDb,ANY,DNAStringSet-method}
-\alias{predictCoding,VCF,TranscriptDb,ANY,missing-method}
+\alias{predictCoding,CollapsedVCF,TranscriptDb,ANY,missing-method}
+\alias{predictCoding,ExpandedVCF,TranscriptDb,ANY,missing-method}
 
 \title{Predict amino acid coding changes for variants}
 
@@ -11,7 +12,8 @@
 }
 
 \usage{
-\S4method{predictCoding}{VCF,TranscriptDb,ANY,missing}(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
+\S4method{predictCoding}{CollapsedVCF,TranscriptDb,ANY,missing}(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
+\S4method{predictCoding}{ExpandedVCF,TranscriptDb,ANY,missing}(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 \S4method{predictCoding}{Ranges,TranscriptDb,ANY,DNAStringSet}(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 \S4method{predictCoding}{GRanges,TranscriptDb,ANY,DNAStringSet}(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 }

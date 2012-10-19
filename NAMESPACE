@@ -34,9 +34,10 @@ importMethodsFrom(IRanges, "%in%", append, as.matrix, as.vector,
                   follow, gsub, lapply, match, "metadata<-", narrow, order, 
                   precede, queryHits, rev, Rle, runValue, sapply, shift,
                   split, start, "start<-", subjectHits, "subseq<-", substring, 
-                  unique, unlist, values, "values<-", which, width)
+                  unique, unlist, values, "values<-", which, width, 
+                  expand)
 importFrom(IRanges, CharacterList, DataFrame, IRanges, PartitioningByWidth, 
-           successiveViews)
+           successiveViews, expand)
 
 importMethodsFrom(DBI, dbCommit, dbConnect, dbDisconnect, dbExistsTable, 
                   dbGetQuery, dbReadTable, dbWriteTable, dbListTables, 

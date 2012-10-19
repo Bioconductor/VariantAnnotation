@@ -2,7 +2,14 @@
 \docType{class}
 
 % Class
+\alias{class:VCF}
 \alias{VCF-class}
+\alias{CollapsedVCF}
+\alias{class:CollapsedVCF}
+\alias{CollapsedVCF-class}
+\alias{ExpandedVCF}
+\alias{class:ExpandedVCF}
+\alias{ExpandedVCF-class}
 
 % Constructor-like function:
 \alias{VCF}
@@ -18,7 +25,8 @@
 \alias{alt,VCF-method}
 \alias{alt<-}
 \alias{alt<-,VCF,CharacterList-method}
-\alias{alt<-,VCF,DNAStringSetList-method}
+\alias{alt<-,CollapsedVCF,DNAStringSetList-method}
+\alias{alt<-,ExpandedVCF,DNAStringSet-method}
 \alias{qual}
 \alias{qual,VCF-method}
 \alias{qual<-}
@@ -54,20 +62,21 @@
 \alias{seqlevels,VCF-method}
 \alias{renameSeqlevels,VCF,character-method}
 \alias{keepSeqlevels,VCF,character-method}
+\alias{expand,CollapsedVCF-method}
 
 % show method:
 \alias{show,VCF-method}
+\alias{show,CollapsedVCF-method}
+\alias{show,ExpandedVCF-method}
 
-\title{VCF instances}
+\title{VCF class objects}
 
 \description{
-  The VCF class is an extension of the
-  \code{\linkS4class{SummarizedExperiment}-class} with two additional slots,
-  \code{fixed} and \code{info}.
-}
-
-\section{Extends}{
-   Directly extends class \code{\link{SummarizedExperiment}}.
+  The VCF class is a virtual class extended from 
+  \code{SummarizedExperiment}. The subclasses, 
+  \code{CompressedVCF} and \code{ExtendedVCF}, 
+  are containers for variant data as organized in 
+  Variant Call Format files.
 }
 
 \section{Constructor}{
@@ -76,8 +85,7 @@
       \code{VCF(rowData = GRanges(), colData = DataFrame(), 
                 exptData = SimpleList(), fixed = DataFrame(), 
                 info = DataFrame(), geno = SimpleList(), 
-                ..., verbose = FALSE)
-      }
+                ..., collapsed=TRUE, verbose = FALSE)}
     }
   }
 }
@@ -97,8 +105,11 @@
     \item{}{
       \code{alt(x)}, \code{alt(x) <- value}:
       Returns or sets the alternate allele data from the ALT column of the VCF
-      file. \code{value} can be a \code{DNAStringSetList} or a 
-      \code{CharacterList}. 
+      file. \code{value} is a \code{CharacterList}.
+
+      When \code{x} is a CollapsedVCF object, the replacement value can also
+      be a \code{DNAStringSetList}. When \code{x} is an ExtendedVCF, value
+      can also be a \code{DNAStringSet}.
     }
     \item{}{
       \code{qual(x)}, \code{qual(x) <- value}:
@@ -185,6 +196,7 @@
 }
 
 \section{Other methods}{
+  In the following code snippets \code{x} is a VCF object.
   \describe{
     \item{}{
       \code{genome(x)}:
@@ -211,6 +223,15 @@
       \code{keepSeqlevels(x, value)}:
       Subset the \code{GRanges} in the \code{rowData} slot of the VCF object. 
       \code{value} is a character vector of seqlevels to keep.
+    }
+    In the following \code{x} is a CollapsedVCF object.
+    \item{}{
+      \code{expand(x)}:
+      Expand the columns of a CollapsedVCF object to one row per ALT value.
+      Variables with Number=`A' in the header description will also be
+      expanded per each alternate allele. The return value is a
+      ExpandedVCF object with ALT as a \code{DNAStringSet} or
+      \code{CompressedCharacterList} in the case of structural variants.
     }
   }
 }
@@ -250,50 +271,58 @@
       should be applied to extracted assay elements. Applicable to the 
       \code{geno} accessor only.
     }
+    \item{collapsed}{A \code{logical(1)} indicating whether a 
+      CollapsedVCF or ExpandedVCF should be created. The ALT in a
+      CollapsedVCF is a \code{DNAStringSetList} while in a
+      ExpandedVCF it is a \code{DNAStringSet}. 
+    }
     \item{verbose}{A \code{logical(1)} indicating whether messages
       about data coercion during construction should be printed.
     }
   }
 }
 
-
 \details{
-  The \code{VCF} class is designed to hold data from a Variant Call Format (VCF) 
-  file. The class extends \code{\linkS4class{SummarizedExperiment}} with the 
-  addition of two slots, \code{fixed} and \code{info}. See 
+  The \code{VCF} class is designed to hold data from a Variant Call Format 
+  (VCF) file. The class extends \code{\linkS4class{SummarizedExperiment}} 
+  with the addition of two slots, \code{fixed} and \code{info}. See 
   ?\code{SummarizedExperiment} for a detailed description of the inherited
   slots. 
 
   Slots unique to the \code{VCF} class,
-  \describe{
-    \item{\code{fixed}}{A \link{DataFrame} containing information from the 
-      REF, ALT, QUAL and FILTER fields from a VCF file.
-    }
-    \item{\code{info}}{A \link{DataFrame} containing information from the INFO 
-      fields from a VCF file.
-    }
+  \itemize{
+    \item \code{fixed}: A \link{DataFrame} containing information from the 
+           REF, ALT, QUAL and FILTER fields from a VCF file.
+    \item \code{info}: A \link{DataFrame} containing information from the INFO 
+           fields from a VCF file.
   }
 
   Slots inherited from the \code{SummarizedExperiment} class,
-  \describe{
-    \item{\code{exptData}}{A \link{SimpleList}-class instance containing the 
-      file header or other information about the overall experiment.
-    }
-    \item{\code{rowData}}{A \link{GRanges}-class instance defining the
-      variant ranges and associated metadata columns of REF, ALT, QUAL and
-      FILTER.
-    }
-    \item{\code{colData}}{A \link{DataFrame}-class instance describing the 
-      samples and associated metadata.
-    }
-    \item{\code{geno}}{The \code{assays} slot from \code{SummarizedExperiment}
-     has been renamed as \code{geno} for the VCF class. This slot contains
-     the genotype information immediately following the FORMAT field in a VCF
-     file. Each element of the \code{list} or \code{SimpleList} is a matrix or 
-     array. 
-    }
+  \itemize{
+    \item \code{exptData}: A \link{SimpleList}-class instance containing the 
+          file header or other information about the overall experiment.
+    \item \code{rowData}: A \link{GRanges}-class instance defining the
+           variant ranges and associated metadata columns of REF, ALT, QUAL 
+           and FILTER.
+    \item \code{colData}: A \link{DataFrame}-class instance describing the 
+          samples and associated metadata.
+    \item \code{geno}: The \code{assays} slot from \code{SummarizedExperiment}
+          has been renamed as \code{geno} for the VCF class. This slot contains
+          the genotype information immediately following the FORMAT field in a 
+          VCF file. Each element of the \code{list} or \code{SimpleList} is a 
+          matrix or array. 
   }
 
+  It is not expected that a user will create instances of the VCF class
+  but instead one of the concrete subclasses, CollapsedVCF or ExpandVCF.
+  CollapsedVCF contains the ALT data as a \code{DNAStringSetList} allowing 
+  for multiple alleles per variant. The ExpandedVCF ALT data is a 
+  \code{DNAStringSet} where the ALT column has been expanded to create a 
+  flat form of the data with one row per variant-allele combination. It is 
+  worth noting that ALT data can be a \code{CharacterList} in either of the 
+  subclasses. This is the case when \code{readVcf()} is used on a file of 
+  structural variants. ALT values for sturcutral variants are character 
+  strings and not alleles.
 }
 
 \author{Valerie Obenchain <vobencha@fhcrc.org>}
@@ -311,28 +340,73 @@
   fl <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
   vcf <- readVcf(fl, genome="hg19")
 
-  ## Extract individual 'fixed' fields with ref, alt, qual and filt accessors
+  ## -------------------------------------
+  ## Accessors 
+  ## -------------------------------------
+  ## Variant locations are stored in a GRanges in the rowData slot.
+  rowData(vcf)
+
+  ## Individual fields can be extracted with ref(), alt(), qual() 
+  ## and filt() accessors.
   qual(vcf)
   ref(vcf)
 
-  ## Extract 'fixed', 'info' and 'geno' fields 
+  ## All 'fixed' or all 'info' fields can be extracted together along
+  ## with the GRanges of locations.
   head(fixed(vcf))
   head(info(vcf))
+
+  ## All genotype fields can be seen with geno(). Individual
+  ## fields are accessed with '$' or '[['.
   geno(vcf)
   identical(geno(vcf)$DP, geno(vcf)[[3]])
 
-  ## Rename and subset the seqlevels in the rowData GRanges object :
-  ## The seqlevels (chromosome names) of the vcf are numbers instead of 
-  ## being preceded by "chr*" or "ch*"
+  ## -------------------------------------
+  ## Renaming seqlevels and subsetting 
+  ## -------------------------------------
+  ## It is often the case that chromosome names need to be
+  ## modified. In this VCF, the chromosome names (seqlevels) 
+  ## are numbers instead of preceded by "chr" or "ch".
   seqlevels(vcf)
  
-  ## Add "chr" in front of the seqlevels using renameSeqlevels()
+  ## We can rename the seqlevels in the VCF object with 
+  ## renameSeqlevels().
   newnames <- paste("chr", seqlevels(vcf), sep="")
   names(newnames) <- seqlevels(vcf)
   vcf <- renameSeqlevels(vcf, newnames)
   seqlevels(vcf)
  
-  ## To subset on seqlevels use the keepSeqlevels() helper function
+  ## Subsetting on seqlevels can be done with keepSeqlevels().
   vcf_subset <- keepSeqlevels(vcf, "chr2")
   seqlevels(vcf_subset)
+
+  ## -------------------------------------
+  ## CollapsedVCF 
+  ## -------------------------------------
+  ## readVCF() produces a CollapsedVCF object.
+  fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
+  vcf <- readVcf(fl, genome="hg19")
+  vcf
+
+  ## The ALT column is a DNAStringSetList to allow for more
+  ## than one alternate allele per variant.
+  alt(vcf)
+
+  ## When structural variants are present, the ALT column will be
+  ## a CompressedCharacterList.
+  fl <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
+  vcf <- readVcf(fl, genome="hg19")
+  alt(vcf)
+
+  ## -------------------------------------
+  ## ExpandedVCF
+  ## -------------------------------------
+  ## The ExpandedVCF class is the 'flattened' counterpart of CollapsedVCF.
+  ## Columns of the CollapsedVCF are expanded to hold one ALT value per row.
+  ## ALT will be a DNAStringSet or a CompressedCharacterList in the 
+  ## case of strucutral variants.
+  fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
+  vcf <- readVcf(fl, genome="hg19")
+  vcfExpand <- expand(vcf)
+  alt(vcfExpand)
 }

@@ -207,14 +207,12 @@
   ## info data 
   info(hdr)
   info(vcf)
-  values(info(vcf))[["DP"]]
+  info(vcf)$DP
 
   ## geno data 
   geno(hdr)
   geno(vcf)
   head(geno(vcf)$GT)
-
-  identical(geno(vcf)[["GQ"]], geno(vcf)$GQ)
 
   ## ---------------------------------
   ## Data subsets 
