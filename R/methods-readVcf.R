@@ -26,6 +26,13 @@ setMethod(readVcf, c(file="TabixFile", genome="character",
 })
 
 setMethod(readVcf, c(file="TabixFile", genome="character",
+          param="GRangesList"),
+    function(file, genome, param, ...)
+{
+    .readVcf(file, genome, param=ScanVcfParam(which=param))
+})
+
+setMethod(readVcf, c(file="TabixFile", genome="character",
           param="RangesList"),
     function(file, genome, param, ...)
 {

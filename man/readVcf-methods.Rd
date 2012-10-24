@@ -7,6 +7,7 @@
 \alias{readVcf,TabixFile,character,RangedData-method}
 \alias{readVcf,TabixFile,character,RangesList-method}
 \alias{readVcf,TabixFile,character,GRanges-method}
+\alias{readVcf,TabixFile,character,GRangesList-method}
 \alias{readVcf,TabixFile,character,missing-method}
 
 
@@ -19,6 +20,7 @@
   \S4method{readVcf}{TabixFile,character,RangedData}(file, genome, param, ...)
   \S4method{readVcf}{TabixFile,character,RangesList}(file, genome, param, ...)
   \S4method{readVcf}{TabixFile,character,GRanges}(file, genome, param, ...)
+  \S4method{readVcf}{TabixFile,character,GRangesList}(file, genome, param, ...)
   \S4method{readVcf}{TabixFile,character,missing}(file, genome, param, ...)
   \S4method{readVcf}{character,character,ScanVcfParam}(file, genome, param, ...)
   \S4method{readVcf}{character,character,missing}(file, genome, param, ...)
@@ -39,10 +41,10 @@
     associated with the \code{\linkS4class{GRanges}} object in \code{rowData}.
   }
   \item{param}{A instance of \code{\linkS4class{ScanVcfParam}}, \code{GRanges},
-    \code{RangedData} or \code{RangesList}. VCF files can be subset on genomic
-    coordinates (ranges) or elements in the VCF fields. Both genomic coordinates
-    and VCF elements can be specified in a \code{\linkS4class{ScanVcfParam}}.
-    See ?\code{ScanVcfParam} for details.
+    \code{GRangesList}, \code{RangedData} or \code{RangesList}. VCF files can be 
+    subset on genomic coordinates (ranges) or elements in the VCF fields. Both 
+    genomic coordinates and VCF elements can be specified in a 
+    \code{\linkS4class{ScanVcfParam}}. See ?\code{ScanVcfParam} for details.
   }
   \item{\dots}{Additional arguments, passed to methods.
   }
@@ -234,8 +236,9 @@
   ## Subset on 'fixed', 'info' or 'geno' VCF elements :
   param <- ScanVcfParam(fixed="ALT", geno=c("GT", "HQ"), info=c("NS", "AF"))
   vcf_tab <- readVcf(tab, "hg19", param)
+  ## Because there are no ranges specified in the 'param' we don't have
+  ## to use the tabix file.
   vcf_fname <- readVcf(fl, "hg19", param)
-  identical(vcf_tab, vcf_fname) 
 
   ## Subset on both genome coordinates and VCF elements : 
   param <- ScanVcfParam(geno="HQ", info="AF", which=rngs)

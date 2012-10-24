@@ -2,14 +2,14 @@ Package:     VariantAnnotation
 Type:        Package
 Title:       Annotation of Genetic Variants 
 Description: Annotate variants, compute amino acid coding changes, predict coding outcomes
-Version:     1.5.4
+Version:     1.5.5
 Author:      Valerie Obenchain, Martin Morgan, Michael Lawrence 
 Maintainer:  Valerie Obenchain <vobencha@fhcrc.org> 
 License:     Artistic-2.0 
 biocViews:   DataImport, Sequencing, HighThroughputSequencing, SNP,
              Annotation, Genetics, Homo_sapiens
 Depends:     R (>= 2.8.0), methods, GenomicRanges (>= 1.9.56), 
-             Rsamtools (>= 1.9.4), IRanges (>= 1.17.4)
+             Rsamtools (>= 1.11.4), IRanges (>= 1.17.4)
 Imports:     methods, BiocGenerics (>= 0.1.0), IRanges, 
              Biobase (>= 2.15.1), Rsamtools (>= 1.9.4),
              AnnotationDbi (>= 1.17.11), Biostrings (>= 2.25.2),

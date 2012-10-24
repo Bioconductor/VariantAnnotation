@@ -58,3 +58,20 @@ test_ScanVcfParam_trimEmpty <- function()
     ## FIXME : should this work?
     #checkException(vcfTrimEmpty(svp) <- NA, silent=TRUE)
 }
+
+test_ScanVcfParam_GRangesList <- function()
+{
+  fl <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
+  compressVcf <- bgzip(fl, tempfile())
+  idx <- indexTabix(compressVcf, "vcf")
+  tab <- TabixFile(compressVcf, idx)
+  gr1 <- GRanges("1", IRanges(13219, 2827695, name="regionA"))
+  gr2 <- GRanges(rep("2", 2), 
+      IRanges(c(321680, 14477080), c(321689, 14477090),
+      name=c("regionB", "regionC")))
+  grl <- GRangesList("1"=gr1, "2"=gr2)
+  vcf_grl <- readVcf(tab, "hg19", grl)
+  gr <- unlist(grl, use.names=FALSE)
+  vcf_gr <- readVcf(tab, "hg19", gr)
+  checkIdentical(rowData(vcf_grl), rowData(vcf_gr))
+}

@@ -63,11 +63,10 @@
   \item{trimEmpty}{A logical(1) indicating whether \sQuote{GENO} fields
     with no values should be returned.
   }
-  \item{which}{A \code{\linkS4class{GRanges}}, \code{\linkS4class{RangesList}}, 
-    \code{\linkS4class{RangedData}} or missing object, describing the sequences 
-    and ranges to be queried. Variants whose \code{POS} lies in the interval(s) 
-    \code{[start, end]} are returned. If \code{which} is not specified all
-    ranges are returned. 
+  \item{which}{A \code{\linkS4class{GRanges}} or \code{\linkS4class{RangedData}} 
+    describing the sequences and ranges to be queried. Variants whose \code{POS} 
+    lies in the interval(s) \code{[start, end]} are returned. If \code{which} is 
+    not specified all ranges are returned. 
   }
   \item{object}{An instance of class \code{ScanVcfParam}.
   }
@@ -137,23 +136,46 @@
 \examples{
   ScanVcfParam()
 
+  fl <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
+  compressVcf <- bgzip(fl, tempfile())
+  idx <- indexTabix(compressVcf, "vcf")
+  tab <- TabixFile(compressVcf, idx)
   ## --------------------------------------
   ## 'which' argument
   ## --------------------------------------
-  ## To subset on genomic coordinates, create a GRanges, RangedData or 
-  ## RangesList with the ranges of interest. This object is supplied
-  ## to ScanVcfParam() as the 'which' argument.
-  which <- RangesList(seq1=IRanges(1000, 2000), 
-      seq2=IRanges(c(100, 1000), c(1000, 2000)))
-  ScanVcfParam(which=which)
+  ## To subset on genomic coordinates, supply an object 
+  ## containing the ranges of interest. These ranges can
+  ## be given directly to the 'param' argument or wrapped
+  ## inside ScanVcfParam() as the 'which' argument.  
+
+  ## When using a list, the outer list names must correspond to valid
+  ## chromosome names in the vcf file. In this example they are "1" 
+  ## and "2".
+  gr1 <- GRanges("1", IRanges(13219, 2827695, name="regionA"))
+  gr2 <- GRanges(rep("2", 2), IRanges(c(321680, 14477080), c(321689, 14477090),
+                 name=c("regionB", "regionC")))
+  grl <- GRangesList("1"=gr1, "2"=gr2)
+  vcf <- readVcf(tab, "hg19", grl)
+
+  ## Names of the individual ranges are returned in the
+  ## 'paramRangeID' column in the rowData,
+  rowData(vcf)
+
+  ## which can be used for subsetting the VCF object
+  vcf[rowData(vcf)$paramRangeID == "regionA"]
+ 
+  ## When using ranges, the seqnames must correspond to valid
+  ## chromosome names in the vcf file.
+  gr <- unlist(grl, use.names=FALSE)
+  vcf <- readVcf(tab, "hg19", gr)
  
   ## --------------------------------------
   ## 'fixed', 'info' and 'geno' arguments
   ## --------------------------------------
-  ## This param specifies the return of the "GT" 'geno' field and the 
+  ## This param specifies the "GT" 'geno' field and the 
   ## subset of ranges in 'which'. All 'fixed' and 'info' fields will be 
   ## returned. 
-  ScanVcfParam(geno="GT", which=which)
+  ScanVcfParam(geno="GT", which=gr)
  
   ## Here two 'fixed' and one 'geno' field are specified
   ScanVcfParam(fixed=c("ALT", "QUAL"), geno="GT", info=NA) 

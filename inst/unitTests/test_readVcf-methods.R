@@ -19,7 +19,7 @@ test_readVcf_format <- function()
     fl <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
     vcf <- readVcf(fl, "hg19")
     checkTrue(class(alt(vcf)) == "CompressedCharacterList")
-    checkIdentical(qual(vcf), c(NA, 6, 6, 12, 23, 14, 11))
+    checkIdentical(qual(vcf), c(6, NA, 6, 12, 23, 14, 11))
 }
 
 test_readVcf_unspecified_INFO_FORMAT <- function()
