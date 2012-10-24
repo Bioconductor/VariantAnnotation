@@ -258,8 +258,8 @@ setMethod("keepSeqlevels",  c("VCF", "character"),
 setMethod(show, "VCF",
     function(object)
 {
-    paste0("This object is no longer valid. Please use updateObeject() to ",
-          " create a valid instance of CollapsedVCF or ExpandedVCF.")
+    paste0("This object is no longer valid. Please use updateObject() to ",
+          " create a valid instance of CollapsedVCF.")
 })
 
 ### show method for CollapsedVCF and ExapandedVCF
@@ -317,7 +317,9 @@ setMethod("updateObject", "VCF",
     {
         if (verbose)
             message("updateObject(object = 'VCF')")
-        as(object, "CompressedVCF")
+        VCF(rowData=rowData(object), colData=colData(object),
+            exptData=exptData(object), info=mcols(info(object))[-1],
+            fixed=mcols(fixed(object))[-1], geno=geno(object))
     }
 )
 
