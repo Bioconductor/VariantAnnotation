@@ -5,7 +5,7 @@
 
 \title{Write VCF files}
 
-\description{Write Variant Call Format (VCF) files - under construction - }
+\description{Write Variant Call Format (VCF) files to disk}
 
 \usage{
   \S4method{writeVcf}{VCF,character}(obj, filename, index = FALSE, ...)
@@ -18,13 +18,14 @@
   \item{filename}{The character() name of the VCF file to be
     written out.
   }
-  \item{index}{Whether to bgzip the output file and generate a tabix index.}
+  \item{index}{Whether to bgzip the output file and generate a tabix index.
+  }
   \item{\dots}{Additional arguments, passed to methods.
   }
 }
 
 \details{A VCF file can be written out from data in a \code{VCF} file. More
-  general methods to write out from lists are in progress.
+  general methods to write out from other objects may be added in the future. 
 }
 
 \value{VCF file
@@ -42,7 +43,7 @@
   \code{samtools}.
 }
 
-\author{Valerie Obenchain <vobencha@fhcrc.org>}
+\author{Valerie Obenchain <vobencha@fhcrc.org> and Michael Lawrence}
 
 \seealso{
   \code{\link{readVcf}}

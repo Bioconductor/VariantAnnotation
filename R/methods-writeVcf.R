@@ -74,13 +74,15 @@ setMethod(writeVcf, c("VCF", "character"),
       matrix(unlist(x, use.names=FALSE), nrow(x), prod(tail(dim(x), -1)))
     })
   }
-  
+ 
   do.call(cbind, Map(function(elt, nms) {
 ### Should be discussed, but it seems like if we have a list matrix,
 ### we should look for elements that are empty, not a single NA.
+### VO: If readVcf() was used, all empty fields were converted to NA.
     if (is.list(elt))
-      haveData <- elementLengths(elt) > 0
-    else haveData <- rowSums(!is.na(elt)) > 0
+      haveData <- rowSums(matrix(elementLengths(elt), nrow(elt))) > 0
+    else 
+      haveData <- rowSums(!is.na(elt)) > 0
     as.character(ifelse(haveData, nms, NA_character_))
   }, as.list(geno), names(geno)))
 }
@@ -126,7 +128,7 @@ setMethod(writeVcf, c("VCF", "character"),
     keep <- !is.na(formatMatPerSub)
     genoListBySub <- seqsplit(genoMat[keep], row(genoMat)[keep])
     genoMatCollapsed <- matrix(.pasteCollapse(genoListBySub, ":"), nrec, nsub)
-    
+ 
     cbind(FORMAT, genoMatCollapsed)
 }
 
@@ -135,23 +137,23 @@ setMethod(writeVcf, c("VCF", "character"),
     if (ncol(info) == 0) {
       return(rep.int(".", nrow(info)))
     }
-    
+ 
     lists <- sapply(info, is, "list")
     info[lists] <- lapply(info[lists], as, "List")
-    
+ 
     lists <- sapply(info, is, "List")
     info[lists] <- lapply(info[lists], function(l) {
       charList <- as(l, "CharacterList")
-      charList[is.na(l)] <- "."
+      charList@unlistData[is.na(charList@unlistData)] <- "."
       collapsed <- .pasteCollapse(charList, ",")
       ifelse(sum(!is.na(l)) > 0L, collapsed, NA_character_)
     })
-    
+ 
     arrays <- sapply(info, is.array)
     info[arrays] <- lapply(info[arrays], function(a) {
       mat <- matrix(a, nrow = nrow(a))
       charMat <- mat
-      charMat[is.na(mat)] <- "."
+      charMat@unlistData[is.na(charMat@unlistData)] <- "."
       collapsed <- do.call(paste, c(as.data.frame(charMat), sep = ","))
       ifelse(rowSums(!is.na(mat)) > 0L, NA_character_, collapsed)
     })

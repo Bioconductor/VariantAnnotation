@@ -259,7 +259,7 @@ setMethod(show, "VCF",
     function(object)
 {
     paste0("This object is no longer valid. Please use updateObject() to ",
-          " create a valid instance of CollapsedVCF.")
+          "create a CollapsedVCF instance.")
 })
 
 ### show method for CollapsedVCF and ExapandedVCF
@@ -312,6 +312,7 @@ setMethod(show, "VCF",
 ### updateObject 
 ###
 
+### Creates a CollapsedVCF from a VCF.
 setMethod("updateObject", "VCF",
     function(object, ..., verbose=FALSE)
     {
