@@ -62,7 +62,7 @@
                 } else {
                     trans <- lapply(elt, t)
                     cmb <- matrix(t(do.call(c, trans)), 
-                                  c(length(lst[["rowData"]]), d[2]))
+                                  length(lst[["rowData"]]), d[2])
                     cmb
                 }
             }) 
