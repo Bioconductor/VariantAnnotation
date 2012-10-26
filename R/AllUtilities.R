@@ -5,7 +5,8 @@
 .collapseLists <- function(vcf, param)
 {
     idx <- sapply(vcf, function(elt) length(elt$rowData) > 0L)
-    vcf <- vcf[idx]
+    if (length(vcf) > 1L)
+        vcf <- vcf[idx]
     if (is(param, "ScanVcfParam"))
         paramRangeID <- names(unlist(vcfWhich(param), use.names=FALSE))[idx]
     else
