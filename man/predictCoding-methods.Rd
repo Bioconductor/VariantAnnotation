@@ -57,12 +57,12 @@
 }
 
 \details{
-  This function returns the amino acid coding for variants that fall in
-  coding regions. The reference sequences are taken from a fasta file or 
-  \link[BSgenome]{BSgenome}. The width of the reference is determined
-  from the start postion and width of the range in the \code{query}.
-  For guidance on how to represent an insertion, deletion or substitution 
-  see the 1000 Genomes VCF format (references). 
+  This function returns the amino acid coding for variants that fall 
+  completely `within' a coding region. The reference sequences are 
+  taken from a fasta file or \link[BSgenome]{BSgenome}. The width of 
+  the reference is determined from the start postion and width of the 
+  range in the \code{query}. For guidance on how to represent an insertion, 
+  deletion or substitution see the 1000 Genomes VCF format (references). 
 
   Variant alleles are taken from the \code{varAllele} when supplied.
   When the \code{query} is a \code{VCF} object the \code{varAllele} will
