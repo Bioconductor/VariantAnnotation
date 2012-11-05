@@ -64,7 +64,8 @@ setMethod("select", "PolyPhenDb",
         missing <- (!keys %in% as.character(raw$RSID))
         if (any(missing)) {
             msg <- paste(IRanges:::selectSome(keys[missing], 5), collapse=" ")
-            warning(sprintf(msg, "keys not found in database : %s"))
+            warning(sum(missing), " keys not found in PolyPhen database: ", msg,
+                    call.=FALSE)
         }
         lst <- as.list(rep(NA_character_, length(keys)))
         raw <- raw[!duplicated(raw), ]

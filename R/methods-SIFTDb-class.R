@@ -52,7 +52,8 @@ setMethod("select", "SIFTDb",
         missing <- (!fmtkeys %in% as.character(raw$RSID))
         if (any(missing)) {
             msg <- paste(IRanges:::selectSome(keys[missing], 5), collapse=" ")
-            warning(sprintf("keys not found in database : %s", msg))
+            warning(sum(missing), " keys not found in SIFT database: ", msg,
+                    call.=FALSE)
         }
     }
 
