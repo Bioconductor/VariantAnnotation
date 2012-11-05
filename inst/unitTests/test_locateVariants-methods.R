@@ -106,5 +106,9 @@ test_locateVariants_PromoterVariants <- function()
     checkEquals(c(1L, 2L), .extract(current, "QUERYID"))
     current <- locateVariants(q, s, PromoterVariants(0, 0))
     checkTrue(length(current) == 0L)
+
+    q <- GRanges("chr22", IRanges(50310410, 50310420))
+    current <- locateVariants(q, txdb, PromoterVariants())
+    checkIdentical(unique(current$GENEID), "79174")
 }
 

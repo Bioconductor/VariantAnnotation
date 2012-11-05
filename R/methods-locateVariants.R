@@ -312,11 +312,13 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "PromoterVariants"),
         if (!exists("tx", cache, inherits=FALSE)) {
             tx <- transcripts(subject) 
             cache[["tx"]] <- splitAsList(tx, seq_len(length(tx))) 
+            names(cache[["tx"]]) <- tx$tx_id
         }
         res <- callGeneric(query, cache[["tx"]], region, ...,
             ignore.strand=ignore.strand, asHits=asHits)
         if (is(res, "GenomicRanges") & length(res) > 0L) {
-            res$GENEID <- select(subject, res$TXID, "GENEID", "TXID")$GENEID 
+            if (!is.null(res$TXID))
+                res$GENEID <- select(subject, res$TXID, "GENEID", "TXID")$GENEID
         }
         res
     }
@@ -338,7 +340,6 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "PromoterVariants"),
                 elementLengths(subject)))
 
         if (length(fo) > 0) {
-            fo <- fo[order(queryHits(fo))]
             queryid <- queryHits(fo)
             GRanges(seqnames=seqnames(query)[queryid],
                     ranges=IRanges(ranges(query)[queryid]),
