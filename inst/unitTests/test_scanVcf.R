@@ -91,6 +91,9 @@ test_scanVcfHeader_VarScan <- function()
     hd <- scanVcfHeader(fl)
     checkIdentical(dim(info(hd)), c(7L, 3L))
     checkIdentical(names(info(hd)), c("Number", "Type", "Description"))
+    expected <- paste0("Somatic status of variant ",
+        "(0=Reference,1=Germline,2=Somatic,3=LOH, or 5=Unknown)")
+    checkIdentical(info(hd)["SS", "Description"], expected)
 
     fl <- system.file("extdata", "ex2.vcf",
                       package="VariantAnnotation")
