@@ -1,0 +1,22 @@
+##fileformat=VCFv4.1
+##source=VarScan2
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total depth of quality bases">
+##INFO=<ID=SOMATIC,Number=0,Type=Flag,Description="Indicates if record is a somatic mutation">
+##INFO=<ID=SS,Number=1,Type=String,Description="Somatic status of variant (0=Reference,1=Germline,2=Somatic,3=LOH, or 5=Unknown)">
+##INFO=<ID=SSC,Number=1,Type=String,Description="Somatic score in Phred scale (0-255) derived from somatic p-value">
+##INFO=<ID=GPV,Number=1,Type=Float,Description="Fisher's Exact Test P-value of tumor+normal versus no variant for Germline calls">
+##INFO=<ID=SPV,Number=1,Type=Float,Description="Fisher's Exact Test P-value of tumor versus normal for Somatic/LOH calls">
+##FILTER=<ID=str10,Description="Less than 10% or more than 90% of variant supporting reads on one strand">
+##FILTER=<ID=indelError,Description="Likely artifact due to indel reads at this position">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype Quality">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">
+##FORMAT=<ID=RD,Number=1,Type=Integer,Description="Depth of reference-supporting bases (reads1)">
+##FORMAT=<ID=AD,Number=1,Type=Integer,Description="Depth of variant-supporting bases (reads2)">
+##FORMAT=<ID=FREQ,Number=1,Type=String,Description="Variant allele frequency">
+##SnpEffVersion="2.0.5 (build 2011-12-24), by Pablo Cingolani"
+##SnpEffCmd="SnpEff eff GRCh37.64 -c /home/adminrig/src/snpeff/snpEff_2_0_5/snpEff.config -i vcf -o vcf -v 48vcf.snp.somatic.vcf "
+##INFO=<ID=EFF,Number=.,Type=String,Description="Predicted effects for this variant.Format: 'Effect ( Effefct_Impact | Functional_Class | Codon_Change | Amino_Acid_change | Gene_Name | Gene_BioType | Coding | Transcript | Exon [ | ERRORS | WARNINGS ] )' ">
+#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT NORMAL TUMOR
+chr1 1574019 . A G 0.0 PASS DP=27;SOMATIC;SS=2;SSC=14;GPV=1E0;SPV=3.7681E-2;EFF=DOWNSTREAM(MODIFIER||||MMP23B|protein_coding|CODING|ENST00000356026|),TRANSCRIPT(MODIFIER||||AL691432.2|unprocessed_pseudogene|NON_CODING|ENST00000317673|),SPLICE_SITE_ACCEPTOR(HIGH||||WASH2P|unprocessed_pseudogene|NON_CODING|ENST00000542901|),UTR_5_PRIME(MODIFIER||||ARHGEF16|protein_coding|CODING|ENST00000378371|exon_1_3383535_3383901),NON_SYNONYMOUS_CODING(MODERATE|MISSENSE|Cgg/Tgg|R10W|CYP4B1|processed_transcript|CODING|ENST00000468637|exon_1_47279154_47279278) GT:GQ:DP:RD:AD:FREQ 0/0:.:12:11:1:8.33% 0/1:.:15:8:7:46.67%
+chr1 1580738 . T A 0.0 PASS DP=76;SOMATIC;SS=2;SSC=14;GPV=1E0;SPV=3.1816E-2;EFF=TRANSCRIPT(MODIFIER||||AL691432.2|unprocessed_pseudogene|NON_CODING|ENST00000317673|),TRANSCRIPT(MODIFIER||||AL691432.2|unprocessed_pseudogene|NON_CODING|ENST00000340677|),TRANSCRIPT(MODIFIER||||AL691432.2|unprocessed_pseudogene|NON_CODING|ENST00000341832|),TRANSCRIPT(MODIFIER||||AL691432.2|unprocessed_pseudogene|NON_CODING|ENST00000407249|),TRANSCRIPT(MODIFIER||||AL691432.2|unprocessed_pseudogene|NON_CODING|ENST00000513088|) GT:GQ:DP:RD:AD:FREQ 1/1:.:25:15:4:21.05% 0/1:.:51:25:24:48.98%
