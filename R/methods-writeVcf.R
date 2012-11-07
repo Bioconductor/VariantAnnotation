@@ -5,25 +5,43 @@
 setMethod(writeVcf, c("VCF", "character"),
     function(obj, filename, index = FALSE, ...)
 {
+    con <- file(filename, open="w")
+    on.exit(close(con))
+
+    writeVcf(obj, con, index=index, ...)
+})
+
+setMethod(writeVcf, c("VCF", "connection"),
+    function(obj, filename, index = FALSE, ...)
+{
     if (!isTRUEorFALSE(index))
         stop("'index' must be TRUE or FALSE")
- 
-    hdr <- .makeVcfHeader(obj)
+
+    if (!isOpen(filename)) {
+        open(filename)
+        on.exit(close(filename))
+    }
+
+    scon <- summary(filename)
+    headerNeeded <- !((scon$mode == "a") &&
+                     file.exists(scon$description) &&
+                     (file.info(scon$description)$size !=0))
+    if (headerNeeded) {
+        hdr <- .makeVcfHeader(obj)
+        writeLines(hdr, filename)
+    }
+
     mat <- .makeVcfMatrix(obj)
- 
-    con = file(filename, open="w")
-    writeLines(hdr, con)
-    writeLines(mat, con)
- 
-    close(con)
+    writeLines(mat, filename)
+    flush(filename)
 
     if (index) {
-        filenameGZ <- bgzip(filename, overwrite = TRUE)
+        filenameGZ <- bgzip(scon$description, overwrite = TRUE)
         indexTabix(filenameGZ, format = "vcf")
-        unlink(filename)
+        unlink(summary(scon)$description)
         invisible(filenameGZ)
     } else {
-        invisible(filename)
+        invisible(scon$description)
     }
 })
 

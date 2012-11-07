@@ -1,23 +1,27 @@
 \name{writeVcf}
 \alias{writeVcf}
 \alias{writeVcf,VCF,character-method}
-
+\alias{writeVcf,VCF,connection-method}
 
 \title{Write VCF files}
 
 \description{Write Variant Call Format (VCF) files to disk}
 
 \usage{
-  \S4method{writeVcf}{VCF,character}(obj, filename, index = FALSE, ...)
+\S4method{writeVcf}{VCF,character}(obj, filename, index = FALSE, ...)
+\S4method{writeVcf}{VCF,connection}(obj, filename, index = FALSE, ...)
 }
 
 \arguments{
   \item{obj}{Object containing data to be written out. At
     present only accepts \linkS4class{VCF}.
   }
-  \item{filename}{The character() name of the VCF file to be
-    written out.
-  }
+
+  \item{filename}{The character() name of the VCF file, or a connection
+    (e.g., \code{\link{file}()}), to be written out. A connection opened
+    with \code{open = "a"} will have header information written only if
+    the file does not already exist.}
+
   \item{index}{Whether to bgzip the output file and generate a tabix index.
   }
   \item{\dots}{Additional arguments, passed to methods.
@@ -61,6 +65,17 @@
   in3 <- readVcf(out2.vcf, "hg19")
 
   identical(in2, in3)
+
+  ## write to console
+  writeVcf(in1, stdout())
+
+  ## write incrementally
+  out3.vcf <- tempfile()
+  con <- file(out3.vcf, open="a")
+  writeVcf(in1[1:2,], con)
+  writeVcf(in1[-(1:2),], con)
+  close(con)
+  readVcf(out3.vcf, "hg19")
 }
 
 \keyword{manip}
