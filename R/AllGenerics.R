@@ -100,6 +100,17 @@ setGeneric("scanVcf", signature = c("file", "param"),
 )
 
 ### -------------------------------------------------------------------------
+### filterVcf
+###
+
+setGeneric("filterVcf", signature = "file",
+           function(file, genome, destination, ..., verbose = FALSE,
+                    index = FALSE, filters = FilterRules(),
+                    param = ScanVcfParam())
+           standardGeneric("filterVcf")
+)
+
+### -------------------------------------------------------------------------
 ### VCF class 
 ###
 

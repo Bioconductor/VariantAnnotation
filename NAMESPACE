@@ -36,14 +36,16 @@ importMethodsFrom(IRanges, "%in%", append, as.matrix, as.vector,
                   split, start, "start<-", subjectHits, "subseq<-", substring, 
                   unique, unlist, values, "values<-", which, width, 
                   expand)
-importFrom(IRanges, CharacterList, DataFrame, IRanges, PartitioningByWidth, 
-           successiveViews, expand)
+importFrom(IRanges, CharacterList, DataFrame, IRanges, isSingleString,
+           PartitioningByWidth, successiveViews, subsetByFilter, expand)
 
 importMethodsFrom(DBI, dbCommit, dbConnect, dbDisconnect, dbExistsTable, 
                   dbGetQuery, dbReadTable, dbWriteTable, dbListTables, 
                   dbListFields)
 
 importClassesFrom(BSgenome, BSgenome)
+
+importFrom(utils, txtProgressBar, setTxtProgressBar)
 
 #exportPattern("^[^\\.]")
 
@@ -57,7 +59,8 @@ export(VCF, VCFHeader,
        SpliceSiteVariants, PromoterVariants, AllVariants,
        upstream, "upstream<-", downstream, "downstream<-")
 
-exportMethods(scanVcf, scanVcfHeader, ScanVcfParam,
+exportMethods(filterVcf,
+              scanVcf, scanVcfHeader, ScanVcfParam,
               readVcf, readVcfLongForm, writeVcf,
               predictCoding, getTranscriptSeqs, refLocsToLocalLocs, 
               MatrixToSnpMatrix, locateVariants, summarizeVariants,

@@ -3,7 +3,7 @@ Type: Package
 Title: Annotation of Genetic Variants 
 Description: Annotate variants, compute amino acid coding changes, predict 
     coding outcomes
-Version: 1.5.11
+Version: 1.5.12
 Author: Valerie Obenchain, Martin Morgan, Michael Lawrence 
 Maintainer: Valerie Obenchain <vobencha@fhcrc.org> 
 License: Artistic-2.0 
@@ -13,7 +13,7 @@ Depends: R (>= 2.8.0), methods, GenomicRanges (>= 1.9.56),
     Rsamtools (>= 1.11.7), IRanges (>= 1.17.4)
 Imports: methods, BiocGenerics (>= 0.1.0), IRanges, Biobase (>= 2.15.1), 
     Rsamtools (>= 1.9.4), AnnotationDbi (>= 1.17.11), Biostrings (>= 2.25.2),
-    zlibbioc, BSgenome, GenomicFeatures (>= 1.9.35), DBI
+    zlibbioc, BSgenome, GenomicFeatures (>= 1.9.35), DBI, utils
 Suggests: RUnit, BSgenome.Hsapiens.UCSC.hg19, TxDb.Hsapiens.UCSC.hg19.knownGene,
           SNPlocs.Hsapiens.dbSNP.20110815, SIFT.Hsapiens.dbSNP132,
           PolyPhen.Hsapiens.dbSNP131, snpStats
