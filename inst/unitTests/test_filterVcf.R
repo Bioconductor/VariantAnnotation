@@ -22,4 +22,7 @@ test_filterVcf_filter <- function()
     dest <- tempfile()
 
     ans <- filterVcf(tbx, "hg19", dest, filters=filt)
+    vcf0 <- subsetByFilter(readVcf(fl, "hg19"), filt)
+    vcf1 <- readVcf(ans, "hg19")
+    checkIdentical(dim(vcf0), dim(vcf1))
 }
