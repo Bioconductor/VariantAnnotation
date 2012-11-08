@@ -38,7 +38,7 @@ setMethod(writeVcf, c("VCF", "connection"),
     if (index) {
         filenameGZ <- bgzip(scon$description, overwrite = TRUE)
         indexTabix(filenameGZ, format = "vcf")
-        unlink(summary(scon)$description)
+        unlink(scon$description)
         invisible(filenameGZ)
     } else {
         invisible(scon$description)
