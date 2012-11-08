@@ -186,24 +186,3 @@ setGeneric("meta", signature = "x",
     function(x) standardGeneric("meta"),
 )
 
-### -------------------------------------------------------------------------
-### VAFilter and VAFilterResult 
-###
-
-setGeneric("name", 
-    function(x, ...) 
-    standardGeneric("name")
-)
-
-setGeneric("stats", 
-    function(x, ...) 
-    standardGeneric("stats")
-)
-
-setGeneric("vaFilter", signature = "fun",
-    function(fun, name=NA_character_, ...)
-    standardGeneric("vaFilter")
-)
-
-setGeneric(".vaValidity")
-

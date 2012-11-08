@@ -52,7 +52,6 @@ exportClassPattern("^.*$")
 export(VCF, VCFHeader, 
        vcfWhich, "vcfWhich<-", vcfFixed, "vcfFixed<-", vcfInfo, "vcfInfo<-", 
        vcfGeno, "vcfGeno<-", vcfTrimEmpty, "vcfTrimEmpty<-", 
-       VAFilterResult, dbSNPFilter, regionFilter, compose,
        duplicateRSID, CodingVariants, IntronVariants,
        FiveUTRVariants, ThreeUTRVariants, IntergenicVariants,
        SpliceSiteVariants, PromoterVariants, AllVariants,
@@ -71,6 +70,4 @@ exportMethods(scanVcf, scanVcfHeader, ScanVcfParam,
 
               reference, samples, header, meta,
 
-              keys, cols, select,
- 
-              vaFilter, name, stats, Logic, show)
+              keys, cols, select)

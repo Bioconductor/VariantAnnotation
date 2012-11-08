@@ -166,29 +166,6 @@ setClass("VCFHeader",
 )
 
 ### ------------------------------------------------------------------------- 
-### VAFilters classes 
-###
-
-setClass(".VAUtil", representation("VIRTUAL"))
-
-.vaValidity <- function(object) TRUE
-setClass("VAFilter",
-    contains=c("function", ".VAUtil"),
-    representation(
-        name="ScalarCharacter"
-    ),
-    validity=.vaValidity
-)
-
-setClass("VAFilterResult",
-    contains=c("logical", ".VAUtil"),
-    representation(
-      name="ScalarCharacter",
-      stats="data.frame"
-    )
-)
-
-### ------------------------------------------------------------------------- 
 ### SIFT and PolyPhen classes 
 ###
 
