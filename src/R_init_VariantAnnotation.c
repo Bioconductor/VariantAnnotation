@@ -1,5 +1,4 @@
 #include <R_ext/Rdynload.h>
-#include "writevcf.h"
 #include "vcffile.h"
 
 static const R_CallMethodDef callMethods[] = {
@@ -7,8 +6,6 @@ static const R_CallMethodDef callMethods[] = {
     {".scan_vcf_character", (DL_FUNC) & scan_vcf_character, 6},
     {".scan_vcf_connection", (DL_FUNC) & scan_vcf_connection, 5},
     {".tabix_as_vcf", (DL_FUNC) & tabix_as_vcf, 5},
-    /* writevcf.c */
-    {".code_allele_observations", (DL_FUNC) & code_allele_observations, 2},
     {NULL, NULL, 0}
 };
 
