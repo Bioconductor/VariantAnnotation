@@ -25,7 +25,7 @@ importMethodsFrom(AnnotationDbi, colnames, cols, exists, keys, ncol,
 importClassesFrom(GenomicFeatures, TranscriptDb)
 importMethodsFrom(GenomicFeatures, cdsBy, exons, transcripts,
                   fiveUTRsByTranscript, threeUTRsByTranscript,
-                  isActiveSeq, "isActiveSeq<-", promoters)
+                  isActiveSeq, "isActiveSeq<-")
 importFrom(GenomicFeatures, extractTranscriptsFromGenome)
 
 importClassesFrom(IRanges, DataFrame, Ranges, RangesList, RangedData)
@@ -35,10 +35,9 @@ importMethodsFrom(IRanges, "%in%", append, as.matrix, as.vector,
                   precede, queryHits, rev, Rle, runValue, sapply, shift,
                   split, start, "start<-", subjectHits, "subseq<-", substring, 
                   unique, unlist, values, "values<-", which, width, 
-                  expand, promoters)
+                  expand)
 importFrom(IRanges, CharacterList, DataFrame, IRanges, isSingleString,
-           PartitioningByWidth, successiveViews, subsetByFilter, expand,
-           promoters)
+           PartitioningByWidth, successiveViews, subsetByFilter, expand)
 
 importMethodsFrom(DBI, dbCommit, dbConnect, dbDisconnect, dbExistsTable, 
                   dbGetQuery, dbReadTable, dbWriteTable, dbListTables, 
