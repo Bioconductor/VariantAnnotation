@@ -128,8 +128,9 @@ locateVariants(query, subject, region, ...)
 }
 \value{
   A \code{GRanges} object with a row for each variant-transcript match.
-  Columns are \code{LOCATION}, \code{QUERYID}, \code{TXID}, \code{GENEID} and 
-  \code{CDSID}. 
+  Columns are \code{LOCATION}, \code{QUERYID}, \code{TXID}, \code{GENEID},
+  \code{PRECEDEID}, \code{FOLLOWID} and \code{CDSID}. Each column is
+  described in detail below. 
 
  \describe{
     \item{\code{LOCATION}}{

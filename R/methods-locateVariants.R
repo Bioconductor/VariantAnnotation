@@ -55,16 +55,14 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "CodingVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE, asHits=FALSE)
     {
-        queryseq <- seqlevels(query)
-        subseq <- seqlevels(subject)
-        if (!any(queryseq %in% subseq))
-            warning("none of seqlevels(query) match seqlevels(subject)")
-
-        ## mask chromosomes not in query
-        masks <- isActiveSeq(subject)
-        on.exit(isActiveSeq(subject) <- masks)
-        .setActiveSubjectSeq(query, subject)
-
+        if (!exists("mask", cache, inherits=FALSE)) {
+            masks <- isActiveSeq(subject)
+            on.exit(isActiveSeq(subject) <- masks)
+            .setActiveSubjectSeq(query, subject)
+        }
+        if (!any(seqlevels(query) %in%
+            names(isActiveSeq(subject))[isActiveSeq(subject)]))
+            return(.returnEmpty())
         ## for width(ranges) == 0 : de-increment start to equal end value 
         if (any(insertion <- width(query) == 0))
             start(query)[insertion] <- start(query)[insertion] - 1
@@ -95,16 +93,14 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "IntronVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE, asHits=FALSE)
     {
-        queryseq <- seqlevels(query)
-        subseq <- seqlevels(subject)
-        if (!any(queryseq %in% subseq))
-            warning("none of seqlevels(query) match seqlevels(subject)")
- 
-        ## mask chromosomes not in query
-        masks <- isActiveSeq(subject)
-        on.exit(isActiveSeq(subject) <- masks)
-        .setActiveSubjectSeq(query, subject)
- 
+        if (!exists("mask", cache, inherits=FALSE)) {
+            masks <- isActiveSeq(subject)
+            on.exit(isActiveSeq(subject) <- masks)
+            .setActiveSubjectSeq(query, subject)
+        }
+        if (!any(seqlevels(query) %in%
+            names(isActiveSeq(subject))[isActiveSeq(subject)]))
+            return(.returnEmpty())
         ## for width(ranges) == 0 : de-increment start to equal end value 
         if (any(insertion <- width(query) == 0))
             start(query)[insertion] <- start(query)[insertion] - 1
@@ -135,16 +131,14 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "ThreeUTRVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE, asHits=FALSE)
     {
-        queryseq <- seqlevels(query)
-        subseq <- seqlevels(subject)
-        if (!any(queryseq %in% subseq))
-            warning("none of seqlevels(query) match seqlevels(subject)")
-
-        ## mesk chromosomes not in query
-        masks <- isActiveSeq(subject)
-        on.exit(isActiveSeq(subject) <- masks)
-        .setActiveSubjectSeq(query, subject)
-
+        if (!exists("mask", cache, inherits=FALSE)) {
+            masks <- isActiveSeq(subject)
+            on.exit(isActiveSeq(subject) <- masks)
+            .setActiveSubjectSeq(query, subject)
+        }
+        if (!any(seqlevels(query) %in%
+            names(isActiveSeq(subject))[isActiveSeq(subject)]))
+            return(.returnEmpty())
         ## for width(ranges) == 0 : de-increment start to equal end value 
         if (any(insertion <- width(query) == 0)) 
             start(query)[insertion] <- start(query)[insertion] - 1 
@@ -176,16 +170,14 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "FiveUTRVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE, asHits=FALSE)
     {
-        queryseq <- seqlevels(query)
-        subseq <- seqlevels(subject)
-        if (!any(queryseq %in% subseq))
-            warning("none of seqlevels(query) match seqlevels(subject)")
-
-        ## mask chromosomes not in query
-        masks <- isActiveSeq(subject)
-        on.exit(isActiveSeq(subject) <- masks)
-        .setActiveSubjectSeq(query, subject)
-
+        if (!exists("mask", cache, inherits=FALSE)) {
+            masks <- isActiveSeq(subject)
+            on.exit(isActiveSeq(subject) <- masks)
+            .setActiveSubjectSeq(query, subject)
+        }
+        if (!any(seqlevels(query) %in%
+            names(isActiveSeq(subject))[isActiveSeq(subject)]))
+            return(.returnEmpty())
         ## for width(ranges) == 0 : de-increment start to equal end value 
         if (any(insertion <- width(query) == 0))
             start(query)[insertion] <- start(query)[insertion] - 1
@@ -218,16 +210,15 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb",
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE)
     {
-        queryseq <- seqlevels(query)
-        subseq <- seqlevels(subject)
-        if (!any(queryseq %in% subseq))
-            warning("none of seqlevels(query) match seqlevels(subject)")
-
-        ## mask chromosomes not in query
-        masks <- isActiveSeq(subject)
-        on.exit(isActiveSeq(subject) <- masks)
-        .setActiveSubjectSeq(query, subject)
-
+        if (!exists("mask", cache, inherits=FALSE)) {
+            ## mask chromosomes not in query
+            masks <- isActiveSeq(subject)
+            on.exit(isActiveSeq(subject) <- masks)
+            .setActiveSubjectSeq(query, subject)
+        }
+        if (!any(seqlevels(query) %in%
+            names(isActiveSeq(subject))[isActiveSeq(subject)]))
+            return(.returnEmpty())
         ## for width(ranges) == 0 : de-increment start to equal end value 
         if (any(insertion <- width(query) == 0))
             start(query)[insertion] <- start(query)[insertion] - 1
@@ -255,16 +246,15 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "SpliceSiteVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE, asHits=FALSE)
     {
-        queryseq <- seqlevels(query)
-        subseq <- seqlevels(subject)
-        if (!any(queryseq %in% subseq))
-            warning("none of seqlevels(query) match seqlevels(subject)")
-
-        ## mask chromosomes not in query
-        masks <- isActiveSeq(subject)
-        on.exit(isActiveSeq(subject) <- masks)
-        .setActiveSubjectSeq(query, subject)
-
+        if (!exists("mask", cache, inherits=FALSE)) {
+            ## mask chromosomes not in query
+            masks <- isActiveSeq(subject)
+            on.exit(isActiveSeq(subject) <- masks)
+            .setActiveSubjectSeq(query, subject)
+        }
+        if (!any(seqlevels(query) %in%
+            names(isActiveSeq(subject))[isActiveSeq(subject)]))
+            return(.returnEmpty())
         ## for width(ranges) == 0 : de-increment start to equal end value 
         if (any(insertion <- width(query) == 0))
             start(query)[insertion] <- start(query)[insertion] - 1
@@ -295,16 +285,15 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "PromoterVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE, asHits=FALSE)
     { 
-        queryseq <- seqlevels(query)
-        subseq <- seqlevels(subject)
-        if (!any(queryseq %in% subseq))
-            warning("none of seqlevels(query) match seqlevels(subject)")
-
-        ## mask chromosomes not in query
-        masks <- isActiveSeq(subject)
-        on.exit(isActiveSeq(subject) <- masks)
-        .setActiveSubjectSeq(query, subject)
-
+        if (!exists("mask", cache, inherits=FALSE)) {
+            ## mask chromosomes not in query
+            masks <- isActiveSeq(subject)
+            on.exit(isActiveSeq(subject) <- masks)
+            .setActiveSubjectSeq(query, subject)
+        }
+        if (!any(seqlevels(query) %in%
+            names(isActiveSeq(subject))[isActiveSeq(subject)]))
+            return(.returnEmpty())
         ## for width(ranges) == 0 : de-increment start to equal end value 
         if (any(insertion <- width(query) == 0)) 
             start(query)[insertion] <- start(query)[insertion] - 1 
@@ -348,12 +337,15 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "PromoterVariants"),
                     QUERYID=queryid,
                     TXID=as.integer(txid[subjectHits(fo)]),
                     CDSID=NA_integer_,
-                    GENEID=NA_character_)
+                    GENEID=NA_character_,
+                    PRECEDEID=NA_character_,
+                    FOLLOWID=NA_character_)
         } else {
             res <- GRanges()
             values(res) <- DataFrame(LOCATION=.location(), QUERYID=integer(),
                                      TXID=integer(), CDSID=integer(),
-                                     GENEID=character())
+                                     GENEID=character(), PRECEDEID=character(),
+                                     FOLLOWID=character())
             res
         }
     }
@@ -367,6 +359,15 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE)
     {
+        ## mask chromosomes not in query
+        masks <- isActiveSeq(subject)
+        on.exit(isActiveSeq(subject) <- masks)
+        .setActiveSubjectSeq(query, subject)
+        cache[["mask"]] <- TRUE
+        if (!any(seqlevels(query) %in%
+            names(isActiveSeq(subject))[isActiveSeq(subject)]))
+            return(.returnEmpty())
+
         coding <- locateVariants(query, subject, CodingVariants(), cache=cache,
             ignore.strand=ignore.strand)
         intron <- locateVariants(query, subject, IntronVariants(), cache=cache,
@@ -395,10 +396,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
         intergenic <- locateVariants(query, subject, IntergenicVariants(), 
             cache=cache, ignore.strand=ignore.strand)
 
-        base <- c(coding, intron, fiveUTR, threeUTR, splice, promoter)
-        PRECEDEID <- FOLLOWID <- rep(NA_character_, length(base))
-        values(base) <- append(values(base), DataFrame(PRECEDEID, FOLLOWID))
-        ans <- c(base, intergenic)
+        ans <- c(coding, intron, fiveUTR, threeUTR, splice, promoter, intergenic)
         meta <- values(ans)
         ans[order(meta$QUERYID, meta$TXID, meta$CDSID, meta$GENEID), ]
     }
@@ -407,6 +405,17 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
 ### -------------------------------------------------------------------------
 ### helpers 
 ###
+
+.returnEmpty <- function()
+{
+    warning("none of seqlevels(query) match seqlevels(subject)")
+    res <- GRanges()
+    values(res) <- DataFrame(LOCATION=.location(), QUERYID=integer(), 
+                             TXID=integer(), CDSID=integer(), 
+                             GENEID=character(), PRECEDEID=character(), 
+                             FOLLOWID=character())
+    res
+}
 
 .location <-
     function(length=0, value=NA)
@@ -443,12 +452,15 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
                 QUERYID=queryid,
                 TXID=as.integer(txid[subjectHits(fo)]),
                 CDSID=NA_integer_,
-                GENEID=NA_character_)
+                GENEID=NA_character_,
+                PRECEDEID=NA_character_,
+                FOLLOWID=NA_character_)
     } else {
         res <- GRanges()
         values(res) <- DataFrame(LOCATION=.location(), QUERYID=integer(),
                                  TXID=integer(), CDSID=integer(), 
-                                 GENEID=character())
+                                 GENEID=character(), PRECEDEID=character(),
+                                 FOLLOWID=character())
         res
     }
 }
@@ -470,7 +482,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
     co <- countOverlaps(query, subject, type="any", 
                         ignore.strand=ignore.strand)
     intergenic <- co == 0
-    if (all(!intergenic)) {
+    if (all(!intergenic | (length(subject) == 0L))) {
         res <- GRanges()
         values(res) <- DataFrame(LOCATION=.location(), QUERYID=integer(), 
                                  TXID=integer(), CDSID=integer(), 
@@ -520,12 +532,15 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
                 QUERYID=queryid,
                 TXID=as.integer(txid[subjectHits(fo)]),
                 CDSID=cdsid,
-                GENEID=NA_character_)
+                GENEID=NA_character_,
+                PRECEDEID=NA_character_,
+                FOLLOWID=NA_character_)
     } else {
         res <- GRanges()
         values(res) <- DataFrame(LOCATION=.location(), QUERYID=integer(),
                                  TXID=integer(), CDSID=integer(), 
-                                 GENEID=character())
+                                 GENEID=character(), PRECEDEID=character(),
+                                 FOLLOWID=character())
         res
     }
 }
