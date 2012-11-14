@@ -155,38 +155,29 @@ setMethod(writeVcf, c("VCF", "connection"),
     if (ncol(info) == 0) {
       return(rep.int(".", nrow(info)))
     }
- 
-    lists <- sapply(info, is, "list")
-    info[lists] <- lapply(info[lists], as, "List")
- 
-    lists <- sapply(info, is, "List")
+
+    ## Replace NA with '.' in columns with data.
+    ## Columns with no data are set to NA. 
+    lists <- sapply(info, function(elt) 
+        is.list(elt) || is(elt, "List"))
     info[lists] <- lapply(info[lists], function(l) {
       charList <- as(l, "CharacterList")
       charList@unlistData[is.na(charList@unlistData)] <- "."
       collapsed <- .pasteCollapse(charList, ",")
       ifelse(sum(!is.na(l)) > 0L, collapsed, NA_character_)
     })
- 
-    arrays <- sapply(info, is.array)
-    info[arrays] <- lapply(info[arrays], function(a) {
-      mat <- matrix(a, nrow = nrow(a))
-      charMat <- mat
-      charMat@unlistData[is.na(charMat@unlistData)] <- "."
-      collapsed <- do.call(paste, c(as.data.frame(charMat), sep = ","))
-      ifelse(rowSums(!is.na(mat)) > 0L, NA_character_, collapsed)
-    })
 
+    ## Add names to non-NA data.
+    infoMat <- matrix(".", nrow(info),ncol(info)) 
     logicals <- sapply(info, is.logical)
-    info[logicals] <- Map(function(l, nm) {
+    infoMat[,logicals] <- unlist(Map(function(l, nm) {
       ifelse(l, nm, NA_character_)
-    }, info[logicals], as(names(info)[logicals], "List"))
+    }, info[logicals], as(names(info)[logicals], "List")))
 
-    info[!logicals] <- Map(function(i, nm) {
+    infoMat[,!logicals] <- unlist(Map(function(i, nm) {
       ifelse(!is.na(i), paste0(nm, "=", i), NA_character_)
-    }, info[!logicals], as(names(info)[!logicals], "List"))
+    }, info[!logicals], as(names(info)[!logicals], "List")))
 
-    infoMat <- as.matrix(info)
-    mode(infoMat) <- "character"
     keep <- !is.na(infoMat)
     infoRows <- factor(row(infoMat), seq_len(nrow(infoMat)))
     infoList <- seqsplit(infoMat[keep], infoRows[keep])

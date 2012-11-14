@@ -63,8 +63,7 @@
   in2 <- readVcf(out1.vcf, "hg19")
   writeVcf(in2, out2.vcf)
   in3 <- readVcf(out2.vcf, "hg19")
-
-  identical(in2, in3)
+  stopifnot(all(in2 == in3))
 
   ## write to console
   writeVcf(in1, stdout())
