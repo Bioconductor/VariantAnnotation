@@ -128,13 +128,21 @@ test_VCF_subset <- function()
     checkIdentical(rowData(ss1)[idx,,drop=FALSE], rowData(ss2))
     ss2 <- ss1[,idx]
     checkIdentical(colData(ss1)[idx,,drop=FALSE], colData(ss2))
+}
 
-    ## 0 columns
-    #vcf <- VCF(rowData=GRanges("chr1", IRanges(1:10, width=1)))
-    #checkIdentical(dim(vcf[1:5, ]), c(5L, 0L))
-    ## 0 rows 
-    vcf <- VCF(colData=DataFrame(samples=1:10))
-    checkIdentical(dim(vcf[ ,1:5]), c(0L, 5L))
+test_VCF_subset_empty_slots <- function()
+{
+    fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
+    vcf <- readVcf(fl, "hg19", param=ScanVcfParam(info=NA, fixed=NA))
+    checkTrue(names(mcols(vcf)) == "paramRangeID") 
+    checkTrue(nrow(vcf[2:4]) == 3L) 
+    checkTrue(ncol(vcf[,1:2]) == 2L) 
+
+    vcf <- readVcf(fl, "hg19", param=ScanVcfParam(geno=NA))
+    checkTrue(length(names(geno(vcf))) == 0L) 
+    checkTrue(ncol(vcf) == 0L) 
+    checkException(vcf[,1:5], silent=TRUE) 
+    checkTrue(nrow(vcf[2:4]) == 3L)
 }
 
 test_VCF_subsetassign <- function()

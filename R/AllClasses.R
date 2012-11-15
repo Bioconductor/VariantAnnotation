@@ -14,7 +14,7 @@ setClass("CollapsedVCF", contains="VCF") ## ALT is DNAStrinsSetList
 
 setClass("ExpandedVCF", contains="VCF")  ## ALT is DNAStringSet 
 
-### Coercion 
+### Coercion: 
 ### Recursion problem in an automatically generated coerce method requires
 ### that we handle coercion from subclasses to SummarizedExperiment.
 
@@ -76,7 +76,7 @@ setAs("CollapsedVCF", "SummarizedExperiment",
     ffld <- slot(object, "fixed")
     nms <- names(ffld)
 
-    if (length(ffld) != 0) {
+    if (nrow(ffld) != 0) {
         if (nrow(ffld) != xlen)
             return(paste("'fixed(object)' and 'rowData(object) must have the same ",
                    "number of rows", sep=""))
@@ -108,26 +108,28 @@ setAs("CollapsedVCF", "SummarizedExperiment",
 
 .valid.CollapsedVCF.alt <- function(object)
 {
-    if (nrow(object) == 0L)
-        return(NULL)
-    alt <- alt(object)
-    if (!is(alt, "DNAStringSetList") && !is(alt, "CharacterList")) 
-        paste("'alt(object)' must be a DNAStringSetList or a ",
-              "CharacterList", sep="")
-    else
-        NULL
+    ffld <- slot(object, "fixed")
+    if (length(ffld) != 0L) {
+        alt <- alt(object)
+        if (length(alt) != 0L)
+            if (!is(alt, "DNAStringSetList") && !is(alt, "CharacterList")) 
+                return(paste("'alt(object)' must be a DNAStringSetList or a ",
+                       "CharacterList", sep=""))
+    } 
+    NULL
 }
  
 .valid.ExpandedVCF.alt <- function(object)
 {
-    if (nrow(object) == 0L)
-        return(NULL)
-    alt <- alt(object)
-    if (!is(alt, "DNAStringSet") && !is(alt, "CharacterList")) 
-        paste("'alt(object)' must be a DNAStringSet or a ",
-              " CharacterList", sep="")
-    else
-        NULL
+    ffld <- slot(object, "fixed")
+    if (length(ffld) != 0L) {
+        alt <- alt(object)
+        if (length(alt) != 0L)
+            if (!is(alt, "DNAStringSet") && !is(alt, "CharacterList")) 
+                return(paste("'alt(object)' must be a DNAStringSet or a ",
+                       "CharacterList", sep=""))
+    } 
+    NULL
 }
 
 .valid.CollapsedVCF <- function(object)

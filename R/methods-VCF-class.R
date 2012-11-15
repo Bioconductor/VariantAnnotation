@@ -9,8 +9,7 @@
 
 VCF <-
     function(rowData=GRanges(), colData=DataFrame(), exptData=SimpleList(), 
-             fixed=DataFrame(row.names=1:length(rowData)), 
-             info=DataFrame(row.names=1:length(rowData)), geno=SimpleList(),
+             fixed=DataFrame(), info=DataFrame(), geno=SimpleList(),
              ..., collapsed=TRUE, verbose=FALSE)
 {
     rownames(info) <- rownames(fixed) <- NULL
@@ -179,16 +178,23 @@ setMethod("[", c("VCF", "ANY", "ANY"),
         i <- GenomicRanges:::.SummarizedExperiment.charbound(i, rownames(x), msg)
     }
 
+    ii <- ff <- NULL
+    if (!missing(i)) {
+        if (length(slot(x, "info")) != 0L)
+            ii <- i
+        if (length(slot(x, "fixed")) != 0L)
+            ff <- i
+    }
     if (missing(i) && missing(j)) {
         x
     } else if (missing(i)) {
         callNextMethod(x, , j, ...)
     } else if (missing(j)) {
-        callNextMethod(x, i, , info=slot(x, "info")[i,,drop=FALSE],
-                       fixed=slot(x, "fixed")[i,,drop=FALSE], ...)
+        callNextMethod(x, i, , info=slot(x, "info")[ii,,drop=FALSE],
+                       fixed=slot(x, "fixed")[ff,,drop=FALSE], ...)
     } else {
-        callNextMethod(x, i, j, info=slot(x, "info")[i,,drop=FALSE],
-                       fixed=slot(x, "fixed")[i,,drop=FALSE], ...)
+        callNextMethod(x, i, j, info=slot(x, "info")[ii,,drop=FALSE],
+                       fixed=slot(x, "fixed")[ff,,drop=FALSE], ...)
     }
 })
 
