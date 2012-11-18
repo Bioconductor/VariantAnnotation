@@ -24,7 +24,8 @@
 \alias{alt}
 \alias{alt,VCF-method}
 \alias{alt<-}
-\alias{alt<-,VCF,CharacterList-method}
+\alias{alt<-,CollapsedVCF,CharacterList-method}
+\alias{alt<-,ExpandedVCF,character-method}
 \alias{alt<-,CollapsedVCF,DNAStringSetList-method}
 \alias{alt<-,ExpandedVCF,DNAStringSet-method}
 \alias{qual}
@@ -184,7 +185,6 @@
 
 \section{Subsetting}{
   In the following code snippets \code{x} is a VCF object.
-
   \describe{
     \item{}{
       \code{x[i, j]}, \code{x[i, j] <- value}:
@@ -224,14 +224,22 @@
       Subset the \code{GRanges} in the \code{rowData} slot of the VCF object. 
       \code{value} is a character vector of seqlevels to keep.
     }
-    In the following \code{x} is a CollapsedVCF object.
+  }
+}
+
+\section{expand}{
+  In the following code snippets \code{x} is a CollapsedVCF object.
+  \describe{
     \item{}{
       \code{expand(x)}:
-      Expand the columns of a CollapsedVCF object to one row per ALT value.
-      Variables with Number=`A' in the header description will also be
-      expanded per each alternate allele. The return value is a
-      ExpandedVCF object with ALT as a \code{DNAStringSet} or
-      \code{CompressedCharacterList} in the case of structural variants.
+      Expand (unlist) the ALT column of a CollapsedVCF object to one row 
+      per ALT value. In addition to ALT, all variables with Number='A' in the 
+      header are also expanded. The 'A' indicates one value per alternate
+      allele. Data without Number='A' in the header are replicated
+      the appropriate number of times. 
+
+      The output is an ExpandedVCF object with ALT as a \code{DNAStringSet} 
+      or \code{character} (structural variants). 
     }
   }
 }
@@ -318,11 +326,9 @@
   CollapsedVCF contains the ALT data as a \code{DNAStringSetList} allowing 
   for multiple alleles per variant. The ExpandedVCF ALT data is a 
   \code{DNAStringSet} where the ALT column has been expanded to create a 
-  flat form of the data with one row per variant-allele combination. It is 
-  worth noting that ALT data can be a \code{CharacterList} in either of the 
-  subclasses. This is the case when \code{readVcf()} is used on a file of 
-  structural variants. ALT values for sturcutral variants are character 
-  strings and not alleles.
+  flat form of the data with one row per variant-allele combination. In 
+  the case of strucutral variants, ALT will be a \code{CompressedCharacterList}
+  in the collapsed form or a \code{character} in the expanded form.
 }
 
 \author{Valerie Obenchain <vobencha@fhcrc.org>}
@@ -340,9 +346,9 @@
   fl <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
   vcf <- readVcf(fl, genome="hg19")
 
-  ## -------------------------------------
+  ## ----------------------------------------------------------------
   ## Accessors 
-  ## -------------------------------------
+  ## ----------------------------------------------------------------
   ## Variant locations are stored in a GRanges in the rowData slot.
   rowData(vcf)
 
@@ -361,9 +367,9 @@
   geno(vcf)
   identical(geno(vcf)$DP, geno(vcf)[[3]])
 
-  ## -------------------------------------
+  ## ----------------------------------------------------------------
   ## Renaming seqlevels and subsetting 
-  ## -------------------------------------
+  ## ----------------------------------------------------------------
   ## It is often the case that chromosome names need to be
   ## modified. In this VCF, the chromosome names (seqlevels) 
   ## are numbers instead of preceded by "chr" or "ch".
@@ -380,11 +386,12 @@
   vcf_subset <- keepSeqlevels(vcf, "chr2")
   seqlevels(vcf_subset)
 
-  ## -------------------------------------
+  ## ----------------------------------------------------------------
   ## CollapsedVCF 
-  ## -------------------------------------
+  ## ----------------------------------------------------------------
   ## readVCF() produces a CollapsedVCF object.
-  fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
+  fl <- system.file("extdata", "ex2.vcf", 
+                    package="VariantAnnotation")
   vcf <- readVcf(fl, genome="hg19")
   vcf
 
@@ -392,21 +399,21 @@
   ## than one alternate allele per variant.
   alt(vcf)
 
-  ## When structural variants are present, the ALT column will be
+  ## When structural variants are present, ALT is 
   ## a CompressedCharacterList.
-  fl <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
+  fl <- system.file("extdata", "structural.vcf", 
+                    package="VariantAnnotation")
   vcf <- readVcf(fl, genome="hg19")
   alt(vcf)
 
-  ## -------------------------------------
+  ## ----------------------------------------------------------------
   ## ExpandedVCF
-  ## -------------------------------------
-  ## The ExpandedVCF class is the 'flattened' counterpart of CollapsedVCF.
-  ## Columns of the CollapsedVCF are expanded to hold one ALT value per row.
-  ## ALT will be a DNAStringSet or a CompressedCharacterList in the 
-  ## case of strucutral variants.
+  ## ----------------------------------------------------------------
+  ## ExpandedVCF is the 'flattened' counterpart of CollapsedVCF.
+  ## The ALT and all variables with Number='A' in the header are
+  ## expanded to one row per alternate allele.
   fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
   vcf <- readVcf(fl, genome="hg19")
-  vcfExpand <- expand(vcf)
-  alt(vcfExpand)
+  vcfLong <- expand(vcf)
+  alt(vcfLong)
 }

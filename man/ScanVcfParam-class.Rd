@@ -146,7 +146,7 @@
   ## To subset on genomic coordinates, supply an object 
   ## containing the ranges of interest. These ranges can
   ## be given directly to the 'param' argument or wrapped
-  ## inside ScanVcfParam() as the 'which' argument.  
+  ## inside ScanVcfParam() as the 'which' argument. 
 
   ## When using a list, the outer list names must correspond to valid
   ## chromosome names in the vcf file. In this example they are "1" 

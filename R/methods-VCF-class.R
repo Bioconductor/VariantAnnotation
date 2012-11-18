@@ -47,7 +47,16 @@ setMethod("alt", "VCF",
     slot(x, "fixed")$ALT
 })
 
-setReplaceMethod("alt", c("VCF", "CharacterList"),
+setReplaceMethod("alt", c("CollapsedVCF", "CharacterList"),
+    function(x, value)
+{
+    if (length(value) != length(rowData(x)))
+        stop("length(value) must equal length(rowData(x))")
+    slot(x, "fixed")$ALT <- value
+    x
+})
+
+setReplaceMethod("alt", c("ExpandedVCF", "character"),
     function(x, value)
 {
     if (length(value) != length(rowData(x)))
@@ -265,53 +274,94 @@ setMethod(show, "VCF",
     function(object)
 {
     paste0("This object is no longer valid. Please use updateObject() to ",
-          "create a CollapsedVCF instance.")
+           "create a CollapsedVCF instance.")
 })
 
 ### show method for CollapsedVCF and ExapandedVCF
 .showVCFSubclass <- function(object)
 {
-    selectSome <- IRanges:::selectSome
-    scat <- function(fmt, vals=character(), exdent=2, ...)
+    prettydescr <- function(desc) {
+        desc <- as.character(desc)
+        wd <- options()[["width"]] - 30
+        dwd <- nchar(desc)
+        desc <- substr(desc, 1, wd)
+        idx <- dwd > wd
+        substr(desc[idx], wd - 2, dwd[idx]) <- "..."
+        desc
+    }
+    headerrec <- function(df, lbl, margin="  ") {
+        df$Description <- prettydescr(df$Description)
+        rownames(df) <- paste(margin, rownames(df))
+        print(df, right=FALSE)
+    }
+    printSmallGRanges <- function(x, margin="   ")
     {
-        vals <- ifelse(nzchar(vals), vals, "''")
-        lbls <- paste(selectSome(vals), collapse=" ")
-        txt <- sprintf(fmt, length(vals), lbls)
-        cat(strwrap(txt, exdent=exdent, ...), sep="\n")
+        nms <- names(x)
+        ncols <- length(mcols(x)) + 4
+        top_idx <- 1:3
+        bottom_idx <- (length(x)-1):length(x) 
+        makeMat <- GenomicRanges:::.makeNakedMatFromGenomicRanges
+        if (length(x) < 6L) {
+            out <- makeMat(x)
+            ans_rownames <- nms
+        } else {
+            out <- rbind(makeMat(x[top_idx]),
+                         matrix(rep.int("...", ncols), nrow=1L),
+                         makeMat(x[bottom_idx]))
+            ans_rownames <- c(nms[top_idx], "...", nms[bottom_idx])
+        }
+        rownames(out) <- paste0(margin, ans_rownames)
+        print(out, right=FALSE, quote=FALSE)
+    }
+    printSmallDataTable <- function(x, margin="   ")
+    {
+        nr <- nrow(x)
+        nc <- ncol(x)
+        top_idx <- 1:3
+        bottom_idx <- (nr-1):nr
+        nms <- rownames(x)
+        showAsCell <- IRanges:::showAsCell
+        if (nrow(x) < 6L) {
+            out <- as.matrix(format(as.data.frame(lapply(x, function(elt)
+                showAsCell(head(elt, nrow(x)))), optional=TRUE)))
+            ans_rownames <- nms
+        } else {
+            top <- as.matrix(format(as.data.frame(lapply(x, function(elt)
+                showAsCell(head(elt, length(top_idx)))), optional=TRUE)))
+            dots <- rbind(rep.int("...", nc))
+            bottom <- as.matrix(format(as.data.frame(lapply(x, function(elt)
+                showAsCell(tail(elt, length(bottom_idx)))), optional=TRUE)))
+            out <- rbind(top, dots, bottom)
+            ans_rownames <- c(head(nms, length(top_idx)), "...", 
+                              tail(nms, length(bottom_idx)))
+        }
+        rownames(out) <- paste0(margin, ans_rownames)
+        print(out, right=FALSE, quote=FALSE)
+    }
+    printSimpleList <- function(x, margin="  ")
+    {
+        lo <- length(x)
+        cat(margin, class(x), " of length ", lo, "\n", sep = "")
+        if (!is.null(names(x)))
+            cat(" ", IRanges:::labeledLine("names", names(x)))
     }
     cat("class:", class(object), "\n")
     cat("dim:", dim(object), "\n")
-    cat("genome:", unique(genome(rowData(object))), "\n")
-
-    expt <- names(exptData(object))
-    if (is.null(expt))
-        expt <- character(length(exptData(object)))
-    scat("exptData(%d): %s\n", expt)
-
-    fixed <- names(slot(object, "fixed")) 
-    if (is.null(fixed))
-        fixed <- character(ncol(values(fixed(object))))
-    scat("fixed(%d): %s\n", fixed)
-
-    info <- names(slot(object, "info")) 
-    if (is.null(info))
-        info <- character(ncol(values(info(object))))
-    scat("info(%d): %s\n", info)
-
-    nms <- names(geno(object, withDimnames=FALSE))
-    if (is.null(nms))
-        nms <- character(length(geno(object, withDimnames=FALSE)))
-    scat("geno(%d): %s\n", nms)
-
-    dimnames <- dimnames(object)
-    dlen <- sapply(dimnames, length)
-    if (dlen[[1]]) scat("rownames(%d): %s\n", dimnames[[1]])
-    else scat("rownames: NULL\n")
-    scat("rowData values names(%d): %s\n",
-         names(values(rowData(object))))
-    if (dlen[[2]]) scat("colnames(%d): %s\n", dimnames[[2]])
-    else cat("colnames: NULL\n")
-    scat("colData names(%d): %s\n", names(colData(object)))
+    cat("\nrowData(vcf):\n")
+    fixed <- fixed(object)[,-1]
+    printSmallGRanges(fixed)
+    cat("\ninfo(exptData(vcf)$header):\n")
+    info <- as.data.frame(info(exptData(object)$header))
+    headerrec(info, "info")
+    info_dat <- mcols(info(object))
+    rownames(info_dat) <- names(info(object))
+    cat("\nmcols(info(vcf)):\n")
+    printSmallDataTable(info_dat) 
+    cat("\ngeno(exptData(vcf)$header):\n")
+    geno <- as.data.frame(geno(exptData(object)$header))
+    headerrec(geno, "geno")
+    cat("\ngeno(vcf); full content not shown:\n")
+    printSimpleList(geno(object)) 
 }
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -322,14 +372,10 @@ setMethod(show, "VCF",
 setMethod("updateObject", "VCF",
     function(object, ..., verbose=FALSE)
     {
-        if (verbose)
-            message("updateObject(object = 'VCF')")
-        VCF(rowData=rowData(object), colData=colData(object),
-            exptData=exptData(object), info=mcols(info(object))[-1],
-            fixed=mcols(fixed(object))[-1], geno=geno(object))
+        if (verbose) 
+            message("updateObject(object = 'VCF')") 
+        VCF(rowData=rowData(object), colData=colData(object), exptData=exptData(object), 
+            info=mcols(info(object))[-1], fixed=mcols(fixed(object))[-1], geno=geno(object))
     }
 )
-
-
-
 

@@ -128,6 +128,13 @@ test_VCF_subset <- function()
     checkIdentical(rowData(ss1)[idx,,drop=FALSE], rowData(ss2))
     ss2 <- ss1[,idx]
     checkIdentical(colData(ss1)[idx,,drop=FALSE], colData(ss2))
+
+    ## 0 columns
+    vcf <- VCF(rowData=GRanges("chr1", IRanges(1:10, width=1)))
+    checkIdentical(dim(vcf[1:5, ]), c(5L, 0L))
+    ## 0 rows 
+    vcf <- VCF(colData=DataFrame(samples=1:10))
+    checkIdentical(dim(vcf[ ,1:5]), c(0L, 5L))
 }
 
 test_VCF_subset_empty_slots <- function()

@@ -125,9 +125,9 @@ setAs("CollapsedVCF", "SummarizedExperiment",
     if (length(ffld) != 0L) {
         alt <- alt(object)
         if (length(alt) != 0L)
-            if (!is(alt, "DNAStringSet") && !is(alt, "CharacterList")) 
+            if (!is(alt, "DNAStringSet") && !is.character(alt)) 
                 return(paste("'alt(object)' must be a DNAStringSet or a ",
-                       "CharacterList", sep=""))
+                       "character", sep=""))
     } 
     NULL
 }
