@@ -63,7 +63,7 @@ setMethod(writeVcf, c("VCF", "connection"),
     QUAL[is.na(QUAL)] <- "."
     FILTER <- filt(obj)
     FILTER[is.na(FILTER)] <- "."
-    INFO <- .makeVcfInfo(values(info(obj))[-1])
+    INFO <- .makeVcfInfo(info(obj))
     ans <- paste(CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, sep = "\t")
     if (length(geno(obj)) > 0L) {
       GENO <- .makeVcfGeno(geno(obj))
@@ -168,7 +168,7 @@ setMethod(writeVcf, c("VCF", "connection"),
     })
 
     ## Add names to non-NA data.
-    infoMat <- matrix(".", nrow(info),ncol(info)) 
+    infoMat <- matrix(".", nrow(info), ncol(info)) 
     logicals <- sapply(info, is.logical)
     infoMat[,logicals] <- unlist(Map(function(l, nm) {
       ifelse(l, nm, NA_character_)

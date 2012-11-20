@@ -11,8 +11,9 @@
 \alias{class:ExpandedVCF}
 \alias{ExpandedVCF-class}
 
-% Constructor-like function:
+% Constructors:
 \alias{VCF}
+\alias{updateObject,VCF-method}
 
 % Coercion methods:
 
@@ -73,131 +74,108 @@
 \title{VCF class objects}
 
 \description{
-  The VCF class is a virtual class extended from 
-  \code{SummarizedExperiment}. The subclasses, 
-  \code{CompressedVCF} and \code{ExtendedVCF}, 
-  are containers for variant data as organized in 
-  Variant Call Format files.
+  The VCF class is a virtual class extended from \code{SummarizedExperiment}. 
+  The subclasses, \code{CompressedVCF} and \code{ExtendedVCF}, are containers 
+  for holding data from Variant Call Format files.
 }
 
-\section{Constructor}{
+\section{Constructors}{
   \describe{
+    \item{}{
+      \code{readVcf(rowData = GRanges(), colData = DataFrame(), 
+                exptData = SimpleList(), fixed = DataFrame(), 
+                info = DataFrame(), geno = SimpleList(), 
+                ..., collapsed=TRUE, verbose = FALSE)}
+      Creates a CollapsedVCF class from data in a Variant Call
+      Format file on disk. 
+    }
+    \item{}{
+      \code{expand(rowData = GRanges(), colData = DataFrame(), 
+                exptData = SimpleList(), fixed = DataFrame(), 
+                info = DataFrame(), geno = SimpleList(), 
+                ..., collapsed=TRUE, verbose = FALSE)}
+      Creates an ExpandedVCF from a CollapsedVCF.
+    }
     \item{}{
       \code{VCF(rowData = GRanges(), colData = DataFrame(), 
                 exptData = SimpleList(), fixed = DataFrame(), 
                 info = DataFrame(), geno = SimpleList(), 
                 ..., collapsed=TRUE, verbose = FALSE)}
+      Low-level constructor. Generally not used directly. The
+      \code{collapsed} argument dictates the creation of a 
+      CollapsedVCF or ExpandedVCF.
     }
   }
 }
 
 \section{Accessors}{
-  In the following code snippets \code{x} is a VCF object. The \code{info} and
-  \code{fixed} accessors returns the data as elementMetadata column(s) of the 
-  \code{rowData} \code{GRanges} object. The \code{geno} accessor returns a 
-  \code{SimpleList}.
-
+  In the following code snippets \code{x} is a CollapsedVCF or ExpandedVCF 
+  object.
   \describe{
     \item{}{
-      \code{ref(x)}, \code{ref(x) <- value}:
-      Returns or sets the reference allele data from the REF column of the VCF
-      file. \code{value} must be a \code{DNAStringSet}. 
-    }
-    \item{}{
-      \code{alt(x)}, \code{alt(x) <- value}:
-      Returns or sets the alternate allele data from the ALT column of the VCF
-      file. \code{value} is a \code{CharacterList}.
+      \code{rowData(x)}, \code{rowData(x) <- value}:
+      Gets or sets a \code{GRanges} constructed from the CHROM, POS and ID 
+      fields of the VCF file with REF, ALT, QUAL and FILT as metadata columns. 
+      The ID's serve as the \code{rownames}; if they are NULL, \code{rownames} 
+      are constructed from  CHROM:POS. \code{value} must be a \code{GRanges} 
+      with metadata columns.
 
-      When \code{x} is a CollapsedVCF object, the replacement value can also
-      be a \code{DNAStringSetList}. When \code{x} is an ExtendedVCF, value
-      can also be a \code{DNAStringSet}.
-    }
-    \item{}{
-      \code{qual(x)}, \code{qual(x) <- value}:
-      Returns or sets the quality scores from the QUAL column of the VCF
-      file. \code{value} must be an \code{integer(1L)}.
-    }
-    \item{}{
-      \code{filt(x)}, \code{filt(x) <- value}:
-      Returns or sets the filter data from the FILTER column of the VCF
-      file. \code{value} must be a \code{character(1L)}.
-    }
-    \item{}{
-      \code{fixed(x)}, \code{fixed(x) <- value}:
-      The 'getter' returns the \code{GRanges} in the \code{rowData} slot 
-      with the REF, ALT, QUAL, and FILTER fields as metadata columns. If
-      the data were read in with \code{readVcf()} the \code{GRanges}
-      will have an additional metadata column called \code{paramRangeID}.
-      This column distinguishes ranges when a subset of data have been
-      read in from a VCF file.
+      The \code{paramRangeID} metadata column groups ranges as
+      specified with \code{ScanVcfParam}. If \code{ScanVcfParam} was
+      not used with \code{readVcf} these values will be \code{NA}. 
 
-      The 'setter' sets the values in the \code{info} slot of the VCF. 
-      \code{value} must be a \code{DataFrame}.
+      The metadata columns can be accessed with \code{mcols(x)$<variable>} or 
+      the following accessors:
+      \itemize{
+        \item{\code{ref(x)}, \code{ref(x) <- value}:
+          Gets or sets the reference allele (REF). \code{value} must 
+          be a \code{DNAStringSet}. 
+        }
+        \item{\code{alt(x)}, \code{alt(x) <- value}:
+          Gets or sets the alternate allele data (ALT). When \code{x} is 
+          a CollapsedVCF, \code{value} must be a \code{DNAStringSetList}
+          or \code{CompressedCharacterList}. For ExtendedVCF, \code{value}
+          must be a \code{DNAStringSet} or \code{character}.
+        }
+        \item{\code{qual(x)}, \code{qual(x) <- value}:
+          Returns or sets the quality scores (QUAL). \code{value} must 
+          be an \code{integer(1L)}.
+        }
+        \item{\code{filt(x)}, \code{filt(x) <- value}:
+          Returns or sets the filter data (FILT). \code{value} must 
+          be a \code{character(1L)}.
+        }
+      }
     }
     \item{}{
       \code{info(x)}, \code{info(x) <- value}:
-      The 'getter' returns the \code{GRanges} in the \code{rowData} slot
-      with the INFO variables from the VCF file as metadata columns.
-      If the data were read in with \code{readVcf()} the \code{GRanges}
-      will have an additional metadata column called \code{paramRangeID}.
-      This column distinguishes ranges when a subset of data have been
-      read in from a VCF file.
-
-      The 'setter' sets the values in the \code{fixed} slot of the VCF.
-      \code{value} must be a \code{DataFrame}. If no \code{info} fields 
-      are present, the \code{rowData} \code{GRanges} will be returned
-      with no metadata columns. 
+       Gets or sets a DataFrame of INFO variables. 
     }
     \item{}{
       \code{geno(x)}, \code{geno(x) <- value}:
-      Returns or sets \code{geno} data. Contains the genotype information 
-      from the samples in a VCF file. \code{value} must be a \code{SimpleList} 
-      of \code{matrices} or \code{arrays}. An optional \code{withDimnames}
-      argument controls the return of dimnames (default = TRUE).
-
-      \code{geno(x)[[i]]}, \code{geno(x)[[i]] <- value}:
-      Returns or sets elements of geno. \code{value} can be a \code{matrix},
-      or \code{array}. 
+       Gets a SimpleList of genotype data.
+       \code{value} is a SimpleList. To replace a single variable in
+       the SimpleList use \code{geno(x)$variable <- value}; in this 
+       case \code{value} must be a matrix or array.
     }
     \item{}{
-      \code{exptData(x)}, \code{exptData(x) <- value}:
-      Returns or sets \code{exptData} data. Contains the header information 
-      from a VCF file as well as any other experiment-specific information.
-      \code{value} must be a \code{SimpleList}.
+      \code{exptData(x)}:
+       Gets a SimpleList of header information from the VCF. For
+       detailed descriptions of info, geno, etc.,
+       \itemize{
+         \item{\code{info(exptData(x)$header)}}
+         \item{\code{geno(exptData(x)$header)}}
+         \item{\code{meta(exptData(x)$header)}}
+         \item{\code{samples(exptData(x)$header)}}
+      }
     }
     \item{}{
-      \code{rowData(x)}, \code{rowData(x) <- value}:
-      Returns or sets \code{rowData} data. Contains a \code{GRanges} constructed
-      from the CHROM, POS and ID fields of the VCF file. The ID's serve as the
-      \code{rownames}; if they are NULL, \code{rownames} are constructed from 
-      CHROM:POS. \code{value} must be a \code{GRanges} with names representing 
-      the ID's in the VCF file.
+      \code{colData(x)}:
+      Gets a \code{DataFrame} of sample-specific information. Each row 
+      represents a sample in the VCf file. \code{value} must be a 
+      \code{DataFrame} with rownames representing the samples in the VCF 
+      file.
     }
-    \item{}{
-      \code{colData(x)}, \code{colData(x) <- value}:
-      Returns or sets \code{colData} data. Contains a \code{DataFrame} of 
-      sample-specific information. Each row represents a sample in the VCF
-      file. \code{value} must be a \code{DataFrame} with rownames representing
-      the samples in the VCF file.
-    }
-  }
-}
-
-\section{Subsetting}{
-  In the following code snippets \code{x} is a VCF object.
-  \describe{
-    \item{}{
-      \code{x[i, j]}, \code{x[i, j] <- value}:
-      Gets or sets rows \code{i} and columns \code{j}. \code{i} and \code{j}
-      can be integer or logical vectors. \code{value} is a replacement
-      \code{VCF} object.
-    }
-  }
-}
-
-\section{Other methods}{
-  In the following code snippets \code{x} is a VCF object.
-  \describe{
     \item{}{
       \code{genome(x)}:
       Extract the \code{genome} information from the \code{GRanges} in 
@@ -213,6 +191,23 @@
       Extract the \code{strand} from the \code{GRanges} in the 
       \code{rowData} slot.
     }
+  }
+}
+
+\section{Subsetting and related operations}{
+  In the following code snippets \code{x} is a VCF object.
+  \describe{
+    \item{}{
+      \code{x[i, j]}, \code{x[i, j] <- value}:
+      Gets or sets rows and columns. \code{i} and \code{j} can be integer
+      or logical vectors. \code{value} is a replacement \code{VCF} object.
+    }
+  }
+}
+
+\section{Other methods}{
+  In the following code snippets \code{x} is a VCF object.
+  \describe{
     \item{}{
       \code{renameSeqlevels(x, value)}:
       Rename the seqlevels in the \code{GRanges} in the \code{rowData} slot
@@ -275,10 +270,6 @@
     }
     \item{...}{Additional arguments passed to methods. 
     }
-    \item{withDimnames}{A \code{logical(1)}, indicating whether dimnames
-      should be applied to extracted assay elements. Applicable to the 
-      \code{geno} accessor only.
-    }
     \item{collapsed}{A \code{logical(1)} indicating whether a 
       CollapsedVCF or ExpandedVCF should be created. The ALT in a
       CollapsedVCF is a \code{DNAStringSetList} while in a
@@ -291,13 +282,10 @@
 }
 
 \details{
-  The \code{VCF} class is designed to hold data from a Variant Call Format 
-  (VCF) file. The class extends \code{\linkS4class{SummarizedExperiment}} 
-  with the addition of two slots, \code{fixed} and \code{info}. See 
-  ?\code{SummarizedExperiment} for a detailed description of the inherited
-  slots. 
+  The \code{VCF} class is a virtual class with two concrete subclasses,
+  \code{CollapsedVCF} and \code{ExtendedVCF}. 
 
-  Slots unique to the \code{VCF} class,
+  Slots unique to \code{VCF} and subclasses,
   \itemize{
     \item \code{fixed}: A \link{DataFrame} containing information from the 
            REF, ALT, QUAL and FILTER fields from a VCF file.
@@ -305,7 +293,7 @@
            fields from a VCF file.
   }
 
-  Slots inherited from the \code{SummarizedExperiment} class,
+  Slots inherited from \code{SummarizedExperiment},
   \itemize{
     \item \code{exptData}: A \link{SimpleList}-class instance containing the 
           file header or other information about the overall experiment.
@@ -321,14 +309,14 @@
           matrix or array. 
   }
 
-  It is not expected that a user will create instances of the VCF class
+  It is expected that users will not create instances of the VCF class
   but instead one of the concrete subclasses, CollapsedVCF or ExpandVCF.
   CollapsedVCF contains the ALT data as a \code{DNAStringSetList} allowing 
   for multiple alleles per variant. The ExpandedVCF ALT data is a 
   \code{DNAStringSet} where the ALT column has been expanded to create a 
   flat form of the data with one row per variant-allele combination. In 
   the case of strucutral variants, ALT will be a \code{CompressedCharacterList}
-  in the collapsed form or a \code{character} in the expanded form.
+  or \code{character} in the collapsed or expanded forms.
 }
 
 \author{Valerie Obenchain <vobencha@fhcrc.org>}
@@ -353,13 +341,12 @@
   rowData(vcf)
 
   ## Individual fields can be extracted with ref(), alt(), qual() 
-  ## and filt() accessors.
+  ## and filt().
   qual(vcf)
   ref(vcf)
 
-  ## All 'fixed' or all 'info' fields can be extracted together along
+  ## All 'info' fields can be extracted together along
   ## with the GRanges of locations.
-  head(fixed(vcf))
   head(info(vcf))
 
   ## All genotype fields can be seen with geno(). Individual
@@ -375,8 +362,7 @@
   ## are numbers instead of preceded by "chr" or "ch".
   seqlevels(vcf)
  
-  ## We can rename the seqlevels in the VCF object with 
-  ## renameSeqlevels().
+  ## seqlevels can be renamed with renameSeqlevels().
   newnames <- paste("chr", seqlevels(vcf), sep="")
   names(newnames) <- seqlevels(vcf)
   vcf <- renameSeqlevels(vcf, newnames)

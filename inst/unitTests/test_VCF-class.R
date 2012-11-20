@@ -11,8 +11,8 @@ test_VCF_construction <- function() {
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
     target <- readVcf(fl, genome="hg19")
     current <- VCF(rowData=rowData(target), colData=colData(target),
-                   geno=geno(target), info=values(info(target)),
-                   fixed=values(fixed(target))) 
+                   geno=geno(target), info=info(target),
+                   fixed=fixed(target)) 
     checkTrue(validObject(current)) 
     checkIdentical("hg19", unique(genome(rowData(target)))) 
 }
@@ -45,9 +45,9 @@ test_VCF_accessors <- function() {
     checkException(filt(vcf) <- as.list(filt(vcf)), silent=TRUE)
 
     ## fixed 
-    checkTrue(class(values(fixed(vcf))) == "DataFrame")
+    checkTrue(class(fixed(vcf)) == "DataFrame")
     checkException(fixed(vcf) <- NULL, silent=TRUE)
-    checkException(fixed(vcf) <- as.matrix(values(fixed(vcf))), 
+    checkException(fixed(vcf) <- as.matrix(fixed(vcf)), 
         silent=TRUE)
 
     DF <- DataFrame(REF=DNAStringSet(c("A", "C", "T", "T", "C")),
@@ -70,15 +70,20 @@ test_VCF_accessors <- function() {
     df$REF <- as.character(df$REF)
     checkException(fixed(vcf) <- df, silent=TRUE)
 
+    ## rowData
+    v1 <- vcf
+    rowData(v1) <- rowData(v1)[5:1]
+    checkIdentical(rownames(vcf), rev(rownames(v1)))
+
     ## info
-    checkTrue(class(values(info(vcf))) == "DataFrame")
+    checkTrue(class(info(vcf)) == "DataFrame")
     checkException(info(vcf) <- NULL, silent=TRUE)
     v1 <- vcf 
     info(v1) <- DataFrame()
 
-    checkTrue(class(values(info(vcf))[["AF"]]) == "CompressedNumericList")
+    checkTrue(class(info(vcf)$AF) == "CompressedNumericList")
     AF <- NumericList(0.5, 0.017, c(0.333,0.667), NA, NA)
-    checkIdentical(values(info(vcf))[["AF"]], AF) 
+    checkIdentical(info(vcf)$AF, AF) 
 
     ## geno
     checkTrue(class(geno(vcf)) == "SimpleList")
@@ -97,10 +102,10 @@ test_VCF_subset <- function()
     checkIdentical(c(2L, ncol(vcf)), dim(ss1))
     ss1 <- vcf[,2]
     checkIdentical(c(nrow(vcf), 1L), dim(ss1))
-    checkIdentical(rownames(ss1), names(info(ss1)))
+    checkIdentical(rownames(ss1), rownames(info(ss1)))
     ss1 <- vcf[2:3, 2]
     checkIdentical(c(2L, 1L), dim(ss1))
-    checkIdentical(rownames(ss1), names(info(ss1)))
+    checkIdentical(rownames(ss1), rownames(info(ss1)))
 
     ## character
     ss1 <- vcf 
@@ -141,7 +146,7 @@ test_VCF_subset_empty_slots <- function()
 {
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
     vcf <- readVcf(fl, "hg19", param=ScanVcfParam(info=NA, fixed=NA))
-    checkTrue(names(mcols(vcf)) == "paramRangeID") 
+    checkTrue(all(names(mcols(vcf)) %in% c("paramRangeID", "REF"))) 
     checkTrue(nrow(vcf[2:4]) == 3L) 
     checkTrue(ncol(vcf[,1:2]) == 2L) 
 

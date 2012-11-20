@@ -10,7 +10,7 @@ test_readVcf_format <- function()
     fl <- system.file(package="VariantAnnotation", "unitTests",
                       "cases", "no_INFO_header.vcf")
     vcf <- suppressWarnings(readVcf(fl, "hg19"))
-    checkTrue(ncol(values(info(vcf))) == 2L)
+    checkTrue(ncol(info(vcf)) == 1L)
     checkTrue("DNAStringSetList" == class(alt(vcf)))
     checkTrue("numeric" == class(qual(vcf)))
     checkTrue("character" == class(filt(vcf)))
@@ -88,8 +88,8 @@ test_readVcf_param <- function()
     i <- inms[c(1,4)]
     param <- ScanVcfParam(info=i)
     vcf <- readVcf(fl, "hg19", param)
-    checkTrue(ncol(values(info(vcf))) == length(i) + 1)
-    checkTrue(all(i %in% names(values(info(vcf)))))
+    checkTrue(ncol(info(vcf)) == length(i))
+    checkTrue(all(i %in% colnames(info(vcf))))
 
     ## geno, info
     param <- ScanVcfParam()
@@ -107,7 +107,7 @@ test_readVcf_param <- function()
     idx <- indexTabix(compressVcf, "vcf")
     tab <- TabixFile(compressVcf, idx)
     vcf <- readVcf(tab, "hg19",  param)
-    checkTrue(all(i %in% names(values(info(vcf)))))
+    checkTrue(all(i %in% colnames(info(vcf))))
     checkTrue(all(names(geno(vcf)) %in% g))
     checkTrue(length(rowData(vcf)) == 3)
 

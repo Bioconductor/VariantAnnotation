@@ -97,10 +97,7 @@ setReplaceMethod("filt", c("VCF", "character"),
 setMethod("fixed", "VCF", 
     function(x) 
 {
-    gr <- rowData(x)
-    if (length(slot(x, "fixed")) != 0L)
-        values(gr) <- append(values(gr), slot(x, "fixed"))
-    gr
+    slot(x, "fixed")
 })
 
 setReplaceMethod("fixed", c("VCF", "DataFrame"),
@@ -111,14 +108,39 @@ setReplaceMethod("fixed", c("VCF", "DataFrame"),
     x
 })
 
+### rowData
+setMethod("rowData", "VCF", 
+    function(x) 
+{
+    gr <- slot(x, "rowData") 
+    if (length(slot(x, "fixed")) != 0L)
+        values(gr) <- append(values(gr), slot(x, "fixed"))
+    gr
+})
+
+setReplaceMethod("rowData", c("VCF", "GRanges"),
+    function(x, value)
+{
+    if (!is(value, "GRanges"))
+        stop("'value' must be a GRanges")
+    idx <- names(mcols(value)) %in% "paramRangeID"
+    fixed(x) <- mcols(value)[!idx] 
+    slot(x, "rowData") <- value[,idx]
+   # if (!is.null(names(value)))
+   #     rownames(x) <- names(value)
+    validObject(x)
+    x
+})
+ 
 ### info 
 setMethod("info", "VCF", 
     function(x) 
 {
-    gr <- rowData(x)
-    if (length(slot(x, "info")) != 0L)
-        values(gr) <- append(values(gr), slot(x, "info"))
-    gr
+    info <- slot(x, "info")
+    if (any(duplicated(rownames(x))))
+        return(info)
+    rownames(info) <- rownames(x)
+    info
 })
 
 setReplaceMethod("info", c("VCF", "DataFrame"),
@@ -199,10 +221,12 @@ setMethod("[", c("VCF", "ANY", "ANY"),
     } else if (missing(i)) {
         callNextMethod(x, , j, ...)
     } else if (missing(j)) {
-        callNextMethod(x, i, , info=slot(x, "info")[ii,,drop=FALSE],
+        callNextMethod(x, i, , rowData=slot(x, "rowData")[i,,drop=FALSE],
+                       info=slot(x, "info")[ii,,drop=FALSE],
                        fixed=slot(x, "fixed")[ff,,drop=FALSE], ...)
     } else {
-        callNextMethod(x, i, j, info=slot(x, "info")[ii,,drop=FALSE],
+        callNextMethod(x, i, j, rowData=slot(x, "rowData")[i,,drop=FALSE],
+                       info=slot(x, "info")[ii,,drop=FALSE],
                        fixed=slot(x, "fixed")[ff,,drop=FALSE], ...)
     }
 })
@@ -221,7 +245,12 @@ setReplaceMethod("[",
     } else if (missing(i)) {
         callNextMethod(x, , j, ..., value=value)
     } else if (missing(j)) {
-        callNextMethod(x, i, , info=local({
+        callNextMethod(x, i, , rowData=local({
+            rd <- slot(x, "rowData")
+            rd[i,] <- slot(value, "rowData")
+            names(rd)[i] <- names(slot(value, "rowData"))
+            rd
+        }), info=local({
             ii <- slot(x, "info")
             ii[i,] <- slot(value, "info")
             ii 
@@ -231,7 +260,12 @@ setReplaceMethod("[",
             ff
         }), ..., value=value)
     } else {
-        callNextMethod(x, i, j, info=local({
+        callNextMethod(x, i, j, rowData=local({
+            rd <- slot(x, "rowData")
+            rd[i,] <- slot(value, "rowData")
+            names(rd)[i] <- names(slot(value, "rowData"))
+            rd
+        }), info=local({
             ii <- slot(x, "info")
             ii[i,] <- slot(value, "info")
             ii 
@@ -313,13 +347,14 @@ setMethod(show, "VCF",
         rownames(out) <- paste0(margin, ans_rownames)
         print(out, right=FALSE, quote=FALSE)
     }
-    printSmallDataTable <- function(x, margin="   ")
+    printSmallDataTable <- function(x, margin="   ", nms)
     {
         nr <- nrow(x)
         nc <- ncol(x)
+        if (nr == 0L)
+            return(x)
         top_idx <- 1:3
         bottom_idx <- (nr-1):nr
-        nms <- rownames(x)
         showAsCell <- IRanges:::showAsCell
         if (nrow(x) < 6L) {
             out <- as.matrix(format(as.data.frame(lapply(x, function(elt)
@@ -348,15 +383,12 @@ setMethod(show, "VCF",
     cat("class:", class(object), "\n")
     cat("dim:", dim(object), "\n")
     cat("\nrowData(vcf):\n")
-    fixed <- fixed(object)[,-1]
-    printSmallGRanges(fixed)
+    printSmallGRanges(rowData(object))
     cat("\ninfo(exptData(vcf)$header):\n")
     info <- as.data.frame(info(exptData(object)$header))
     headerrec(info, "info")
-    info_dat <- mcols(info(object))
-    rownames(info_dat) <- names(info(object))
-    cat("\nmcols(info(vcf)):\n")
-    printSmallDataTable(info_dat) 
+    cat("\ninfo(vcf):\n")
+    printSmallDataTable(info(object), nms=rownames(object)) 
     cat("\ngeno(exptData(vcf)$header):\n")
     geno <- as.data.frame(geno(exptData(object)$header))
     headerrec(geno, "geno")

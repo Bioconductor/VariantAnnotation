@@ -30,11 +30,11 @@ setMethod("expand", "CollapsedVCF",
     {
         elt <- elementLengths(alt(x))
         if (all(elt == 1L) || (is(alt(x), "CharacterList"))) {
-            fxd <- mcols(fixed(x))[-1]
+            fxd <- fixed(x)
             fxd$ALT <- unlist(alt(x), use.names=FALSE)
             return(VCF(rowData=rowData(x), colData=colData(x), 
                        exptData=exptData(x), fixed=fxd, 
-                       info=mcols(info(x))[-1], geno=geno(x), 
+                       info=info(x), geno=geno(x), 
                        ..., collapsed=FALSE))
         }
         idx <- rep.int(seq_len(nrow(x)), elt) 
@@ -42,7 +42,7 @@ setMethod("expand", "CollapsedVCF",
         ## info
         iexp <- .expandInfo(x, hdr, elt, idx)
         ## fixed
-        fexp <- mcols(fixed(x))[idx, -1]
+        fexp <- fixed(x)[idx, ]
         fexp$ALT <- unlist(alt(x), use.names=FALSE)
         ## geno 
         gexp <- .expandGeno(x, hdr, elt, idx)
@@ -89,11 +89,11 @@ setMethod("expand", "CollapsedVCF",
 
 .expandInfo <- function(x, hdr, elt, idx)
 {
-    icol <- mcols(info(x))[-1]
+    icol <- info(x)
     inms <- rownames(info(hdr))[info(hdr)$Number == "A"]
     if (length(inms) > 0L) {
         ielt <- sapply(inms, function(i) 
-                    elt - elementLengths(mcols(info(x))[[i]]))
+                    elt - elementLengths(info(x)[[i]]))
         ## elementLengths same as ALT
         csums <- colSums(ielt) == 0L
         if (any(csums))
