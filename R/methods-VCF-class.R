@@ -114,7 +114,7 @@ setMethod("rowData", "VCF",
 {
     gr <- slot(x, "rowData") 
     if (length(slot(x, "fixed")) != 0L)
-        values(gr) <- append(values(gr), slot(x, "fixed"))
+        mcols(gr) <- append(mcols(gr), slot(x, "fixed"))
     gr
 })
 
@@ -126,8 +126,6 @@ setReplaceMethod("rowData", c("VCF", "GRanges"),
     idx <- names(mcols(value)) %in% "paramRangeID"
     fixed(x) <- mcols(value)[!idx] 
     slot(x, "rowData") <- value[,idx]
-   # if (!is.null(names(value)))
-   #     rownames(x) <- names(value)
     validObject(x)
     x
 })
@@ -330,6 +328,8 @@ setMethod(show, "VCF",
     }
     printSmallGRanges <- function(x, margin="   ")
     {
+        if (length(x) == 0L)
+            return(print(x))
         nms <- names(x)
         ncols <- length(mcols(x)) + 4
         top_idx <- 1:3
@@ -352,7 +352,7 @@ setMethod(show, "VCF",
         nr <- nrow(x)
         nc <- ncol(x)
         if (nr == 0L)
-            return(x)
+            return(print(x))
         top_idx <- 1:3
         bottom_idx <- (nr-1):nr
         showAsCell <- IRanges:::showAsCell
