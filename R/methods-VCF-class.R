@@ -1,4 +1,4 @@
-### =========================================================================
+## =========================================================================
 ### VCF class methods 
 ### =========================================================================
 
@@ -191,6 +191,12 @@ setReplaceMethod("strand", "VCF",
     x
 })
 
+### header
+setMethod("header", "VCF",
+    function(x)
+{ 
+    exptData(x)$header
+})
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Subsetting 
@@ -326,74 +332,43 @@ setMethod(show, "VCF",
         rownames(df) <- paste(margin, rownames(df))
         print(df, right=FALSE)
     }
-    printSmallGRanges <- function(x, margin="   ")
+    printSmallGRanges <- function(x, margin)
     {
-        if (length(x) == 0L)
-            return(print(x))
-        nms <- names(x)
-        ncols <- length(mcols(x)) + 4
-        top_idx <- 1:3
-        bottom_idx <- (length(x)-1):length(x) 
-        makeMat <- GenomicRanges:::.makeNakedMatFromGenomicRanges
-        if (length(x) < 6L) {
-            out <- makeMat(x)
-            ans_rownames <- nms
-        } else {
-            out <- rbind(makeMat(x[top_idx]),
-                         matrix(rep.int("...", ncols), nrow=1L),
-                         makeMat(x[bottom_idx]))
-            ans_rownames <- c(nms[top_idx], "...", nms[bottom_idx])
-        }
-        rownames(out) <- paste0(margin, ans_rownames)
-        print(out, right=FALSE, quote=FALSE)
+        lx <- length(x)
+        nc <- ncol(mcols(x))
+        nms <- names(mcols(x))
+        cat(margin, class(x), " with ",
+            nc, " metadata ", ifelse(nc == 1L, "column", "columns"),
+            ": ", paste0(nms, collapse=", "), "\n", sep="")
     }
-    printSmallDataTable <- function(x, margin="   ", nms)
+    printSmallDataTable <- function(x, margin)
     {
         nr <- nrow(x)
         nc <- ncol(x)
-        if (nr == 0L)
-            return(print(x))
-        top_idx <- 1:3
-        bottom_idx <- (nr-1):nr
-        showAsCell <- IRanges:::showAsCell
-        if (nrow(x) < 6L) {
-            out <- as.matrix(format(as.data.frame(lapply(x, function(elt)
-                showAsCell(head(elt, nrow(x)))), optional=TRUE)))
-            ans_rownames <- nms
-        } else {
-            top <- as.matrix(format(as.data.frame(lapply(x, function(elt)
-                showAsCell(head(elt, length(top_idx)))), optional=TRUE)))
-            dots <- rbind(rep.int("...", nc))
-            bottom <- as.matrix(format(as.data.frame(lapply(x, function(elt)
-                showAsCell(tail(elt, length(bottom_idx)))), optional=TRUE)))
-            out <- rbind(top, dots, bottom)
-            ans_rownames <- c(head(nms, length(top_idx)), "...", 
-                              tail(nms, length(bottom_idx)))
-        }
-        rownames(out) <- paste0(margin, ans_rownames)
-        print(out, right=FALSE, quote=FALSE)
+        cat(margin, class(x), " with ",
+            nc, ifelse(nc == 1, " column.\n", " columns.\n"),
+            sep = "")
     }
-    printSimpleList <- function(x, margin="  ")
+    printSimpleList <- function(x, margin)
     {
         lo <- length(x)
         cat(margin, class(x), " of length ", lo, "\n", sep = "")
-        if (!is.null(names(x)))
-            cat(" ", IRanges:::labeledLine("names", names(x)))
     }
+    margin <- "  "
     cat("class:", class(object), "\n")
     cat("dim:", dim(object), "\n")
-    cat("\nrowData(vcf):\n")
-    printSmallGRanges(rowData(object))
-    cat("\ninfo(exptData(vcf)$header):\n")
+    cat("rowData(vcf):\n")
+    printSmallGRanges(rowData(object), margin=margin)
+    cat("info(vcf):\n")
+    printSmallDataTable(info(object), margin=margin) 
+    cat("info(header(vcf)):\n")
     info <- as.data.frame(info(exptData(object)$header))
     headerrec(info, "info")
-    cat("\ninfo(vcf):\n")
-    printSmallDataTable(info(object), nms=rownames(object)) 
-    cat("\ngeno(exptData(vcf)$header):\n")
+    cat("geno(vcf):\n")
+    printSimpleList(geno(object), margin=margin) 
+    cat("geno(header(vcf)):\n")
     geno <- as.data.frame(geno(exptData(object)$header))
     headerrec(geno, "geno")
-    cat("\ngeno(vcf); full content not shown:\n")
-    printSimpleList(geno(object)) 
 }
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -53,6 +53,7 @@
 \alias{geno<-,VCF,missing,SimpleList-method}
 \alias{strand,VCF-method}
 \alias{strand<-,VCF-method}
+\alias{header,VCF-method}
 
 % Subset methods
 \alias{[,VCF-method}
@@ -190,6 +191,12 @@
       \code{strand(x)}:
       Extract the \code{strand} from the \code{GRanges} in the 
       \code{rowData} slot.
+    }
+    \item{}{
+      \code{header(x)}:
+      Extract the VCF header information. The slot names of the resulting
+      \code{VCFHeader} object are accessors that will further extract
+      the data, (i.e., info(), geno(), fixed(), samples(), meta()).
     }
   }
 }
