@@ -138,8 +138,8 @@ setMethod(writeVcf, c("VCF", "connection"),
     if (is.list(genoMat)) {
       genoMatList <- relist(genoMatFlat, PartitioningByEnd(genoMat))
       genoMatFlat <- .pasteCollapse(genoMatList, ",")
-      genoMat <- matrix(genoMatFlat, nrow(genoMat), ncol(genoMat))
-    } else genoMat <- genoMatFlat
+    }
+    genoMat <- matrix(genoMatFlat, nrow(genoMat), ncol(genoMat))
 
     formatMatPerSub <- matrix(rep(t(formatMat), nsub), nsub * nrec,
                               length(geno), byrow = TRUE)

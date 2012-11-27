@@ -25,4 +25,13 @@ test_writeVcf_tags <- function()
     checkTrue(rownames(meta(hd1)) %in% rownames(meta(hd2))) 
     checkIdentical(names(geno(vcf1)), names(geno(vcf2))) 
     checkIdentical(colnames(mcols(info(vcf1))), colnames(mcols(info(vcf2))))
-} 
+}
+ 
+test_writeVcf_flatgeno <- function()
+{
+    fl <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
+    dest <- tempfile()
+    vcf1 <- readVcf(fl, "hg19")
+    writeVcf(vcf1, dest)
+    vcf2 <- readVcf(dest, "hg19")
+}
