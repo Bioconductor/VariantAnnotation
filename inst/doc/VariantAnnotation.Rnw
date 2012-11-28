@@ -406,15 +406,12 @@ res <- MatrixToSnpMatrix(calls, ref(vcf), alt(vcf))
 res
 @
 
-The \Rcode{ALT} value in the 'map' \Robject{DataFrame} will be a
-\Robject{CharacterList} if the VCF was for structural variants or a 
-\Robject{DNAStringSetList} otherwise. The column is not clearly visable inside 
-the \Robject{DataFrame} but can be extracted and inspected as follows,
+In the map \Rcode{DataFrame}, allele.1 represents the reference allele
+and allele.2 is the alternate allele.
 <<snpMatrix_ALT>>=
 allele2 <- res$map[["allele.2"]]
 ## number of alternate alleles per variant
 unique(elementLengths(allele2))
-unlist(allele2)
 @
 
 \subsection{Expand "flatten" a VCF}

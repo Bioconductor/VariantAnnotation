@@ -47,7 +47,7 @@ setMethod("expand", "CollapsedVCF",
         ## geno 
         gexp <- .expandGeno(x, hdr, elt, idx)
         ## rowData
-        rdexp <- rowData(x)[idx, ]
+        rdexp <- rowData(x)[idx, "paramRangeID"]
 
         ## exptData, colData untouched
         VCF(rowData=rdexp, colData=colData(x), exptData=exptData(x),
