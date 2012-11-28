@@ -98,8 +98,8 @@ head(rowData(vcf))
 The REF, ALT, QUAL and FILTER fields can be accessed with 
 \Rcode{ref}, \Rcode{alt}, \Rcode{qual} and \Rcode{filt}. 
 <<readVcf_fixed>>=
-ref(vcf)
-qual(vcf)
+ref(vcf)[1:5]
+qual(vcf)[1:5]
 @
 
 \Robject{ALT} is a \Robject{DNAStringSetList} or \Rcode{DNAStringSet}.
@@ -147,7 +147,6 @@ index.
 <<subset_TabixFile>>=
 tab <- TabixFile(fl)
 vcf_rng <- readVcf(tab, "hg19", param=rng)
-vcf_rng
 @
 
 The \Rcode{paramRangesID} column distinguishes which records came 
@@ -201,7 +200,7 @@ table(dbsnpchr22)
 @
 
 Create a data frame of quality measures of interest ...
-<<examine_dbSNP_quality>>=
+<<examine_quality>>=
 metrics <- data.frame(QUAL=qual(vcf), inDbSNP=dbsnpchr22,
     VT=info(vcf)$VT, LDAF=info(vcf)$LDAF, RSQ=info(vcf)$RSQ)
 @
@@ -209,7 +208,7 @@ metrics <- data.frame(QUAL=qual(vcf), inDbSNP=dbsnpchr22,
 and visualize the distribution of qualities using \Rcode{ggplot2}.
 For instance, genotype imputation quality is higher for the known
 variants in dbSNP.
-<<examine_dbSNP_ggplot2>>=
+<<examine_ggplot2, fig=TRUE>>=
 library(ggplot2)
 ggplot(metrics, aes(x=RSQ, fill=inDbSNP)) +
     geom_density(alpha=0.5) +
@@ -269,13 +268,13 @@ allvar <- locateVariants(rd, txdb, AllVariants())
 To answer gene-centric questions data can be summarized by gene reguardless
 of transcript. 
 <<locate_gene_centric>>=
-## Did any coding variants matched more than one gene?
-table(sapply(split(values(loc)[["GENEID"]], values(loc)[["QUERYID"]]), 
-    function(x) length(unique(x)) > 1))
+## Did any coding variants match more than one gene?
+splt <- split(mcols(loc)$GENEID, mcols(loc)$QUERYID) 
+table(sapply(splt, function(x) length(unique(x)) > 1))
 
 ## Summarize the number of coding variants by gene ID.
 splt <- split(mcols(loc)$QUERYID, mcols(loc)$GENEID)
-table(sapply(splt, function(x) length(unique(x)) > 1))
+head(sapply(splt, function(x) length(unique(x))), 3)
 @
 
 \section{Amino acid coding changes}
@@ -301,7 +300,7 @@ than one row per original variant is possible.
 <<predictCoding>>=
 library(BSgenome.Hsapiens.UCSC.hg19)
 coding <- predictCoding(vcf, txdb, seqSource=Hsapiens)
-coding[5:9]
+coding[5:7]
 @
 
 Using variant rs114264124 as an example, we see varAllele \Rcode{A} 
@@ -323,7 +322,7 @@ translated. The consequence is considered a \Rcode{frameshift} and
 
 <<predictCoding_frameshift>>=
 ## CONSEQUENCE is 'frameshift' where translation is not possible
-coding[values(coding)[["CONSEQUENCE"]] == "frameshift"]
+coding[mcols(coding)$CONSEQUENCE == "frameshift"]
 @
 
 \section{SIFT and PolyPhen Databases}
