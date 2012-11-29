@@ -57,13 +57,15 @@ export(VCF, VCFHeader,
        duplicateRSID, CodingVariants, IntronVariants,
        FiveUTRVariants, ThreeUTRVariants, IntergenicVariants,
        SpliceSiteVariants, PromoterVariants, AllVariants,
-       upstream, "upstream<-", downstream, "downstream<-")
+       upstream, "upstream<-", downstream, "downstream<-",
+       probabilityToSnpMatrix, GLtoGP)
 
 exportMethods(filterVcf,
               scanVcf, scanVcfHeader, ScanVcfParam,
               readVcf, readVcfLongForm, writeVcf,
               predictCoding, getTranscriptSeqs, refLocsToLocalLocs, 
-              MatrixToSnpMatrix, locateVariants, summarizeVariants,
+              MatrixToSnpMatrix, genotypeToSnpMatrix,
+              locateVariants, summarizeVariants,
 
               fixed, "fixed<-", ref, "ref<-", alt, "alt<-", qual, "qual<-",
               filt, "filt<-", info, "info<-", geno, "geno<-", strand, 

@@ -1,0 +1,192 @@
+### =========================================================================
+### genotypeToSnpMatrix methods 
+### =========================================================================
+
+## Coding for snpMatrix :
+## 0 = missing OR multiallelic OR multi-ALT values
+## 1 = homozygous reference (0|0) 
+## 2 = heterozygous (0|1 or 1|0) 
+## 3 = homozygous alternate (risk) allele (1|1)
+
+setMethod("genotypeToSnpMatrix", "CollapsedVCF",
+          function(x, uncertain=FALSE, ...)
+{
+    ok <- suppressWarnings(require("snpStats", quietly=TRUE, 
+                                   character.only=TRUE))
+    ok || stop("'snpStats' required; try biocLite('snpStats')", call.=FALSE) 
+
+    alt <- alt(x)
+    if (is(alt, "CompressedCharacterList")) {
+        warning(paste0("structural variants detected and not supported ",
+                "by SnpMatrix; returning NULL"))
+        return(NULL)
+    }
+    ref <- ref(x)
+
+    if (!uncertain) {
+        gt <- geno(x)$GT
+    } else {
+        geno.cols <- row.names(geno(exptData(x)[["header"]]))
+        if ("GP" %in% geno.cols) {
+            gt <- geno(x)$GP
+            if (mode(gt) == "list") {
+                gt <- .matrixOfListsToArray(gt)
+            }
+        } else if ("GL" %in% geno.cols) {
+            gt <- geno(x)$GL
+            if (mode(gt) == "list") {
+                gt <- .matrixOfListsToArray(gt)
+            }
+            gt <- GLtoGP(gt)
+        } else {
+            warning("uncertain=TRUE requires GP or GL; returning NULL")
+            return(NULL)
+        }
+    }
+
+    callGeneric(gt, ref, alt)
+})
+
+setMethod("genotypeToSnpMatrix", "array",
+          function(x, ref, alt, ...)
+{
+    # query ref and alt alleles for valid SNPs
+    altelt <- elementLengths(alt) == 1L 
+    altseq <- logical(length(alt))
+    idx <- rep(altelt, elementLengths(alt))
+    altseq[altelt] = width(unlist(alt))[idx] == 1L
+    snv <- altseq & (width(ref) == 1L)
+ 
+    # if x is a matrix, we have GT with a single value for each snp
+    if (is.matrix(x)) {
+        if (!all(altelt)) {
+            warning("variants with >1 ALT allele are set to NA")
+            x[!altelt,] <- ".|."
+        }
+
+        if (!all(snv)) {
+            warning("non-single nucleotide variations are set to NA")
+            x[!snv,] <- ".|."
+        }
+ 
+        map <- setNames(sapply(rep(c(0, 1, 2, 2, 3), 2), as.raw),
+                        c(".|.", "0|0", "0|1", "1|0", "1|1",
+                          "./.", "0/0", "0/1", "1/0", "1/1"))
+        diploid <- x %in% names(map)
+        if (!all(diploid)) {
+            warning("non-diploid variants are set to NA")
+            x[!diploid] <- ".|."
+        }
+
+        mat <- matrix(map[x], nrow=ncol(x), ncol=nrow(x),
+                      byrow=TRUE, dimnames=rev(dimnames(x)))
+        genotypes <- new("SnpMatrix", mat)
+    } else {
+    # if x is a 3D array, we have GP with multiple values for each snp
+
+        if (!all(altelt)) {
+            warning("variants with >1 ALT allele are set to NA")
+            x[!altelt,,] <- NA
+        }
+
+        if (!all(snv)) {
+            warning("non-single nucleotide variations are set to NA")
+            x[!snv,,] <- NA
+        }
+
+        # if there is more than one ALT allele for any variant,
+        # the 3rd dimension of the array will be too big
+        # any values here should already have been set to NA above
+        if (dim(x)[3] > 3) {
+            x <- x[,,1:3]
+        }
+ 
+        # for each sample, call probabilityToSnpMatrix
+        smlist <- list()
+        for (s in 1:ncol(x)) {
+            sm <- probabilityToSnpMatrix(x[,s,])
+            rownames(sm) <- colnames(x)[s]
+            smlist[[s]] <- sm
+        }
+        genotypes <- do.call(rbind, smlist)
+    }
+ 
+    flt <- !(snv & altelt)
+    map <- .createMap(rownames(x), ref, alt, flt)
+
+    list(genotypes = genotypes, map = map)
+})
+
+.createMap <- function(nms, ref, alt, flt)
+{
+    if (is.null(ref))
+        DataFrame(snp.names=character(0), 
+                  allele.1=DNAStringSet(), 
+                  allele.2=DNAStringSetList(),
+                  ignore=logical())
+    else 
+        DataFrame(snp.names=nms, 
+                  allele.1=ref, 
+                  allele.2=alt,
+                  ignore=flt)
+}
+
+probabilityToSnpMatrix <- function(probs) {
+    ok <- suppressWarnings(require("snpStats", quietly=TRUE, 
+                                   character.only=TRUE))
+    ok || stop("'snpStats' required; try biocLite('snpStats')", call.=FALSE) 
+
+    if (ncol(probs) != 3)
+        stop("input matrix should have 3 columns: P(A/A), P(A/B), P(B/B)")
+
+    # skip missing values when checking for validity of probabilities
+    missing <- rowSums(is.na(probs)) > 0
+    if (!isTRUE(all.equal(rowSums(probs[!missing,]), rep(1,sum(!missing)),
+                          tolerance=0.0001, check.attributes=FALSE,
+                          check.names=FALSE)))
+        stop("sum of probabilities in each row of input matrix should = 1")
+
+    # post2g can't handle missing data
+    if (sum(missing) > 0) {
+        probs[missing,] <- 0
+        g <- post2g(probs)
+        g[missing] <- as.raw(0)
+    } else {
+        g <- post2g(probs)
+    }
+    g <-  matrix(g, nrow=1, dimnames=list(NULL, rownames(probs)))
+    new("SnpMatrix", g)
+}
+
+GLtoGP <- function(gl) {
+    if (is.matrix(gl) & mode(gl) == "list") {
+        gp <- gl
+        for (i in 1:length(gp)) {
+            gp[[i]] <- 10^gl[[i]] / sum(10^gl[[i]], na.rm=TRUE)
+        }
+        gp
+    } else if (is.array(gl) & length(dim(gl)) == 3) {
+        aperm(apply(gl, c(1,2), function(x) 
+                  10^x / sum(10^x, na.rm=TRUE)), 
+              c(2,3,1))
+    } else {
+        stop("gl must be a matrix of lists or a 3D array")
+    }
+}
+
+.matrixOfListsToArray <- function(x) {
+    # find number of elements of each cell of x
+    n <- elementLengths(x)
+    maxn <- max(n)
+ 
+    # for cells with less than the max number of elements, add NAs
+    idx <- n < maxn
+    x[idx] <- lapply(x[idx], function(a){c(a, rep(NA, maxn-length(a)))})
+ 
+    # unlist and convert to array
+    x <- array(unlist(x), dim=c(maxn, nrow(x), ncol(x)),
+               dimnames=list(NULL, rownames(x), colnames(x)))
+    x <- aperm(x, c(2,3,1))
+
+    x
+}

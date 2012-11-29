@@ -76,10 +76,6 @@ setGeneric("writeVcf", signature = c("obj", "filename"),
     standardGeneric("writeVcf")
 )
 
-setGeneric("MatrixToSnpMatrix", signature = c("callMatrix", "ref", "alt"),
-    function(callMatrix, ref, alt, ...)
-    standardGeneric("MatrixToSnpMatrix")
-)
 
 ### -------------------------------------------------------------------------
 ### scanVcf 
@@ -195,5 +191,19 @@ setGeneric("contig", signature = "x",
 
 setGeneric("meta", signature = "x",
     function(x) standardGeneric("meta"),
+)
+
+### -------------------------------------------------------------------------
+### snp encoding methods 
+###
+
+setGeneric("MatrixToSnpMatrix", signature = c("callMatrix", "ref", "alt"),
+    function(callMatrix, ref, alt, ...)
+    standardGeneric("MatrixToSnpMatrix")
+)
+
+setGeneric("genotypeToSnpMatrix", signature = "x",
+    function(x, ...)
+    standardGeneric("genotypeToSnpMatrix")
 )
 

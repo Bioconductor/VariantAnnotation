@@ -137,7 +137,8 @@ setMethod("info", "VCF",
     info <- slot(x, "info")
     if (any(duplicated(rownames(x))))
         return(info)
-    rownames(info) <- rownames(x)
+    if (length(info) != 0L)
+        rownames(info) <- rownames(x)
     info
 })
 
@@ -343,16 +344,18 @@ setMethod(show, "VCF",
     }
     printSmallDataTable <- function(x, margin)
     {
-        nr <- nrow(x)
         nc <- ncol(x)
+        nms <- names(x)
         cat(margin, class(x), " with ",
-            nc, ifelse(nc == 1, " column.\n", " columns.\n"),
-            sep = "")
+            nc, ifelse(nc == 1, " column", " columns"),
+            ": ", paste0(nms, collapse=", "), "\n", sep = "")
     }
     printSimpleList <- function(x, margin)
     {
         lo <- length(x)
-        cat(margin, class(x), " of length ", lo, "\n", sep = "")
+        nms <- names(x)
+        cat(margin, class(x), " of length ", lo, 
+            ": ", paste0(nms, collapse=", "), "\n", sep = "")
     }
     margin <- "  "
     cat("class:", class(object), "\n")
