@@ -50,6 +50,10 @@ setMethod("genotypeToSnpMatrix", "CollapsedVCF",
 setMethod("genotypeToSnpMatrix", "array",
           function(x, ref, alt, ...)
 {
+    if (!is(ref, "DNAStringSet"))
+        stop("'ref' must be a DNAStringSet")
+    if (!is(alt, "DNAStringSetList"))
+        stop("'alt' must be a DNAStringSetList")
     # query ref and alt alleles for valid SNPs
     altelt <- elementLengths(alt) == 1L 
     altseq <- logical(length(alt))
