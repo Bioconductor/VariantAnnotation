@@ -43,14 +43,15 @@ options(width=72)
 This vignette outlines a work flow for annotating and filtering 
 genetic variants using the \VariantAnnotation  package. Sample data 
 are in VariantCall Format (VCF) and are a subset of chromosome 22 
-from 1000 Genomes,
-\url{ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20110521/}.
+from 
+\href{ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20110521/}{1000
+Genomes}.
 VCF text files contain meta-information lines, a header line with
 column names, data lines with information about a position in the 
 genome, and optional genotype information on samples for each
-position. A full description of the VCF format is on the 1000 Genomes 
-page,
-\url{http://www.1000genomes.org/wiki/Analysis/Variant%20Call%20Format/vcf-variant-call-format-version-41}
+position. The 1000 Genomes page describes the 
+\href{http://www.1000genomes.org/wiki/Analysis/Variant\%20Call\%20Format/vcf-variant-call-format-version-41}{VCF
+format} in detail.
 
 Data are read in from a VCF file and variants identified according 
 to region such as \Rcode{coding}, \Rcode{intron}, \Rcode{intergenic}, 
@@ -59,70 +60,144 @@ non-synonymous variants and SIFT and PolyPhen databases provide predictions
 of how severly the coding changes affect protein function.
 
 \section{Variant Call Format (VCF) files}
-\subsection{Import complete files}
+\subsection{Data import and exploration}
 Data are parsed into a \Robject{VCF} object with \Rfunction{readVcf}. 
 
 <<readVcf>>=
 library(VariantAnnotation)
 fl <- system.file("extdata", "chr22.vcf.gz", package="VariantAnnotation")
 vcf <- readVcf(fl, "hg19")
-@
-
-The show method gives an overview of how the data are organized.
-<<show>>=
 vcf
 @
 
-Extract the header information.
+\subsubsection{Header information}
+Header information can be extracted from the VCF with 
+\Rfunction{header()}. We see there are 5 samples, 1 piece 
+of meta information, 22 info fields and 3 geno fields. 
 <<readVcf_showheader>>=
-hdr <- header(vcf)
-hdr
+header(vcf)
 @
 
-Data can be further extracted with \Rcode{fixed}, \Rcode{info},
-\Rcode{geno}, \Rcode{samples} and \Rcode{meta} accessors.
+Data can be further extracted using the named accessors.
 <<headeraccessors>>=
-samples(hdr)
-geno(hdr)
-head(info(hdr), 3)
+samples(header(vcf))
+geno(header(vcf))
 @
 
-\Rcode{rowData} contains information in the CHROM, POS, and ID
+\subsubsection{Genomic positions}
+\Rcode{rowData} contains information from the CHROM, POS, and ID
 fields of the VCF file, represented as a \Robject{GRanges}.
 The \Rcode{paramRangeID} column is meaningful when reading
 subsets of data and is discussed further below.
 <<readVcf_rowData>>=
-head(rowData(vcf))
+head(rowData(vcf), 3)
 @
 
-The REF, ALT, QUAL and FILTER fields can be accessed with 
-\Rcode{ref}, \Rcode{alt}, \Rcode{qual} and \Rcode{filt}. 
+Individual fields can be pulled out with named accessors. Here
+we see \Rcode{REF} is stored as a \Robject{DNAStringSet} and
+\Rcode{qual} is a numeric vector. 
 <<readVcf_fixed>>=
 ref(vcf)[1:5]
 qual(vcf)[1:5]
 @
 
-\Robject{ALT} is a \Robject{DNAStringSetList} or \Rcode{DNAStringSet}.
-In the case of structural variants, \Robject{ALT} will be a
+\Robject{ALT} is a \Robject{DNAStringSetList} (allows for
+multiple alternate alleles per variant) or a \Rcode{DNAStringSet}.
+When structural variants are present it will be a 
 \Robject{CharacterList}. 
 <<readVcf_ALT>>=
-alt(vcf)
+alt(vcf)[1:5]
 @
 
-Genotype data described in the \Rcode{FORMAT} field are parsed 
-into matrices or arrays and can be accessed with the \Rcode{geno} 
-accessor.
+\subsubsection{Genotype data}
+Genotype data described in the \Rcode{FORMAT} fields are parsed 
+into the geno slot. The data are unique to each sample and
+each sample may have multiple values variable. Because of this, 
+the data are parsed into matrices or arrays where the rows
+represent the variants and the columns the samples. Multidimentional
+arrays indicate multiple values per sample. In this file all 
+variables are matrices.
 <<geno_hdr>>=
-geno(hdr)
 geno(vcf)
-geno(vcf)$GT[1:3,1:5]
+sapply(geno(vcf), class)
 @
 
-The \Rcode{geno} data are unique for each sample. In contrast,
-the \Rcode{info} data are unique to the variant and the same 
-across all samples. These data are stored in a \Rcode{DataFrame}. 
+Let's take a closer look at the genotype dosage (DS) variable. 
+The header provides the variable definition and type.
+<<explore_geno>>=
+geno(header(vcf))["DS",]
+@
+
+These data are stored as a 10376 x 5 matrix. Each of the five
+samples (columns) has a single value per variant location (row).
+<<dim_geno>>=
+DS <-geno(vcf)$DS
+dim(DS)
+DS[1:3,]
+@
+
+DS is also known as 'posterior mean genotypes' and range in value
+from [0, 2]. To get a sense of variable distribution, we compute 
+a five number summary of the minimum, lower-hinge (first quartile), 
+median, upper-hinge (third quartile) and maximum.
+<<fivenum>>=
+fivenum(DS)
+@
+
+The majority of these values (86\%) are zero.
+<<DS_zero>>=
+length(which(DS==0))/length(DS)
+@
+
+View the distribution of the non-zero values.
+<<DS_hist, fig=TRUE>>=
+hist(DS[DS != 0], breaks=seq(0, 2, by=0.05), 
+    main="DS non-zero values", xlab="DS")
+@
+
+\subsubsection{Info data}
+In contrast to the genotype data, the info data are unique to 
+the variant and the same across samples. All info variables
+are represented in a single \Rcode{DataFrame}.
 <<info>>=
 info(vcf)[1:4, 1:5]
+@
+
+We will use the info data to compare quality measures between 
+novel (i.e., not in dbSNP) and known (i.e., in dbSNP) variants 
+and the variant type present in the file. Variants with 
+membership in dbSNP can be identified by using the appropriate 
+SNPlocs package for hg19.
+<<examine_dbSNP>>=
+library(SNPlocs.Hsapiens.dbSNP.20101109)
+dbsnprd <- renameSeqlevels(rowData(vcf), c("22"="ch22"))
+ch22snps <- getSNPlocs("ch22")
+dbsnpchr22 <- sub("rs", "", names(dbsnprd)) %in% ch22snps$RefSNP_id
+table(dbsnpchr22)
+@
+
+Info variables of interest are 'VT', 'LDAF' and 'RSQ'.
+The header offers more details on these variables.
+<<header_info>>=
+info(header(vcf))[c("VT", "LDAF", "RSQ"),]
+@
+
+Create a data frame of quality measures of interest ...
+<<examine_quality>>=
+metrics <- data.frame(QUAL=qual(vcf), inDbSNP=dbsnpchr22,
+    VT=info(vcf)$VT, LDAF=info(vcf)$LDAF, RSQ=info(vcf)$RSQ)
+@
+
+and visualize the distribution of qualities using \Rcode{ggplot2}.
+For instance, genotype imputation quality is higher for the known
+variants in dbSNP.
+<<examine_ggplot2, fig=TRUE>>=
+library(ggplot2)
+ggplot(metrics, aes(x=RSQ, fill=inDbSNP)) +
+    geom_density(alpha=0.5) +
+    scale_x_continuous(name="MaCH / Thunder Imputation Quality") +
+    scale_y_continuous(name="Density") +
+    theme(legend.position="top")
 @
 
 \subsection{Import data subsets}
@@ -131,7 +206,7 @@ read in subsets of the data. This can be accomplished by
 selecting genomic coordinates (ranges) or by specific fields
 from the VCF file.
 
-\subsubsection{Genomic coordinates}
+\subsubsection{Select genomic coordinates}
 To read in a portion of chromosome 22, create a \Robject{GRanges} 
 with the regions of interest.
 <<subset_ranges>>=
@@ -155,7 +230,7 @@ from which param range.
 head(rowData(vcf_rng), 3)
 @
 
-\subsubsection{VCF fields}
+\subsubsection{Select VCF fields}
 Data import can also be defined by the \Rcode{fixed}, \Rcode{info}
 and \Rcode{geno} fields. Fields available for import are
 described in the header information. To view the header before
@@ -185,37 +260,6 @@ svp_all <- ScanVcfParam(info="LDAF", geno="GT", which=rng)
 svp_all
 @
 
-\subsection{Examine VCF contents}
-It is easy to examine the contents of a VCF file. Let's compare
-quality measure between novel (i.e., not in dbSNP) and known
-(i.e., in dbSNP) variants and the variant type present in the
-file. Variants with membership in dbSNP can be identified by
-using the appropriate SNPlocs package for hg19.
-<<examine_dbSNP>>=
-library(SNPlocs.Hsapiens.dbSNP.20101109)
-dbsnprd <- renameSeqlevels(rowData(vcf), c("22"="ch22"))
-ch22snps <- getSNPlocs("ch22")
-dbsnpchr22 <- sub("rs", "", names(dbsnprd)) %in% ch22snps$RefSNP_id
-table(dbsnpchr22)
-@
-
-Create a data frame of quality measures of interest ...
-<<examine_quality>>=
-metrics <- data.frame(QUAL=qual(vcf), inDbSNP=dbsnpchr22,
-    VT=info(vcf)$VT, LDAF=info(vcf)$LDAF, RSQ=info(vcf)$RSQ)
-@
-
-and visualize the distribution of qualities using \Rcode{ggplot2}.
-For instance, genotype imputation quality is higher for the known
-variants in dbSNP.
-<<examine_ggplot2, fig=TRUE>>=
-library(ggplot2)
-ggplot(metrics, aes(x=RSQ, fill=inDbSNP)) +
-    geom_density(alpha=0.5) +
-    scale_x_continuous(name="MaCH / Thunder Imputation Quality") +
-    scale_y_continuous(name="Density") +
-    theme(legend.position="top")
-@
 
 \section{Locating variants in and around genes}
 Variant location with respect to genes can be identified with the
@@ -414,7 +458,7 @@ allele2 <- res$map[["allele.2"]]
 unique(elementLengths(allele2))
 @
 
-\subsection{Expand "flatten" a VCF}
+\subsection{Expand a VCF}
 
 Coming soon ...
 CollapsedVCF and ExpandedVCF classes and expand,CollapsedVCF-method.

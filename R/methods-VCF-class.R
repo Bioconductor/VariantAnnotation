@@ -365,13 +365,15 @@ setMethod(show, "VCF",
     cat("info(vcf):\n")
     printSmallDataTable(info(object), margin=margin) 
     cat("info(header(vcf)):\n")
-    info <- as.data.frame(info(exptData(object)$header))
-    headerrec(info, "info")
+    info <- info(exptData(object)$header)[colnames(info(object)),]
+    if (nrow(info) > 0)
+        headerrec(as.data.frame(info), "info")
     cat("geno(vcf):\n")
     printSimpleList(geno(object), margin=margin) 
     cat("geno(header(vcf)):\n")
-    geno <- as.data.frame(geno(exptData(object)$header))
-    headerrec(geno, "geno")
+    geno <- geno(exptData(object)$header)[names(geno(object)),]
+    if (nrow(geno) > 0)
+        headerrec(as.data.frame(geno), "geno")
 }
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
