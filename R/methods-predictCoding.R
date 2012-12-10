@@ -16,8 +16,12 @@ setMethod("predictCoding", c("CollapsedVCF", "TranscriptDb", "ANY", "missing"),
     if (!is(alt, "DNAStringSetList"))
         stop("alt(query) must be a DNAStringSetList")
     rd <- rep(rowData(query), elementLengths(alt))
-    callGeneric(rd, subject, seqSource, unlist(alt, use.names=FALSE), ...,
-                ignore.strand=ignore.strand) 
+    res <- callGeneric(rd, subject, seqSource, unlist(alt, use.names=FALSE), 
+                ..., ignore.strand=ignore.strand)
+    ## adjust QUERYID for expansion of rowData
+    res$QUERYID <- rep(seq_len(length(alt)),
+                       elementLengths(alt))[res$QUERYID]
+    res 
 })
 
 setMethod("predictCoding", c("ExpandedVCF", "TranscriptDb", "ANY", "missing"),

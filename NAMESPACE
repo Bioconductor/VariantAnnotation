@@ -1,11 +1,11 @@
 useDynLib(VariantAnnotation, .registration=TRUE)
 
 import(methods)
+import(BiocGenerics)
 import(Rsamtools)
 import(GenomicRanges)
 import(zlibbioc)
 
-import(BiocGenerics)
 
 importClassesFrom(Biostrings, DNAStringSet, DNAStringSetList)
 importFrom(Biostrings, AAStringSet, DNAStringSet)
