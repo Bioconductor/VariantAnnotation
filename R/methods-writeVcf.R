@@ -65,7 +65,7 @@ setMethod(writeVcf, c("VCF", "connection"),
     FILTER[is.na(FILTER)] <- "."
     INFO <- .makeVcfInfo(info(obj))
     ans <- paste(CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, sep = "\t")
-    if (length(geno(obj)) > 0L) {
+    if (nrow(colData(obj)) > 0L) {
       GENO <- .makeVcfGeno(geno(obj))
       FORMAT <- GENO[,1]
       GENO <- GENO[,-1,drop=FALSE]
