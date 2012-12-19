@@ -1,19 +1,78 @@
 setMethod("filterVcf", "character",
     function(file, genome, destination, ..., verbose = TRUE,
-             index = FALSE, filters = FilterRules(),
-             param = ScanVcfParam())
+             index = FALSE, prefilters = FilterRules(),
+             filters = FilterRules(), param = ScanVcfParam())
 {
-    tbx <- open(TabixFile(file, yieldSize=10000))
+    tbx <- open(TabixFile(file, yieldSize=100000))
     on.exit(close(tbx))
 
     filterVcf(tbx, genome = genome, destination=destination, ...,
-              verbose = verbose, index = index, filters = filters,
-              param = param)
+              verbose = verbose, index = index, prefilters = prefilters,
+              filters = filters, param = param)
 })
+
+.unlistScan <- function(...)
+    unlist(scanTabix(...), use.names=FALSE)
+
+.prefilter <-
+    function(tbxFile, verbose, index, prefilters, param, ...)
+{
+    if (!isOpen(tbxFile)) {
+        open(tbxFile)
+        on.exit(close(tbxFile), add=TRUE)
+    }
+
+    prefilteredFilename <- tempfile()
+    prefiltered <- file(prefilteredFilename, "w")
+    needsClosing <- TRUE
+    on.exit(if (needsClosing) close(prefiltered))
+    
+    ## copy header
+    writeLines(headerTabix(tbxFile)$header, prefiltered)
+
+    ## prefilter
+    param <- vcfWhich(param)
+    while (length(tbxChunk <- .unlistScan(tbxFile, ..., param=param))) {
+        tbxChunk <- subsetByFilter(tbxChunk, prefilters)
+        writeLines(tbxChunk, prefiltered)
+    }
+    close(prefiltered)
+    needsClosing <- FALSE
+
+    if (index) {
+        prefilteredFilename <- bgzip(prefilteredFilename, overwrite = TRUE)
+        indexTabix(prefilteredFilename, format = "vcf")
+    }
+
+    TabixFile(prefilteredFilename, yieldSize=yieldSize(tbxFile))
+}
+
+.filter <-
+    function(tbxFile, genome, destination, verbose, filters, param, ...)
+{
+    if (!isOpen(tbxFile)) {
+        open(tbxFile)
+        on.exit(close(tbxFile), add=TRUE)
+    }
+
+    filtered <- file(destination, open="a")
+    needsClosing <- TRUE
+    on.exit(if (needsClosing) close(filtered))
+
+    while (nrow(vcfChunk <- readVcf(tbxFile, genome, ..., param=param))) {
+        vcfChunk <- subsetByFilter(vcfChunk, filters)
+        writeVcf(vcfChunk, filtered)
+    }
+    close(filtered)
+    needsClosing <- FALSE
+
+    destination
+}
 
 setMethod("filterVcf", "TabixFile",
     function(file, genome, destination, ..., verbose = TRUE,
-             index = FALSE, filters = FilterRules(),
+             index = FALSE,
+             prefilters = FilterRules(), filters = FilterRules(),
              param = ScanVcfParam())
 {
     if (!isSingleString(destination))
@@ -23,41 +82,28 @@ setMethod("filterVcf", "TabixFile",
     if (!isTRUEorFALSE(index))
         stop("'index' must be TRUE or FALSE")
 
+    if (!length(prefilters) && !length(filters))
+        stop("no 'prefilters' or 'filters' specified")
+
+    ## prefilters
+    if (length(prefilters)) {
+        doIndex <- index || (length(filters) != 0)
+        file <- .prefilter(file, verbose, doIndex, prefilters, param,
+                           ...)
+    }
+    
+    ## filters
+    if (length(filters))
+        file <- .filter(file, genome, destination, verbose, filters,
+                        param, ...)
+
     ## desination: character(1) file path
-    con <- file(destination, open="a")
-    needsClosing <- TRUE
-    on.exit(if (needsClosing) close(con))
-
-    if (!isOpen(file)) {
-        open(file)
-        on.exit(close(file), add=TRUE)
-    }
-    if (verbose) {
-        wd <- options()$width
-        pbi <- 0L
-        pb <- txtProgressBar(max=wd)
-    }
-    while (nrow(vcfChunk <- readVcf(file, genome, ..., param=param))) {
-        if (verbose) {
-            pbi <- (pbi + 1L) %% wd
-            if (pbi == 0)
-                message()
-            setTxtProgressBar(pb, pbi)
-        }
-        vcfChunk <- subsetByFilter(vcfChunk, filters)
-        writeVcf(vcfChunk, con)
-    }
-    if (verbose)
-        message()
-    close(con)                          # so bgzip is on a closed file
-    needsClosing <- FALSE
-
     if (index) {
-        filenameGZ <- bgzip(destination, overwrite = TRUE)
+        filenameGZ <- bgzip(file, overwrite = TRUE)
         indexTabix(filenameGZ, format = "vcf")
-        unlink(destination)
+        unlink(file)
         invisible(filenameGZ)
     } else {
-        invisible(destination)
+        invisible(file)
     }
 })
