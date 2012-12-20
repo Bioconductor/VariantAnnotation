@@ -15,7 +15,7 @@ setMethod("filterVcf", "character",
     unlist(scanTabix(...), use.names=FALSE)
 
 .prefilter <-
-    function(tbxFile, verbose, index, prefilters, param, ...)
+    function(tbxFile, verbose, prefilters, param, ...)
 {
     if (!isOpen(tbxFile)) {
         open(tbxFile)
@@ -25,7 +25,7 @@ setMethod("filterVcf", "character",
     prefilteredFilename <- tempfile()
     prefiltered <- file(prefilteredFilename, "w")
     needsClosing <- TRUE
-    on.exit(if (needsClosing) close(prefiltered))
+    on.exit(if (needsClosing) close(prefiltered), add=TRUE)
     
     ## copy header
     writeLines(headerTabix(tbxFile)$header, prefiltered)
@@ -39,12 +39,13 @@ setMethod("filterVcf", "character",
     close(prefiltered)
     needsClosing <- FALSE
 
-    if (index) {
-        prefilteredFilename <- bgzip(prefilteredFilename, overwrite = TRUE)
-        indexTabix(prefilteredFilename, format = "vcf")
-    }
+    ## TabixFile needs to be bgzipped and indexed
+    ## FIXME: all records are read at next stage, so no need to index?
+    gzFilename<- bgzip(prefilteredFilename, overwrite = TRUE)
+    indexTabix(gzFilename, format = "vcf")
+    unlink(prefilteredFilename)
 
-    TabixFile(prefilteredFilename, yieldSize=yieldSize(tbxFile))
+    TabixFile(gzFilename, yieldSize=yieldSize(tbxFile))
 }
 
 .filter <-
@@ -57,7 +58,7 @@ setMethod("filterVcf", "character",
 
     filtered <- file(destination, open="a")
     needsClosing <- TRUE
-    on.exit(if (needsClosing) close(filtered))
+    on.exit(if (needsClosing) close(filtered), add=TRUE)
 
     while (nrow(vcfChunk <- readVcf(tbxFile, genome, ..., param=param))) {
         vcfChunk <- subsetByFilter(vcfChunk, filters)
@@ -85,25 +86,22 @@ setMethod("filterVcf", "TabixFile",
     if (!length(prefilters) && !length(filters))
         stop("no 'prefilters' or 'filters' specified")
 
-    ## prefilters
-    if (length(prefilters)) {
-        doIndex <- index || (length(filters) != 0)
-        file <- .prefilter(file, verbose, doIndex, prefilters, param,
-                           ...)
-    }
-    
-    ## filters
+    if (length(prefilters))
+        file <- .prefilter(file, verbose, prefilters, param, ...)
+
     if (length(filters))
         file <- .filter(file, genome, destination, verbose, filters,
                         param, ...)
 
-    ## desination: character(1) file path
     if (index) {
-        filenameGZ <- bgzip(file, overwrite = TRUE)
-        indexTabix(filenameGZ, format = "vcf")
+        gzFilename <- sprintf("%s.gz", destination)
+        gzFilename <- bgzip(file, gzFilename, overwrite = TRUE)
+        destination <- indexTabix(gzFilename, format = "vcf")
         unlink(file)
-        invisible(filenameGZ)
     } else {
-        invisible(file)
+        if (file != destination)
+            file.rename(file, destination)
     }
+
+    invisible(destination)
 })
