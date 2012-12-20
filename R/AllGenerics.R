@@ -207,3 +207,5 @@ setGeneric("genotypeToSnpMatrix", signature = "x",
     standardGeneric("genotypeToSnpMatrix")
 )
 
+setGeneric("snpSummary", function(x, ...) standardGeneric("snpSummary") )
+

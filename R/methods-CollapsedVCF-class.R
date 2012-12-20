@@ -22,100 +22,6 @@ setReplaceMethod("alt", c("CollapsedVCF", "DNAStringSetList"),
 })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-### expand 
-###
-
-setMethod("expand", "CollapsedVCF",
-    function(x, ...)
-    {
-        elt <- elementLengths(alt(x))
-        if (all(elt == 1L) || (is(alt(x), "CharacterList"))) {
-            fxd <- fixed(x)
-            fxd$ALT <- unlist(alt(x), use.names=FALSE)
-            return(VCF(rowData=rowData(x), colData=colData(x), 
-                       exptData=exptData(x), fixed=fxd, 
-                       info=info(x), geno=geno(x), 
-                       ..., collapsed=FALSE))
-        }
-        idx <- rep.int(seq_len(nrow(x)), elt) 
-        hdr <- exptData(x)$header
-        ## info
-        iexp <- .expandInfo(x, hdr, elt, idx)
-        ## fixed
-        fexp <- fixed(x)[idx, ]
-        fexp$ALT <- unlist(alt(x), use.names=FALSE)
-        ## geno 
-        gexp <- .expandGeno(x, hdr, elt, idx)
-        ## rowData
-        rdexp <- rowData(x)[idx, "paramRangeID"]
-
-        ## exptData, colData untouched
-        VCF(rowData=rdexp, colData=colData(x), exptData=exptData(x),
-            fixed=fexp, info=iexp, geno=gexp, ..., collapsed=FALSE)
-    }
-)
-
-.expandGeno <- function(x, hdr, elt, idx)
-{
-    isA <- geno(hdr)$Number == "A"
-    geno <- geno(x)
-    if (any(isA)) {
-        gnms <- rownames(geno(hdr))[geno(hdr)$Number == "A"]
-        gelt <- sapply(gnms, function(i) 
-                    elt - elementLengths(geno[[i]]))
-        ## elementLengths same as ALT
-        csums <- colSums(gelt) == 0L
-        if (any(csums))
-            geno[gnms[csums]] <- endoapply(geno[gnms[csums]], function(i)
-                                     matrix(unlist(i, use.names=FALSE)))
-        ## elementLengths shorter than ALT
-        if (any(!csums)) {
-            nms <- names(geno) %in% names(csums)[!csums]
-            reps <- lapply(list(gelt[!csums] + 1L), rep.int,
-                        x=seq_len(nrow(x)))
-            geno[nms] <- mendoapply(geno[nms], function(d, r)
-                             unlist(d[r], use.names=FALSE),
-                         r=reps)
-        }
-        geno
-    }
-    geno[!isA] <- endoapply(geno[!isA], function(i) {
-                      if (is(i, "matrix"))
-                          matrix(i[idx, ], ncol=ncol(x))
-                      else
-                          i[idx, , ]})
-    geno
-}
-
-.expandInfo <- function(x, hdr, elt, idx)
-{
-    icol <- info(x)
-    inms <- rownames(info(hdr))[info(hdr)$Number == "A"]
-    if (length(inms) > 0L) {
-        ielt <- sapply(inms, function(i) 
-                    elt - elementLengths(info(x)[[i]]))
-        ## elementLengths same as ALT
-        csums <- colSums(ielt) == 0L
-        if (any(csums))
-            res <- expand(icol, inms[csums], TRUE)
-        else
-            res <- icol[idx, ] 
-        ## elementLengths shorter than ALT
-        if (any(!csums)) {
-            nms <- colnames(icol) %in% names(csums)[!csums]
-            reps <- lapply(list(ielt[!csums] + 1L), rep.int,
-                        x=seq_len(nrow(x)))
-            res[nms] <- Map(function(d, r)
-                             unlist(d[r], use.names=FALSE),
-                         icol[nms], reps)
-        }
-        res
-    } else {
-        icol[idx, ]
-    }
-}
-
-### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### show
 ###
 
@@ -124,3 +30,92 @@ setMethod(show, "CollapsedVCF",
 {
     .showVCFSubclass(object)
 })
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### snpSummary 
+###
+
+setMethod("snpSummary", "CollapsedVCF", 
+    function(x, ...) 
+{
+    alt <- alt(x)
+    if (is(alt,"CompressedCharacterList")) {
+        warning("ALT must be a DNAStringSetList.")
+        return(.emptySnpSummary())
+    }
+    gt <- geno(x)$GT
+    if (is.null(gt)) {
+        warning("No genotype data found in VCF.")
+        return(.emptySnpSummary())
+    }
+    if (ncol(gt) == 0L) {
+        warning("No genotype data found in VCF.")
+        return(.emptySnpSummary())
+    }
+
+    ## Genotype count
+    snv <- .isSNV(ref(x), alt)
+    gmap <- .genotypeToIntegerSNV(FALSE)
+    gmat <- matrix(gmap[gt], nrow=nrow(gt))
+    gcts <- matrix(NA_integer_, nrow(gmat), 3)
+    gcts[snv,] <- sapply(1:3, function(i) {
+                      rowSums(gmat[snv,] == i)
+                  })
+    gcts <- matrix(as.integer(gcts), nrow=nrow(gcts),
+                   dimnames=list(NULL, c("g00", "g01", "g11")))
+
+    ## Allele frequency 
+    acts <- gcts %*% matrix(c(2,1,0,0,1,2), nrow=3)
+    afrq <- acts/rowSums(acts)
+    colnames(afrq) <- c("a0Freq", "a1Freq") 
+ 
+    ## HWE 
+    HWEzscore <- .HWEzscore(gcts, acts, afrq)
+    HWEpvalue <- pchisq(HWEzscore^2, 1, lower.tail=FALSE)
+
+    data.frame(gcts, afrq, HWEzscore, HWEpvalue,
+               row.names=rownames(x))
+})
+
+.HWEzscore <- function(genoCounts, alleleCounts, alleleFrequency)
+{
+    a0 <- alleleFrequency[,"a0Freq"]
+    a1 <- alleleFrequency[,"a1Freq"]
+    expt <- rowSums(alleleCounts) * cbind(a0^2/2, a0*a1, a1^2/2)
+    chisq <- rowSums((genoCounts - expt)^2 / expt)
+    z <- rep(NA, nrow(genoCounts))
+    zsign <- sign(genoCounts[,"g01"] - expt[,2] * rowSums(genoCounts))
+    zsign * sqrt(chisq)
+}
+
+## Maps diploid genotypes, phased or unphased.
+.genotypeToIntegerSNV <- function(raw=TRUE)
+{
+    name <-  c(".|.", "0|0", "0|1", "1|0", "1|1",
+              "./.", "0/0", "0/1", "1/0", "1/1")
+    value <- rep(c(0, 1, 2, 2, 3), 2) 
+    if (raw)
+        setNames(sapply(value, as.raw), name)
+    else
+        setNames(value, name)
+}
+
+## Detects valid SNVs based on having a ref allele and
+## single alt allele both of length 1.
+## ref = DNAStringSet
+## alt = DNASTringSetList
+.isSNV <- function(ref, alt)
+{
+    altelt <- elementLengths(alt) == 1L
+    altseq <- logical(length(alt))
+    idx <- rep(altelt, elementLengths(alt))
+    altseq[altelt] = width(unlist(alt, use.names=FALSE)[idx]) == 1L
+    altseq & (width(ref) == 1L)
+}
+
+.emptySnpSummary <- function()
+{
+    data.frame(g00=integer(), g01=integer(), g11=integer(),
+               a0Freq=numeric(), a1Freq=numeric(),
+               HWEzscore=numeric(), HWEpvalue=numeric())
+}

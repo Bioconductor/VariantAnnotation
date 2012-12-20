@@ -6,38 +6,28 @@ import(Rsamtools)
 import(GenomicRanges)
 import(zlibbioc)
 
-
-importClassesFrom(Biostrings, DNAStringSet, DNAStringSetList)
-importFrom(Biostrings, AAStringSet, DNAStringSet)
-importMethodsFrom(Biostrings, 
-                  as.list, as.matrix, duplicated,
-                  end, head, intersect, match, nchar, setdiff,
-                  start, "subseq<-", substr, substring, summary,
-                  translate, unlist, width)
-
-importClassesFrom(Biobase, ScalarCharacter, AssayData)
-importFrom(Biobase, mkScalar, selectSome)
+importClassesFrom(Biobase, AssayData)
 
 importClassesFrom(AnnotationDbi, AnnotationDb)
 importMethodsFrom(AnnotationDbi, colnames, cols, exists, keys, ncol,
                   nrow, select)
 
+importFrom(GenomicFeatures, extractTranscriptsFromGenome)
 importClassesFrom(GenomicFeatures, TranscriptDb)
 importMethodsFrom(GenomicFeatures, cdsBy, exons, transcripts,
                   fiveUTRsByTranscript, threeUTRsByTranscript,
                   isActiveSeq, "isActiveSeq<-")
-importFrom(GenomicFeatures, extractTranscriptsFromGenome)
 
+importFrom(IRanges, CharacterList, DataFrame, IRanges, isSingleString,
+           PartitioningByWidth, successiveViews, subsetByFilter, expand)
 importClassesFrom(IRanges, DataFrame, Ranges, RangesList, RangedData)
 importMethodsFrom(IRanges, "%in%", append, as.matrix, as.vector,
                   countOverlaps, elementLengths, end, eval, findOverlaps, 
                   follow, gsub, lapply, match, "metadata<-", narrow, order, 
                   precede, queryHits, rev, Rle, runValue, sapply, shift,
                   split, start, "start<-", subjectHits, "subseq<-", substring, 
-                  unique, unlist, values, "values<-", which, width, 
+                  unlist, values, "values<-", which, width, 
                   expand)
-importFrom(IRanges, CharacterList, DataFrame, IRanges, isSingleString,
-           PartitioningByWidth, successiveViews, subsetByFilter, expand)
 
 importMethodsFrom(DBI, dbCommit, dbConnect, dbDisconnect, dbExistsTable, 
                   dbGetQuery, dbReadTable, dbWriteTable, dbListTables, 
@@ -64,7 +54,7 @@ exportMethods(filterVcf,
               scanVcf, scanVcfHeader, ScanVcfParam,
               readVcf, readVcfLongForm, writeVcf,
               predictCoding, getTranscriptSeqs, refLocsToLocalLocs, 
-              MatrixToSnpMatrix, genotypeToSnpMatrix,
+              MatrixToSnpMatrix, genotypeToSnpMatrix, snpSummary,
               locateVariants, summarizeVariants,
 
               fixed, "fixed<-", ref, "ref<-", alt, "alt<-", qual, "qual<-",

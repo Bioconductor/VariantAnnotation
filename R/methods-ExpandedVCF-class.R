@@ -22,17 +22,6 @@ setReplaceMethod("alt", c("ExpandedVCF", "DNAStringSet"),
 })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-### expand 
-###
-
-setMethod("expand", "ExpandedVCF",
-    function(x, ...)
-    {
-        x
-    }
-)
-
-### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### show
 ###
 
