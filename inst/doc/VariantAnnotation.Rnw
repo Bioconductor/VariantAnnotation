@@ -425,11 +425,11 @@ head(pp[!is.na(pp$PREDICTION), ])
 \subsection{Create a SnpMatrix}
 
 The 'GT' element in the \Rcode{FORMAT} field of the VCF represents the 
-genotype. These data can be converted into a \Robject{snpMatrix} object 
+genotype. These data can be converted into a \Robject{SnpMatrix} object 
 which can then be used with the functions offered in \Rpackage{snpStats} 
 and other packages making use of the \Robject{SnpMatrix} class. 
 
-The \Rfunction{MatrixToSnpMatrix} function converts the genotype calls in
+The \Rfunction{genotypeToSnpMatrix} function converts the genotype calls in
 \Rcode{geno} to a \Robject{SnpMatrix}. No dbSNP package is used in this
 computation. The return value is a named list where 'genotypes' is a 
 \Robject{SnpMatrix} and 'map' is a \Robject{DataFrame} with SNP names and 
@@ -437,16 +437,15 @@ alleles at each loci. The \Rcode{ignore} column in 'map' indicates which
 variants were set to NA (missing) because they met one or more of the following 
 criteria,
 \begin{itemize}
-\item{only diploid calls are included; others are set to NA}
-\item{only single nucleotide variants are included; others are set to NA}
 \item{variants with >1 ALT allele are set to NA}
+\item{only single nucleotide variants are included; others are set to NA}
+\item{only diploid calls are included; others are set to NA}
 \end{itemize}
 
-See ?\Rfunction{MatrixToSnpMatrix} for more details.
+See ?\Rfunction{genotypeToSnpMatrix} for more details.
 
 <<snpMatrix>>=
-calls <- geno(vcf)$GT
-res <- MatrixToSnpMatrix(calls, ref(vcf), alt(vcf))
+res <- genotypeToSnpMatrix(vcf)
 res
 @
 
@@ -457,6 +456,35 @@ allele2 <- res$map[["allele.2"]]
 ## number of alternate alleles per variant
 unique(elementLengths(allele2))
 @
+
+In addition to the called genotypes, genotype likelihoods or
+probabilities can also be converted to a \Robject{SnpMatrix}, using
+the \Rpackage{snpStats} encoding of posterior probabilities as byte
+values.  To use the values in the 'GL' or 'GP' \Rcode{FORMAT} field
+instead of the called genotypes, use the \Rcode{uncertain=TRUE} option
+in \Rcode{genotypeToSnpMatrix}.
+
+<<>>=
+fl.gl <- system.file("extdata", "gl_chr1.vcf", package="VariantAnnotation") 
+vcf.gl <- readVcf(fl.gl, "hg19")
+geno(vcf.gl)
+
+## Convert the "GL" FORMAT field to a SnpMatrix
+res <- genotypeToSnpMatrix(vcf.gl, uncertain=TRUE)
+res
+t(as(res$genotype, "character"))[c(1,3,7), 1:5]
+
+## Compare to a SnpMatrix created from the "GT" field
+res.gt <- genotypeToSnpMatrix(vcf.gl, uncertain=FALSE)
+t(as(res.gt$genotype, "character"))[c(1,3,7), 1:5]
+
+## What are the original likelihoods for rs58108140?
+geno(vcf.gl)$GL["rs58108140", 1:5]
+@ 
+
+For variant rs58108140 in sample NA06989, the "A/B" genotype is much
+more likely than the others, so the \Rcode{SnpMatrix} object displays
+the called genotype.
 
 \subsection{Expand a VCF}
 

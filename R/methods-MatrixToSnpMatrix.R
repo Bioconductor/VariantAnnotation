@@ -11,6 +11,8 @@
 setMethod("MatrixToSnpMatrix", c("matrix", "DNAStringSet", "DNAStringSetList"),
     function(callMatrix, ref, alt, ...)
 {
+    .Deprecated("genotypeToSnpMatrix")
+  
     ok <- suppressWarnings(require("snpStats", quietly=TRUE, 
                                    character.only=TRUE))
     ok || stop("'snpStats' required; try biocLite('snpStats')", call.=FALSE) 

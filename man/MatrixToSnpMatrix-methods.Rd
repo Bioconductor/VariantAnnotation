@@ -1,11 +1,14 @@
 \name{MatrixToSnpMatrix}
 \alias{MatrixToSnpMatrix}
+\alias{MatrixToSnpMatrix-deprecated}
 \alias{MatrixToSnpMatrix,matrix,DNAStringSet,DNAStringSetList-method}
 
 
 \title{Convert genotype calls from a VCF file to a SnpMatrix object}
 
 \description{
+  This method is deprecated.  Use \link{genotypeToSnpMatrix} instead.
+ 
   Convert a matrix of genotype calls from the "GT" FORMAT field of a VCF
   file to a \link[snpStats:SnpMatrix-class]{SnpMatrix}.
 }
@@ -73,40 +76,7 @@
 }
 
 \examples{
-  ## Read a vcf file into a VCF object.
-  vcfFile <- system.file("extdata", "ex2.vcf", package="VariantAnnotation") 
-  vcf <- readVcf(vcfFile, "hg19")
- 
-  ## Genotype calls are stored in the assays slot.
-  ## Reference and alternate (variant) alleles are in ref and
-  ## alt slots.
-  geno(vcf)
-  calls <- geno(vcf)$GT
-  a0 <- ref(vcf)
-  a1 <- alt(vcf)
-  mat <- MatrixToSnpMatrix(calls, a0, a1)
-
-  ## The result is a list of length 2.
-  names(mat)
-
-  ## Compare original coding in the VCF file to the SnpMatrix coding.
-  geno(vcf)$GT
-  t(as(mat$genotype, "character"))
-
-  ## The 'ignore' column of the map element indicates which variants 
-  ## were set to missing as per the criteria stated in the details section. 
-  mat$map
-
-  ## Variant rs6040355 was ignored because it has more than one alternate
-  ## allele. The microsat1 variant has a reference allele with length
-  ## greater than 1 and more than 1 alternate allele.
-  ## Variant chr20:1230237 was ignored because the alternate allele is not
-  ## of length 1. 
-
-  ## View the reference and alternate alleles. 
-  DataFrame(reference = ref(vcf), 
-            alternate = CharacterList(as.list(alt(vcf))),
-            row.names = rownames(vcf))
+## see ?genotypeToSnpMatrix
 }
 
 \keyword{manip}

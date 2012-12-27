@@ -4,7 +4,6 @@
 \alias{genotypeToSnpMatrix,CollapsedVCF-method}
 \alias{genotypeToSnpMatrix,array-method}
 
-
 \title{Convert genotype calls from a VCF file to a SnpMatrix object}
 
 \description{
@@ -20,7 +19,7 @@
 \arguments{
   \item{x}{
     A \code{CollapsedVCF} object or a \code{array} of genotype data 
-    from the "GT" FORMAT field of a VCF file.  This \code{array} is created 
+    from the "GT", "GP", or "GL" FORMAT field of a VCF file.  This \code{array} is created 
     with a call to \code{readVcf} and can be accessed with \code{geno(<VCF>)}.
   }
   \item{uncertain}{
@@ -60,16 +59,34 @@
   and "B" is the risk allele. Equivalent statements to those made with 0 and 1 
   allele values would be 0 = missing, 1 = "A/A", 2 = "A/B" or "B/A" and
   3 = "B/B".
+  
+  The three genotype fields are defined as follows:
+  \itemize{
+    \item{GT : genotype, encoded as allele values separated by either of
+      "/" or "|". The allele values are 0 for the reference allele and 1
+      for the alternate allele.}
+    \item{GL : genotype likelihoods comprised of comma separated
+      floating point log10-scaled likelihoods for all possible
+      genotypes.  In the case of a reference allele A and a single
+      alternate allele B, the likelihoods will be ordered "A/A", "A/B", "B/B".}
+    \item{GP : the phred-scaled genotype posterior probabilities for all
+      possible genotypes; intended to store
+      imputed genotype probabilities.  The ordering of values is the
+      same as for the GL field.}
+  }
 
   If \code{uncertain=TRUE}, the posterior probabilities of the three
   genotypes ("A/A", "A/B", "B/B") are encoded (approximately) as byte
-  values.  See the \link[snpStats]{snpStats} documentation for more
-  details.
+  values.  This encoding allows uncertain genotypes to be used in
+  \link[snpStats]{snpStats} functions, which in some cases may be more
+  appropriate than using only the called genotypes.  The byte encoding
+  conserves memory by allowing the uncertain genotypes to be stored in a
+  two-dimensional raw matrix.
+  See the \link[snpStats]{snpStats} documentation for more details.
 }
 
 \value{
   A list with the following elements,
-
   \item{genotypes}{
     The output genotype data as an object of class 
     \code{"SnpMatrix"}. The columns are snps and the rows are the samples. 
@@ -80,6 +97,10 @@
     The \code{ignore} column indicates which variants were set to \code{NA}
     (see \code{NA} criteria in 'details' section).
   } 
+}
+
+\references{
+  \url{http://www.1000genomes.org/wiki/Analysis/Variant\%20Call\%20Format/vcf-variant-call-format-version-41} 
 }
 
 \author{
@@ -129,13 +150,31 @@
   ## Convert the "GL" FORMAT field to a SnpMatrix
   mat <- genotypeToSnpMatrix(vcf, uncertain=TRUE)
 
-  ## Only 3 of the 9 variants passed the filters.
+  ## Only 3 of the 9 variants passed the filters.  The
+  ## other 6 variants had no alternate alleles.
   mat$map
 
-  ## Compare original vs SnpMatrix coding for a subset of
-  ## samples in variant rs180734498. 
+  ## Compare genotype representations for a subset of
+  ## samples in variant rs180734498.
+  ## Original called genotype
+  geno(vcf)$GT["rs180734498", 14:16]
+
+  ## Original genotype likelihoods
   geno(vcf)$GL["rs180734498", 14:16]
+
+  ## Posterior probability (computed inside genotypeToSnpMatrix)
+  GLtoGP(geno(vcf)$GL["rs180734498", 14:16, drop=FALSE])[1,]
+
+  ## SnpMatrix coding.
   t(as(mat$genotype, "character"))["rs180734498", 14:16]
+  t(as(mat$genotype, "numeric"))["rs180734498", 14:16]
+
+  ## For samples NA11829 and NA11830, one probability is significantly
+  ## higher than the others, so SnpMatrix calls the genotype.  These
+  ## calls match the original coding: "0|1" -> "A/B", "0|0" -> "A/A".
+  ## Sample NA11831 was originally called as "0|1" but the probability
+  ## of "0|0" is only a factor of 3 lower, so SnpMatrix calls it as
+  ## "Uncertain" with an appropriate byte-level encoding.
 }
 
 \keyword{manip}

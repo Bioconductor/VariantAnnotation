@@ -1,3 +1,5 @@
+library(snpStats) ## SnpMatrix class
+quiet <- suppressWarnings
 
 test_gSM_array_GT <- function() {
     mat <- matrix(c(".|.", "0|0", "0|1", "1|0", "1|1",
@@ -37,7 +39,7 @@ test_gSM_array_GT_2alt <- function() {
                              allele.1=ref, 
                              allele.2=alt,
                              ignore=rep(TRUE,3))
-    gtsm <- genotypeToSnpMatrix(mat, ref, alt)
+    gtsm <- quiet(genotypeToSnpMatrix(mat, ref, alt))
     checkIdentical(sm, gtsm$genotypes)
     checkIdentical(map, gtsm$map)
 }
@@ -57,7 +59,7 @@ test_gSM_array_GT_nonsnv <- function() {
                              allele.1=ref, 
                              allele.2=alt,
                              ignore=rep(TRUE,3))
-    gtsm <- genotypeToSnpMatrix(mat, ref, alt)
+    gtsm <- quiet(genotypeToSnpMatrix(mat, ref, alt))
     checkIdentical(sm, gtsm$genotypes)
     checkIdentical(map, gtsm$map)
 }
@@ -65,7 +67,7 @@ test_gSM_array_GT_nonsnv <- function() {
 test_gSM_VCF_GL <- function() {
     fl <- system.file("extdata", "gl_chr1.vcf", package="VariantAnnotation")
     vcf <- readVcf(fl, "hg19")
-    gtsm <- genotypeToSnpMatrix(vcf, uncertain=TRUE)
+    gtsm <- quiet(genotypeToSnpMatrix(vcf, uncertain=TRUE))
     checkIdentical(colnames(vcf), rownames(gtsm$genotypes))
     checkIdentical(rownames(vcf), colnames(gtsm$genotypes))
     checkIdentical(rownames(vcf), gtsm$map$snp.names)
@@ -78,7 +80,17 @@ test_gSM_VCF_GL <- function() {
 test_gSM_VCF_structural <- function() {
     fl <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
     vcf <- readVcf(fl, "hg19")
-    checkIdentical(NULL, genotypeToSnpMatrix(vcf))
+    checkIdentical(VariantAnnotation:::.emptySnpMatrix(), 
+                   genotypeToSnpMatrix(vcf))
+}
+
+test_gSM_VCF_noSamples <- function() {
+    fl <- system.file("unitTests", "cases", 
+                      "FORMAT_header_no_SAMPLEs.vcf", 
+                      package="VariantAnnotation")
+    vcf <- readVcf(fl, "hg19")
+    gtsm <- quiet(genotypeToSnpMatrix(vcf))
+    checkEquals(0, nrow(gtsm$genotypes))
 }
 
 test_pSM_valid <- function() {
