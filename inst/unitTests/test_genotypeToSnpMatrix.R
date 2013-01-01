@@ -115,6 +115,16 @@ test_pSM_invalid <- function() {
     checkException(probabilityToSnpMatrix(probs))
 }
 
+test_pSM_onerow <- function() {
+    probs <- matrix(c(1,0,0,
+                      NA,NA,NA),
+                    ncol=3, byrow=TRUE,
+                    dimnames=list(1:2,c("RR","RA","AA")))
+    sm <- new("SnpMatrix", matrix(as.raw(c(1,0)), nrow=1,
+                                  dimnames=list(NULL,1:2)))
+    checkIdentical(sm, probabilityToSnpMatrix(probs))
+}
+
 test_GLtoGP_array <- function() {
     probs <- aperm(array(c(0.4,0.3,0.3,
                            0.5,0.1,0.4,

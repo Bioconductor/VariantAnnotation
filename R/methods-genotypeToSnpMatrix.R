@@ -158,8 +158,9 @@ probabilityToSnpMatrix <- function(probs) {
 
     # skip missing values when checking for validity of probabilities
     missing <- rowSums(is.na(probs)) > 0
-    if (!isTRUE(all.equal(rowSums(probs[!missing,]), rep(1,sum(!missing)),
-                          tolerance=0.0001, check.attributes=FALSE,
+    if (!isTRUE(all.equal(rowSums(probs[!missing,,drop=FALSE]),
+                          rep(1,sum(!missing)),
+                          check.attributes=FALSE,
                           check.names=FALSE)))
         stop("sum of probabilities in each row of input matrix should = 1")
 
