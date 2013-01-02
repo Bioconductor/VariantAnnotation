@@ -6,9 +6,12 @@ setMethod("snpSummary", "CollapsedVCF",
     function(x, ...) 
 {
     alt <- alt(x)
-    if (is(alt,"CompressedCharacterList")) {
-        warning("ALT must be a DNAStringSetList.")
-        return(.emptySnpSummary())
+    if (is(alt, "CompressedCharacterList")) {
+        alt <- .toDNAStringSetList(alt)
+        if (all(elementLengths(alt) == 0L)) {
+            warning("No nucleotide ALT values were detected.")
+            return(.emptySnpSummary())
+        }
     }
     gt <- geno(x)$GT
     if (is.null(gt)) {
@@ -22,13 +25,20 @@ setMethod("snpSummary", "CollapsedVCF",
 
     ## Genotype count
     snv <- .isSNV(ref(x), alt)
+    if (sum(snv) == 0L) {
+        warning("No valid SNPs found in VCF.")
+        return(.emptySnpSummary())
+    }
     gmap <- .genotypeToIntegerSNV(FALSE)
     gmat <- matrix(gmap[gt], nrow=nrow(gt))
     gcts <- matrix(NA_integer_, nrow(gmat), 3)
-    gcts[snv,] <- sapply(1:3, function(i) {
-                      rowSums(gmat[snv,] == i)
-                  })
-    gcts <- matrix(as.integer(gcts), nrow=nrow(gcts),
+    if (ncol(gmat) == 1L)
+        fun <- I
+    else
+        fun <- rowSums
+    gcts[snv,] <- sapply(1:3, function(i)
+                      fun(gmat[snv,] == i))
+    gcts <- matrix(as.integer(gcts), nrow=nrow(gmat),
                    dimnames=list(NULL, c("g00", "g01", "g11")))
 
     ## Allele frequency 

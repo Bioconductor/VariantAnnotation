@@ -6,7 +6,7 @@ setMethod("expand", "CollapsedVCF",
     function(x, ...)
     {
         elt <- elementLengths(alt(x))
-        if (all(elt == 1L) || (is(alt(x), "CharacterList"))) {
+        if (all(elt == 1L)) {
             fxd <- fixed(x)
             fxd$ALT <- unlist(alt(x), use.names=FALSE)
             return(VCF(rowData=rowData(x), colData=colData(x), 

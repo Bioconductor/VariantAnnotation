@@ -92,22 +92,21 @@ setMethod(readVcf, c(file="character", genome="missing",
     vcf <- .collapseLists(vcf, param)
 
     ## rowData
-    rowData <- vcf[["rowData"]]
+    rowData <- vcf$rowData
     if (length(rowData))
         genome(seqinfo(rowData)) <- genome 
-    values(rowData) <- DataFrame(paramRangeID=vcf[["paramRangeID"]])
+    values(rowData) <- DataFrame(vcf["paramRangeID"])
 
     ## fixed fields
-    ALT <- .formatALT(vcf[["ALT"]])
-    fx <- list(REF=vcf[["REF"]], ALT=ALT, QUAL=vcf[["QUAL"]],
-               FILTER=vcf[["FILTER"]])
-    fixed <- DataFrame(fx[lapply(fx, is.null) == FALSE]) 
+    fx <- vcf[c("REF", "ALT", "QUAL", "FILTER")]
+    fx$ALT <- .formatALT(fx$ALT)
+    fixed <- DataFrame(fx[!sapply(fx, is.null)]) 
 
     ## info 
-    info <- .formatInfo(vcf[["INFO"]], info(hdr))
+    info <- .formatInfo(vcf$INFO, info(hdr))
 
     ## colData
-    if (length(vcf[["GENO"]]) > 0) {
+    if (length(vcf$GENO) > 0) {
         samples <- samples(hdr) 
         colData <- DataFrame(Samples=seq_len(length(samples)),
                              row.names=samples)
@@ -116,6 +115,6 @@ setMethod(readVcf, c(file="character", genome="missing",
     }
 
     VCF(rowData=rowData, colData=colData, exptData=SimpleList(header=hdr),
-        fixed=fixed, info=info, geno=SimpleList(vcf[["GENO"]]))
+        fixed=fixed, info=info, geno=SimpleList(vcf$GENO))
 }
 

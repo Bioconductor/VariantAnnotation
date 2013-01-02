@@ -80,8 +80,9 @@ test_gSM_VCF_GL <- function() {
 test_gSM_VCF_structural <- function() {
     fl <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
     vcf <- readVcf(fl, "hg19")
-    checkIdentical(VariantAnnotation:::.emptySnpMatrix(), 
-                   genotypeToSnpMatrix(vcf))
+    gtsn <- quiet(genotypeToSnpMatrix(vcf))
+    checkTrue(nrow(gtsn$genotype) == 1L)
+    checkTrue(rownames(gtsn$genotype) == "NA00001")
 }
 
 test_gSM_VCF_noSamples <- function() {

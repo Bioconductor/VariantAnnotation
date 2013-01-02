@@ -26,8 +26,11 @@ setMethod("genotypeToSnpMatrix", "CollapsedVCF",
 
     alt <- alt(x)
     if (is(alt, "CompressedCharacterList")) {
-        warning("ALT must be DNAStringSetList")
-        return(.emptySnpMatrix())
+        alt <- .toDNAStringSetList(alt)
+        if (all(elementLengths(alt) == 0L)) {
+            warning("No nucleotide ALT values were detected.")
+            return(.emptySnpMatrix())
+        }
     }
     ref <- ref(x)
 

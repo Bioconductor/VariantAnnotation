@@ -12,9 +12,14 @@ setMethod("predictCoding", c("Ranges", "TranscriptDb", "ANY", "DNAStringSet"),
 setMethod("predictCoding", c("CollapsedVCF", "TranscriptDb", "ANY", "missing"),
     function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 {
+    rd <- rowData(query)
     alt <- alt(query) 
-    if (!is(alt, "DNAStringSetList"))
-        stop("alt(query) must be a DNAStringSetList")
+    if (is(alt, "CharacterList")) {
+        alt <- .toDNAStringSetList(alt)
+        if (sum(elementLengths(alt)) == 0L) {
+            stop("No nucleotide ALT values were detected.")
+        }
+    }
     rd <- rep(rowData(query), elementLengths(alt))
     res <- callGeneric(rd, subject, seqSource, unlist(alt, use.names=FALSE), 
                 ..., ignore.strand=ignore.strand)
@@ -27,10 +32,9 @@ setMethod("predictCoding", c("CollapsedVCF", "TranscriptDb", "ANY", "missing"),
 setMethod("predictCoding", c("ExpandedVCF", "TranscriptDb", "ANY", "missing"),
     function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 {
-    alt <- alt(query) 
-    if (!is(alt, "DNAStringSetList"))
-        stop("alt(query) must be a DNAStringSet")
-    callGeneric(rd, subject, seqSource, alt, ..., ignore.strand=ignore.strand) 
+    ## ExpandedVCF ALT must be DNAStringSet (CharacterList not supported)
+    callGeneric(rowData(query), subject, seqSource, alt, ..., 
+                ignore.strand=ignore.strand) 
 })
 
 setMethod("predictCoding", c("GRanges", "TranscriptDb", "ANY", "DNAStringSet"),
@@ -101,7 +105,7 @@ setMethod("predictCoding", c("GRanges", "TranscriptDb", "ANY", "DNAStringSet"),
         translateidx[fmshift] <- FALSE
     zwidth <- width(altallele) == 0
     if (any(zwidth)) {
-        warning("records with missing 'varAllele' values will be ignored")
+        warning("records with missing 'varAllele' were ignored")
         translateidx[zwidth] <- FALSE 
         fmshift[zwidth] <- FALSE
     }
@@ -109,7 +113,7 @@ setMethod("predictCoding", c("GRanges", "TranscriptDb", "ANY", "DNAStringSet"),
     codeN[grep("N", as.character(altallele, use.names=FALSE), 
         fixed=TRUE)] <-TRUE
     if (any(codeN)) {
-        warning("varAllele values containing 'N' will not be translated")
+        warning("varAllele values containing 'N' were not translated")
         translateidx[codeN] <- FALSE
     }
 

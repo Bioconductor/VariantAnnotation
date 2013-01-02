@@ -81,31 +81,45 @@
         Logical = LogicalList(data))
 }
 
-.toDNAStringSet <- function(x)
-{
-    xx <- unlist(strsplit(x, ",", fixed = TRUE))
-    ulist <- sub(".", "", xx, fixed = TRUE)
-    ulist[is.na(ulist)] <- ""
-    DNAStringSet(ulist)
-}
-
 .toDNAStringSetList <- function(x)
 {
-    dna <- .toDNAStringSet(x)
-    idx <- elementLengths(strsplit(x, ",", fixed = TRUE))
-    pbw <- PartitioningByWidth(idx)
-    relist(dna, pbw)
+    if (is(x, "CharacterList")) {
+        ## Called from predictCoding, genotypeToSnpMatrix, etc.
+        pbw <- PartitioningByWidth(elementLengths(x))
+        x <- unlist(x, use.names=FALSE)
+        str <- .isStructural(x)
+        x[str] <- "" 
+    } else {
+        ## Called from .formatALT
+        x <- strsplit(x, ",", fixed=TRUE)
+        pbw <- PartitioningByWidth(elementLengths(x))
+        x <- unlist(x, use.names=FALSE)
+    }
+    xx <- sub(".", "", x, fixed=TRUE)
+    relist(DNAStringSet(xx), pbw)
 }
 
 .formatALT <- function(x)
 {
     if (is.null(x))
         return(NULL)
-    structural <- grep("<", x, fixed=TRUE)
-    if (!identical(integer(0), structural))
-        seqsplit(x, seq_len(length(x)))
-    else
+    str <- .isStructural(x) 
+    if (sum(str) != 0L) {
+        lst <- strsplit(unlist(x, use.names=FALSE), ",")
+        lst[str] <- x[str] 
+        new("CompressedCharacterList",
+            unlistData=unlist(lst, use.names=FALSE),
+            partitioning=PartitioningByEnd(lst))
+    } else {
         .toDNAStringSetList(x)
+    }
+}
+
+.isStructural <- function(x)
+{
+    grepl("<", x, fixed=TRUE) |
+    grepl("[", x, fixed=TRUE) |
+    grepl("]", x, fixed=TRUE)
 }
 
 .formatInfo <- function(x, hdr)

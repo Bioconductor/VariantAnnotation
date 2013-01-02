@@ -52,7 +52,7 @@ export(VCF, VCFHeader,
 
 exportMethods(filterVcf,
               scanVcf, scanVcfHeader, ScanVcfParam,
-              readVcf, readVcfLongForm, writeVcf,
+              readVcf, readVcfLongForm, writeVcf, expand,
               predictCoding, getTranscriptSeqs, refLocsToLocalLocs, 
               MatrixToSnpMatrix, genotypeToSnpMatrix, snpSummary,
               locateVariants, summarizeVariants,

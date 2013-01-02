@@ -1,4 +1,3 @@
-
 test_expand_info_geno <- function()
 {
     fl <- system.file("unitTests", "cases", "expand.vcf", 
@@ -22,4 +21,13 @@ test_expand_structural <- function()
     checkTrue(nrow(vcf) == nrow(exp))
     checkTrue(ncol(vcf) == ncol(exp))
     checkTrue(is.character(alt(exp)))
+}
+
+test_expand_structural <- function()
+{
+    fl <- system.file("unitTests", "cases", "mixedStructural.vcf", 
+                      package="VariantAnnotation")
+    vcf <- readVcf(fl, "hg19")
+    exp <- expand(vcf)
+    checkTrue(nrow(exp) == 8L)
 }
