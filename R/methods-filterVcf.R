@@ -105,3 +105,17 @@ setMethod("filterVcf", "TabixFile",
 
     invisible(destination)
 })
+
+## Deprecated
+
+dbSNPFilter <-
+    function(dbSNP=character(0), .name="dbSNPFilter")
+{
+    .Deprecated("filterVcf")
+}
+
+regionFilter <-
+    function(txdb, region="coding", .name="regionFilter")
+{
+    .Deprecated("filterVcf")
+}

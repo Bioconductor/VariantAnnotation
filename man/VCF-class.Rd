@@ -66,6 +66,7 @@
 \alias{renameSeqlevels,VCF,character-method}
 \alias{keepSeqlevels,VCF,character-method}
 \alias{expand,CollapsedVCF-method}
+\alias{expand,ExpandedVCF-method}
 
 % show method:
 \alias{show,VCF-method}
