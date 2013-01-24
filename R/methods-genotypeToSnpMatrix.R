@@ -4,9 +4,9 @@
 
 ## Coding for snpMatrix :
 ## 0 = missing OR multiallelic OR multi-ALT values
-## 1 = homozygous reference (0|0) 
-## 2 = heterozygous (0|1 or 1|0) 
-## 3 = homozygous alternate (risk) allele (1|1)
+## 1 = homozygous reference (0|0 or 0/0) 
+## 2 = heterozygous (0|1 or 0/1 or 1|0 or 1/0) 
+## 3 = homozygous alternate (risk) allele (1|1 or 1/1)
 
 ## empty matrix to return if conditions not met
 .emptySnpMatrix <- function() {
@@ -71,10 +71,6 @@ setMethod("genotypeToSnpMatrix", "array",
         stop("'alt' must be a DNAStringSetList")
     # query ref and alt alleles for valid SNPs
     altelt <- elementLengths(alt) == 1L 
-    #altseq <- logical(length(alt))
-    #idx <- rep(altelt, elementLengths(alt))
-    #altseq[altelt] = width(unlist(alt))[idx] == 1L
-    #snv <- altseq & (width(ref) == 1L)
     snv <- .isSNV(ref, alt) 
  
     # if x is a matrix, we have GT with a single value for each snp
@@ -89,9 +85,6 @@ setMethod("genotypeToSnpMatrix", "array",
             x[!snv,] <- ".|."
         }
         map <- .genotypeToIntegerSNV(TRUE)
-        #map <- setNames(sapply(rep(c(0, 1, 2, 2, 3), 2), as.raw),
-        #                c(".|.", "0|0", "0|1", "1|0", "1|1",
-        #                  "./.", "0/0", "0/1", "1/0", "1/1"))
         diploid <- x %in% names(map)
         if (!all(diploid)) {
             warning("non-diploid variants are set to NA")
