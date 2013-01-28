@@ -45,6 +45,9 @@
 \alias{info,VCF-method}
 \alias{info<-}
 \alias{info<-,VCF,DataFrame-method}
+\alias{rowData,VCF-method}
+\alias{rowData<-,VCF-method}
+\alias{mcols<-,VCF-method}
 \alias{geno}
 \alias{geno,VCF-method}
 \alias{geno<-}
@@ -59,6 +62,10 @@
 \alias{[,VCF-method}
 \alias{[,VCF,ANY,ANY-method}
 \alias{[<-,VCF,ANY,ANY,VCF-method}
+
+% Combine methods
+\alias{cbind,VCF-method}
+\alias{rbind,VCF-method}
 
 % Other methods
 \alias{genome,VCF-method}
@@ -202,13 +209,29 @@
   }
 }
 
-\section{Subsetting and related operations}{
-  In the following code snippets \code{x} is a VCF object.
+\section{Subsetting and combining}{
+  In the following code \code{x} is a VCF object, and \dots is a list
+  of VCF objects.
   \describe{
     \item{}{
       \code{x[i, j]}, \code{x[i, j] <- value}:
       Gets or sets rows and columns. \code{i} and \code{j} can be integer
       or logical vectors. \code{value} is a replacement \code{VCF} object.
+    }
+    \item{}{
+      \code{cbind(...)}, \code{rbind(...)}:
+      \code{cbind} combines objects with identical ranges (\code{rowData}) 
+      but different samples (columns in \code{assays}). The colnames in
+      \code{colData} must match or an error is thrown. Duplicate columns
+      of \code{fixed}, \code{info} and \code{mcols(rowData(VCF))} 
+      must contain the same data.
+
+      \code{rbind} combines objects with different ranges (\code{rowData}) 
+      and the same subjects (columns in \code{assays}). Duplicate columns
+      of \code{colData} must contain the same data. 
+
+      \code{exptData} from all objects are combined into a
+      \code{SimpleList} with no name checking.
     }
   }
 }
@@ -276,7 +299,8 @@
     \item{exptData}{A \code{SimpleList} describing the header of the VCF file or 
       additional information for the overall experiment. 
     }
-    \item{...}{Additional arguments passed to methods. 
+    \item{...}{For \code{cbind} and \code{rbind} a list of VCF objects.
+      For all other methods \dots are additional arguments passed to methods. 
     }
     \item{collapsed}{A \code{logical(1)} indicating whether a 
       CollapsedVCF or ExpandedVCF should be created. The ALT in a
