@@ -5,6 +5,7 @@ NEW FEATURES
 
     o genotypeToSnpMatrix has replaced MatrixToSnpMatrix
     o new function snpSummary 
+    o cbind and rbind added for VCF objects 
 
 MODIFICATIONS
 

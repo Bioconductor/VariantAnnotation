@@ -191,3 +191,86 @@ test_VCF_seqlevels <- function()
     vcf3 <- keepSeqlevels(vcf, "3")
     checkIdentical(seqlevels(vcf3), "3")
 }
+
+quiet <- suppressWarnings
+test_VCF_cbind <- function()
+## requires matching ranges
+{
+    ## empty
+    vcf <- VCF()
+    empty <- cbind(vcf, vcf)
+    checkTrue(all.equal(vcf, empty))
+
+    ## different ranges 
+    fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
+    vcf1 <- readVcf(fl, genome="hg19")
+    vcf2 <- vcf1[2:4]
+    rownames(vcf2) <- month.name[seq_len(nrow(vcf2))]
+    checkException(quiet(cbind(vcf1, vcf2)), silent=TRUE)
+
+    ## same ranges
+    vcf2 <- vcf1[,1]
+    #colnames(vcf2) <- month.name[seq_len(ncol(vcf2))]
+    res <- cbind(vcf1, vcf2)
+    checkTrue(nrow(res) == 5)
+    checkTrue(ncol(res) == 4)
+    ## info 
+    checkTrue(ncol(info(res)) == 6)
+    info2 <- info(vcf2)
+    info2$H2 <- !info2$H2
+    info(vcf2) <- info2
+    checkException(cbind(vcf1, vcf2), silent=TRUE)
+    info(vcf2) <- info(vcf2)[,1:2] 
+    res <- cbind(vcf1, vcf2)
+    checkTrue(ncol(info(res)) == 6) 
+    info(vcf2) <- DataFrame("noMatch"=1:5)
+    res <- cbind(vcf1, vcf2)
+    checkTrue(ncol(info(res)) == 7) 
+    ## fixed 
+    vcf2 <- vcf1[,1]
+    res <- cbind(vcf1, vcf2)
+    checkTrue(ncol(fixed(res)) == 4)
+    fixed2 <- fixed(vcf2)
+    fixed2$QUAL <- c(rep(1, 5)) 
+    fixed(vcf2) <- fixed2
+    checkException(cbind(vcf1, vcf2), silent=TRUE)
+}
+
+test_VCF_rbind <- function()
+## requires matching samples 
+{
+    ## empty
+    vcf <- VCF()
+    empty <- rbind(vcf, vcf)
+    checkTrue(all.equal(vcf, empty))
+
+    ## different sample 
+    fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
+    vcf1 <- readVcf(fl, genome="hg19")
+    vcf2 <- vcf1[,2]
+    colnames(vcf2) <- month.name[seq_len(ncol(vcf2))]
+    checkException(quiet(rbind(vcf1, vcf2)), silent=TRUE)
+
+    ## same samples 
+    vcf2 <- vcf1[1:3,]
+    #colnames(vcf2) <- month.name[seq_len(ncol(vcf2))]
+    res <- rbind(vcf1, vcf2)
+    checkTrue(nrow(res) == 8)
+    checkTrue(ncol(res) == 3)
+    ## info 
+    checkTrue(ncol(info(res)) == 6)
+    info2 <- info(vcf2)
+    info2$H2 <- !info2$H2
+    info(vcf2) <- info2
+    res <- rbind(vcf1, vcf2)
+    checkTrue(ncol(info(res)) == 6)
+    ## fixed 
+    vcf2 <- vcf1[1:3,]
+    res <- rbind(vcf1, vcf2)
+    checkTrue(ncol(fixed(res)) == 4)
+    fixed2 <- fixed(vcf2)
+    fixed2$QUAL <- c(rep(1, nrow(vcf2))) 
+    fixed(vcf2) <- fixed2
+    res <- rbind(vcf1, vcf2)
+    checkTrue(ncol(fixed(res)) == 4)
+}

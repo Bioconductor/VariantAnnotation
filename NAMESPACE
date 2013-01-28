@@ -59,7 +59,7 @@ exportMethods(filterVcf,
 
               fixed, "fixed<-", ref, "ref<-", alt, "alt<-", qual, "qual<-",
               filt, "filt<-", info, "info<-", geno, "geno<-", strand, 
-              "strand<-", "[", "[<-", 
+              "strand<-", "[", "[<-", cbind, rbind, "mcols<-", 
 
               genome, seqlevels, renameSeqlevels, keepSeqlevels,
 

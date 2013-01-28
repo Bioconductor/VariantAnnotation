@@ -129,6 +129,22 @@ setReplaceMethod("rowData", c("VCF", "GRanges"),
     validObject(x)
     x
 })
+
+### We need a 'mcols<-,VCF' distinct from
+### 'mcols<-,SummarizedExperiment' because of the
+### behavior of 'rowData<-,VCF'. The 'fixed' fields
+### are stored in a separate slot and not in
+### the meta data columns of the 'rowData' slot.
+setReplaceMethod("mcols", "VCF",
+    function(x, ..., value)
+{
+    if (!is(value, "DataFrame"))
+        stop("'value' must be a DataFrame")
+    idx <- names(value) %in% "paramRangeID"
+    fixed(x) <- value[!idx] 
+    slot(x, "rowData") <- value[,idx]
+    x
+})
  
 ### info 
 setMethod("info", "VCF", 
@@ -200,7 +216,7 @@ setMethod("header", "VCF",
 })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-### Subsetting 
+### Subsetting and combining
 ###
 
 setMethod("[", c("VCF", "ANY", "ANY"),
@@ -281,6 +297,33 @@ setReplaceMethod("[",
         }), ..., value=value)
     }
 })
+
+.compare <- GenomicRanges:::.compare
+.bind.DataFrame <- GenomicRanges:::.bind.DataFrame
+.bind.SummarizedExperiment <- GenomicRanges:::.bind.SummarizedExperiment
+## Appropriate for objects with different ranges and same samples.
+setMethod("rbind", "VCF",
+    function(..., deparse.level=1)
+{
+    .bind.VCF(unname(list(...)), rbind)
+})
+
+## Appropriate for objects with same ranges and different samples.
+setMethod("cbind", "VCF",
+    function(..., deparse.level=1)
+{
+    .bind.VCF(unname(list(...)), cbind)
+})
+
+.bind.VCF <- function(args, bind)
+{
+    if (!.compare(lapply(args, class)))
+        stop("'...' objects must be of the same VCF class")
+    se <- .bind.SummarizedExperiment(args, bind)
+    info <- .bind.DataFrame(args, bind, "info") 
+    fixed <- .bind.DataFrame(args, bind, "fixed") 
+    new(class(args[[1]]), se, fixed=fixed, info=info)
+}
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Other methods 
@@ -364,16 +407,19 @@ setMethod(show, "VCF",
     printSmallGRanges(rowData(object), margin=margin)
     cat("info(vcf):\n")
     printSmallDataTable(info(object), margin=margin) 
+    if (!is.null(header(object))) {
     cat("info(header(vcf)):\n")
-    info <- info(exptData(object)$header)[colnames(info(object)),]
-    if (nrow(info) > 0)
-        headerrec(as.data.frame(info), "info")
+        info <- info(header(object))[colnames(info(object)),]
+        if (nrow(info) > 0)
+            headerrec(as.data.frame(info), "info")
+    }
     cat("geno(vcf):\n")
     printSimpleList(geno(object), margin=margin) 
+    if (!is.null(header(object))) {
     cat("geno(header(vcf)):\n")
-    geno <- geno(exptData(object)$header)[names(geno(object)),]
-    if (nrow(geno) > 0)
-        headerrec(as.data.frame(geno), "geno")
+        geno <- as.data.frame(geno(exptData(object)$header))
+        headerrec(geno, "geno")
+    }
 }
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -390,4 +436,3 @@ setMethod("updateObject", "VCF",
             info=mcols(info(object))[-1], fixed=mcols(fixed(object))[-1], geno=geno(object))
     }
 )
-
