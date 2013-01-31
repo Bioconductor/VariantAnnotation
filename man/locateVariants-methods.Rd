@@ -215,7 +215,7 @@ locateVariants(query, subject, region, ...)
   intersect(seqlevels(rd_adj), seqlevels(txdb))
 
   ## VCF object as the query
-  loc_coding <- locateVariants(vcf_adj, txdb, AllVariants())
+  loc_all <- locateVariants(vcf_adj, txdb, AllVariants())
 
   ## --------------------------------
   ## GRangesList as subject 
