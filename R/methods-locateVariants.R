@@ -383,11 +383,11 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
             splicings <- 
                 GenomicFeatures:::.getSplicingsForTranscriptsWithCDSs(subject)
             cache[["fiveUTRbytx"]] <- 
-                GenomicFeatures:::.make5UTRsByTranscript(txdb, splicings)
+                GenomicFeatures:::.make5UTRsByTranscript(subject, splicings)
         }
         if (!exists("threeUTRbytx", cache, inherits=FALSE))
             cache[["threeUTRbytx"]] <- 
-                GenomicFeatures:::.make5UTRsByTranscript(txdb, splicings)
+                GenomicFeatures:::.make5UTRsByTranscript(subject, splicings)
 
         fiveUTR <- locateVariants(query, subject, FiveUTRVariants(), 
             cache=cache, ignore.strand=ignore.strand)
