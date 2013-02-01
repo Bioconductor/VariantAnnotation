@@ -299,31 +299,35 @@ setReplaceMethod("[",
 })
 
 .compare <- GenomicRanges:::.compare
-.bind.DataFrame <- GenomicRanges:::.bind.DataFrame
-.bind.SummarizedExperiment <- GenomicRanges:::.bind.SummarizedExperiment
+.cbind.DataFrame <- GenomicRanges:::.cbind.DataFrame
+.rbind.DataFrame <- GenomicRanges:::.rbind.DataFrame
+.cbind.SummarizedExperiment <- GenomicRanges:::.cbind.SummarizedExperiment
+.rbind.SummarizedExperiment <- GenomicRanges:::.rbind.SummarizedExperiment
 ## Appropriate for objects with different ranges and same samples.
 setMethod("rbind", "VCF",
     function(..., deparse.level=1)
 {
-    .bind.VCF(unname(list(...)), rbind)
+    args <- unname(list(...))
+    if (!.compare(lapply(args, class)))
+        stop("'...' objects must be of the same VCF class")
+    se <- .rbind.SummarizedExperiment(args)
+    info <- .rbind.DataFrame(args, info, "info") 
+    fixed <- .rbind.DataFrame(args, fixed, "fixed") 
+    new(class(args[[1]]), se, fixed=fixed, info=info)
 })
 
 ## Appropriate for objects with same ranges and different samples.
 setMethod("cbind", "VCF",
     function(..., deparse.level=1)
 {
-    .bind.VCF(unname(list(...)), cbind)
-})
-
-.bind.VCF <- function(args, bind)
-{
+    args <- unname(list(...))
     if (!.compare(lapply(args, class)))
         stop("'...' objects must be of the same VCF class")
-    se <- .bind.SummarizedExperiment(args, bind)
-    info <- .bind.DataFrame(args, bind, "info") 
-    fixed <- .bind.DataFrame(args, bind, "fixed") 
+    se <- .cbind.SummarizedExperiment(args)
+    info <- .cbind.DataFrame(args, info, "info") 
+    fixed <- .cbind.DataFrame(args, fixed, "fixed") 
     new(class(args[[1]]), se, fixed=fixed, info=info)
-}
+})
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Other methods 
