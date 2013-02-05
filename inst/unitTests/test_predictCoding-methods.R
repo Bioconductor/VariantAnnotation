@@ -48,8 +48,8 @@ test_refLocsToLocalLocs <- function()
     current <- refLocsToLocalLocs(query, cdsbytx=cdsbytx[c(1,3)])
     expected <- IRanges(c(2, 5, 9, 6), width=1) 
     checkIdentical(values(current)[["CDSLOC"]], expected)
-    expected <- IntegerList(1, 2, 3, 2) 
-    checkIdentical(values(current)[["PROTEINLOC"]], expected)
+    expected <- c(1L, 2L, 3L, 2L) 
+    checkIdentical(unlist(current$PROTEINLOC, use.names=FALSE), expected)
 
     ## one in each cds
     query <- GRanges(seqnames="chr1",
@@ -58,8 +58,8 @@ test_refLocsToLocalLocs <- function()
     current <- refLocsToLocalLocs(query, cdsbytx=cdsbytx[c(1,3)])
     expected <- IRanges(c(2, 7, 9, 4), width=1) 
     checkIdentical(values(current)[["CDSLOC"]], expected)
-    expected <- IntegerList(1, 3, 3, 2) 
-    checkIdentical(values(current)[["PROTEINLOC"]], expected)
+    expected <- c(1L, 3L, 3L, 2L) 
+    checkIdentical(unlist(current$PROTEINLOC, use.names=FALSE), expected)
 
     ## both in 'last' cds
     query <- GRanges(seqnames="chr1",
@@ -68,8 +68,8 @@ test_refLocsToLocalLocs <- function()
     current <- refLocsToLocalLocs(query, cdsbytx=cdsbytx[c(1,3)])
     expected <- IRanges(c(6, 9, 5, 2), width=1) 
     checkIdentical(values(current)[["CDSLOC"]], expected)
-    expected <- IntegerList(2, 3, 2, 1) 
-    checkIdentical(values(current)[["PROTEINLOC"]], expected)
+    expected <- c(2L, 3L, 2L, 1L) 
+    checkIdentical(unlist(current$PROTEINLOC, use.names=FALSE), expected)
 } 
 
 test_predictCoding_strand <- function()
