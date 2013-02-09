@@ -17,6 +17,8 @@ setMethod("filterVcf", "character",
 .prefilter <-
     function(tbxFile, verbose, prefilters, param, ...)
 {
+    if (verbose)
+        message("starting prefilter")
     if (!isOpen(tbxFile)) {
         open(tbxFile)
         on.exit(close(tbxFile), add=TRUE)
@@ -32,7 +34,11 @@ setMethod("filterVcf", "character",
 
     ## prefilter
     param <- vcfWhich(param)
+    nTotal <- 0L
     while (length(tbxChunk <- .unlistScan(tbxFile, ..., param=param))) {
+        if (verbose)
+            message("prefiltering ", nTotal <- nTotal + length(tbxChunk),
+                    " records")
         tbxChunk <- subsetByFilter(tbxChunk, prefilters)
         writeLines(tbxChunk, prefiltered)
     }
@@ -41,8 +47,11 @@ setMethod("filterVcf", "character",
 
     ## TabixFile needs to be bgzipped and indexed
     ## FIXME: all records are read at next stage, so no need to index?
-    gzFilename<- bgzip(prefilteredFilename, overwrite = TRUE)
-    indexTabix(gzFilename, format = "vcf")
+    if (verbose)
+        message("prefilter compressing and indexing '",
+                prefilteredFilename, "'")
+    gzFilename <- bgzip(prefilteredFilename, overwrite = TRUE)
+    indexTabix(gzFilename, format = "vcf4")
     unlink(prefilteredFilename)
 
     TabixFile(gzFilename, yieldSize=yieldSize(tbxFile))
@@ -51,6 +60,8 @@ setMethod("filterVcf", "character",
 .filter <-
     function(tbxFile, genome, destination, verbose, filters, param, ...)
 {
+    if (verbose)
+        message("starting filter")
     if (!isOpen(tbxFile)) {
         open(tbxFile)
         on.exit(close(tbxFile), add=TRUE)
@@ -60,7 +71,11 @@ setMethod("filterVcf", "character",
     needsClosing <- TRUE
     on.exit(if (needsClosing) close(filtered), add=TRUE)
 
+    nTotal <- 0L
     while (nrow(vcfChunk <- readVcf(tbxFile, genome, ..., param=param))) {
+        if (verbose)
+            message("filerting ", nTotal <- nTotal + nrow(vcfChunk),
+                    " records")
         vcfChunk <- subsetByFilter(vcfChunk, filters)
         writeVcf(vcfChunk, filtered)
     }
@@ -94,6 +109,8 @@ setMethod("filterVcf", "TabixFile",
                         param, ...)
 
     if (index) {
+        if (verbose)
+            message("compressing and indexing filtered VCF")
         gzFilename <- sprintf("%s.gz", destination)
         gzFilename <- bgzip(file, gzFilename, overwrite = TRUE)
         destination <- indexTabix(gzFilename, format = "vcf")
