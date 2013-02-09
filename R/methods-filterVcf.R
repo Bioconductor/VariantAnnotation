@@ -45,16 +45,7 @@ setMethod("filterVcf", "character",
     close(prefiltered)
     needsClosing <- FALSE
 
-    ## TabixFile needs to be bgzipped and indexed
-    ## FIXME: all records are read at next stage, so no need to index?
-    if (verbose)
-        message("prefilter compressing and indexing '",
-                prefilteredFilename, "'")
-    gzFilename <- bgzip(prefilteredFilename, overwrite = TRUE)
-    indexTabix(gzFilename, format = "vcf4")
-    unlink(prefilteredFilename)
-
-    TabixFile(gzFilename, yieldSize=yieldSize(tbxFile))
+    prefilteredFilename
 }
 
 .filter <-
@@ -101,8 +92,21 @@ setMethod("filterVcf", "TabixFile",
     if (!length(prefilters) && !length(filters))
         stop("no 'prefilters' or 'filters' specified")
 
-    if (length(prefilters))
+    if (length(prefilters)) {
+        yieldSize <- yieldSize(file)
         file <- .prefilter(file, verbose, prefilters, param, ...)
+        if (length(filters)) {
+            ## TabixFile needs to be bgzipped and indexed
+            ## FIXME: all records are read at next stage, so no need to index?
+            if (verbose)
+                message("prefilter compressing and indexing ", sQuote(file))
+            gzFilename <- bgzip(file, overwrite = TRUE)
+            indexTabix(gzFilename, format = "vcf4")
+            file <- TabixFile(gzFilename, yieldSize=yieldSize)
+        } else {
+            file.rename(file, destination)
+        }
+    }
 
     if (length(filters))
         file <- .filter(file, genome, destination, verbose, filters,
@@ -110,14 +114,11 @@ setMethod("filterVcf", "TabixFile",
 
     if (index) {
         if (verbose)
-            message("compressing and indexing filtered VCF")
+            message("compressing and indexing ", sQuote(file))
         gzFilename <- sprintf("%s.gz", destination)
         gzFilename <- bgzip(file, gzFilename, overwrite = TRUE)
         destination <- indexTabix(gzFilename, format = "vcf")
         unlink(file)
-    } else {
-        if (file != destination)
-            file.rename(file, destination)
     }
 
     invisible(destination)

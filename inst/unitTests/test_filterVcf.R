@@ -27,3 +27,22 @@ test_filterVcf_filter <- function()
     vcf1 <- readVcf(ans, "hg19")
     checkIdentical(dim(vcf0), dim(vcf1))
 }
+
+test_filterVcf_prefilter_only <- function()
+{
+    fl <- system.file("extdata", "chr22.vcf.gz", package="VariantAnnotation")
+    tbx <- TabixFile(fl, yieldSize=5000)
+
+    filt <- FilterRules(list(filt1=function(x) {
+        grepl("LOWCOV", x, fixed=TRUE)
+    }))
+    dest <- tempfile()
+
+    ans <- filterVcf(tbx, "hg19", dest, prefilters=filt, verbose=FALSE)
+
+    vcf <- readVcf(fl, "hg19")
+    idx <- any(info(vcf)$SNPSOURCE == "LOWCOV")
+    vcf0 <- vcf[!is.na(idx) & idx,]
+    vcf1 <- readVcf(ans, "hg19")
+    checkIdentical(dim(vcf0), dim(vcf1))
+}
