@@ -65,7 +65,7 @@ setMethod("filterVcf", "character",
     nTotal <- 0L
     while (nrow(vcfChunk <- readVcf(tbxFile, genome, ..., param=param))) {
         if (verbose)
-            message("filerting ", nTotal <- nTotal + nrow(vcfChunk),
+            message("filtering ", nTotal <- nTotal + nrow(vcfChunk),
                     " records")
         vcfChunk <- subsetByFilter(vcfChunk, filters)
         writeVcf(vcfChunk, filtered)
