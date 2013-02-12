@@ -3,8 +3,12 @@ setMethod("filterVcf", "character",
              index = FALSE, prefilters = FilterRules(),
              filters = FilterRules(), param = ScanVcfParam())
 {
+   if (file.exists(destintation))
+        stop(sprintf("file '%s' exists and will not be over-written", destination))
+
     tbx <- open(TabixFile(file, yieldSize=100000))
     on.exit(close(tbx))
+ 
 
     filterVcf(tbx, genome = genome, destination=destination, ...,
               verbose = verbose, index = index, prefilters = prefilters,
@@ -58,7 +62,7 @@ setMethod("filterVcf", "character",
         on.exit(close(tbxFile), add=TRUE)
     }
 
-    filtered <- file(destination, open="a")
+    filtered <- file(destination, open="w")
     needsClosing <- TRUE
     on.exit(if (needsClosing) close(filtered), add=TRUE)
 
@@ -72,7 +76,6 @@ setMethod("filterVcf", "character",
     }
     close(filtered)
     needsClosing <- FALSE
-
     destination
 }
 
@@ -95,6 +98,9 @@ setMethod("filterVcf", "TabixFile",
     if (length(prefilters)) {
         yieldSize <- yieldSize(file)
         file <- .prefilter(file, verbose, prefilters, param, ...)
+        if(verbose){
+            printf("prefiltered to %s", file)
+            }
         if (length(filters)) {
             ## TabixFile needs to be bgzipped and indexed
             ## FIXME: all records are read at next stage, so no need to index?
@@ -106,12 +112,13 @@ setMethod("filterVcf", "TabixFile",
         } else {
             file.rename(file, destination)
         }
-    }
+      }
 
-    if (length(filters))
+    if (length(filters)) {
         file <- .filter(file, genome, destination, verbose, filters,
                         param, ...)
-
+        } # if filters
+        
     if (index) {
         if (verbose)
             message("compressing and indexing ", sQuote(file))
