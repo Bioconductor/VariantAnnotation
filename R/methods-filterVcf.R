@@ -3,7 +3,7 @@ setMethod("filterVcf", "character",
              index = FALSE, prefilters = FilterRules(),
              filters = FilterRules(), param = ScanVcfParam())
 {
-   if (file.exists(destintation))
+   if (file.exists(destination))
         stop(sprintf("file '%s' exists and will not be over-written", destination))
 
     tbx <- open(TabixFile(file, yieldSize=100000))
