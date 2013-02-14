@@ -387,7 +387,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
         }
         if (!exists("threeUTRbytx", cache, inherits=FALSE))
             cache[["threeUTRbytx"]] <- 
-                GenomicFeatures:::.make5UTRsByTranscript(subject, splicings)
+                GenomicFeatures:::.make3UTRsByTranscript(subject, splicings)
 
         fiveUTR <- locateVariants(query, subject, FiveUTRVariants(), 
             cache=cache, ignore.strand=ignore.strand)
