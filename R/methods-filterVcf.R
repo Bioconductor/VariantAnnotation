@@ -99,7 +99,7 @@ setMethod("filterVcf", "TabixFile",
         yieldSize <- yieldSize(file)
         file <- .prefilter(file, verbose, prefilters, param, ...)
         if(verbose){
-            printf("prefiltered to %s", file)
+            message(sprintf("prefiltered to %s", file))
             }
         if (length(filters)) {
             ## TabixFile needs to be bgzipped and indexed
