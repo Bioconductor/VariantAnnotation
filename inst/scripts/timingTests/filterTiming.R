@@ -17,16 +17,21 @@ stopifnot(file.exists(COMPLETE_VCF_FILE_2))
 #-------------------------------------------------------------------------------
 runTests <- function()
 {
-    test_allelicDepthFilter()
-    test_germlineFilter()
+    #test_allelicDepthFilter()
+    #test_germlineFilter()
     test_germlinePrefilter()
-    test_snpFilter()
-    test_combinedFilters()
+    test_dbsnpPrefilter()
+    #test_snpFilter()
+    #test_combinedFilters()
     
 } # runTests
 #-------------------------------------------------------------------------------
 isGermlinePrefilter <- function(x) {
     grepl("Germline", x, fixed=TRUE)
+    }
+
+notInDbsnpPrefilter <- function(x) {
+    !(grepl("dbsnp", x, fixed=TRUE))
     }
 
 isGermlineFilter <- function(x) {
@@ -92,6 +97,18 @@ runGermlinePrefilter <- function (gzippedFilename, tbl, yieldSize=10000,
 
 } # runGermlinePrefilter
 #-------------------------------------------------------------------------------
+runDbsnpPrefilter <- function (gzippedFilename, tbl, yieldSize=10000, 
+                               verbose=FALSE)
+{
+    tabix.file <- TabixFile(gzippedFilename, yieldSize=yieldSize)
+    filters <- FilterRules(list(germline=notInDbsnpPrefilter))
+    destination.file <- tempfile()
+    filtered.filename <- filterVcf(gzippedFilename, "hg19", destination.file, 
+                                   prefilters=filters, verbose=verbose)
+    filtered.filename
+
+} # runDbsnpPrefilter
+#-------------------------------------------------------------------------------
 runSnpFilter <- function (gzippedFilename, yieldSize=10000, verbose=FALSE)
 {
     tabix.file <- TabixFile(gzippedFilename, yieldSize=yieldSize)
@@ -120,7 +137,8 @@ runAllelicDepthFilter <- function (gzippedFilename, yieldSize=10000,
 runCombinedFilters <- function (gzippedFilename, yieldSize=10000, verbose=FALSE)
 {
     tabix.file <- TabixFile(gzippedFilename, yieldSize=yieldSize)
-    prefilters <- FilterRules(list(germline=isGermlinePrefilter))
+    prefilters <- FilterRules(list(germline=isGermlinePrefilter,
+                              dbsnp=notInDbsnpPrefilter))
     filters <- FilterRules(list(isSnp=isSnp, AD=allelicDepth))
     destination.file <- tempfile()
     filtered.filename <- filterVcf(tabix.file, "hg19", destination.file,
@@ -167,6 +185,14 @@ test_germlinePrefilter <- function()
 
 } # test_germlinePrefilter
 #-------------------------------------------------------------------------------
+test_dbsnpPrefilter <- function()
+{
+    print("--- test_dbsnpPrefilter")
+    filtered.filename <- runDbsnpPrefilter(SMALL_VCF_FILE)
+    checkEquals(nrow(readVcf(filtered.filename, "hg19")), 9833) # 166)
+
+} # test_germlinePrefilter
+#-------------------------------------------------------------------------------
 # of the 9999 rows in the SMALL_VCF_FILE, 186 describe snps
 test_snpFilter <- function()
 {
@@ -203,19 +229,22 @@ collectTimings <- function()
     prefilteringFunctions <- FilterRules(list(isGermline=isGermlinePrefilter))
     filteringFunctions <- FilterRules(list(isSnp=isSnp))
 
-    #files <- c(SMALL_VCF_FILE, MEDIUM_VCF_FILE, COMPLETE_VCF_FILE_1)
-    files <- c(COMPLETE_VCF_FILE_1)
+    files <- c(SMALL_VCF_FILE, MEDIUM_VCF_FILE, COMPLETE_VCF_FILE_1)
     options(stringsAsFactors=FALSE)
     tbl <- data.frame()
 
-    for(file in files) {
+    for(file in files[3]) {
         time <- system.time(runGermlinePrefilter(file, tbl))
         tbl <- recordTiming(tbl, file, "germline prefilter", time[["elapsed"]])
         print(tbl)
 
-        time <- system.time(runGermlineFilter(file, tbl))
-        tbl <- recordTiming(tbl, file, "germline filter", time[["elapsed"]])
+        time <- system.time(runDbsnpPrefilter(file, tbl))
+        tbl <- recordTiming(tbl, file, "dbsnp prefilter", time[["elapsed"]])
         print(tbl)
+
+        #time <- system.time(runGermlineFilter(file, tbl))
+        #tbl <- recordTiming(tbl, file, "germline filter", time[["elapsed"]])
+        #print(tbl)
 
         time <- system.time(runSnpFilter(file))
         tbl <- recordTiming(tbl, file, "snp filter", time[["elapsed"]])
@@ -229,8 +258,15 @@ collectTimings <- function()
         tbl <- recordTiming(tbl, file, "combined filters", time[["elapsed"]])
         print(tbl)
 
-        save(tbl, file="tbl.RData")
+        filename <- sprintf("tbl-%s.tsv", format (Sys.time(), "%a.%b.%d.%Y-%H:%M:%S"))
+        write.table (tbl, file=filename, sep='\t', col.names=TRUE, row.names=FALSE, quote=FALSE)
         } # for
 
 } # collectTimings
 #-------------------------------------------------------------------------------
+#filtered.filename <- runCombinedFilters(SMALL_VCF_FILE)
+#filtered.filename <- runCombinedFilters(COMPLETE_VCF_FILE_1)
+#print(filtered.filename)
+#cmd = sprintf("cp %s %s", filtered.filename, "filtered.vcf")
+#system(cmd)
+# ps -aux | grep  16098
