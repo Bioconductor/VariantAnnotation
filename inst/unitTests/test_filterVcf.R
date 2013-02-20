@@ -7,6 +7,7 @@ runTests <- function()
     test_filterVcf_TabixFile()
     test_filterVcf_filter()
     test_prefilterOnSomaticStatus()
+    test_filterOnSomaticStatus()
     test_filterOnSnps()
     test_prefilterOnSomaticStatusThenFilterOnSnps()
     
@@ -64,8 +65,8 @@ test_filterVcf_prefilter_only <- function()
 #-------------------------------------------------------------------------------
 test_filterOnSomaticStatus <- function()
 {
-    print("---  test_filterOnSomaticStatus")
-    f <- file.path("h1187-10k.vcf")
+    print("--- test_filterOnSomaticStatus")
+    f <- system.file("extdata", "h1187-10k.vcf.gz", package="VariantAnnotation")
     vcf <- readVcf(f, "hg19")
     somaticStatus <- as.list(table(info(vcf)$SS))
     checkEquals(somaticStatus, list(Germline=103, LOH=1, Somatic=4))
@@ -74,27 +75,16 @@ test_filterOnSomaticStatus <- function()
         !is.na(info(x)$SS) & info(x)$SS=="Germline"
         }
                              
-        # filter the in-memory data structur
+        # filter the in-memory data structure
     filters <- FilterRules(list(filter.1=somaticStatusGermlineFilter))
     checkEquals(dim(subsetByFilter(vcf, filters)), c(103, 2))
 
-        # create a new filtered file
-    
-    fbz <- paste(f, ".gz", sep="")
-    checkTrue(file.exists(fbz))
-    tbx <- TabixFile(fbz, yieldSize=5000)
-    tmp.file <- tempfile()
-    filtered.filename <- filterVcf(tbx, "hg19", tmp.file, filters=filters)
-    vcf0 <- readVcf(filtered.filename, "hg19")
-    checkEquals(nrow(vcf0), 103)
-     
-
-} # test_prefilterOnSomaticStatus
+} # test_filterOnSomaticStatus
 #-------------------------------------------------------------------------------
 test_prefilterOnSomaticStatus <- function()
 {
     print("--- test_prefilterOnSomaticStatus")
-    f <- file.path("h1187-10k.vcf.gz")
+    f <- system.file("extdata", "h1187-10k.vcf.gz", package="VariantAnnotation")
     tabix.file <- TabixFile(f, yieldSize=1000)
 
     isGermline=function(x) {
@@ -113,7 +103,7 @@ test_prefilterOnSomaticStatus <- function()
 test_filterOnSnps <- function()
 {
     print("--- test_filterOnSnps")
-    f <- file.path("h1187-10k.vcf.gz")
+    f <- system.file("extdata", "h1187-10k.vcf.gz", package="VariantAnnotation")
     tabix.file <- TabixFile(f, yieldSize=1000)
 
        # filter only on snp
@@ -140,7 +130,7 @@ test_filterOnSnps <- function()
 test_prefilterOnSomaticStatusThenFilterOnSnps <- function()
 {
     print("--- test_prefilterOnSomaticStatusThenFilterOnSnps")
-    f <- file.path("h1187-10k.vcf.gz")
+    f <- system.file("extdata", "h1187-10k.vcf.gz", package="VariantAnnotation")
     tabix.file <- TabixFile(f, yieldSize=1000)
 
     isGermline=function(x) {
