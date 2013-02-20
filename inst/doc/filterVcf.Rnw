@@ -1,0 +1,374 @@
+%\VignetteIndexEntry{filterVcf Overview}
+%\VignetteDepends{VariantAnnotation}
+%\VignettePackage{VariantAnntation}
+
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+
+\usepackage{url}
+
+
+\newenvironment{packed_enum}{
+\begin{enumerate}
+  \setlength{\itemsep}{2pt}
+  \setlength{\parskip}{0pt}
+  \setlength{\parsep}{0pt}
+}{\end{enumerate}}
+
+
+\newenvironment{packed_list}{
+\begin{itemize}
+  \setlength{\itemsep}{2pt}
+  \setlength{\parskip}{0pt}
+  \setlength{\parsep}{0pt}
+}{\end{itemize}}
+
+
+\usepackage{times}
+\usepackage{hyperref}
+
+
+\usepackage[authoryear,round]{natbib}
+\usepackage{times}
+\usepackage{comment}
+
+\usepackage[nottoc,numbib]{tocbibind}
+
+\textwidth=6.2in
+\textheight=8.5in
+%\parskip=.3cm
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2ex}
+
+
+
+\oddsidemargin=.1in
+\evensidemargin=.1in
+\headheight=-.3in
+
+\newcommand{\scscst}{\scriptscriptstyle}
+\newcommand{\scst}{\scriptstyle}
+
+\newcommand{\Rfunction}[1]{{\texttt{#1}}}
+\newcommand{\Robject}[1]{{\texttt{#1}}}
+\newcommand{\Rpackage}[1]{{\textit{#1}}}
+\newcommand{\Rmethod}[1]{{\texttt{#1}}}
+\newcommand{\Rfunarg}[1]{{\texttt{#1}}}
+\newcommand{\Rclass}[1]{{\textit{#1}}}
+\newcommand{\Rcode}[1]{{\texttt{#1}}}
+
+
+
+\bibliographystyle{plainnat}
+
+
+\title{filterVcf:  Extact Variants of Interest from a Large VCF File}
+\author{Paul Shannon}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+
+\section{Introduction}
+
+<<setup, echo=FALSE>>=
+options(width=80, prompt = " ", continue = " ")
+@ 
+
+Whole genome Variant Call Format (VCF) files are very large, typically
+containing millions of called variants, one call per line of text. 
+The actual number of variants relevant to a particular study
+(of a disease such as breast cancer, for instance) will often be far
+fewer.  Thus the first task one faces when analyzing a whole genome
+VCF file is to identify and extract the relatively few variants which
+may be of interest, excluding all others.  This vignette
+illustrates several techniques for doing this.
+
+We demonstrate three methods: filtering by genomic region,
+filtering on attributes of each specific variant call, and intersecting
+with known regions of interest (exons, splice sites, regulatory regions,
+etc.).  We are primarily concerned with the latter two.
+However, in order to create the small VCF data file we use here for
+demonstration purposes, we employed genomic region filtering, reducing
+a very large whole genome two-sample breast cancer VCF file of
+fourteen million calls, to a file containing fewer than ten thousand
+calls in a one million base pair region of chromomsome 7.  For the
+sake of reproducability, and for completeness of exposition, we
+will illustrate this first step also.
+
+\section{The Data: Paired Tumor/Normal Breast Cancer Variants}
+
+Complete Genomics Inc. ({\url{http://www.completegenomics.com/public-data/cancer-data}) states:
+%% two whole genome VCF files[\citet{drmanac2010human}], accompanied by this description:
+
+\begin{quote}
+  To provide the scientific community with public access to data
+  generated from two paired tumor/normal cancer samples, Complete
+  Genomics sequenced and analyzed cell-line samples of patients with
+  breast cancer (invasive ductal carcinomas). The cell line-derived DNA
+  are housed at ATCC. Samples have been sequenced to an average
+  genome-wide coverage of 123X for three of the samples, and 92X for for
+  the fourth sample.\footnote{Data generated with version 2.0.0.32 of the Complete 
+  Genomics assembly software, on high molecular weight genomic DNA 
+  isolated from the HCC1187 breast carcinoma cell line ATCC CRL 2322.
+  Sequencing methods documented in [Drmanac et al, 2010].}
+\end{quote}
+
+\section{Filter by Genomic Region}
+
+From prior exploration we know that variants of biological interest
+suitable for this demonstration can be found in a 1M base pair region of 
+chromosome seven.  Extract just that region and write the variant calls
+to a new, small VCF file:
+
+\begin{small}
+\begin{verbatim}
+library(VariantAnnotation)
+file.gz <- "somaticVcfBeta-HCC1187-H-200-37-ASM-T1-N1.vcf.gz"
+stopifnot(file.exists(file.gz))
+file.gz.tbi <- paste(file.gz, ".tbi", sep="")
+if(!(file.exists(file.gz.tbi))
+    indexTabix(file.gz, format="vcf")
+start.loc <- 55000000
+end.loc   <- 56000000
+chr7.gr <- GRanges("7", IRanges(start.loc, end.loc))
+params <- ScanVcfParam(which=chr7.gr)
+vcf <- readVcf(TabixFile(file.gz), "hg19", params)
+writeVcf(vcf, "chr7-sub.vcf")
+bgzip("chr7-sub.vcf", overwrite=TRUE)
+indexTabix("chr7-sub.vcf.gz", format="vcf")
+\end{verbatim}  
+
+\end{small}
+
+This code creates the small gzipped vcf and index files we use below.
+
+\section{Introducing the \Rmethod{filterVcf} Method}
+
+The \Rmethod{filterVcf} method reads (by chunks, about which more below)
+through a possibly very large VCF file to write a new,
+smaller VCF file which includes only those variant calling rows 
+which meet the criteria specified in \Robject{prefilters} and 
+\Robject{filters}.  
+
+Reading ``by chunks'' is accomplished using a tabix [\citet{li2011tabix}] file.
+The \emph{yieldsize} argument specifies how many variant lines are read
+into memory at each iteration.
+
+\begin{small}
+
+\begin{verbatim}
+tabix.file <- TabixFile(file.gz, yieldSize=10000)
+filterVcf(tabix.file, genome, destination.file,
+          prefilters=prefilters, filters=filters)
+\end{verbatim}
+\end{small}
+
+in which 
+\begin{packed_enum}
+  \item \emph{file.gz}: a gzipped vcf file with an accompanying Tabix
+    index file.
+
+  \item \emph{yieldsize}: the number of text (call variant) lines  to
+     read at a time.
+
+  \item \emph{genome}: a string indicating the genome assembly, e.g.,
+    ``hg19''.
+
+  \item \emph{prefilters}: one or more simple string-based filtering
+    functions, each of which returns a logical vector corresponding to
+    the vcf rows it will be passed (as simple characger strings).
+
+  \item \emph{filters}: one or more filtering function, each of which
+    returns a logical vector, corresponding to the list of parsed vcf
+    structures it will be passed.
+
+\end{packed_enum}
+
+\section{Prefilters}
+
+Prefilters are conceptually very simple.  They are functions which
+will be called with a single argument, a vector of
+character strings,  each of which is an \emph{unparsed} variant cal line, as read
+from the input VCF file.  We use  \Rfunction{grepl} to 
+return a logical vector equal in length to the incoming
+vector of unparsed VCF lines.  Each prefilter and filter is called 
+repeatedly, with \emph{yieldsize} lines supplied on each invocation.
+\Rfunction{filterVcf} calls these functions repeatedly until the 
+input file is exhausted.  
+
+Notice how the logic of these prefilters is very simple, using \Rfunction{grepl}
+to do fast, simple, fixed pattern matching:
+
+
+\begin{small}
+<<prefilters>>=
+library(VariantAnnotation)
+isGermlinePrefilter <- function(x) {
+    grepl("Germline", x, fixed=TRUE)
+    }
+
+notInDbsnpPrefilter <- function(x) {
+    !(grepl("dbsnp", x, fixed=TRUE))
+    }
+@ 
+\end{small}
+
+\section{Filters}
+
+Filters are more sophisticated than prefilters in that they assess
+\emph{parsed} variant call lines for possible inclusion.  Such parsing
+is intrinsically expensive but will be performed only on those lines
+which passed the prefilters.  Therefore it pays to eliminate as many
+lines as possible using Prefilters.  Filters are useful when there
+exists detailed criteria for inclusion and exclusion.  This can be
+seen below, especially in the \Rfunction{allelicDepth} function.
+
+
+\begin{small}
+<<filters>>=
+isSnp <- function(x) {
+    refSnp <- nchar(ref(x)) == 1L
+    a <- alt(x)
+    altSnp <- elementLengths(a) == 1L
+    ai <- unlist(a[altSnp])    # all length 1, so unlisting is 1:1 map
+    altSnp[altSnp] <- nchar(ai) == 1L & (ai %in% c("A", "C", "G", "T"))
+    refSnp & altSnp
+    }
+
+allelicDepth <- function(x) {
+    ##  ratio of AD of the "alternate allele" for the tumor sample
+    ##  OR "reference allele" for normal samples to total reads for
+    ##  the sample should be greater than some threshold (say 0.1,
+    ##  that is: at least 10% of the sample should have the allele
+    ##  of interest)
+    ad <- geno(x)$AD
+    tumorPct <- ad[,1,2,drop=FALSE] / rowSums(ad[,1,,drop=FALSE])
+    normPct <- ad[,2,1, drop=FALSE] / rowSums(ad[,2,,drop=FALSE])
+    test <- (tumorPct > 0.1) | (normPct > 0.1)
+    !is.na(test) & test
+    }
+@ 
+\end{small}
+
+\section{FilterRules}
+
+\Robject{FilterRules} allow you to combine a list of filters, or of prefilters
+so that they may be passed as parameters to \emph{filterVcf}.
+We use them here to combine the \emph{isGermlinePrefilter} with the 
+\emph{notInDbsnpPrefilter}, and the \emph{isSnp} with the \emph{AD} filter.
+
+
+\section{Create the Filtered file}
+
+\begin{small}
+
+<<createFilteredFile>>=
+prefilters <- FilterRules(list(germline=isGermlinePrefilter, 
+                               dbsnp=notInDbsnpPrefilter))
+filters <- FilterRules(list(isSnp=isSnp, AD=allelicDepth))
+
+file.gz     <- system.file("extdata", "chr7-sub.vcf.gz", 
+                           package="VariantAnnotation")
+file.gz.tbi <- system.file("extdata", "chr7-sub.vcf.gz.tbi", 
+                           package="VariantAnnotation")
+destination.file <- tempfile()
+tabix.file <- TabixFile(file.gz, yieldSize=10000)
+filterVcf(tabix.file,  "hg19", destination.file,
+          prefilters=prefilters, filters=filters,verbose=TRUE)
+
+@ 
+\end{small}
+
+\section{Look for SNPs in Regulatory Regions}
+
+We have now created a file containing 29 novel, Germline, SNP variant calls, each with
+a reasonable allelic depth, extracted from the 3808 calls in \emph{chr7-sub.vcf}.
+We examine those variants for overlap with regulatory regions, turning to
+the ENCODE project and using Bioconductor's \Robject{AnnotationHub}.
+
+The ENCODE project is a large, long-term effort to build a ``parts list'' of all the functional
+elements in the human genome.  They have recently focused on regulatory elements.  We use the
+Bioconductor \Robject{AnnotationHub} to download regulatory regions reported for a breast cancer
+cell line, with which to identify possibly functional, and possibly clinically relevant SNVs
+in the breast cancer tumor/normal genome we have been examining.
+
+The \Robject{AnnotationHub} is a recent addition to Bioconductor.  See here [TODO] for more information.
+
+\subsection{Load CTCF Transcription Factor Binding Regions Identified in MCF-7 Breast Cancer Cell Line}
+
+The \emph{MCF-7} Breast Cancer Cell line
+(\url{http://en.wikipedia.org/wiki/MCF-7}) was established forty years
+ago, and has since played a dominant role in breast cancer cell line
+studies.  The University of Washington reports transcription factor
+binding sites (TFBS) for the CTCF protein, which often acts as a
+negative regulator of transcription via chromatin structure
+modifications Though the MCF-7 cell line is an imperfect match to the
+HCC1187 cell line sequenced by Complete Genomics, we combine these two
+breast-cancer related datasets here, didactically, in this exercise,
+to highlight the importance of cell-type-specific regulatory regions,
+and of the availability of such data from ENCODE.  We shall see a SNP
+in the intronic binding region of the cancer-related gene, EGFR.
+
+\begin{small}
+
+<<mcf7regulatoryRegions>>=
+library(AnnotationHub)
+hub <<- AnnotationHub()
+mcf7.gr <- hub$goldenpath.hg19.encodeDCC.wgEncodeUwTfbs.wgEncodeUwTfbsMcf7CtcfStdPkRep1.narrowPeak_0.0.1.RData
+
+@ 
+\end{small}
+
+\subsection{Find SNPs in CTCF Binding Regions}
+
+\begin{small}
+
+<<findOverlaps>>=
+vcf <- readVcf(destination.file, "hg19")
+seqlevels(vcf) <- paste("chr", seqlevels(vcf),sep="")
+ov.mcf7 <- findOverlaps(rowData(vcf), mcf7.gr)
+
+@ 
+\end{small}
+
+There is just one SNV which overlaps with the MCF-7 regulatory regions.  Find out where, if anywhere, it fits within a gene model.
+\begin{small}
+
+<<locateVariant>>=
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene 
+print(locateVariants(vcf[6,], txdb, AllVariants()))
+@ 
+\end{small}
+
+\section{Conclusion}
+
+This case study begins, somewhat artificially, with a very short
+region of chromosome seven, a section which we knew, from previous
+exploration, held an intronic regulatory SNV for EGFR, a recpetor
+tryosine kinase inplicated in some cancers.  Though artifical, the
+case study illustrates all of the steps needed for broader, realistic
+surveys of whole genome variation data:
+
+\begin{packed_enum}
+
+  \item Filter by genomic coordinates.
+
+  \item Filter to extract only those variant calls which meet these criteria:  Germline, novel (not in dbSnp),
+     consisting of a single nucleotide, of sufficient allelic depth.
+     
+  \item Intersect these variants with recognized DNA elements.  In our case, we used short TFBS regulatory regions,
+     but the same method can be used with exons, splice sites, DNaseI footprints, methylation sites, etc.
+     
+\end{packed_enum}
+
+
+\nocite{*} 
+
+\bibliography{filterVcf}
+
+\end{document}
