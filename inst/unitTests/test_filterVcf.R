@@ -1,18 +1,3 @@
-library(VariantAnnotation)
-library(RUnit)
-#-------------------------------------------------------------------------------
-runTests <- function()
-{
-    test_filterVcf_prefilter_only()
-    test_filterVcf_TabixFile()
-    test_filterVcf_filter()
-    test_prefilterOnSomaticStatus()
-    test_filterOnSomaticStatus()
-    test_filterOnSnps()
-    test_prefilterOnSomaticStatusThenFilterOnSnps()
-    
-} # runTests
-#-------------------------------------------------------------------------------
 test_filterVcf_TabixFile <- function()
 {
     fl <- system.file("extdata", "chr22.vcf.gz", package="VariantAnnotation")
@@ -62,10 +47,8 @@ test_filterVcf_prefilter_only <- function()
     checkIdentical(dim(vcf0), dim(vcf1))
 }
 
-#-------------------------------------------------------------------------------
 test_filterOnSomaticStatus <- function()
 {
-    print("--- test_filterOnSomaticStatus")
     f <- system.file("extdata", "h1187-10k.vcf.gz", package="VariantAnnotation")
     vcf <- readVcf(f, "hg19")
     somaticStatus <- as.list(table(info(vcf)$SS))
@@ -78,12 +61,10 @@ test_filterOnSomaticStatus <- function()
         # filter the in-memory data structure
     filters <- FilterRules(list(filter.1=somaticStatusGermlineFilter))
     checkEquals(dim(subsetByFilter(vcf, filters)), c(103, 2))
+}
 
-} # test_filterOnSomaticStatus
-#-------------------------------------------------------------------------------
 test_prefilterOnSomaticStatus <- function()
 {
-    print("--- test_prefilterOnSomaticStatus")
     f <- system.file("extdata", "h1187-10k.vcf.gz", package="VariantAnnotation")
     tabix.file <- TabixFile(f, yieldSize=1000)
 
@@ -97,12 +78,10 @@ test_prefilterOnSomaticStatus <- function()
                                    verbose=FALSE)
 
     checkEquals(nrow(readVcf(filtered.filename, "hg19")), 103)
+} 
 
-} # test_prefilterOnSomaticStatus
-#-------------------------------------------------------------------------------
 test_filterOnSnps <- function()
 {
-    print("--- test_filterOnSnps")
     f <- system.file("extdata", "h1187-10k.vcf.gz", package="VariantAnnotation")
     tabix.file <- TabixFile(f, yieldSize=1000)
 
@@ -123,13 +102,10 @@ test_filterOnSnps <- function()
       # now check the results
     vcf.germline <- readVcf(filtered.filename, "hg19")   # 
     checkEquals(nrow(vcf.germline), 186)
+}
 
-
-} # test_ilterOnSnps
-#-------------------------------------------------------------------------------
 test_prefilterOnSomaticStatusThenFilterOnSnps <- function()
 {
-    print("--- test_prefilterOnSomaticStatusThenFilterOnSnps")
     f <- system.file("extdata", "h1187-10k.vcf.gz", package="VariantAnnotation")
     tabix.file <- TabixFile(f, yieldSize=1000)
 
@@ -159,7 +135,4 @@ test_prefilterOnSomaticStatusThenFilterOnSnps <- function()
       # now check the results
     vcf.germline.snp <- readVcf(filtered.filename, "hg19")   # 
     checkEquals(nrow(vcf.germline.snp), 98)
-    
-
-} # test_prefilterOnSomaticStatusThenOnFilterSnps
-#-------------------------------------------------------------------------------
+}
