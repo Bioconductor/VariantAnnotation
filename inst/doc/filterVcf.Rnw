@@ -331,8 +331,11 @@ in the intronic binding region of the cancer-related gene, EGFR.
 <<mcf7regulatoryRegions>>=
 library(AnnotationHub)
 hub <- AnnotationHub()
-mcf7.gr <- 
-    hub$goldenpath.hg19.encodeDCC.wgEncodeUwTfbs.wgEncodeUwTfbsMcf7CtcfStdPkRep1.narrowPeak_0.0.1.RData
+    # paste operation is only for display purposes on a narrow page
+ctcf.regs <- paste("goldenpath.hg19.encodeDCC.wgEncodeUwTfbs",
+                   "wgEncodeUwTfbsMcf7CtcfStdPkRep1.narrowPeak_0.0.1.RData",
+                  sep=".")
+mcf7.gr <- hub[[ctcf.regs]]
 @ 
 \end{small}
 
@@ -343,11 +346,13 @@ mcf7.gr <-
 <<findOverlaps>>=
 vcf <- readVcf(destination.file, "hg19")
 seqlevels(vcf) <- paste("chr", seqlevels(vcf), sep="")
-ov.mcf7 <- findOverlaps(rowData(vcf), mcf7.gr)
+ov.mcf7 <- findOverlaps(vcf, mcf7.gr)
 @ 
 \end{small}
 
-There is just one SNV which overlaps with the MCF-7 regulatory regions.  Find out where, if anywhere, it fits within a gene model.
+There is just one SNV which overlaps with the MCF-7 regulatory regions.  Find
+out where, if anywhere, it fits within a gene model.
+
 \begin{small}
 
 <<locateVariant>>=
