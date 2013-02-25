@@ -167,24 +167,25 @@ setReplaceMethod("info", c("VCF", "DataFrame"),
 })
 
 ### geno
+### 'assays' extracts full list
+### 'assay' extracts individual list elements
+
 setMethod("geno", "VCF",
     function(x, ..., withDimnames = TRUE)
 {
     assays(x, ..., withDimnames=withDimnames) 
 })
 
-setReplaceMethod("geno", c("VCF", "character", "matrix"),
-    function(x, i, ..., value)
+setMethod("geno", c("VCF", "numeric"),
+    function(x, i, ..., withDimnames = TRUE)
 {
-    assays(x)[[i]] <- value
-    x
+    assay(x, i, ...) 
 })
 
-setReplaceMethod("geno", c("VCF", "numeric", "matrix"),
-    function(x, i, ..., value)
+setMethod("geno", c("VCF", "character"),
+    function(x, i, ..., withDimnames = TRUE)
 {
-    assays(x)[[i]] <- value
-    x
+    assay(x, i, ...) 
 })
 
 setReplaceMethod("geno", c("VCF", "missing", "SimpleList"),
@@ -193,6 +194,28 @@ setReplaceMethod("geno", c("VCF", "missing", "SimpleList"),
     assays(x) <- value
     x
 })
+
+setReplaceMethod("geno", c("VCF", "character", "matrix"),
+    function(x, i, ..., value)
+{
+    assay(x, i) <- value
+    x
+})
+
+setReplaceMethod("geno", c("VCF", "numeric", "matrix"),
+    function(x, i, ..., value)
+{
+    assay(x, i) <- value
+    x
+})
+
+setReplaceMethod("geno", c("VCF", "missing", "matrix"),
+    function(x, i, ..., value)
+{
+    assay(x) <- value
+    x
+})
+
 
 ### strand
 setMethod("strand", "VCF",

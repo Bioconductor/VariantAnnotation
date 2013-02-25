@@ -17,7 +17,7 @@ test_VCF_construction <- function() {
     checkIdentical("hg19", unique(genome(rowData(target)))) 
 }
 
-test_VCF_accessors <- function() {
+test_VCF_fixed <- function() {
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
     vcf <- readVcf(fl, genome="hg19")
 
@@ -69,7 +69,11 @@ test_VCF_accessors <- function() {
     df <- DF
     df$REF <- as.character(df$REF)
     checkException(fixed(vcf) <- df, silent=TRUE)
+}
 
+test_VCF_rowData_info_geno <- function() {
+    fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
+    vcf <- readVcf(fl, genome="hg19")
     ## rowData
     v1 <- vcf
     rowData(v1) <- rowData(v1)[5:1]
@@ -89,7 +93,12 @@ test_VCF_accessors <- function() {
     checkTrue(class(geno(vcf)) == "SimpleList")
     checkException(geno(vcf) <- NULL, silent=TRUE)
     checkIdentical(geno(vcf)$CNQ, geno(vcf)[["CNQ"]])
-    checkIdentical(geno(vcf)[["CN"]], assays(vcf)[["CN"]]) 
+    checkIdentical(geno(vcf)[["CN"]], assays(vcf)[["CN"]])
+
+    checkTrue(class(geno(vcf, "GT")) == "matrix")
+    v1 <- vcf
+    geno(v1, "GT") <- matrix(NA, nrow=5, ncol=3)
+    checkTrue(unique(as.vector(geno(v1, "GT"))), NA)
 }
 
 test_VCF_subset <- function()
