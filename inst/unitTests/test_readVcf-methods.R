@@ -10,7 +10,7 @@ test_readVcf_format <- function()
     fl <- system.file(package="VariantAnnotation", "unitTests",
                       "cases", "no_INFO_header.vcf")
     vcf <- suppressWarnings(readVcf(fl, "hg19"))
-    checkTrue(ncol(info(vcf)) == 1L)
+    checkTrue(ncol(info(vcf)) == 0L)
     checkTrue("DNAStringSetList" == class(alt(vcf)))
     checkTrue("numeric" == class(qual(vcf)))
     checkTrue("character" == class(filt(vcf)))

@@ -5,7 +5,7 @@ test_filterVcf_TabixFile <- function()
     dest <- tempfile()
     filt <- FilterRules(list(fun=function(...) TRUE))
     ans <- filterVcf(tbx, "hg19", dest, filters=filt, verbose=FALSE)
-    
+ 
     checkIdentical(dest, ans)
     vcf0 <- readVcf(fl, "hg19")
     vcf1 <- readVcf(dest, "hg19")
@@ -57,7 +57,7 @@ test_filterOnSomaticStatus <- function()
     somaticStatusGermlineFilter <- function(x){
         !is.na(info(x)$SS) & info(x)$SS=="Germline"
         }
-                             
+ 
         # filter the in-memory data structure
     filters <- FilterRules(list(filter.1=somaticStatusGermlineFilter))
     checkEquals(dim(subsetByFilter(vcf, filters)), c(103, 2))
@@ -94,7 +94,7 @@ test_filterOnSnps <- function()
         altSnp[altSnp] <- nchar(ai) == 1L & (ai %in% c("A", "C", "G", "T"))
         refSnp & altSnp
         }
-    
+ 
     filteringFunctions <- FilterRules(list(isSnp=isSnp))
     filtered.filename <- filterVcf(tabix.file, "hg19", "small.vcf",
                                    filters=filteringFunctions,
@@ -123,9 +123,9 @@ test_prefilterOnSomaticStatusThenFilterOnSnps <- function()
         altSnp[altSnp] <- nchar(ai) == 1L & (ai %in% c("A", "C", "G", "T"))
         refSnp & altSnp
         }
-    
+ 
     filteringFunctions <- FilterRules(list(isSnp=isSnp))
-    
+ 
         # now filter on both.  should be 98 rows
     filtered.filename <- filterVcf(tabix.file, "hg19", "small.vcf",
                                    prefilters=prefilteringFunctions,

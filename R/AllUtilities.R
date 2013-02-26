@@ -124,8 +124,10 @@
 
 .formatInfo <- function(x, hdr)
 {
-    if (0L ==length(x))
+    ## no data
+    if (1L == length(x) && names(x) == "INFO")
         return(DataFrame())
+    ## data in file but not in header
     if (0L == length(hdr)) {
         DF <- DataFrame(x)
         names(DF) <- names(x)

@@ -8,7 +8,8 @@
 ###
 
 VCF <-
-    function(rowData=GRanges(), colData=DataFrame(), exptData=SimpleList(), 
+    function(rowData=GRanges(), colData=DataFrame(), 
+             exptData=SimpleList(header=VCFHeader()), 
              fixed=DataFrame(), info=DataFrame(), geno=SimpleList(),
              ..., collapsed=TRUE, verbose=FALSE)
 {
@@ -329,11 +330,21 @@ setMethod("rbind", "VCF",
     args <- unname(list(...))
     if (!.compare(lapply(args, class)))
         stop("'...' objects must be of the same VCF class")
+    args <- .renameSamples(args) 
     se <- GenomicRanges:::.rbind.SummarizedExperiment(args)
     info <- do.call(rbind, lapply(args, info))
     fixed <- do.call(rbind, lapply(args, fixed))
     new(class(args[[1]]), se, fixed=fixed, info=info)
 })
+
+.renameSamples <- function(args)
+{
+    Map(function(x, i) {
+        idx <- names(colData(x)) == "Samples"
+        names(colData(x))[idx] <- paste0("Samples.", i)
+        x
+    }, x=args, i=seq_along(args)) 
+}
 
 ## Appropriate for objects with same ranges and different samples.
 setMethod("cbind", "VCF",
@@ -417,14 +428,16 @@ setMethod(show, "VCF",
         nms <- names(x)
         cat(margin, class(x), " with ",
             nc, ifelse(nc == 1, " column", " columns"),
-            ": ", paste0(nms, collapse=", "), "\n", sep = "")
+    #        ": ", paste0(nms, collapse=", "), "\n", sep = "")
+            ": ", prettydescr(paste0(nms, collapse=", ")), "\n", sep="")
     }
     printSimpleList <- function(x, margin)
     {
         lo <- length(x)
         nms <- names(x)
         cat(margin, class(x), " of length ", lo, 
-            ": ", paste0(nms, collapse=", "), "\n", sep = "")
+            #": ", paste0(nms, collapse=", "), "\n", sep = "")
+            ": ", prettydescr(paste0(nms, collapse=", ")), "\n", sep="")
     }
     margin <- "  "
     cat("class:", class(object), "\n")
@@ -433,18 +446,15 @@ setMethod(show, "VCF",
     printSmallGRanges(rowData(object), margin=margin)
     cat("info(vcf):\n")
     printSmallDataTable(info(object), margin=margin) 
-    if (!is.null(header(object))) {
-    cat("info(header(vcf)):\n")
-        info <- info(header(object))[colnames(info(object)),]
-        if (nrow(info) > 0)
-            headerrec(as.data.frame(info), "info")
+    if (length(hdr <- info(header(object))) > 0) {
+        cat("info(header(vcf)):\n")
+        headerrec(as.data.frame(hdr[colnames(info(object)),]), "info")
     }
     cat("geno(vcf):\n")
     printSimpleList(geno(object), margin=margin) 
-    if (!is.null(header(object))) {
-    cat("geno(header(vcf)):\n")
-        geno <- as.data.frame(geno(exptData(object)$header))
-        headerrec(geno, "geno")
+    if (length(hdr <- geno(header(object))) > 0) {
+        cat("geno(header(vcf)):\n")
+        headerrec(as.data.frame(hdr), "geno")
     }
 }
 

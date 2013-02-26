@@ -98,7 +98,7 @@ test_VCF_rowData_info_geno <- function() {
     checkTrue(class(geno(vcf, "GT")) == "matrix")
     v1 <- vcf
     geno(v1, "GT") <- matrix(NA, nrow=5, ncol=3)
-    checkTrue(unique(as.vector(geno(v1, "GT"))), NA)
+    checkIdentical(unique(as.vector(geno(v1, "GT"))), NA)
 }
 
 test_VCF_subset <- function()
@@ -208,7 +208,7 @@ test_VCF_cbind <- function()
     ## empty
     vcf <- VCF()
     empty <- cbind(vcf, vcf)
-    checkTrue(all.equal(vcf, empty))
+    checkEquals(dim(empty), c(0, 0))
 
     ## different ranges 
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
@@ -251,7 +251,7 @@ test_VCF_rbind <- function()
     ## empty
     vcf <- VCF()
     empty <- rbind(vcf, vcf)
-    checkTrue(all.equal(vcf, empty))
+    checkEquals(dim(empty), c(0, 0))
 
     ## different sample 
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")

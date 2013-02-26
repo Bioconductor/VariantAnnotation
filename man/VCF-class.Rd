@@ -50,9 +50,14 @@
 \alias{mcols<-,VCF-method}
 \alias{geno}
 \alias{geno,VCF-method}
+\alias{geno,VCF,ANY-method}
+\alias{geno,VCF,character-method}
+\alias{geno,VCF,numeric-method}
+\alias{geno,VCFHeader,ANY-method}
 \alias{geno<-}
 \alias{geno<-,VCF,character,matrix-method}
 \alias{geno<-,VCF,numeric,matrix-method}
+\alias{geno<-,VCF,missing,matrix-method}
 \alias{geno<-,VCF,missing,SimpleList-method}
 \alias{strand,VCF-method}
 \alias{strand<-,VCF-method}
@@ -107,12 +112,13 @@
     }
     \item{}{
       \code{VCF(rowData = GRanges(), colData = DataFrame(), 
-                exptData = SimpleList(), fixed = DataFrame(), 
-                info = DataFrame(), geno = SimpleList(), 
-                ..., collapsed=TRUE, verbose = FALSE)}
-      Low-level constructor. Generally not used directly. The
-      \code{collapsed} argument dictates the creation of a 
-      CollapsedVCF or ExpandedVCF.
+                exptData = SimpleList(header = VCFHeader()), 
+                fixed = DataFrame(), info = DataFrame(), 
+                geno = SimpleList(), ..., collapsed=TRUE, 
+                verbose = FALSE)}
+      Low-level constructor. Generally not used directly. If 
+      \code{collapsed = TRUE} a CollapsedVCF is created, else
+      an ExpandedVCF.
     }
   }
 }
@@ -169,19 +175,15 @@
     }
     \item{}{
       \code{exptData(x)}:
-       Gets a SimpleList of header information from the VCF. For
-       detailed descriptions of info, geno, etc.,
-       \itemize{
-         \item{\code{info(exptData(x)$header)}}
-         \item{\code{geno(exptData(x)$header)}}
-         \item{\code{meta(exptData(x)$header)}}
-         \item{\code{samples(exptData(x)$header)}}
-      }
+       Gets a SimpleList of experiment-related data. By default this
+       list includes the \sQuote{header} information from the VCF file. 
+       See the use of \code{header()} for details in extracting
+       header information. 
     }
     \item{}{
-      \code{colData(x)}:
-      Gets a \code{DataFrame} of sample-specific information. Each row 
-      represents a sample in the VCf file. \code{value} must be a 
+      \code{colData(x)}, \code{colData(x) <- value}:
+      Gets or sets a \code{DataFrame} of sample-specific information. Each row 
+      represents a sample in the VCF file. \code{value} must be a 
       \code{DataFrame} with rownames representing the samples in the VCF 
       file.
     }
@@ -202,9 +204,13 @@
     }
     \item{}{
       \code{header(x)}:
-      Extract the VCF header information. The slot names of the resulting
-      \code{VCFHeader} object are accessors that will further extract
-      the data, (i.e., info(), geno(), fixed(), samples(), meta()).
+      Extract the VCF header information.
+       \itemize{
+         \item{\code{info(header(x))}}
+         \item{\code{geno(header(x))}}
+         \item{\code{meta(header(x))}}
+         \item{\code{samples(header(x))}}
+      }
     }
   }
 }
@@ -222,16 +228,21 @@
       \code{cbind(...)}, \code{rbind(...)}:
       \code{cbind} combines objects with identical ranges (\code{rowData}) 
       but different samples (columns in \code{assays}). The colnames in
-      \code{colData} must match or an error is thrown. Duplicate columns
-      of \code{fixed}, \code{info} and \code{mcols(rowData(VCF))} 
+      \code{colData} must match or an error is thrown. Columns with
+      duplicate names in \code{fixed}, \code{info} and \code{mcols(rowData(VCF))} 
       must contain the same data.
 
       \code{rbind} combines objects with different ranges (\code{rowData}) 
-      and the same subjects (columns in \code{assays}). Duplicate columns
-      of \code{colData} must contain the same data. 
+      and the same subjects (columns in \code{assays}). Columns with
+      duplicate names in \code{colData} must contain the same data. 
+      The \sQuote{Samples} columns in \code{colData} (created by \code{readVcf}) 
+      are renamed with a numeric extension ordered as they were input to \code{rbind}
+      e.g., \dQuote{Samples.1, Samples.2, ...} etc. 
 
       \code{exptData} from all objects are combined into a
       \code{SimpleList} with no name checking.
+
+      ## TODO: header information not yet combined
     }
   }
 }

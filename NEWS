@@ -3,15 +3,20 @@ CHANGES IN VERSION 1.5.*
 
 NEW FEATURES
 
+    o show method for VCF class enhanced to show header information 
     o genotypeToSnpMatrix has replaced MatrixToSnpMatrix
-    o new function snpSummary 
     o cbind and rbind added for VCF objects 
+    o new function snpSummary 
 
 MODIFICATIONS
 
     o predictCoding and genotypeToSnpMatrix can now handle
       ALT as CharacterList. Structural variants are set to
       empty character ("").
+    o When no INFO data are present in a vcf file, the info() 
+      slot is now an empty DataFrame. Previously an empty column 
+      named 'INFO' was returned. 
+    o Empty VCF class now has an empty VCFHeader 
 
 
 CHANGES IN VERSION 1.5.0
