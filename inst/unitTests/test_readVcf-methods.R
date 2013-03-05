@@ -84,7 +84,15 @@ test_readVcf_param <- function()
     checkTrue(length(names(geno(vcf))) == length(g))
     checkTrue(all(names(geno(vcf)) %in% g))
 
+    fl <- system.file("extdata", "chr22.vcf.gz",
+                      package="VariantAnnotation")
+    vcf <- readVcf(fl, "hg19")
+    param <- ScanVcfParam(which=rowData(vcf)[1:10])
+    vcf2 <- readVcf(fl, "hg19", param=param)
+    checkIdentical(geno(vcf)$GT[1:10, ], geno(vcf2)$GT)
+
     ## info 
+    fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
     i <- inms[c(1,4)]
     param <- ScanVcfParam(info=i)
     vcf <- readVcf(fl, "hg19", param)

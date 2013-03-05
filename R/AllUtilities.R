@@ -62,8 +62,8 @@
                     cmb
                 } else {
                     trans <- lapply(elt, t)
-                    cmb <- matrix(t(do.call(c, trans)), 
-                                  length(lst[["rowData"]]), d[2])
+                    cmb <- matrix(do.call(c, trans), length(lst[["rowData"]]), 
+                                  d[2], byrow=TRUE)
                     cmb
                 }
             }) 
