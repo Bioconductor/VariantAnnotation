@@ -200,15 +200,12 @@ setMethod(scanVcf, c("connection", "missing"),
                 x <- array(unlist(strsplit(xrep, ",", fixed=TRUE)),
                            dim=c(d, nrow(x), ncol(x)),
                            dimnames=list(NULL, NULL, colnames(x)))
-                x <- aperm(sub("\\.", NA, x), c(2, 3, 1))
+                x[which(x == ".")] <- NA
+                x <- aperm(x, c(2, 3, 1))
+                .forceType(type, x)
             }
-            ## 1 and 0 
-            switch(type, 
-                   Flag=x,
-                   Character=, String=x,
-                   Integer={ mode(x) <- "integer"; x },
-                   Float={ mode(x) <- "numeric"; x },
-                   stop(sprintf("unhandled FORMAT type '%s'", type)))
+            ## 1 and 0
+            .forceType(type, x) 
         } else {
             ## non-numeric
             nrow <- nrow(x)
@@ -227,6 +224,16 @@ setMethod(scanVcf, c("connection", "missing"),
         warning(msg, call.=FALSE)
         invokeRestart("muffleWarning")
     })
+}
+
+.forceType <- function(type, x)
+{
+    switch(type, 
+           Flag=x,
+           Character=, String=x,
+           Integer={ mode(x) <- "integer"; x },
+           Float={ mode(x) <- "numeric"; x },
+           stop(sprintf("unhandled FORMAT type '%s'", type)))
 }
 
 .unpackVcfTag <- function(tag, id, n, type)
