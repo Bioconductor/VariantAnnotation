@@ -36,6 +36,11 @@ test_predictCoding_varAllele <- function()
     current_consequence <- values(current[names(current) == "B"])[["CONSEQUENCE"]]
     checkTrue(current_consequence == "not translated")
 
+    variant=DNAStringSet(c("GGA", "GGA"))
+    query <- GRanges("chr1", IRanges(rep(10101, 2), width=c(2,3)), variant=variant)
+    current <- suppressWarnings(fun(query, cdsbytx[1:2], Hsapiens, variant))
+    checkIdentical(as.character(mcols(current)$VARCODON), c("TAGGGG", "TTCCGG"))
+ 
     ## TODO : add test for codon width based on 1,2,3 position
 }
 
@@ -94,6 +99,4 @@ test_predictCoding_strand <- function()
         ignore.strand=FALSE))
     checkIdentical(4L, length(p2))
 }
-
-
 

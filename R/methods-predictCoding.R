@@ -122,7 +122,8 @@ setMethod("predictCoding", c("GRanges", "TranscriptDb", "ANY", "DNAStringSet"),
     refCodon <- varCodon <- .constructRefSequences(txlocal, altpos, seqSource, 
                                                    cdsbytx)
     if (any(translateidx)) {
-        subseq(varCodon, start=altpos, width=rwidth) <- altallele[translateidx]
+        subseq(varCodon, altpos, width=rwidth)[translateidx]  <-
+            altallele[translateidx]
 
         ## translation
         refAA <- translate(refCodon)
