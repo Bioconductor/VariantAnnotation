@@ -37,8 +37,6 @@ importClassesFrom(BSgenome, BSgenome)
 
 importFrom(utils, txtProgressBar, setTxtProgressBar)
 
-#exportPattern("^[^\\.]")
-
 exportClassPattern("^.*$")
 
 export(VCF, VCFHeader, 
