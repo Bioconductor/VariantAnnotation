@@ -3,5 +3,3 @@ SAMVARS=$(shell echo 'cat(system.file("usretc", .Platform[["r_arch"]], \
         "${R_HOME}/bin/R" --vanilla --slave)
 
 include $(SAMVARS)
-
-PKG_LIBS += -lz -pthread
