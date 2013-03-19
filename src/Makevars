@@ -4,4 +4,4 @@ SAMVARS=$(shell echo 'cat(system.file("usretc", .Platform[["r_arch"]], \
 
 include $(SAMVARS)
 
-PKG_LIBS += -lz
+PKG_LIBS += -lz -pthread
