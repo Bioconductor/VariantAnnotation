@@ -118,7 +118,7 @@ setMethod("filterVcf", "TabixFile",
         file <- .filter(file, genome, destination, verbose, filters,
                         param, ...)
         } # if filters
-        
+ 
     if (index) {
         if (verbose)
             message("compressing and indexing ", sQuote(file))
