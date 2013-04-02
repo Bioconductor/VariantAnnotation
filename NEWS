@@ -6,39 +6,59 @@ NEW FEATURES
     o VCF is now VIRTUAL. Concrete subclasses are CollapsedVCF 
       and ExpandedVCF. 
 
+    o Add filterVcf() generic and methods for character and TabixFile. 
+      This method creates one VCF file from another, using FilterRules.
+
     o Enhance show,VCF method with header information.
  
     o Stephanie Gogarten added genotypeToSnpMatrix() generic and 
       CollapsedVCF and matrix methods.
-
-    o MatrixToSnpMatrix() has been deprecated.
 
     o Chris Wallace added snpSummary() generic and CollapsedVCF
       method.
 
     o Add cbind and rbind for VCF objects. 
 
-    o Add filterVcf() generic and methods for character and TabixFile. 
-      This method creates one VCF file from another, using FilterRules.
-
 MODIFICATIONS
+
+    o writeVcf,connection-method allows writing to console and appending.
+
+    o writeVcf,connection-method accepts connections with open="a",
+      only adding a header if the file does not already exist.
 
     o predictCoding and genotypeToSnpMatrix can now handle
       ALT as CharacterList. Structural variants are set to
       empty character ("").
-
+ 
     o When no INFO data are present in a vcf file, the info() 
       slot is now an empty DataFrame. Previously an empty column 
       named 'INFO' was returned. 
 
     o Empty VCF class now has an empty VCFHeader 
 
-    o writeVcf,connection-method accepts connections with open="a",
-      only adding a header if the file does not already exist.
+    o expand,CollapsedVCF-method expands 'geno' data with Number=A. 
+
+    o VCF class accessors "fixed", "info" now return DataFrame instead
+       of GRanges. "rowData" returns fixed fileds as the mcols. 
+
+    o Updates to the vignette. 
 
 DEPRECATED and DEFUNCT
 
     o Deprecate dbSNPFilter() and regionFilter().
+
+    o Deprecate MatrixToSnpMatrix().
+
+BUG FIXES
+
+    o Multiple bugs fixed in "locateVariants".
+
+    o Multiple bugs fixed in "writeVcf".
+
+    o Bug fixed in subsetting of VCF objects. 
+
+    o Bug fixed in "predictCoding" related to QUERYID column not
+      mapping back to original indices (rows). 
 
 
 CHANGES IN VERSION 1.4.0
@@ -46,13 +66,13 @@ CHANGES IN VERSION 1.4.0
 
 NEW FEATURES
 
-    o summarizeVariants() for summarizing counts by sample
+    o "summarizeVariants" for summarizing counts by sample
 
-    o new VariantType promoterVariants() added to locateVariants()
+    o new VariantType 'PromoterVariants()' added to "locateVariants"
 
 MODIFICATIONS
 
-    o ref(), alt(), filt() and  qual() accessors for VCF-class now return
+    o "ref", "alt", "filt" and "qual" accessors for VCF-class now return
       a single variable instead of GRanges with variable as metadata 
 
 
@@ -61,21 +81,21 @@ CHANGES IN VERSION 1.2.0
 
 NEW FEATURES
 
-    o readVcf() has genome argument, can be subset on ranges or VCF elements
-      with ScanVcfParam()
+    o "readVcf" has genome argument, can be subset on ranges or VCF elements
+      with "ScanVcfParam"
 
-    o scanVcfHeader() returns VCFHeader class with accessors fixed, info, geno,
+    o "scanVcfHeader" returns VCFHeader class with accessors fixed, info, geno,
       etc.
 
-    o writeVcf() writes out a VCF file from a VCF class
+    o "writeVcf" writes out a VCF file from a VCF class
 
-    o locateVariants() 
+    o "locateVariants" methods
         - returns GRanges instead of DataFrame
         - 'region' argument allows specification of variants by region 
         - output includes txID, geneID and cdsID
         - has cache argument for repeated calls over multiple vcf files
 
-    o predictCoding()
+    o "predictCoding" methods
         - returns GRanges instead of DataFrame
         - output includes txID, geneID, cdsID, 
           cds-based and protein-based coordinates
@@ -86,17 +106,16 @@ CHANGES IN VERSION 1.0.0
 
 NEW FEATURES
 
-    o readVcf() for reading and parsing VCF files into a SummarizedExperiment 
+    o "readVcf" methods for reading and parsing VCF files into a SummarizedExperiment 
 
-    o locateVariants() and predictCoding() for identifying amino acid coding
+    o "locateVariants" and "predictCoding" for identifying amino acid coding
       changes in nonsynonymous variants
  
-    o dbSNPFilter() and regionFilter() for filtering variants on membership in
+    o "dbSNPFilter" and "regionFilter" for filtering variants on membership in
       dbSNP or on a particular location in the genome
  
-    o access to PolyPhen and SIFT predictions through keys() , cols() and
-      select() methods. See ?SIFT or ?PolyPhen.
- 
+    o access to PolyPhen and SIFT predictions through "keys" , "cols" and
+      "select" methods. See ?SIFT or ?PolyPhen.
 
 BUG FIXES
 
