@@ -1,66 +1,102 @@
 useDynLib(VariantAnnotation, .registration=TRUE)
 
 import(methods)
+
 import(BiocGenerics)
+
 import(Rsamtools)
+
 import(GenomicRanges)
+
 import(zlibbioc)
 
-importClassesFrom(Biobase, AssayData)
+importClassesFrom(Biobase, 
+    AssayData
+)
 
-importClassesFrom(AnnotationDbi, AnnotationDb)
-importMethodsFrom(AnnotationDbi, colnames, cols, exists, keys, ncol,
-                  nrow, select)
+importClassesFrom(AnnotationDbi, 
+    AnnotationDb
+)
 
-importFrom(GenomicFeatures, extractTranscriptsFromGenome)
-importClassesFrom(GenomicFeatures, TranscriptDb)
-importMethodsFrom(GenomicFeatures, cdsBy, exons, transcripts,
-                  fiveUTRsByTranscript, threeUTRsByTranscript,
-                  isActiveSeq, "isActiveSeq<-")
+importMethodsFrom(AnnotationDbi, 
+    colnames, cols, exists, keys, ncol, 
+    nrow, select
+)
 
-importFrom(IRanges, CharacterList, DataFrame, IRanges, isSingleString,
-           PartitioningByWidth, successiveViews, subsetByFilter, expand)
-importClassesFrom(IRanges, DataFrame, Ranges, RangesList, RangedData)
-importMethodsFrom(IRanges, "%in%", append, as.matrix, as.vector,
-                  countOverlaps, elementLengths, end, eval, findOverlaps, 
-                  follow, gsub, lapply, match, "metadata<-", narrow, order, 
-                  precede, queryHits, rev, Rle, runValue, sapply, shift,
-                  split, start, "start<-", subjectHits, "subseq<-", substring, 
-                  unlist, values, "values<-", which, width, 
-                  expand)
+importFrom(GenomicFeatures, 
+    extractTranscriptsFromGenome
+)
 
-importMethodsFrom(DBI, dbCommit, dbConnect, dbDisconnect, dbExistsTable, 
-                  dbGetQuery, dbReadTable, dbWriteTable, dbListTables, 
-                  dbListFields)
+importClassesFrom(GenomicFeatures, 
+    TranscriptDb
+)
 
-importClassesFrom(BSgenome, BSgenome)
+importMethodsFrom(GenomicFeatures, 
+    cdsBy, exons, transcripts,
+    fiveUTRsByTranscript, threeUTRsByTranscript,
+    isActiveSeq, "isActiveSeq<-"
+)
 
-importFrom(utils, txtProgressBar, setTxtProgressBar)
+importFrom(IRanges, 
+    CharacterList, DataFrame, IRanges, isSingleString,
+    PartitioningByWidth, successiveViews, subsetByFilter, expand
+)
+
+importClassesFrom(IRanges, 
+    DataFrame, Ranges, RangesList, RangedData
+)
+
+importMethodsFrom(IRanges, 
+    "%in%", append, as.matrix, as.vector,
+    countOverlaps, elementLengths, end, eval, findOverlaps, 
+    follow, gsub, lapply, match, "metadata<-", narrow, order, 
+    precede, queryHits, rev, Rle, runValue, sapply, shift,
+    split, start, "start<-", subjectHits, "subseq<-", substring, 
+    unlist, values, "values<-", which, width, 
+    expand
+)
+
+importMethodsFrom(DBI, 
+    dbCommit, dbConnect, dbDisconnect, dbExistsTable, 
+    dbGetQuery, dbReadTable, dbWriteTable, dbListTables, 
+    dbListFields
+)
+
+importClassesFrom(BSgenome, 
+    BSgenome
+)
+
+importFrom(utils, 
+    txtProgressBar, setTxtProgressBar
+)
 
 exportClassPattern("^.*$")
 
-export(VCF, VCFHeader, 
-       vcfWhich, "vcfWhich<-", vcfFixed, "vcfFixed<-", vcfInfo, "vcfInfo<-", 
-       vcfGeno, "vcfGeno<-", vcfTrimEmpty, "vcfTrimEmpty<-", 
-       duplicateRSID, CodingVariants, IntronVariants,
-       FiveUTRVariants, ThreeUTRVariants, IntergenicVariants,
-       SpliceSiteVariants, PromoterVariants, AllVariants,
-       upstream, "upstream<-", downstream, "downstream<-",
-       probabilityToSnpMatrix, GLtoGP)
+export(
+    VCF, VCFHeader, 
+    vcfWhich, "vcfWhich<-", vcfFixed, "vcfFixed<-", vcfInfo, "vcfInfo<-", 
+    vcfGeno, "vcfGeno<-", vcfTrimEmpty, "vcfTrimEmpty<-", 
+    duplicateRSID, CodingVariants, IntronVariants,
+    FiveUTRVariants, ThreeUTRVariants, IntergenicVariants,
+    SpliceSiteVariants, PromoterVariants, AllVariants,
+    upstream, "upstream<-", downstream, "downstream<-",
+    probabilityToSnpMatrix, GLtoGP
+)
 
-exportMethods(filterVcf,
-              scanVcf, scanVcfHeader, ScanVcfParam,
-              readVcf, readVcfLongForm, writeVcf, expand,
-              predictCoding, getTranscriptSeqs, refLocsToLocalLocs, 
-              MatrixToSnpMatrix, genotypeToSnpMatrix, snpSummary,
-              locateVariants, summarizeVariants,
+exportMethods(
+    filterVcf, scanVcf, scanVcfHeader, ScanVcfParam,
+    readVcf, readVcfLongForm, writeVcf, expand,
+    predictCoding, getTranscriptSeqs, refLocsToLocalLocs, 
+    MatrixToSnpMatrix, genotypeToSnpMatrix, snpSummary,
+    locateVariants, summarizeVariants,
 
-              fixed, "fixed<-", ref, "ref<-", alt, "alt<-", qual, "qual<-",
-              filt, "filt<-", info, "info<-", geno, "geno<-", strand, 
-              "strand<-", "[", "[<-", cbind, rbind, "mcols<-", 
+    fixed, "fixed<-", ref, "ref<-", alt, "alt<-", qual, "qual<-",
+    filt, "filt<-", info, "info<-", geno, "geno<-", strand, 
+    "strand<-", "[", "[<-", cbind, rbind, "mcols<-", 
 
-              genome, seqlevels, renameSeqlevels, keepSeqlevels,
+    genome, seqlevels, renameSeqlevels, keepSeqlevels,
 
-              reference, samples, header, meta,
+    reference, samples, header, meta,
 
-              keys, cols, select)
+    keys, cols, select
+)
