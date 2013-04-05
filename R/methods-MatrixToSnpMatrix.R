@@ -11,7 +11,7 @@
 setMethod("MatrixToSnpMatrix", c("matrix", "DNAStringSet", "DNAStringSetList"),
     function(callMatrix, ref, alt, ...)
 {
-    .Deprecated("genotypeToSnpMatrix")
+    .Defunct("genotypeToSnpMatrix")
 })
 
 .createMap <- function(nms, ref, alt, flt)

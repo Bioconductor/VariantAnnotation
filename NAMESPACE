@@ -73,6 +73,7 @@ importFrom(utils,
 exportClassPattern("^.*$")
 
 export(
+    dbSNPFilter, regionFilter, ## Defunct
     VCF, VCFHeader, 
     vcfWhich, "vcfWhich<-", vcfFixed, "vcfFixed<-", vcfInfo, "vcfInfo<-", 
     vcfGeno, "vcfGeno<-", vcfTrimEmpty, "vcfTrimEmpty<-", 

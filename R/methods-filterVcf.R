@@ -32,7 +32,7 @@ setMethod("filterVcf", "character",
     prefiltered <- file(prefilteredFilename, "w")
     needsClosing <- TRUE
     on.exit(if (needsClosing) close(prefiltered), add=TRUE)
-    
+ 
     ## copy header
     writeLines(headerTabix(tbxFile)$header, prefiltered)
 
@@ -131,16 +131,14 @@ setMethod("filterVcf", "TabixFile",
     invisible(destination)
 })
 
-## Deprecated
-
 dbSNPFilter <-
     function(dbSNP=character(0), .name="dbSNPFilter")
 {
-    .Deprecated("filterVcf")
+    .Defunct("filterVcf")
 }
 
 regionFilter <-
     function(txdb, region="coding", .name="regionFilter")
 {
-    .Deprecated("filterVcf")
+    .Defunct("filterVcf")
 }
