@@ -234,7 +234,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb",
 setMethod("locateVariants", c("GRanges", "GRangesList", "IntergenicVariants"),
     function(query, subject, region, ..., ignore.strand=FALSE)
     {
-        .intergenic(query, subject, ignore.strand=ignore.strand)
+        .intergenic(query, subject, region, ignore.strand=ignore.strand)
     }
 )
 
@@ -368,15 +368,20 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
             names(isActiveSeq(subject))[isActiveSeq(subject)]))
             return(.returnEmpty())
 
-        coding <- locateVariants(query, subject, CodingVariants(), cache=cache,
-            ignore.strand=ignore.strand)
-        intron <- locateVariants(query, subject, IntronVariants(), cache=cache,
-            ignore.strand=ignore.strand)
-        splice <- locateVariants(query, subject, SpliceSiteVariants(), 
-            cache=cache, ignore.strand=ignore.strand)
-        promoter <- locateVariants(query, subject,
-            PromoterVariants(upstream(region), downstream(region)), 
-            cache=cache, ignore.strand=ignore.strand)
+        coding <- 
+            locateVariants(query, subject, CodingVariants(), cache=cache,
+                           ignore.strand=ignore.strand)
+        intron <- 
+            locateVariants(query, subject, IntronVariants(), cache=cache,
+                           ignore.strand=ignore.strand)
+        splice <- 
+            locateVariants(query, subject, SpliceSiteVariants(), 
+                           cache=cache, ignore.strand=ignore.strand)
+        promoter <- 
+            locateVariants(query, subject,
+                           PromoterVariants(upstream(promoter(region)),
+                                            downstream(promoter(region))), 
+                           cache=cache, ignore.strand=ignore.strand)
 
         ## Consolidate calls for UTR data
         if (!exists("fiveUTRbytx", cache, inherits=FALSE)) {
@@ -389,12 +394,17 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
             cache[["threeUTRbytx"]] <- 
                 GenomicFeatures:::.make3UTRsByTranscript(subject, splicings)
 
-        fiveUTR <- locateVariants(query, subject, FiveUTRVariants(), 
-            cache=cache, ignore.strand=ignore.strand)
-        threeUTR <- locateVariants(query, subject, ThreeUTRVariants(), 
-            cache=cache, ignore.strand=ignore.strand)
-        intergenic <- locateVariants(query, subject, IntergenicVariants(), 
-            cache=cache, ignore.strand=ignore.strand)
+        fiveUTR <- 
+            locateVariants(query, subject, FiveUTRVariants(), 
+                           cache=cache, ignore.strand=ignore.strand)
+        threeUTR <- 
+            locateVariants(query, subject, ThreeUTRVariants(), 
+                           cache=cache, ignore.strand=ignore.strand)
+        intergenic <- 
+            locateVariants(query, subject, 
+                           IntergenicVariants(upstream(intergenic(region)),
+                                              downstream(intergenic(region))), 
+                           cache=cache, ignore.strand=ignore.strand)
 
         ans <- c(coding, intron, fiveUTR, threeUTR, splice, promoter, intergenic)
         meta <- values(ans)
@@ -477,7 +487,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
            subjectLength=slen)) 
 }
 
-.intergenic <- function(query, subject, ignore.strand, ...)
+.intergenic <- function(query, subject, region, ignore.strand, ...)
 {
     co <- countOverlaps(query, subject, type="any", 
                         ignore.strand=ignore.strand)
@@ -491,13 +501,16 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
         res
     } else {
         res <- query[intergenic]
-        ## gene ranges
         rng <- unlist(subject, use.names=FALSE)
         genes <- rep(names(subject), elementLengths(subject))
         ## query precedes subject; get index for following gene 
         pidx <- precede(res, rng, ignore.strand=ignore.strand)
         ## query follows subject; get index for preceding gene 
         fidx <- follow(res, rng, ignore.strand=ignore.strand)
+        ## confirm hits are within upstream/downstream ranges
+        shft <- .shiftRangeUpDown(res, upstream(region), downstream(region))
+        pidx <- .indexWithinUpDown(shft, rng, region, pidx) 
+        fidx <- .indexWithinUpDown(shft, rng, region, fidx) 
 
         values(res) <- DataFrame(LOCATION=.location(length(res), "intergenic"),
                                  QUERYID=which(intergenic), TXID=NA_integer_, 
@@ -505,6 +518,33 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
                                  PRECEDEID=genes[pidx], FOLLOWID=genes[fidx])
         res
     }
+}
+
+.indexWithinUpDown <- function(x, subject, region, index)
+{
+    ## FIXME: IRanges:::normalizeSingleBracketSubscript NA handling
+    isect <- pintersect(x[!is.na(index)], 
+                        subject[na.omit(index)], 
+                        resolve.empty="start.x")
+    index[!is.na(index)] <- ifelse(width(isect) == 0, NA, na.omit(index))
+    index 
+}
+
+.shiftRangeUpDown <- function(x, upstream, downstream)
+{
+    ## '+' strand 
+    on_plus <- which(strand(x) == "+" | strand(x) == "*")
+    on_plus_start <- start(x)[on_plus]
+    start(x)[on_plus] <- on_plus_start - upstream
+    on_plus_end <- end(x)[on_plus]
+    end(x)[on_plus] <- on_plus_end + downstream
+    ## '-' strand 
+    on_minus <- which(strand(x) == "-")
+    on_minus_end <- end(x)[on_minus]
+    end(x)[on_minus] <- on_minus_end + upstream
+    on_minus_start <- start(x)[on_minus]
+    start(x)[on_minus] <- on_minus_start - downstream
+    x
 }
 
 .makeResult <- function(query, subject, vtype, ignore.strand, asHits)

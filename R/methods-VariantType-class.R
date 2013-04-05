@@ -2,7 +2,7 @@
 ### VariantType class methods 
 ### =========================================================================
 
-## 'show' methods
+### 'show' methods
 
 setMethod("show", "VariantType",
     function(object) 
@@ -15,8 +15,12 @@ setMethod("show", "AllVariants",
     function(object) 
     {
         cat("class:", class(object), "\n")
-        cat("upstream:", upstream(object), "\n")
-        cat("downstream:", downstream(object), "\n")
+        cat("promoter: \n")
+        cat("  upstream: ", upstream(promoter(object)), "\n")
+        cat("  downstream: ", downstream(promoter(object)), "\n")
+        cat("intergenic: \n")
+        cat("  upstream: ", upstream(intergenic(object)), "\n")
+        cat("  downstream: ", downstream(intergenic(object)), "\n")
     }
 )
 
@@ -29,13 +33,20 @@ setMethod("show", "PromoterVariants",
     }
 )
 
-## Classes with constructors only
+setMethod("show", "IntergenicVariants",
+    function(object) 
+    {
+        cat("class:", class(object), "\n")
+        cat("upstream:", upstream(object), "\n")
+        cat("downstream:", downstream(object), "\n")
+    }
+)
+
+### constructors
 
 CodingVariants <- function() new("CodingVariants")
 
 IntronVariants <- function() new("IntronVariants")
-
-IntergenicVariants <- function() new("IntergenicVariants")
 
 UTRVariants <- function() new("UTRVariants")
 
@@ -45,85 +56,106 @@ FiveUTRVariants <- function() new("FiveUTRVariants")
 
 SpliceSiteVariants <- function() new("SpliceSiteVariants")
 
-## Classes with getters and setters
-
-PromoterVariants <- function(upstream=2000, downstream=200)
+### .checkArgs() takes the place of a validity method.
+### 'upstream' and 'downstream' are forced to integers
+### which changes the object and can't be done a validity
+### method. 
+.checkArgs <- function(x, argName)
 {
-    if (!isSingleNumber(upstream))
-        stop("'upstream' must be a single integer")
-    if (!is.integer(upstream))
-        upstream <- as.integer(upstream)
-    if (!isSingleNumber(downstream))
-        stop("'downstream' must be a single integer")
-    if (!is.integer(downstream))
-        downstream <- as.integer(downstream)
+    if (!isSingleNumber(x) | x < 0)
+        stop(paste0("'", argName, "'", " must be a single integer >= 0"))
+    if (!is.integer(x))
+        as.integer(x)
+    else
+        x
+}
+
+IntergenicVariants <- function(upstream=100000L, downstream=100000L)
+{
+    upstream <- .checkArgs(upstream, "upstream") 
+    downstream <- .checkArgs(downstream, "downstream") 
+    new("IntergenicVariants", upstream=upstream, 
+        downstream=downstream) 
+}
+
+PromoterVariants <- function(upstream=2000L, downstream=200L)
+{
+    upstream <- .checkArgs(upstream, "upstream") 
+    downstream <- .checkArgs(downstream, "downstream") 
     new("PromoterVariants", upstream=upstream, 
         downstream=downstream) 
 }
 
-setMethod("upstream", "PromoterVariants",
-    function(x)
+AllVariants <- function(promoter=PromoterVariants(),
+                        intergenic=IntergenicVariants())
 {
-    slot(x, "upstream")
-})
+    new("AllVariants", promoter=promoter, intergenic=intergenic)
+}
+
+### getters and setters
+
+setMethod("upstream", "PromoterVariants",
+    function(x) slot(x, "upstream"))
 
 setReplaceMethod("upstream", "PromoterVariants",
     function(x, value)
 {
-    slot(x, "upstream") <- value
+    slot(x, "upstream") <- .checkArgs(value, "upstream") 
     x
 })
 
 setMethod("downstream", "PromoterVariants",
-    function(x)
-{
-    slot(x, "downstream")
-})
+    function(x) slot(x, "downstream"))
 
 setReplaceMethod("downstream", "PromoterVariants",
     function(x, value)
 {
-    slot(x, "downstream") <- value
+    slot(x, "downstream") <- .checkArgs(value, "downstream") 
     x
 })
 
-AllVariants <- function(upstream=2000L, downstream=200L)
-{
-    if (!isSingleNumber(upstream))
-        stop("'upstream' must be a single integer")
-    if (!is.integer(upstream))
-        upstream <- as.integer(upstream)
-    if (!isSingleNumber(downstream))
-        stop("'downstream' must be a single integer")
-    if (!is.integer(downstream))
-        downstream <- as.integer(downstream)
-    new("AllVariants", upstream=upstream, 
-        downstream=downstream) 
-}
+setMethod("upstream", "IntergenicVariants",
+    function(x) slot(x, "upstream"))
 
-setMethod("upstream", "AllVariants",
-    function(x)
-{
-    slot(x, "upstream")
-})
-
-setReplaceMethod("upstream", "AllVariants",
+setReplaceMethod("upstream", "IntergenicVariants",
     function(x, value)
 {
-    slot(x, "upstream") <- value
+    slot(x, "upstream") <- .checkArgs(value, "upstream") 
     x
 })
 
-setMethod("downstream", "AllVariants",
-    function(x)
-{
-    slot(x, "downstream")
-})
+setMethod("downstream", "IntergenicVariants",
+    function(x) slot(x, "downstream"))
 
-setReplaceMethod("downstream", "AllVariants",
+setReplaceMethod("downstream", "IntergenicVariants",
     function(x, value)
 {
-    slot(x, "downstream") <- value
+    slot(x, "downstream") <- .checkArgs(value, "downstream") 
+    x
+})
+
+
+setMethod("promoter", "AllVariants",
+    function(x) slot(x, "promoter"))
+
+setReplaceMethod("promoter", "AllVariants",
+    function(x, value)
+{
+    if (class(value) != "PromoterVariants")
+        stop("'value' must be a 'PromoterVariants' object")
+    slot(x, "promoter") <- value 
+    x
+})
+
+setMethod("intergenic", "AllVariants",
+    function(x) slot(x, "intergenic"))
+
+setReplaceMethod("intergenic", "AllVariants",
+    function(x, value)
+{
+    if (class(value) != "IntergenicVariants")
+        stop("'value' must be a 'IntergenicVariants' object")
+    slot(x, "intergenic") <- value 
     x
 })
 

@@ -80,6 +80,7 @@ export(
     FiveUTRVariants, ThreeUTRVariants, IntergenicVariants,
     SpliceSiteVariants, PromoterVariants, AllVariants,
     upstream, "upstream<-", downstream, "downstream<-",
+    promoter, "promoter<-", intergenic, "intergenic<-",
     probabilityToSnpMatrix, GLtoGP
 )
 

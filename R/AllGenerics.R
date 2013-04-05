@@ -57,6 +57,22 @@ setGeneric("downstream<-", signature = "x",
     function(x, value) standardGeneric("downstream<-")
 )
 
+setGeneric("promoter", signature = "x",
+    function(x) standardGeneric("promoter")
+)
+
+setGeneric("promoter<-", signature = "x",
+    function(x, value) standardGeneric("promoter<-")
+)
+
+setGeneric("intergenic", signature = "x",
+    function(x) standardGeneric("intergenic")
+)
+
+setGeneric("intergenic<-", signature = "x",
+    function(x, value) standardGeneric("intergenic<-")
+)
+
 ### -------------------------------------------------------------------------
 ### read/write Vcf 
 ###

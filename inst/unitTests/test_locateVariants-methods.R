@@ -4,8 +4,10 @@ cdsbytx <- cdsBy(txdb)
 intbytx <- intronsByTranscript(txdb)
 txbygene <- transcriptsBy(txdb, "gene")
 
-gr <- GRanges("chr22", IRanges(c(16268137, 16287254, 16190792, 16164570,
-    18209442, 18121652, 24314750, 25508661), width=c(1,1,1,1,3,3,2,2)),
+gr <- GRanges("chr22", 
+    IRanges(c(16268137, 16287254, 16190792, 16164570,
+              18209442, 18121652, 24314750, 25508661), 
+            width=c(1,1,1,1,3,3,2,2)),
     strand=c("-", "-", "-", "+", "+", "+", "+", "+"))
  
 test_locateVariants_subject <- function()
@@ -28,7 +30,18 @@ test_locateVariants_subject <- function()
     checkIdentical(mcols(loc1)[ ,cols], mcols(loc2)[ ,cols])
 }
 
-test_locateVariants_query <- function()
+test_locateVariants_upstream_downstream <- function()
+{
+    loc1 <- locateVariants(gr, txdb, IntergenicVariants(1, 1))
+    checkIdentical(mcols(loc1)$FOLLOWID, rep(NA_character_, 3))
+    loc2 <- locateVariants(gr, txbygene, IntergenicVariants(2, 2))
+    checkIdentical(mcols(loc2)$FOLLOWID, c(NA, NA, "100037417"))
+    loc3 <- locateVariants(gr, txbygene, IntergenicVariants(1000000, 1000000))
+    checkIdentical(mcols(loc3)$FOLLOWID, c("23784", NA, "100037417"))
+    checkIdentical(mcols(loc3)$PRECEDEID, c(NA, "387590", "2953"))
+}
+
+test_locateVariants_queryAsVCF <- function()
 {
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
     vcf <- readVcf(fl, "hg19")
@@ -111,4 +124,3 @@ test_locateVariants_PromoterVariants <- function()
     current <- locateVariants(q, txdb, PromoterVariants())
     checkIdentical(unique(current$GENEID), "79174")
 }
-

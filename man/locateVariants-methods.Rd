@@ -51,10 +51,15 @@ locateVariants(query, subject, region, ...)
     \code{CodingVariants}, \code{IntronVariants}, \code{FiveUTRVariants}, 
     \code{ThreeUTRVariants}, \code{IntergenicVariants}, 
     \code{SpliceSiteVariants}, \code{PromoterVariants}, \code{AllVariants}.
-    All objects are instantiated with no arguments, e.g., CodingVariants()
-    will create an object of \code{CodingVariants}. \code{AllVariants}
-    and \code{PromoterVariants} classes can be given \code{upstream}
-    and \code{downstram} arguments. 
+    All objects can be instantiated with no arguments, e.g., CodingVariants()
+    will create an object of \code{CodingVariants}. 
+
+    \code{AllVariants}, \code{PromoterVariants} and \code{IntergenicVariants}
+    have \code{upstream} and \code{downstream} arguments. For
+    \code{PromoterVariants} and \code{IntergenicVariants} these are single
+    integer values >= 0. For \code{AllVariants} these are integer vectors
+    of length 2 named \sQuote{promoter} and \sQuote{intergenic}. See
+    ?\code{upstream} for more details. 
   }
   \item{\dots}{Additional arguments passed to methods
   }
@@ -89,12 +94,18 @@ locateVariants(query, subject, region, ...)
       \sQuote{threeUTR}, and \sQuote{fiveUTR} require variants to fall 
       completely within the defined region to be classified as such. 
 
-      To be classified as a \sQuote{spliceSite} the variant must overlap with 
-      any portion of the first 2 or last 2 nucleotides in an intron. 
+      To be classified as a \sQuote{spliceSite} the variant must overlap 
+      with any portion of the first 2 or last 2 nucleotides in an intron. 
 
-      \sQuote{intergenic} variants are those that do not fall within a 
-      transcript associated with a gene. If available, gene IDs for the flanking 
-      genes are give as the \code{PRECEDEID} and \code{FOLLOWID}.
+      \sQuote{intergenic} variants do not fall within a gene region as 
+      defined by the annotaion. \sQuote{transcripts by gene} are extracted
+      from the annotation and overlapped with the variant ranges. The 
+      variants that do not have a \sQuote{hit} are considered 
+      \code{intergenic}. When available, gene IDs for the flanking genes 
+      are provided as \code{PRECEDEID} and \code{FOLLOWID}. The 
+      \code{upstream} and \code{downstream} arguments to 
+      \code{IntergenicVariants()} and \code{AllVariants()} control the 
+      distance from the query for the flanking genes.
 
       \sQuote{promoter} variants fall within a specified range upstream and 
       downstream of the transcription start site. Ranges values can be set 
@@ -168,11 +179,15 @@ locateVariants(query, subject, region, ...)
     }
     \item{\code{PRECEDEID}}{
       The id of the gene the query precedes. Only present for
-      \sQuote{intergenic} variants.
+      \sQuote{intergenic} variants. \code{upstream} and
+      and \code{downstream} argments control the distance
+      of \code{PRECEDEID} and \code{FOLLOWID} from the query. 
     }
     \item{\code{FOLLOWID}}{
       The id of the gene the query follows. Only present for 
-      \sQuote{intergenic} variants.
+      \sQuote{intergenic} variants. \code{upstream} and
+      and \code{downstream} argments control the distance
+      of \code{PRECEDEID} and \code{FOLLOWID} from the query. 
     }
     All ID values will be \sQuote{NA} for variants with a location of
     \code{transcript_region} or \code{NA}.
@@ -184,6 +199,8 @@ locateVariants(query, subject, region, ...)
 \seealso{
   \code{\link{readVcf}},
   \code{\link{summarizeVariants}},
+  \code{\link{predictCoding}}
+  ?\code{upstream}
   \code{\link{predictCoding}}
 }
 

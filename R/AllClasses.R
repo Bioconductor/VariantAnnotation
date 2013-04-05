@@ -195,13 +195,17 @@ setClass("CodingVariants", contains="VariantType")
 
 setClass("IntronVariants", contains="VariantType")
 
-setClass("IntergenicVariants", contains="VariantType")
-
 setClass("ThreeUTRVariants", contains="VariantType")
 
 setClass("FiveUTRVariants", contains="VariantType")
 
 setClass("SpliceSiteVariants", contains="VariantType")
+
+setClass("IntergenicVariants", 
+    contains="VariantType",
+    representation(upstream="integer",
+                   downstream="integer")
+)
 
 setClass("PromoterVariants", 
     contains="VariantType",
@@ -209,25 +213,8 @@ setClass("PromoterVariants",
                    downstream="integer")
 )
 
-.promoterValidity <- function(object, ...)
-{
-    if (any((upstream(object) < 0)  | (downstream(object) < 0)))
-        return("'upstream' and 'downstream' must be integers >= 0")
-    NULL 
-}
-
-setValidity("PromoterVariants",
-    function(object)
-        .promoterValidity(object)
-)
-
 setClass("AllVariants", 
     contains="VariantType",
-    representation(upstream="integer",
-                   downstream="integer")
-)
-
-setValidity("AllVariants",
-    function(object)
-        .promoterValidity(object)
+    representation(promoter="PromoterVariants",
+                   intergenic="IntergenicVariants")
 )
