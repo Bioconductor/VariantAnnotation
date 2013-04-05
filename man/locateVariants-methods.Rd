@@ -59,7 +59,12 @@ locateVariants(query, subject, region, ...)
     \code{PromoterVariants} and \code{IntergenicVariants} these are single
     integer values >= 0. For \code{AllVariants} these are integer vectors
     of length 2 named \sQuote{promoter} and \sQuote{intergenic}. See
-    ?\code{upstream} for more details. 
+    ?\code{upstream} for more details.
+
+    When using \code{AllVariants}, a range in \code{query} may fall in
+    multiple regions (e.g., 'intergenic' and 'promoter'). In this case
+    the result will have a row for each match. All data in the
+    row will be equivalent except the LOCATION column. 
   }
   \item{\dots}{Additional arguments passed to methods
   }
