@@ -68,7 +68,7 @@
     FiveUTRVariants()
     ThreeUTRVariants()
     SpliceSiteVariants()
-    IntergenicVariants(upstream = 100000L, downstream = 100000L)
+    IntergenicVariants(upstream = 1e+06L, downstream = 1e+06L)
     PromoterVariants(upstream = 2000L, downstream = 200L)
     AllVariants(promoter = PromoterVariants(),
                 intergenic = IntergenicVariants())

@@ -70,7 +70,7 @@ SpliceSiteVariants <- function() new("SpliceSiteVariants")
         x
 }
 
-IntergenicVariants <- function(upstream=100000L, downstream=100000L)
+IntergenicVariants <- function(upstream=1e+06L, downstream=1e+06L)
 {
     upstream <- .checkArgs(upstream, "upstream") 
     downstream <- .checkArgs(downstream, "downstream") 
