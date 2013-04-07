@@ -103,7 +103,7 @@ setMethod(readVcf, c(file="character", genome="missing",
     fixed <- DataFrame(fx[!sapply(fx, is.null)]) 
 
     ## info 
-    info <- .formatInfo(vcf$INFO, info(hdr))
+    info <- .formatInfo(vcf$INFO, info(hdr), length(rowData))
 
     ## colData
     if (length(vcf$GENO) > 0) {

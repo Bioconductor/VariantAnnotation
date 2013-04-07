@@ -4,7 +4,7 @@
 \alias{MatrixToSnpMatrix,matrix,DNAStringSet,DNAStringSetList-method}
 
 
-\title{Convert genotype calls from a VCF file to a SnpMatrix object}
+\title{(Defunct) Convert genotype calls from a VCF file to a SnpMatrix object}
 
 \description{
   This method is deprecated.  Use \link{genotypeToSnpMatrix} instead.

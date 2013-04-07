@@ -122,11 +122,11 @@
     grepl("]", x, fixed=TRUE)
 }
 
-.formatInfo <- function(x, hdr)
+.formatInfo <- function(x, hdr, nrows)
 {
     ## no data
-    if (1L == length(x) && names(x) == "INFO")
-        return(DataFrame())
+    if (0L == length(x))
+        return(DataFrame(row.names=seq_len(nrows)))
     ## data in file but not in header
     if (0L == length(hdr)) {
         DF <- DataFrame(x)

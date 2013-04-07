@@ -99,9 +99,8 @@ setAs("CollapsedVCF", "SummarizedExperiment",
 {
     xlen <- nrow(object)
     i <- slot(object, "info")
-    if (length(i) != 0)
-        if (nrow(i) != xlen)
-            return("'info' must have the same number of rows as 'rowData'")
+    if (nrow(i) != xlen)
+        return("'info' must have the same number of rows as 'rowData'")
     NULL
 }
 

@@ -10,7 +10,9 @@
 VCF <-
     function(rowData=GRanges(), colData=DataFrame(), 
              exptData=SimpleList(header=VCFHeader()), 
-             fixed=DataFrame(), info=DataFrame(), geno=SimpleList(),
+             fixed=DataFrame(),
+             info=DataFrame(row.names=seq_along(rowData)), 
+             geno=SimpleList(),
              ..., collapsed=TRUE, verbose=FALSE)
 {
     rownames(info) <- rownames(fixed) <- NULL
@@ -386,7 +388,7 @@ setMethod("keepSeqlevels",  c("VCF", "character"),
 
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-### show
+### show methods
 ###
 
 setMethod(show, "VCF",
@@ -396,7 +398,7 @@ setMethod(show, "VCF",
            "create a CollapsedVCF instance.")
 })
 
-### show method for CollapsedVCF and ExapandedVCF
+### methods for CollapsedVCF and ExapandedVCF
 .showVCFSubclass <- function(object)
 {
     prettydescr <- function(desc) {
@@ -428,7 +430,6 @@ setMethod(show, "VCF",
         nms <- names(x)
         cat(margin, class(x), " with ",
             nc, ifelse(nc == 1, " column", " columns"),
-    #        ": ", paste0(nms, collapse=", "), "\n", sep = "")
             ": ", prettydescr(paste0(nms, collapse=", ")), "\n", sep="")
     }
     printSimpleList <- function(x, margin)
@@ -436,7 +437,6 @@ setMethod(show, "VCF",
         lo <- length(x)
         nms <- names(x)
         cat(margin, class(x), " of length ", lo, 
-            #": ", paste0(nms, collapse=", "), "\n", sep = "")
             ": ", prettydescr(paste0(nms, collapse=", ")), "\n", sep="")
     }
     margin <- "  "
@@ -447,14 +447,18 @@ setMethod(show, "VCF",
     cat("info(vcf):\n")
     printSmallDataTable(info(object), margin=margin) 
     if (length(hdr <- info(header(object))) > 0) {
-        cat("info(header(vcf)):\n")
-        headerrec(as.data.frame(hdr[colnames(info(object)),]), "info")
+        if (nrow(df <- as.data.frame(hdr[colnames(info(object)),])) > 0) {
+            cat("info(header(vcf)):\n")
+            headerrec(df, "info")
+        }
     }
     cat("geno(vcf):\n")
     printSimpleList(geno(object), margin=margin) 
-    if (length(hdr <- geno(header(object))) > 0) {
-        cat("geno(header(vcf)):\n")
-        headerrec(as.data.frame(hdr), "geno")
+    if (nrow(hdr <- geno(header(object))) > 0) {
+        if (nrow(df <- as.data.frame(hdr[names(geno(object)),])) > 0) {
+            cat("geno(header(vcf)):\n")
+            headerrec(df, "geno")
+        }
     }
 }
 

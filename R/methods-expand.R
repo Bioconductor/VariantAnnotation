@@ -34,39 +34,45 @@ setMethod("expand", "CollapsedVCF",
 
 .expandGeno <- function(x, hdr, elt, idx)
 {
+    gvar <- geno(x)
+    ## no data 
+    if (length(gvar) == 0L)
+        return(gvar)
     isA <- geno(hdr)$Number == "A"
-    geno <- geno(x)
     if (any(isA)) {
         gnms <- rownames(geno(hdr))[geno(hdr)$Number == "A"]
         gelt <- sapply(gnms, function(i) 
-                    elt - elementLengths(geno[[i]]))
+                    elt - elementLengths(gvar[[i]]))
         ## elementLengths same as ALT
         csums <- colSums(gelt) == 0L
         if (any(csums))
-            geno[gnms[csums]] <- endoapply(geno[gnms[csums]], function(i)
+            gvar[gnms[csums]] <- endoapply(gvar[gnms[csums]], function(i)
                                      matrix(unlist(i, use.names=FALSE)))
         ## elementLengths shorter than ALT
         if (any(!csums)) {
-            nms <- names(geno) %in% names(csums)[!csums]
+            nms <- names(gvar) %in% names(csums)[!csums]
             reps <- lapply(list(gelt[!csums] + 1L), rep.int,
                         x=seq_len(nrow(x)))
-            geno[nms] <- mendoapply(geno[nms], function(d, r)
+            gvar[nms] <- mendoapply(gvar[nms], function(d, r)
                              unlist(d[r], use.names=FALSE),
                          r=reps)
         }
-        geno
+        gvar
     }
-    geno[!isA] <- endoapply(geno[!isA], function(i) {
+    gvar[!isA] <- endoapply(gvar[!isA], function(i) {
                       if (is(i, "matrix"))
                           matrix(i[idx, ], ncol=ncol(x))
                       else
                           i[idx, , ]})
-    geno
+    gvar
 }
 
 .expandInfo <- function(x, hdr, elt, idx)
 {
-    icol <- info(x)
+    ivar <- info(x)
+    ## no data 
+    if (ncol(ivar) == 0L)
+        return(DataFrame(row.names=seq_along(idx)))
     inms <- rownames(info(hdr))[info(hdr)$Number == "A"]
     if (length(inms) > 0L) {
         ielt <- sapply(inms, function(i) 
@@ -74,21 +80,21 @@ setMethod("expand", "CollapsedVCF",
         ## elementLengths same as ALT
         csums <- colSums(ielt) == 0L
         if (any(csums))
-            res <- expand(icol, inms[csums], TRUE)
+            res <- expand(ivar, inms[csums], TRUE)
         else
-            res <- icol[idx, ] 
+            res <- ivar[idx, ] 
         ## elementLengths shorter than ALT
         if (any(!csums)) {
-            nms <- colnames(icol) %in% names(csums)[!csums]
+            nms <- colnames(ivar) %in% names(csums)[!csums]
             reps <- lapply(list(ielt[!csums] + 1L), rep.int,
                         x=seq_len(nrow(x)))
             res[nms] <- Map(function(d, r)
                              unlist(d[r], use.names=FALSE),
-                         icol[nms], reps)
+                         ivar[nms], reps)
         }
         res
     } else {
-        icol[idx, ]
+        ivar[idx, ]
     }
 }
 
