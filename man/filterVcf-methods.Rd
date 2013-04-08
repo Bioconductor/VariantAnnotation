@@ -2,8 +2,6 @@
 \alias{filterVcf}
 \alias{filterVcf,character-method}
 \alias{filterVcf,TabixFile-method}
-\alias{dbSNPFilter}
-\alias{regionFilter}
 
 \title{Filter VCF files}
 
