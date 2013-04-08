@@ -12,7 +12,7 @@
   of \code{VariantAnnotation}.
 }
 
-\section{usage} {
+\section{usage}{
   ## Defunct in 1.7.z
   dbSNPFilter()
   regionFilter()
