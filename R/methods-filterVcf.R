@@ -1,18 +1,19 @@
 setMethod("filterVcf", "character",
-    function(file, genome, destination, ..., verbose = TRUE,
-             index = FALSE, prefilters = FilterRules(),
-             filters = FilterRules(), param = ScanVcfParam())
+    function(file, genome, destination, ..., verbose=TRUE,
+             index=FALSE, prefilters=FilterRules(),
+             filters=FilterRules(), param=ScanVcfParam())
 {
    if (file.exists(destination))
-        stop(sprintf("file '%s' exists and will not be over-written", destination))
+        stop(sprintf("file '%s' exists and will not be over-written", 
+             destination))
 
     tbx <- open(TabixFile(file, yieldSize=100000))
     on.exit(close(tbx))
  
 
-    filterVcf(tbx, genome = genome, destination=destination, ...,
-              verbose = verbose, index = index, prefilters = prefilters,
-              filters = filters, param = param)
+    filterVcf(tbx, genome=genome, destination=destination, ...,
+              verbose=verbose, index=index, prefilters=prefilters,
+              filters=filters, param=param)
 })
 
 .unlistScan <- function(...)
@@ -110,7 +111,9 @@ setMethod("filterVcf", "TabixFile",
             indexTabix(gzFilename, format = "vcf4")
             file <- TabixFile(gzFilename, yieldSize=yieldSize)
         } else {
-            file.rename(file, destination)
+            ## file.rename does not work across file systems, so be expensive
+            file.copy(file, destination)
+            unlink(file)
         }
       }
 

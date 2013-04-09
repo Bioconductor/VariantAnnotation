@@ -10,7 +10,7 @@
 \alias{readVcfLongForm,TabixFile,character,missing-method}
 
 
-\title{Read VCF files into a long form GRanges}
+\title{(Deprecated) Read VCF files into a long form GRanges}
 
 \description{Read Variant Call Format (VCF) files into a long form GRanges}
 

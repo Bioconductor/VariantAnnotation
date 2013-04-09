@@ -73,7 +73,7 @@ test_prefilterOnSomaticStatus <- function()
         }
 
     prefilteringFunctions <- FilterRules(list(isGermline=isGermline))
-    filtered.filename <- filterVcf(tabix.file, "hg19", "small.vcf",
+    filtered.filename <- filterVcf(tabix.file, "hg19", tempfile(),
                                    prefilters=prefilteringFunctions,
                                    verbose=FALSE)
 
@@ -96,7 +96,7 @@ test_filterOnSnps <- function()
         }
  
     filteringFunctions <- FilterRules(list(isSnp=isSnp))
-    filtered.filename <- filterVcf(tabix.file, "hg19", "small.vcf",
+    filtered.filename <- filterVcf(tabix.file, "hg19", tempfile(),
                                    filters=filteringFunctions,
                                    verbose=FALSE)
       # now check the results
@@ -127,7 +127,7 @@ test_prefilterOnSomaticStatusThenFilterOnSnps <- function()
     filteringFunctions <- FilterRules(list(isSnp=isSnp))
  
         # now filter on both.  should be 98 rows
-    filtered.filename <- filterVcf(tabix.file, "hg19", "small.vcf",
+    filtered.filename <- filterVcf(tabix.file, "hg19", tempfile(),
                                    prefilters=prefilteringFunctions,
                                    filters=filteringFunctions,
                                    verbose=FALSE)
