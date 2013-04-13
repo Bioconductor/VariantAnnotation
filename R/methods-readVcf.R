@@ -89,6 +89,10 @@ setMethod(readVcf, c(file="character", genome="missing",
 .scanVcfToVCF <- function(vcf, file, genome, param, ...)
 {
     hdr <- scanVcfHeader(file)
+    if (length(vcf[[1]]$GENO) > 0L)
+        colnms <- colnames(vcf[[1]]$GENO[[1]])
+    else
+        colnms <- NULL
     vcf <- .collapseLists(vcf, param)
 
     ## rowData
@@ -106,13 +110,7 @@ setMethod(readVcf, c(file="character", genome="missing",
     info <- .formatInfo(vcf$INFO, info(hdr), length(rowData))
 
     ## colData
-    if (length(vcf$GENO) > 0) {
-        samples <- samples(hdr) 
-        colData <- DataFrame(Samples=seq_len(length(samples)),
-                             row.names=samples)
-    } else {
-        colData <- DataFrame(Samples=character(0))
-    }
+    colData <- DataFrame(Samples=seq_along(colnms), row.names=colnms)
 
     VCF(rowData=rowData, colData=colData, exptData=SimpleList(header=hdr),
         fixed=fixed, info=info, geno=SimpleList(vcf$GENO))

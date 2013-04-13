@@ -9,18 +9,38 @@
 
 setMethod(ScanVcfParam, "ANY",
     function(fixed=character(), info=character(), geno=character(), 
-             trimEmpty=TRUE, which, ...)
+             samples=character(), trimEmpty=TRUE, which, ...)
 {
-    ScanBcfParam(fixed, info, geno, trimEmpty, which=which,
-                 class="ScanVcfParam")
+    ScanBcfParam(fixed, info, geno, samples, trimEmpty=trimEmpty, 
+                 which=which, class="ScanVcfParam")
 })
 
 setMethod(ScanVcfParam, "missing",
     function(fixed=character(), info=character(), geno=character(), 
-             trimEmpty=TRUE, which, ...)
+             samples=character(), trimEmpty=TRUE, which, ...)
 {
-    ScanBcfParam(fixed, info, geno, trimEmpty, class="ScanVcfParam")
+    ScanBcfParam(fixed, info, geno, samples, trimEmpty=trimEmpty,
+                 class="ScanVcfParam")
 })
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Validity 
+##
+
+.valid.ScanVcfParam <- function(x)
+{
+    samples <- vcfSamples(x)
+    geno <- vcfGeno(x)
+    if (any(is.na(samples)) && length(geno) > 0L)
+        return("ScanVcfParam: 'geno' cannot be specified if 'samples' is 'NA'")
+    if (any(is.na(geno)) && length(samples) > 0L)
+        return("ScanVcfParam: 'samples' cannot be specified if 'geno' is 'NA'")
+
+    NULL 
+}
+
+setValidity("ScanVcfParam", .valid.ScanVcfParam,
+    where=asNamespace("VariantAnnotation"))
 
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## Getters and Setters
@@ -44,6 +64,13 @@ vcfGeno <- function(object) slot(object, "geno")
 "vcfGeno<-" <- function(object, value) 
 {
     slot(object, "geno") <- value
+    object
+}
+
+vcfSamples <- function(object) slot(object, "samples")
+"vcfSamples<-" <- function(object, value) 
+{
+    slot(object, "samples") <- value
     object
 }
 

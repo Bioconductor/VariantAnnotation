@@ -52,9 +52,9 @@
 
 \details{
   \describe{
-    \item{Data Import :}{
+    \item{Data Import: }{
       \describe{
-        \item{VCF object :}{
+        \item{VCF object: }{
           \code{readVcf} imports records from bzip compressed or uncompressed 
           VCF files. Data are parsed into a \code{\linkS4class{VCF}} object 
           using the file header information if available. To import a subset 
@@ -66,7 +66,7 @@
       \code{readVcf} calls \code{\link{scanVcf}}, the details of which can be 
       found with \code{?scanVcf}.
     }
-    \item{Data type :}{
+    \item{Data type: }{
       CHROM, POS, ID and REF fields are used to create the \code{GRanges}
       stored in the \code{rowData} slot of the \code{VCF} object. Access
       with \code{rowData} accessor.
@@ -81,7 +81,7 @@
       Genotype data (i.e., data immediately following the FORMAT field in the 
       VCF) can be accessed with the \code{geno} accessor. INFO and genotype data 
       types are determined according to the \sQuote{Number} and \sQuote{Type} 
-      information in the file header as follows :
+      information in the file header as follows:
 
       If \sQuote{Number} is 1, \sQuote{info} data are parsed into a 
       \code{vector}. \sQuote{geno} data are parsed into a \code{matrix} where 
@@ -98,7 +98,7 @@
       When the VCF header does not contain data type information, the data are 
       returned as a single unparsed column named \sQuote{INFO} or \sQuote{GENO}.
     }
-    \item{Missing data  :}{
+    \item{Missing data: }{
       Missing data in VCF files are represented by a dot ("."). \code{readVcf} 
       retains the dot as a character string for data type character and converts 
       it to \code{NA} for data types numeric or double. 
@@ -116,7 +116,7 @@
   See ?\code{VCF} for complete details of the class structure.
 
   \describe{
-    \item{rowData:}{
+    \item{rowData: }{
       The CHROM, POS, ID and REF fields are used to create a \code{GRanges}
       object. The ranges are created using POS as the start value and width of 
       the reference allele (REF). The IDs become the rownames. If they are 
@@ -130,23 +130,23 @@
       in the \code{ScanVcfParam}. This ID distinguishes which records match
       each range.
     }
-    \item{fixed:}{
+    \item{fixed: }{
       REF, ALT, QUAL and FILTER fields of the VCF are parsed into a 
       \code{DataFrame}.
     }
-    \item{info:}{
+    \item{info: }{
       Data from the INFO field of the VCF is parsed into a \code{DataFrame}.
     }
-    \item{geno:}{
+    \item{geno: }{
       If present, the genotype data are parsed into a list of \code{matrices} 
       or \code{arrays}. Each list element represents a field in the FORMAT 
       column of the VCF file. Rows are the variants, columns are the samples. 
     }
-    \item{colData:}{
+    \item{colData: }{
       This slot contains a \code{DataFrame} describing the samples. If present, 
       the sample names following FORMAT in the VCF file become the row names.
     }
-    \item{exptData:}{ 
+    \item{exptData: }{ 
       Header information present in the file is put into a \code{SimpleList}
       in \code{exptData}.
     }
@@ -175,7 +175,7 @@
   \code{\link{TabixFile}},
   \code{\link{scanTabix}},
   \code{\link{scanBcf}},
-  \code{readVcfLongForm}
+  \code{\link{expand,CollapsedVCF-method}}
 }
 
 \examples{
@@ -188,7 +188,7 @@
   vcf
 
   ## extract the VCFHeader object from exptData
-  hdr <- exptData(vcf)[["header"]]
+  hdr <- header(vcf)
   ## use accessors to extract the data
   info(hdr)
   fixed(hdr)
@@ -220,7 +220,7 @@
   ## Data subsets 
   ## ---------------------------------
 
-  ## Subset on genome coordinates :
+  ## Subset on genome coordinates:
   ## 'file' must have a Tabix index
   rngs <- GRanges("20", IRanges(c(14370, 1110000), c(17330, 1234600)))
   names(rngs) <- c("geneA", "geneB")
@@ -230,17 +230,28 @@
   tab <- TabixFile(compressVcf, idx)
   vcf <- readVcf(tab, "hg19", param)
 
-  ## 'paramRangeID' associates the records to the ranges in the param
-  rowData(vcf)
+  ## When 'param' is used to subset the data, the 'paramRangeID' column 
+  ## in the result provides a map back to the original range in 'param'.
+  mcols(rowData(vcf))$paramRangeID
+  vcfWhich(param)
 
-  ## Subset on 'fixed', 'info' or 'geno' VCF elements :
+  ## Subset on samples:
+  ## The header information contains the names of all available samples.
+  samples(hdr) 
+  ## One or more names can be specified in 'samples' in a ScanVcfParam 
+  ## object to subset by sample.
+  param <- ScanVcfParam(samples="NA00002")
+  vcf <- readVcf(tab, "hg19", param)
+
+
+  ## Subset on 'fixed', 'info' or 'geno' VCF elements:
   param <- ScanVcfParam(fixed="ALT", geno=c("GT", "HQ"), info=c("NS", "AF"))
   vcf_tab <- readVcf(tab, "hg19", param)
   ## Because there are no ranges specified in the 'param' we don't have
   ## to use the tabix file.
   vcf_fname <- readVcf(fl, "hg19", param)
 
-  ## Subset on both genome coordinates and VCF elements : 
+  ## Subset on both genome coordinates and VCF elements: 
   param <- ScanVcfParam(geno="HQ", info="AF", which=rngs)
   vcf <- readVcf(tab, "hg19", param)
 

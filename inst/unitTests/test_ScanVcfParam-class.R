@@ -47,6 +47,17 @@ test_ScanVcfParam_geno <- function()
     checkIdentical(geno, vcfGeno(svp))
 }
 
+test_ScanVcfParam_samples <- function()
+{
+    samp <- c("GT", "GQ")
+    svp <- ScanVcfParam(samples=samp)
+    checkIdentical(samp, vcfSamples(svp))
+    checkException(vcfSamples(svp) <- DataFrame(), silent=TRUE)
+    checkException(vcfSamples(svp) <- 1:5, silent=TRUE)
+    checkException(ScanVcfParam(geno="DP", samples=NA), silent=TRUE)
+    checkException(ScanVcfParam(geno=NA, samples="foo"), silent=TRUE)
+}
+
 test_ScanVcfParam_trimEmpty <- function()
 {
     svp <- ScanVcfParam()

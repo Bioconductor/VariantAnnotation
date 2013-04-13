@@ -50,7 +50,8 @@ struct parse_t {
     struct rle_t *chrom;
     struct dna_hash_t *ref;
     int vcf_n, imap_n, gmap_n, samp_n, *gmapidx;
-    const char **inms, **gnms;
+    Rboolean *sampbool;
+    const char **inms, **gnms, **snms;
     khash_t(WARNINGS) *warnings;
 };
 
@@ -98,11 +99,13 @@ static SEXP _trim_null(SEXP data, const char **cnms)
     return data;
 }
 
-static struct vcftype_t *_vcf_alloc(const int vcf_n, SEXP sample,
+static struct vcftype_t *_vcf_alloc(const int vcf_n, SEXP smap,
                                     SEXP fmap, SEXP imap, SEXP gmap)
 {
     struct vcftype_t *vcf, *rowData;
-    const int samp_n = Rf_length(sample);
+    int samp_n = 0;
+    for(int i = 0; i < Rf_length(smap); i++)
+        samp_n += INTEGER(smap)[i];
 
     if (Rf_length(fmap) != N_FLDS - 2)
         Rf_error("[internal] 'fixed' field length %d does not equal %d",
@@ -148,8 +151,11 @@ static void _parse(char *line, const int irec,
     struct vcftype_t *vcf = parse->vcf, *rowData, *elt;
     const int samp_n = parse->samp_n, imap_n = parse->imap_n,
         gmap_n = parse->gmap_n;
-    const char **inms = parse->inms, **gnms = parse->gnms;
-    int fmtidx, sampleidx, imapidx, *gmapidx = parse->gmapidx;
+    const char **inms = parse->inms, **gnms = parse->gnms,
+        **snms = parse->snms;
+    int fmtidx, sampleidx, imapidx;
+    int *gmapidx = parse->gmapidx;
+    Rboolean *sampbool = parse->sampbool;
 
     int idx = irec, j;
     struct it_t it0, it1, it2;
@@ -216,7 +222,7 @@ static void _parse(char *line, const int irec,
                 break;
         }
         if (gmap_n == j)
-	    vcfwarn(parse->warnings, irec + 1, "FORMAT", field);
+            vcfwarn(parse->warnings, irec + 1, "FORMAT", field);
         gmapidx[fmtidx] = j;
     }
 
@@ -224,10 +230,12 @@ static void _parse(char *line, const int irec,
     struct vcftype_t *geno = vcf->u.list[GENO_IDX];
     for (sample = it_next(&it0), sampleidx = 0;
          '\0' != *sample; sample = it_next(&it0), sampleidx++) {
+        if (!sampbool[sampleidx])
+            continue;    /* skip sample */
         for (field = it_init(&it2, sample, ':'), fmtidx = 0;
              '\0' != *field; field = it_next(&it2), fmtidx++) {
-	    if (gmap_n == gmapidx[fmtidx])
-		continue;	/* unknown FORMAT */
+            if (gmap_n == gmapidx[fmtidx])
+                continue;    /* unknown FORMAT */
             elt = geno->u.list[ gmapidx[fmtidx] ];
             idx = irec * samp_n + sampleidx;
             _vcftype_set(elt, idx, field);
@@ -235,7 +243,7 @@ static void _parse(char *line, const int irec,
     }
 }
 
-static SEXP _vcf_as_SEXP(struct parse_t *parse, SEXP fmap, SEXP sample)
+static SEXP _vcf_as_SEXP(struct parse_t *parse, SEXP fmap, SEXP smap)
 {
     SEXP result = PROTECT(_vcftype_as_SEXP(parse->vcf));
 
@@ -285,16 +293,29 @@ static SEXP _vcf_as_SEXP(struct parse_t *parse, SEXP fmap, SEXP sample)
     Rf_namesgets(VECTOR_ELT(result, GENO_IDX), nms);
     UNPROTECT(1);
 
+
+    SEXP samplenames;
+    int nz = 0;
+    for(int i = 0; i < Rf_length(smap); i++)
+        nz += INTEGER(smap)[i];
+    PROTECT(samplenames = Rf_allocVector(STRSXP, nz));
+    for (int i = 0, j = 0; i < parse->samp_n; ++i) {
+        if (parse->sampbool[i]) {
+           SET_STRING_ELT(samplenames, j, mkChar(parse->snms[i]));
+           j++;
+        }
+    }
     PROTECT(nms = Rf_allocVector(VECSXP, 2));
     SET_VECTOR_ELT(nms, 0, R_NilValue);
-    SET_VECTOR_ELT(nms, 1, sample);
+    SET_VECTOR_ELT(nms, 1, samplenames);
+
     sxp = VECTOR_ELT(result, GENO_IDX);
     for (int i = 0; i < Rf_length(sxp); ++i) {
         elt = VECTOR_ELT(sxp, i);
         if (R_NilValue != elt)
             Rf_dimnamesgets(elt, nms);
     }
-    UNPROTECT(1);
+    UNPROTECT(2);
 
     UNPROTECT(1);
     return result;
@@ -314,13 +335,13 @@ static void _vcf_types_tidy(struct parse_t *parse, SEXP result)
     SET_VECTOR_ELT(result, GENO_IDX, _trim_null(elt, parse->gnms));
 }
 
-static struct parse_t *_parse_new(int vcf_n, SEXP sample, SEXP fmap,
+static struct parse_t *_parse_new(int vcf_n, SEXP smap, SEXP fmap,
                                   SEXP imap, SEXP gmap)
 {
     struct parse_t *parse = Calloc(1, struct parse_t);
 
     parse->vcf_n = vcf_n;
-    parse->vcf = _vcf_alloc(parse->vcf_n, sample, fmap, imap, gmap);
+    parse->vcf = _vcf_alloc(parse->vcf_n, smap, fmap, imap, gmap);
 
     parse->imap_n = Rf_length(imap);
     if (1 == parse->imap_n && R_NilValue == GET_NAMES(imap))
@@ -332,7 +353,16 @@ static struct parse_t *_parse_new(int vcf_n, SEXP sample, SEXP fmap,
             parse->inms[j] = CHAR(STRING_ELT(GET_NAMES(imap), j));
     }
 
-    parse->samp_n = Rf_length(sample);
+    parse->samp_n = Rf_length(smap);
+    //parse->sampbool = (int *) R_alloc(sizeof(int), parse->samp_n);
+    parse->sampbool = LOGICAL(smap);
+    parse->snms =
+        (const char **) R_alloc(sizeof(const char *), parse->samp_n);
+    for (int j = 0; j < parse->samp_n; ++j) {
+        parse->snms[j] = CHAR(STRING_ELT(GET_NAMES(smap), j));
+//        parse->sampbool[j] = asInteger(VECTOR_ELT(smap, j));
+    }
+
     parse->gmap_n = Rf_length(gmap);
     parse->gnms =
         (const char **) R_alloc(sizeof(const char *), parse->gmap_n);
@@ -343,6 +373,7 @@ static struct parse_t *_parse_new(int vcf_n, SEXP sample, SEXP fmap,
     parse->ref = dna_hash_new(parse->vcf_n);
 
     parse->warnings = vcfwarn_new();
+
 
     return parse;
 }
@@ -364,12 +395,12 @@ static void _parse_grow(struct parse_t *parse, int size)
     parse->vcf_n = size;
 }
 
-SEXP scan_vcf_connection(SEXP txt, SEXP sample, SEXP fmap, SEXP imap,
+SEXP scan_vcf_connection(SEXP txt, SEXP smap, SEXP fmap, SEXP imap,
                          SEXP gmap)
 {
     struct parse_t *parse;
 
-    parse = _parse_new(Rf_length(txt), sample, fmap, imap, gmap);
+    parse = _parse_new(Rf_length(txt), smap, fmap, imap, gmap);
 
     /* parse each line */
     for (int irec = 0; irec < parse->vcf_n; irec++) {
@@ -379,7 +410,7 @@ SEXP scan_vcf_connection(SEXP txt, SEXP sample, SEXP fmap, SEXP imap,
     }
 
     SEXP result = PROTECT(Rf_allocVector(VECSXP, 1));
-    SET_VECTOR_ELT(result, 0, _vcf_as_SEXP(parse, fmap, sample));
+    SET_VECTOR_ELT(result, 0, _vcf_as_SEXP(parse, fmap, smap));
     _vcf_types_tidy(parse, result);
     _parse_free(parse);
     UNPROTECT(1);
@@ -388,7 +419,7 @@ SEXP scan_vcf_connection(SEXP txt, SEXP sample, SEXP fmap, SEXP imap,
 }
 
 SEXP scan_vcf_character(SEXP file, SEXP yield,
-                        SEXP sample, SEXP fmap, SEXP imap, SEXP gmap)
+                        SEXP smap, SEXP fmap, SEXP imap, SEXP gmap)
 {
     struct parse_t *parse;
 
@@ -397,7 +428,7 @@ SEXP scan_vcf_character(SEXP file, SEXP yield,
     if (!IS_CHARACTER(file) || 1L != Rf_length(file))
         Rf_error("'file' must be character(1) or as on ?scanVcf");
 
-    parse = _parse_new(INTEGER(yield)[0], sample, fmap, imap, gmap);
+    parse = _parse_new(INTEGER(yield)[0], smap, fmap, imap, gmap);
 
     const int BUFLEN = 4096;
     char *buf0 = Calloc(BUFLEN, char);
@@ -447,7 +478,7 @@ SEXP scan_vcf_character(SEXP file, SEXP yield,
     _vcf_grow(parse->vcf, irec);
 
     SEXP result = PROTECT(Rf_allocVector(VECSXP, 1));
-    SET_VECTOR_ELT(result, 0, _vcf_as_SEXP(parse, fmap, sample));
+    SET_VECTOR_ELT(result, 0, _vcf_as_SEXP(parse, fmap, smap));
     _vcf_types_tidy(parse, VECTOR_ELT(result, 0));
     _parse_free(parse);
     UNPROTECT(1);

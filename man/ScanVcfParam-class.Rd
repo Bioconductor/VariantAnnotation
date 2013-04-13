@@ -11,6 +11,8 @@
 \alias{vcfInfo<-}
 \alias{vcfGeno}
 \alias{vcfGeno<-}
+\alias{vcfSamples}
+\alias{vcfSamples<-}
 \alias{vcfTrimEmpty}
 \alias{vcfTrimEmpty<-}
 \alias{vcfWhich}
@@ -23,12 +25,12 @@
   which records and fields are imported from a VCF file. Record
   parsing is based on genomic coordinates and requires a Tabix index
   file. Individual VCF elements can be specified in the \sQuote{fixed},
-  \sQuote{info} and \sQuote{geno} arguments.
+  \sQuote{info}, \sQuote{geno} and \sQuote{samples} arguments.
 }
 
 \usage{
   ScanVcfParam(fixed=character(), info=character(), geno=character(), 
-               trimEmpty=TRUE, which, ...)
+               samples=character(), trimEmpty=TRUE, which, ...)
 
   ## Getters and Setters 
  
@@ -38,6 +40,8 @@
   vcfInfo(object) <- value
   vcfGeno(object)
   vcfGeno(object) <- value
+  vcfSamples(object)
+  vcfSamples(object) <- value
   vcfTrimEmpty(object)
   vcfTrimEmpty(object) <- value
   vcfWhich(object)
@@ -59,6 +63,11 @@
   \item{geno}{A character() vector naming the \sQuote{GENO} fields to return.
     \code{scanVcfHeader()} returns a vector of available fields. If not specified, 
     all fields are returned; if \code{geno=NA} no fields are returned.
+  }
+  \item{samples}{A character() vector of sample names to return.
+    \code{samples(scanVcfHeader())} returns all possible names. If not specified, 
+    data for all samples are returned; if \code{samples=NA} no sample data are 
+    returned.
   }
   \item{trimEmpty}{A logical(1) indicating whether \sQuote{GENO} fields
     with no values should be returned.
@@ -95,6 +104,9 @@
     }
     \item{\code{geno}:}{Object of class \code{"character"} indicating
       portions of \sQuote{GENO} to be returned. 
+    }
+    \item{\code{samples}:}{Object of class \code{"character"} indicating
+      the samples to be returned.
     }
     \item{\code{trimEmpty}:}{Object of class \code{"logical"} indicating
       whether empty \sQuote{GENO} fields are to be returned.

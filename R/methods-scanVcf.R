@@ -41,28 +41,38 @@
 }
 
 .vcf_scan_header_maps <-
-    function(file, fixed, info, geno)
+    function(file, fixed, info, geno, samples)
 {
     hdr <- scanVcfHeader(file)
-    samples <- samples(hdr) 
+    samp <- samples(hdr)
+    smap <- logical(length(samp))
+    if (identical(character(), samples)) {
+        smap <- !smap
+    } else {
+        if (length(nx <- samples[!samples %in% samp]) > 0L)
+            warning(paste0("samples '", nx, "' in ",
+                    "vcfSamples(<ScanVcfParam>) not found in file"))
+        smap <- samp %in% samples
+    }
+    names(smap) <- samp
     fmap <- .vcf_fixed(fixed)
     imap <- .vcf_map(info(hdr), info, nm="info")
     if (0L == length(imap))
         imap <- list(character())
     gmap <- .vcf_map(geno(hdr), geno, nm="geno")
-    list(hdr=hdr, samples=samples, fmap=fmap, imap=imap, gmap=gmap)
+    list(hdr=hdr, samples=smap, fmap=fmap, imap=imap, gmap=gmap)
 }
 
 .vcf_scan <- 
    function(file, ..., fixed=character(), info=character(),
-            geno=character(), param)
+            geno=character(), samples=character(), param)
 {
     result <- tryCatch({
         if (!isOpen(file)) {
             open(file)
             on.exit(close(file))
         }
-        maps <- .vcf_scan_header_maps(file, fixed, info, geno)
+        maps <- .vcf_scan_header_maps(file, fixed, info, geno, samples)
         tbxstate <- maps[c("samples", "fmap", "imap", "gmap")]
         tbxsym <- getNativeSymbolInfo(".tabix_as_vcf",
                                       "VariantAnnotation")
@@ -77,13 +87,14 @@
 
 .vcf_scan_character <-
     function(file, ..., fixed=character(), info=character(),
-             geno=character(), yieldSize=100000L)
+             geno=character(), samples=character(), 
+             yieldSize=100000L)
 {
     res <- tryCatch({
         file <- normalizePath(path.expand(file))
         if (!file.exists(file))
             stop("file does not exist")
-        maps <- .vcf_scan_header_maps(file, fixed, info, geno)
+        maps <- .vcf_scan_header_maps(file, fixed, info, geno, samples)
         result <- .Call(.scan_vcf_character, file,
                         as.integer(yieldSize), maps$samples,
                         maps$fmap, maps$imap, maps$gmap)
@@ -99,11 +110,11 @@
 
 .vcf_scan_connection <-
     function(file, ..., fixed=character(), info=character(),
-             geno=character())
+             geno=character(), samples=character())
 {
     res <- tryCatch({
         file <- summary(file)$description
-        maps <- .vcf_scan_header_maps(file, fixed, info, geno)
+        maps <- .vcf_scan_header_maps(file, fixed, info, geno, samples)
 
         txt <- readLines(file, ...)
         txt <- txt[!grepl("^#", txt)] # FIXME: handle header lines better
@@ -142,7 +153,7 @@ setMethod(scanVcf, c("TabixFile", "ScanVcfParam"),
 {
     result <- scanVcf(file, ..., fixed=vcfFixed(param),
                       info=vcfInfo(param), geno=vcfGeno(param),
-                      param=vcfWhich(param))
+                      samples=vcfSamples(param), param=vcfWhich(param))
     if (vcfTrimEmpty(param))
         lapply(result, function(rng) {
             rng[["GENO"]] <- Filter(Negate(is.null), rng[["GENO"]])
@@ -164,7 +175,8 @@ setMethod(scanVcf, c("character", "ScanVcfParam"),
     ## no ranges
     if (0L == length(vcfWhich(param))) {
         .vcf_scan_character(file, ..., fixed=vcfFixed(param), 
-            info=vcfInfo(param), geno=vcfGeno(param))
+            info=vcfInfo(param), geno=vcfGeno(param),
+            samples=vcfSamples(param))
     } else {
     ## ranges
       callGeneric(TabixFile(file), ..., param=param)

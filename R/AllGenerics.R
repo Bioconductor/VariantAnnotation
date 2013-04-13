@@ -9,12 +9,12 @@ setGeneric("predictCoding",
 )
 
 setGeneric("refLocsToLocalLocs",
-    signature = c("ranges", "txdb", "cdsbytx"),
+    signature=c("ranges", "txdb", "cdsbytx"),
     function(ranges, txdb, cdsbytx, ...)
         standardGeneric("refLocsToLocalLocs")
 )
 
-setGeneric("getTranscriptSeqs", signature = c("query", "subject"),
+setGeneric("getTranscriptSeqs", signature=c("query", "subject"),
     function(query, subject, ...)
         standardGeneric("getTranscriptSeqs")
 )
@@ -23,7 +23,7 @@ setGeneric("getTranscriptSeqs", signature = c("query", "subject"),
 ### locateVariants 
 ###
 
-setGeneric("locateVariants", signature = c("query", "subject", "region"),
+setGeneric("locateVariants", signature=c("query", "subject", "region"),
     function(query, subject, region, ...)
         standardGeneric("locateVariants")
 )
@@ -32,7 +32,7 @@ setGeneric("locateVariants", signature = c("query", "subject", "region"),
 ### summarizeVariants 
 ###
 
-setGeneric("summarizeVariants", signature = c("query", "subject", "mode"),
+setGeneric("summarizeVariants", signature=c("query", "subject", "mode"),
     function(query, subject, mode, ...)
         standardGeneric("summarizeVariants")
 )
@@ -41,35 +41,35 @@ setGeneric("summarizeVariants", signature = c("query", "subject", "mode"),
 ### VariantRegion classes 
 ###
 
-setGeneric("upstream", signature = "x",
+setGeneric("upstream", signature="x",
     function(x) standardGeneric("upstream")
 )
 
-setGeneric("upstream<-", signature = "x",
+setGeneric("upstream<-", signature="x",
     function(x, value) standardGeneric("upstream<-")
 )
 
-setGeneric("downstream", signature = "x",
+setGeneric("downstream", signature="x",
     function(x) standardGeneric("downstream")
 )
 
-setGeneric("downstream<-", signature = "x",
+setGeneric("downstream<-", signature="x",
     function(x, value) standardGeneric("downstream<-")
 )
 
-setGeneric("promoter", signature = "x",
+setGeneric("promoter", signature="x",
     function(x) standardGeneric("promoter")
 )
 
-setGeneric("promoter<-", signature = "x",
+setGeneric("promoter<-", signature="x",
     function(x, value) standardGeneric("promoter<-")
 )
 
-setGeneric("intergenic", signature = "x",
+setGeneric("intergenic", signature="x",
     function(x) standardGeneric("intergenic")
 )
 
-setGeneric("intergenic<-", signature = "x",
+setGeneric("intergenic<-", signature="x",
     function(x, value) standardGeneric("intergenic<-")
 )
 
@@ -77,17 +77,17 @@ setGeneric("intergenic<-", signature = "x",
 ### read/write Vcf 
 ###
 
-setGeneric("readVcf", signature = c("file", "genome", "param"),
+setGeneric("readVcf", signature=c("file", "genome", "param"),
     function(file, genome, param, ...)
     standardGeneric("readVcf")
 )
 
-setGeneric("readVcfLongForm", signature = c("file", "genome", "param"),
+setGeneric("readVcfLongForm", signature=c("file", "genome", "param"),
     function(file, genome, param, ...)
     standardGeneric("readVcfLongForm")
 )
 
-setGeneric("writeVcf", signature = c("obj", "filename"),
+setGeneric("writeVcf", signature=c("obj", "filename"),
     function(obj, filename, ...)
     standardGeneric("writeVcf")
 )
@@ -97,17 +97,17 @@ setGeneric("writeVcf", signature = c("obj", "filename"),
 ### scanVcf 
 ###
 
-setGeneric("ScanVcfParam", signature = "which",
+setGeneric("ScanVcfParam", signature="which",
            function(fixed=character(), info=character(), geno=character(), 
-                    trimEmpty=TRUE, which, ...)
+                    samples=character(), trimEmpty=TRUE, which, ...)
            standardGeneric("ScanVcfParam")
 )
 
-setGeneric("scanVcfHeader", signature = "file",
+setGeneric("scanVcfHeader", signature="file",
            function(file, ...) standardGeneric("scanVcfHeader")
 )
 
-setGeneric("scanVcf", signature = c("file", "param"),
+setGeneric("scanVcf", signature=c("file", "param"),
            function(file, ..., param) standardGeneric("scanVcf")
 )
 
@@ -115,10 +115,10 @@ setGeneric("scanVcf", signature = c("file", "param"),
 ### filterVcf
 ###
 
-setGeneric("filterVcf", signature = "file",
-           function(file, genome, destination, ..., verbose = FALSE,
-                    index = FALSE, prefilters = FilterRules(),
-                    filters = FilterRules(), param = ScanVcfParam())
+setGeneric("filterVcf", signature="file",
+           function(file, genome, destination, ..., verbose=FALSE,
+                    index=FALSE, prefilters=FilterRules(),
+                    filters=FilterRules(), param=ScanVcfParam())
            standardGeneric("filterVcf")
 )
 
@@ -126,60 +126,60 @@ setGeneric("filterVcf", signature = "file",
 ### VCF class 
 ###
 
-setGeneric("fixed", signature = "x", 
+setGeneric("fixed", signature="x", 
     function(x) standardGeneric("fixed")
 )
 
-setGeneric("fixed<-", signature = c("x", "value"),
+setGeneric("fixed<-", signature=c("x", "value"),
     function(x, value) standardGeneric("fixed<-")
 )
 
-setGeneric("ref", signature = "x", 
+setGeneric("ref", signature="x", 
     function(x) standardGeneric("ref")
 )
 
-setGeneric("ref<-", signature = c("x", "value"),
+setGeneric("ref<-", signature=c("x", "value"),
     function(x, value) standardGeneric("ref<-")
 )
 
-setGeneric("alt", signature = "x", 
+setGeneric("alt", signature="x", 
     function(x) standardGeneric("alt")
 )
 
-setGeneric("alt<-", signature = c("x", "value"),
+setGeneric("alt<-", signature=c("x", "value"),
     function(x, value) standardGeneric("alt<-")
 )
 
-setGeneric("qual", signature = "x", 
+setGeneric("qual", signature="x", 
     function(x) standardGeneric("qual")
 )
 
-setGeneric("qual<-", signature = c("x", "value"),
+setGeneric("qual<-", signature=c("x", "value"),
     function(x, value) standardGeneric("qual<-")
 )
 
-setGeneric("filt", signature = "x", 
+setGeneric("filt", signature="x", 
     function(x) standardGeneric("filt")
 )
 
-setGeneric("filt<-", signature = c("x", "value"),
+setGeneric("filt<-", signature=c("x", "value"),
     function(x, value) standardGeneric("filt<-")
 )
 
-setGeneric("info", signature = "x", 
+setGeneric("info", signature="x", 
     function(x) standardGeneric("info")
 )
 
-setGeneric("info<-", signature = c("x", "value"),
+setGeneric("info<-", signature=c("x", "value"),
     function(x, value) standardGeneric("info<-")
 )
 
-setGeneric("geno", signature = c("x", "i"),
+setGeneric("geno", signature=c("x", "i"),
     function(x, i, ..., withDimnames=TRUE) 
     standardGeneric("geno"),
 )
 
-setGeneric("geno<-", signature = c("x", "i", "value"),
+setGeneric("geno<-", signature=c("x", "i", "value"),
     function(x, i, ..., value) 
     standardGeneric("geno<-")
 )
@@ -188,24 +188,24 @@ setGeneric("geno<-", signature = c("x", "i", "value"),
 ### VCFHeader class 
 ###
 
-setGeneric("reference", signature = "x",
+setGeneric("reference", signature="x",
     function(x) standardGeneric("reference"),
 )
 
-setGeneric("samples", signature = "x",
+setGeneric("samples", signature="x",
     function(x) standardGeneric("samples"),
 )
 
-setGeneric("header", signature = "x",
+setGeneric("header", signature="x",
     function(x) standardGeneric("header"),
 )
 
 
-setGeneric("contig", signature = "x",
+setGeneric("contig", signature="x",
     function(x) standardGeneric("contig"),
 )
 
-setGeneric("meta", signature = "x",
+setGeneric("meta", signature="x",
     function(x) standardGeneric("meta"),
 )
 
@@ -213,12 +213,12 @@ setGeneric("meta", signature = "x",
 ### snp encoding methods 
 ###
 
-setGeneric("MatrixToSnpMatrix", signature = c("callMatrix", "ref", "alt"),
+setGeneric("MatrixToSnpMatrix", signature=c("callMatrix", "ref", "alt"),
     function(callMatrix, ref, alt, ...)
     standardGeneric("MatrixToSnpMatrix")
 )
 
-setGeneric("genotypeToSnpMatrix", signature = "x",
+setGeneric("genotypeToSnpMatrix", signature="x",
     function(x, ...)
     standardGeneric("genotypeToSnpMatrix")
 )

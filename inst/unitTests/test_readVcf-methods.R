@@ -75,6 +75,13 @@ test_readVcf_param <- function()
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
     gnms <- c("GT", "GQ", "DP", "HQ")
     inms <- c("NS", "DP", "AF", "DB")
+    snms <- c("NA00001", "NA00002", "NA00003")
+
+    ## samples
+    s <- snms[2]
+    vcf <- readVcf(fl, "hg19", param=ScanVcfParam(samples=s))
+    checkTrue(ncol(vcf) == 1L)
+    checkTrue(colnames(vcf) == s)
  
     ## geno
     g <- gnms[2:3]
@@ -105,11 +112,12 @@ test_readVcf_param <- function()
     checkIdentical(names(geno(vcf_a)), names(geno(vcf_b))) 
     checkIdentical(rowData(vcf_a), rowData(vcf_b))
 
-    ## info, geno, ranges
+    ## info, geno, ranges, samples
     g <- gnms[1]
     i <- inms[2:3]
+    s <- snms[3]
     rngs <- GRanges("20", IRanges(1110000, 1234600))
-    param <- ScanVcfParam(geno=g, info=i, which=rngs)
+    param <- ScanVcfParam(geno=g, info=i, which=rngs, samples=s)
     compressVcf <- bgzip(fl, tempfile())
     idx <- indexTabix(compressVcf, "vcf")
     tab <- TabixFile(compressVcf, idx)
@@ -117,6 +125,8 @@ test_readVcf_param <- function()
     checkTrue(all(i %in% colnames(info(vcf))))
     checkTrue(all(names(geno(vcf)) %in% g))
     checkTrue(length(rowData(vcf)) == 3)
+    checkTrue(ncol(vcf) == 1L)
+    checkTrue(colnames(vcf) == s)
 
     ## no info, geno
     checkTrue(validObject(readVcf(fl, "hg19", ScanVcfParam(geno=NA))))

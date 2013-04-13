@@ -76,7 +76,7 @@ export(
     dbSNPFilter, regionFilter, ## Defunct
     VCF, VCFHeader, 
     vcfWhich, "vcfWhich<-", vcfFixed, "vcfFixed<-", vcfInfo, "vcfInfo<-", 
-    vcfGeno, "vcfGeno<-", vcfTrimEmpty, "vcfTrimEmpty<-", 
+    vcfGeno, "vcfGeno<-", vcfSamples, "vcfSamples<-", vcfTrimEmpty, "vcfTrimEmpty<-", 
     duplicateRSID, CodingVariants, IntronVariants,
     FiveUTRVariants, ThreeUTRVariants, IntergenicVariants,
     SpliceSiteVariants, PromoterVariants, AllVariants,
