@@ -127,7 +127,7 @@
 
   Accessors:
   \describe{
-    \item{vcfFixed, vcfInfo, vcfGeno, vcfTrimEmpty, vcfWhich:}{
+    \item{vcfFixed, vcfInfo, vcfGeno, vcfSamples, vcfTrimEmpty, vcfWhich:}{
       Return the corresponding field from \code{object}.
     }
   }
@@ -152,9 +152,9 @@
   compressVcf <- bgzip(fl, tempfile())
   idx <- indexTabix(compressVcf, "vcf")
   tab <- TabixFile(compressVcf, idx)
-  ## --------------------------------------
+  ## ---------------------------------------------------------------------
   ## 'which' argument
-  ## --------------------------------------
+  ## ---------------------------------------------------------------------
   ## To subset on genomic coordinates, supply an object 
   ## containing the ranges of interest. These ranges can
   ## be given directly to the 'param' argument or wrapped
@@ -164,8 +164,8 @@
   ## chromosome names in the vcf file. In this example they are "1" 
   ## and "2".
   gr1 <- GRanges("1", IRanges(13219, 2827695, name="regionA"))
-  gr2 <- GRanges(rep("2", 2), IRanges(c(321680, 14477080), c(321689, 14477090),
-                 name=c("regionB", "regionC")))
+  gr2 <- GRanges(rep("2", 2), IRanges(c(321680, 14477080), 
+                 c(321689, 14477090), name=c("regionB", "regionC")))
   grl <- GRangesList("1"=gr1, "2"=gr2)
   vcf <- readVcf(tab, "hg19", grl)
 
@@ -181,13 +181,13 @@
   gr <- unlist(grl, use.names=FALSE)
   vcf <- readVcf(tab, "hg19", gr)
  
-  ## --------------------------------------
-  ## 'fixed', 'info' and 'geno' arguments
-  ## --------------------------------------
-  ## This param specifies the "GT" 'geno' field and the 
-  ## subset of ranges in 'which'. All 'fixed' and 'info' fields will be 
-  ## returned. 
-  ScanVcfParam(geno="GT", which=gr)
+  ## ---------------------------------------------------------------------
+  ## 'fixed', 'info', 'geno' and 'samples' arguments
+  ## ---------------------------------------------------------------------
+  ## This param specifies the "GT" 'geno' field for a single sample
+  ## and the subset of ranges in 'which'. All 'fixed' and 'info' fields 
+  ## will be returned. 
+  ScanVcfParam(geno="GT", samples="NA00002", which=gr)
  
   ## Here two 'fixed' and one 'geno' field are specified
   ScanVcfParam(fixed=c("ALT", "QUAL"), geno="GT", info=NA) 

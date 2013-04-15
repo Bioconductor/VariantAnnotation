@@ -63,7 +63,7 @@ setMethod(writeVcf, c("VCF", "connection"),
     QUAL[is.na(QUAL)] <- "."
     FILTER <- filt(obj)
     FILTER[is.na(FILTER)] <- "."
-    INFO <- .makeVcfInfo(info(obj))
+    INFO <- .makeVcfInfo(info(obj), length(rd))
     ans <- paste(CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, sep = "\t")
     if (nrow(colData(obj)) > 0L) {
       GENO <- .makeVcfGeno(geno(obj))
@@ -150,10 +150,10 @@ setMethod(writeVcf, c("VCF", "connection"),
     cbind(FORMAT, genoMatCollapsed)
 }
 
-.makeVcfInfo <- function(info, ...)
+.makeVcfInfo <- function(info, nrecords, ...)
 {
     if (ncol(info) == 0) {
-      return(rep.int(".", nrow(info)))
+      return(rep.int(".", nrecords))
     }
 
     ## Replace NA with '.' in columns with data.
