@@ -27,10 +27,10 @@ setMethod(ScanVcfParam, "missing",
 ## Validity 
 ##
 
-.valid.ScanVcfParam <- function(x)
+.valid.ScanVcfParam <- function(object)
 {
-    samples <- vcfSamples(x)
-    geno <- vcfGeno(x)
+    samples <- vcfSamples(object)
+    geno <- vcfGeno(object)
     if (any(is.na(samples)) && length(geno) > 0L)
         return("ScanVcfParam: 'geno' cannot be specified if 'samples' is 'NA'")
     if (any(is.na(geno)) && length(samples) > 0L)

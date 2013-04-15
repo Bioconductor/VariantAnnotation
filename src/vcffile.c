@@ -49,8 +49,7 @@ struct parse_t {
     struct vcftype_t *vcf;
     struct rle_t *chrom;
     struct dna_hash_t *ref;
-    int vcf_n, imap_n, gmap_n, samp_n, *gmapidx;
-    Rboolean *sampbool;
+    int vcf_n, imap_n, gmap_n, samp_n, *gmapidx, *sampbool;
     const char **inms, **gnms, **snms;
     khash_t(WARNINGS) *warnings;
 };
@@ -151,11 +150,10 @@ static void _parse(char *line, const int irec,
     struct vcftype_t *vcf = parse->vcf, *rowData, *elt;
     const int samp_n = parse->samp_n, imap_n = parse->imap_n,
         gmap_n = parse->gmap_n;
-    const char **inms = parse->inms, **gnms = parse->gnms,
-        **snms = parse->snms;
+    const char **inms = parse->inms, **gnms = parse->gnms;
     int fmtidx, sampleidx, imapidx;
-    int *gmapidx = parse->gmapidx;
-    Rboolean *sampbool = parse->sampbool;
+    int *gmapidx = parse->gmapidx,
+	*sampbool = parse->sampbool;
 
     int idx = irec, j;
     struct it_t it0, it1, it2;
@@ -354,14 +352,11 @@ static struct parse_t *_parse_new(int vcf_n, SEXP smap, SEXP fmap,
     }
 
     parse->samp_n = Rf_length(smap);
-    //parse->sampbool = (int *) R_alloc(sizeof(int), parse->samp_n);
     parse->sampbool = LOGICAL(smap);
     parse->snms =
         (const char **) R_alloc(sizeof(const char *), parse->samp_n);
-    for (int j = 0; j < parse->samp_n; ++j) {
+    for (int j = 0; j < parse->samp_n; ++j)
         parse->snms[j] = CHAR(STRING_ELT(GET_NAMES(smap), j));
-//        parse->sampbool[j] = asInteger(VECTOR_ELT(smap, j));
-    }
 
     parse->gmap_n = Rf_length(gmap);
     parse->gnms =
