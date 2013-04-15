@@ -107,8 +107,13 @@ setMethod(writeVcf, c("VCF", "connection"),
 
 .makeVcfFormat <- function(formatMat)
 {
-    keep <- !is.na(formatMat)
-    .pasteCollapse(seqsplit(formatMat[keep], row(formatMat)[keep]), ":")
+    if (ncol(formatMat) == 1L) {
+        formatMat[is.na(formatMat)] <- ""
+        .pasteCollapse(seqsplit(formatMat, row(formatMat)), ":")
+    } else {
+        keep <- !is.na(formatMat)
+        .pasteCollapse(seqsplit(formatMat[keep], row(formatMat)[keep]), ":")
+    }
 }
 
 .makeVcfGeno <- function(geno, ...)
@@ -141,13 +146,17 @@ setMethod(writeVcf, c("VCF", "connection"),
     }
     genoMat <- matrix(genoMatFlat, nrow(genoMat), ncol(genoMat))
 
-    formatMatPerSub <- matrix(rep(t(formatMat), nsub), nsub * nrec,
-                              length(geno), byrow = TRUE)
-    keep <- !is.na(formatMatPerSub)
-    genoListBySub <- seqsplit(genoMat[keep], row(genoMat)[keep])
-    genoMatCollapsed <- matrix(.pasteCollapse(genoListBySub, ":"), nrec, nsub)
+    if (ncol(genoMat) == 1L) {
+        cbind(FORMAT, genoMat)
+    } else {
+        formatMatPerSub <- matrix(rep(t(formatMat), nsub), nsub*nrec,
+                                  length(geno), byrow=TRUE)
+        keep <- !is.na(formatMatPerSub)
+        genoListBySub <- seqsplit(genoMat[keep], row(genoMat)[keep])
+        genoMatCollapsed <- matrix(.pasteCollapse(genoListBySub, ":"), nrec, nsub)
+        cbind(FORMAT, genoMatCollapsed)
+    }
  
-    cbind(FORMAT, genoMatCollapsed)
 }
 
 .makeVcfInfo <- function(info, nrecords, ...)
