@@ -205,68 +205,88 @@ locateVariants(query, subject, region, ...)
   \code{\link{readVcf}},
   \code{\link{summarizeVariants}},
   \code{\link{predictCoding}}
-  ?\code{upstream}
-  \code{\link{predictCoding}}
+  \code{\link{upstream}}
 }
 
 \examples{
   library(TxDb.Hsapiens.UCSC.hg19.knownGene)
   txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene 
 
-  ## --------------------------------
-  ## TranscriptDb object as subject 
-  ## --------------------------------
+  ## ---------------------------------------------------------------------
+  ## TranscriptDb as subject 
+  ## ---------------------------------------------------------------------
   ## Read variants from a VCF file 
-  fl <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
+  fl <- system.file("extdata", "chr7-sub.vcf.gz", 
+                    package="VariantAnnotation")
   vcf <- readVcf(fl, "hg19")
 
   ## Variant seqlevels do not match the TxDb seqlevels
-  rd <- rowData(vcf)
-  head(seqlevels(rd))
+  head(seqlevels(vcf))
   head(seqlevels(txdb))
-  intersect(seqlevels(rd), seqlevels(txdb))
+  intersect(seqlevels(vcf), seqlevels(txdb))
 
   ## Use the renameSeqlevels helper to rename seqlevels
   newnames <- paste("chr", seqlevels(vcf), sep="")
   names(newnames) <- seqlevels(vcf)
-  vcf_adj <- renameSeqlevels(vcf, newnames) 
-  rd_adj <- renameSeqlevels(rd, newnames)
+  vcf <- renameSeqlevels(vcf, newnames) 
 
   ## Confirm
-  intersect(seqlevels(vcf_adj), seqlevels(txdb))
-  intersect(seqlevels(rd_adj), seqlevels(txdb))
+  intersect(seqlevels(vcf), seqlevels(txdb))
 
-  ## VCF object as the query
-  loc_all <- locateVariants(vcf_adj, txdb, AllVariants())
+  ## Overlaps for all possible variant locations
+  loc_all <- locateVariants(vcf, txdb, AllVariants())
+  table(loc_all$LOCATION)
 
-  ## --------------------------------
+  ## Overlaps for intergenic variants
+  region <- IntergenicVariants(upstream=700000, downstream=500000)
+  loc_int <- locateVariants(vcf, txdb, region)
+
+  ## Intergenic variants do not overlap a gene range in the 
+  ## annotation therefore no GENEID is reported. Instead, the
+  ## flanking gene ids are reported as PRECEDEID and FOLLOWID.
+  mcols(loc_int)[c("LOCATION", "PRECEDEID", "FOLLOWID")] 
+
+  ## Compute distances from the variant to the flanking genes.
+  ## See the ?'distance,GenomicRanges,TranscriptDb-method'
+  ## man page in the GenomicRanges package for details on 
+  ## computing distance with a GRanges and TranscriptDb. 
+  p_dist <- distance(loc_int, txdb, id=loc_int$PRECEDEID, type="gene")
+  f_dist <- distance(loc_int, txdb, id=loc_int$FOLLOWID, type="gene")
+  DataFrame(p_dist, f_dist)
+
+  ## ---------------------------------------------------------------------
   ## GRangesList as subject 
-  ## --------------------------------
-  ## Note the results do not include GENEID. This information
-  ## is not available when a GRangesList is used in place of
-  ## a TranscriptDb.
+  ## ---------------------------------------------------------------------
+  ## When 'subject' is a GRangesList the GENEID is unavailable and
+  ## will always be reported as NA. This is because the GRangesList 
+  ## objects are extractions of region-by-transcript, not region-by-gene.
+  \dontrun{
   cdsbytx <- cdsBy(txdb)
-  locateVariants(rd_adj, cdsbytx, CodingVariants())
+  locateVariants(vcf, cdsbytx, CodingVariants())
 
   intbytx <- intronsByTranscript(txdb)
-  locateVariants(rd_adj, intbytx, IntronVariants())
+  locateVariants(vcf, intbytx, IntronVariants())
+  }
 
-  ## --------------------------------
+  ## ---------------------------------------------------------------------
   ## Using the cache 
-  ## --------------------------------
+  ## ---------------------------------------------------------------------
+  ## When processing multiple VCF files, the 'cache' can be used
+  ## to store and reuse extracted components of the TranscriptDb
+  ## thereby enhancing performance.
   \dontrun{
-   myenv <- new.env()
-   files <- list(vcf1, vcf2, vcf3)
-   lapply(files, 
-       function(fl) {
-           vcf <- readVcf(fl, "hg19")
-           ## modify seqlevels to match TxDb
-           oldnms <- seqlevels(vcf)
-           newnms <- paste("chr", oldnms, sep="")
-           names(newnms) <- oldnms
-           vcf_mod <- renameSeqlevels(vcf, newnms)
-           locateVariants(vcf_mod, txdb, AllVariants(), cache=myenv)
-       }) 
+  myenv <- new.env()
+  files <- list(vcf1, vcf2, vcf3)
+  lapply(files, 
+      function(fl) {
+          vcf <- readVcf(fl, "hg19")
+          ## modify seqlevels to match TxDb
+          oldnms <- seqlevels(vcf)
+          newnms <- paste("chr", oldnms, sep="")
+          names(newnms) <- oldnms
+          vcf_mod <- renameSeqlevels(vcf, newnms)
+          locateVariants(vcf_mod, txdb, AllVariants(), cache=myenv)
+      }) 
   }
 }
 
