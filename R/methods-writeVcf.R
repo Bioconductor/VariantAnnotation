@@ -92,8 +92,8 @@ setMethod(writeVcf, c("VCF", "connection"),
                             ifelse (all(is.na(x)), "", nms))
                 }, g=geno, nms=as.list(names(geno)))
     fvec <- do.call(paste, c(flst, sep=":"))
-    s1 <- gsub("(^:|:$)", "", fvec)
-    s2 <- gsub("(::)", ":", s1)
+    s1 <- gsub("(::)", ":", fvec)
+    s2 <- gsub("(^:|:$)", "", s1)
     s2
 }
 
@@ -119,8 +119,10 @@ setMethod(writeVcf, c("VCF", "connection"),
  
     ## collapse across variables
     dvec <- do.call(paste, c(dlst, sep=":"))
-    dcmb <- c(fmt, gsub("NA", ".", dvec, fixed=TRUE))
-    dsep <- split(dcmb, rep(seq_along(fmt), ncol(geno[[1]]) + 1))
+    dcmb <- c(fmt, gsub("NA", "", dvec, fixed=TRUE))
+    s1 <- gsub("(::)", ":", dcmb)
+    s2 <- gsub("(^:|:$)", "", s1)
+    dsep <- split(s2, rep(seq_along(fmt), ncol(geno[[1]]) + 1))
     do.call(rbind, lapply(dsep, function(x) paste(x, collapse="\t")))
 }
 
