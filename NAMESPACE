@@ -14,6 +14,10 @@ importClassesFrom(Biobase,
     AssayData
 )
 
+importFrom(Biobase,
+    sampleNames
+)
+
 importClassesFrom(AnnotationDbi, 
     AnnotationDb
 )
@@ -39,7 +43,8 @@ importMethodsFrom(GenomicFeatures,
 
 importFrom(IRanges, 
     CharacterList, DataFrame, IRanges, isSingleString,
-    PartitioningByWidth, successiveViews, subsetByFilter, expand
+    PartitioningByWidth, successiveViews, subsetByFilter, expand,
+    SimpleList, relist
 )
 
 importClassesFrom(IRanges, 
