@@ -41,6 +41,10 @@ importMethodsFrom(GenomicFeatures,
     isActiveSeq, "isActiveSeq<-"
 )
 
+importFrom(Biostrings,
+    DNAStringSet
+)
+
 importFrom(IRanges, 
     CharacterList, DataFrame, IRanges, isSingleString,
     PartitioningByWidth, successiveViews, subsetByFilter, expand,
