@@ -42,17 +42,27 @@ importMethodsFrom(GenomicFeatures,
 )
 
 importFrom(Biostrings,
-    DNAStringSet
+    AAStringSet, DNAStringSet, DNAStringSetList
+)
+
+importMethodsFrom(Biostrings,
+    nchar, reverseComplement, subseq, substr, translate
+)
+
+importClassesFrom(Biostrings, 
+    DNAStringSet, DNAStringSetList
 )
 
 importFrom(IRanges, 
-    CharacterList, DataFrame, IRanges, isSingleString,
-    PartitioningByWidth, successiveViews, subsetByFilter, expand,
-    SimpleList, relist
+    CharacterList, DataFrame, DataFrameList, FilterRules, IntegerList, 
+    IRanges, isSingleNumber, isSingleString, isTRUEorFALSE, LogicalList, 
+    NumericList, PartitioningByEnd, PartitioningByWidth, seqsplit,
+    SimpleList, splitAsList, successiveViews
 )
 
 importClassesFrom(IRanges, 
-    DataFrame, Ranges, RangesList, RangedData
+    CharacterList, DataFrame, Ranges, RangesList, RangedData,
+    SimpleDataFrameList, SimpleList
 )
 
 importMethodsFrom(IRanges, 
