@@ -64,10 +64,15 @@ setMethod(writeVcf, c("VCF", "connection"),
     FILTER <- filt(obj)
     FILTER[is.na(FILTER)] <- "."
     INFO <- .makeVcfInfo(info(obj), length(rd))
-    GENO <- .makeVcfGeno(geno(obj))
-    mat <- paste(CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, GENO, sep = "\t")
-    stopifnot(length(mat) == length(rd))
-    mat
+    ans <- paste(CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, sep = "\t")
+    if (nrow(colData(obj)) > 0L) {
+      GENO <- .makeVcfGeno(geno(obj))
+      FORMAT <- GENO[,1]
+      GENO <- GENO[,-1,drop=FALSE]
+      genoPasted <- do.call(paste, c(split(GENO, col(GENO)), sep = "\t"))
+      ans <- paste(ans, FORMAT, genoPasted, sep = "\t")
+    }
+    ans
 }
 
 .makeVcfID <- function(id, ...)
@@ -81,49 +86,80 @@ setMethod(writeVcf, c("VCF", "connection"),
     }
 }
 
-## FORMAT names listed once per row, specific to variant not sample
-.makeVcfFormat <- function(geno)
+.makeVcfFormatMatrix <- function(geno, cls, idx) {
+  if (length(idx) > 0) {
+    geno[idx] <- seqapply(geno[idx], function(x) {
+      matrix(unlist(x, use.names=FALSE), nrow(x), prod(tail(dim(x), -1)))
+    })
+  }
+ 
+  do.call(cbind, Map(function(elt, nms) {
+### Should be discussed, but it seems like if we have a list matrix,
+### we should look for elements that are empty, not a single NA.
+### VO: If readVcf() was used, all empty fields were converted to NA.
+    if (is.list(elt))
+      haveData <- rowSums(matrix(elementLengths(elt), nrow(elt))) > 0
+    else 
+      haveData <- rowSums(!is.na(elt)) > 0
+    as.character(ifelse(haveData, nms, NA_character_))
+  }, as.list(geno), names(geno)))
+}
+
+.makeVcfFormat <- function(formatMat)
 {
-    flst <- Map(function(g, nms) {
-                    d <- dim(g)
-                    sdim <- ifelse (is.na(d[3]), d[2], d[2]*d[3])
-                    tapply(as.vector(g), rep(seq_len(d[1]), sdim), 
-                        function(x)
-                            ifelse (all(is.na(x)), "", nms))
-                }, g=geno, nms=as.list(names(geno)))
-    fvec <- do.call(paste, c(flst, sep=":"))
-    s1 <- gsub("(::)", ":", fvec)
-    s2 <- gsub("(^:|:$)", "", s1)
-    s2
+    if (ncol(formatMat) == 1L) {
+        formatMat[is.na(formatMat)] <- ""
+        .pasteCollapse(seqsplit(formatMat, row(formatMat)), ":")
+    } else {
+        keep <- !is.na(formatMat)
+        .pasteCollapse(seqsplit(formatMat[keep], row(formatMat)[keep]), ":")
+    }
 }
 
 .makeVcfGeno <- function(geno, ...)
 {
-    if (length(geno) == 0L)
-        return(NULL)
+    cls <- lapply(geno, class) 
+    idx <- which(cls == "array")
+    formatMat <- .makeVcfFormatMatrix(geno, cls, idx)
+    FORMAT <- .makeVcfFormat(formatMat)
 
-    fmt <- .makeVcfFormat(geno)
-    ## collapse variable dimensions
-    dlst <- lapply(geno, 
-        function(g) {
-            if (!is.na(dim(g)[3])) {
-                tmp <- as.character(g[,,1]) 
-                for (i in seq_len(dim(g)[3] - 1) + 1)
-                    tmp <- paste(tmp, g[,,i], sep=",")
-            } else {
-                tmp <- as.character(g)
-            }
-        tmp 
-        }
-    )
+    nsub <- ncol(geno[[1]])
+    nrec <- nrow(geno[[1]])
+    arylst <- lapply(geno[idx], 
+                  function(elt, nsub) 
+                  {
+                      m <- matrix(c(elt), ncol=nsub)
+                      matrix(split(m, seq_len(nrec*nsub)), ncol=nsub)
+                  }, nsub)
+    geno[idx] <- SimpleList(arylst)
+
+    genoMat <- matrix(unlist(as.list(geno), use.names = FALSE,
+                             recursive = FALSE),
+                      nsub * nrec, length(geno))
+
+    ## convert NA values to '.' and get a simple character matrix
+    genoMatFlat <- as.character(unlist(genoMat))
+    genoMatFlat[is.na(genoMatFlat)] <- "."
+    if (is.list(genoMat)) {
+      genoMatList <- relist(genoMatFlat, PartitioningByEnd(genoMat))
+      genoMatFlat <- .pasteCollapse(genoMatList, ",")
+    }
+    genoMat <- matrix(genoMatFlat, nrow(genoMat), ncol(genoMat))
+
+    if (ncol(genoMat) == 1L) {
+        if (ncol(genoMat) != length(FORMAT))
+            cbind(FORMAT, matrix(genoMat, nrec, nsub))
+        else
+            cbind(FORMAT, genoMat)
+    } else {
+        formatMatPerSub <- matrix(rep(t(formatMat), nsub), nsub*nrec,
+                                  length(geno), byrow=TRUE)
+        keep <- !is.na(formatMatPerSub)
+        genoListBySub <- seqsplit(genoMat[keep], row(genoMat)[keep])
+        genoMatCollapsed <- matrix(.pasteCollapse(genoListBySub, ":"), nrec, nsub)
+        cbind(FORMAT, genoMatCollapsed)
+    }
  
-    ## collapse across variables
-    dvec <- do.call(paste, c(dlst, sep=":"))
-    dcmb <- c(fmt, gsub("NA", "", dvec, fixed=TRUE))
-    s1 <- gsub("(::)", ":", dcmb)
-    s2 <- gsub("(^:|:$)", "", s1)
-    dsep <- split(s2, rep(seq_along(fmt), ncol(geno[[1]]) + 1))
-    do.call(rbind, lapply(dsep, function(x) paste(x, collapse="\t")))
 }
 
 .makeVcfInfo <- function(info, nrecords, ...)
