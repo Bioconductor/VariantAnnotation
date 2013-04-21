@@ -152,8 +152,7 @@ static void _parse(char *line, const int irec,
         gmap_n = parse->gmap_n;
     const char **inms = parse->inms, **gnms = parse->gnms;
     int fmtidx, sampleidx, imapidx;
-    int *gmapidx = parse->gmapidx,
-	*sampbool = parse->sampbool;
+    int *gmapidx = parse->gmapidx, *sampbool = parse->sampbool;
 
     int idx = irec, j;
     struct it_t it0, it1, it2;
@@ -226,6 +225,7 @@ static void _parse(char *line, const int irec,
 
     /* sample(s) */
     struct vcftype_t *geno = vcf->u.list[GENO_IDX];
+    int sample_genoidx = 0; /* index into sample array */
     for (sample = it_next(&it0), sampleidx = 0;
          '\0' != *sample; sample = it_next(&it0), sampleidx++) {
         if (!sampbool[sampleidx])
@@ -235,9 +235,10 @@ static void _parse(char *line, const int irec,
             if (gmap_n == gmapidx[fmtidx])
                 continue;    /* unknown FORMAT */
             elt = geno->u.list[ gmapidx[fmtidx] ];
-            idx = irec * samp_n + sampleidx;
+            idx = irec * samp_n + sample_genoidx;
             _vcftype_set(elt, idx, field);
         }
+        sample_genoidx += 1;
     }
 }
 
@@ -291,21 +292,13 @@ static SEXP _vcf_as_SEXP(struct parse_t *parse, SEXP fmap, SEXP smap)
     Rf_namesgets(VECTOR_ELT(result, GENO_IDX), nms);
     UNPROTECT(1);
 
-
-    SEXP samplenames;
-    int nz = 0;
-    for(int i = 0; i < Rf_length(smap); i++)
-        nz += INTEGER(smap)[i];
-    PROTECT(samplenames = Rf_allocVector(STRSXP, nz));
-    for (int i = 0, j = 0; i < parse->samp_n; ++i) {
-        if (parse->sampbool[i]) {
-           SET_STRING_ELT(samplenames, j, mkChar(parse->snms[i]));
-           j++;
-        }
-    }
+    SEXP samplenms;
+    PROTECT(samplenms = Rf_allocVector(STRSXP, parse->samp_n));
+    for (int i = 0; i < parse->samp_n; ++i)
+        SET_STRING_ELT(samplenms, i, mkChar(parse->snms[i]));
     PROTECT(nms = Rf_allocVector(VECSXP, 2));
     SET_VECTOR_ELT(nms, 0, R_NilValue);
-    SET_VECTOR_ELT(nms, 1, samplenames);
+    SET_VECTOR_ELT(nms, 1, samplenms);
 
     sxp = VECTOR_ELT(result, GENO_IDX);
     for (int i = 0; i < Rf_length(sxp); ++i) {
@@ -341,6 +334,7 @@ static struct parse_t *_parse_new(int vcf_n, SEXP smap, SEXP fmap,
     parse->vcf_n = vcf_n;
     parse->vcf = _vcf_alloc(parse->vcf_n, smap, fmap, imap, gmap);
 
+    /* INFO */
     parse->imap_n = Rf_length(imap);
     if (1 == parse->imap_n && R_NilValue == GET_NAMES(imap))
         parse->inms = NULL;
@@ -351,24 +345,34 @@ static struct parse_t *_parse_new(int vcf_n, SEXP smap, SEXP fmap,
             parse->inms[j] = CHAR(STRING_ELT(GET_NAMES(imap), j));
     }
 
-    parse->samp_n = Rf_length(smap);
-    parse->sampbool = LOGICAL(smap);
+    /* samples names filtered by smap */
+    parse->samp_n = 0;
+    for (int j = 0; j < Rf_length(smap); j++)
+        parse->samp_n += INTEGER(smap)[j];
     parse->snms =
-        (const char **) R_alloc(sizeof(const char *), parse->samp_n);
-    for (int j = 0; j < parse->samp_n; ++j)
-        parse->snms[j] = CHAR(STRING_ELT(GET_NAMES(smap), j));
+        (const char **) R_alloc(sizeof(const char *), parse->samp_n + 1);
+    int snms_idx = 0;
+    for (int j = 0; j < Rf_length(smap); ++j) {
+        if (INTEGER(smap)[j]) {
+            parse->snms[snms_idx] = CHAR(STRING_ELT(GET_NAMES(smap), j));
+            snms_idx += 1;
+        }
+    }
+    parse->sampbool = LOGICAL(smap);
 
+    /* FORMAT */
     parse->gmap_n = Rf_length(gmap);
     parse->gnms =
         (const char **) R_alloc(sizeof(const char *), parse->gmap_n);
     for (int j = 0; j < parse->gmap_n; ++j)
         parse->gnms[j] = CHAR(STRING_ELT(GET_NAMES(gmap), j));
     parse->gmapidx = (int *) R_alloc(sizeof(int), parse->gmap_n);
+
+    /* FIXED */
     parse->chrom = rle_new(parse->vcf_n);
     parse->ref = dna_hash_new(parse->vcf_n);
 
     parse->warnings = vcfwarn_new();
-
 
     return parse;
 }

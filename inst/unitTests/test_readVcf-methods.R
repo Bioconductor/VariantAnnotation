@@ -78,11 +78,25 @@ test_readVcf_param <- function()
     snms <- c("NA00001", "NA00002", "NA00003")
 
     ## samples
-    s <- snms[2]
-    vcf <- readVcf(fl, "hg19", param=ScanVcfParam(samples=s))
+    samp <- snms[2]
+    vcf <- readVcf(fl, "hg19", param=ScanVcfParam(samples=samp))
     checkTrue(ncol(vcf) == 1L)
-    checkTrue(colnames(vcf) == s)
+    checkTrue(colnames(vcf) == samp)
+
+    param <- ScanVcfParam(geno=c("GT", "HQ"), samples=snms)
+    vcf1 <- readVcf(fl, "hg19")
+    vcf2 <- readVcf(fl, "hg19", param=param)
+    checkIdentical(geno(vcf1)$GT, geno(vcf2)$GT) 
+    checkIdentical(geno(vcf1)$HQ, geno(vcf2)$HQ)
  
+    samp <- snms[3] 
+    param <- ScanVcfParam(geno=c("GT", "HQ"), samples=samp)
+    vcf3 <- readVcf(fl, "hg19", param=param)
+    current <- c(geno(vcf3)$GT)
+    checkIdentical(unname(geno(vcf1)$GT[,samp]), current)
+    current <- c(geno(vcf3)$HQ)
+    checkIdentical(c(geno(vcf1)$HQ[,samp,]), current)
+
     ## geno
     g <- gnms[2:3]
     param <- ScanVcfParam(geno=g)
@@ -92,10 +106,11 @@ test_readVcf_param <- function()
 
     fl <- system.file("extdata", "chr22.vcf.gz",
                       package="VariantAnnotation")
-    vcf <- readVcf(fl, "hg19")
-    param <- ScanVcfParam(which=rowData(vcf)[1:10])
-    vcf2 <- readVcf(fl, "hg19", param=param)
-    checkIdentical(geno(vcf)$GT[1:10, ], geno(vcf2)$GT)
+    param1 <- ScanVcfParam(which=GRanges("22", IRanges(5e7, 50302629)))
+    vcf1 <- readVcf(fl, "hg19", param=param1)
+    param2 <- ScanVcfParam(which=rowData(vcf1)[1:10])
+    vcf2 <- readVcf(fl, "hg19", param=param2)
+    checkIdentical(geno(vcf1)$GT[1:10, ], geno(vcf2)$GT)
 
     ## info 
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
@@ -107,10 +122,10 @@ test_readVcf_param <- function()
 
     ## geno, info
     param <- ScanVcfParam()
-    vcf_a <- readVcf(fl, "hg19", param)
-    vcf_b <- readVcf(fl, "hg19")
-    checkIdentical(names(geno(vcf_a)), names(geno(vcf_b))) 
-    checkIdentical(rowData(vcf_a), rowData(vcf_b))
+    vcf1 <- readVcf(fl, "hg19", param)
+    vcf2 <- readVcf(fl, "hg19")
+    checkIdentical(names(geno(vcf1)), names(geno(vcf2))) 
+    checkIdentical(rowData(vcf1), rowData(vcf2))
 
     ## info, geno, ranges, samples
     g <- gnms[1]
@@ -128,10 +143,12 @@ test_readVcf_param <- function()
     checkTrue(ncol(vcf) == 1L)
     checkTrue(colnames(vcf) == s)
 
-    ## no info, geno
+    ## no info, geno, samples
     checkTrue(validObject(readVcf(fl, "hg19", ScanVcfParam(geno=NA))))
     checkTrue(validObject(readVcf(fl, "hg19", ScanVcfParam(info=NA))))
+    checkTrue(validObject(readVcf(fl, "hg19", ScanVcfParam(samples=NA))))
 }
+
 
 test_readVcf_tabix <- function()
 {
