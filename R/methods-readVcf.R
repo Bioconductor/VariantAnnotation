@@ -88,7 +88,7 @@ setMethod(readVcf, c(file="character", genome="missing",
 
 .scanVcfToVCF <- function(vcf, file, genome, param, ...)
 {
-    hdr <- scanVcfHeader(file)
+    hdr <- .scanVcfHeader(scanVcfHeader(file), param)
     if (length(vcf[[1]]$GENO) > 0L)
         colnms <- colnames(vcf[[1]]$GENO[[1]])
     else

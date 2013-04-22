@@ -122,6 +122,10 @@ setMethod(writeVcf, c("VCF", "connection"),
     idx <- which(cls == "array")
     formatMat <- .makeVcfFormatMatrix(geno, cls, idx)
     FORMAT <- .makeVcfFormat(formatMat)
+    if (sum(nchar(FORMAT)) == 0L) {
+        warning("all geno(<VCF>) fields are NA")
+        FORMAT <- rep(paste(names(geno), sep=":"), length(formatMat))
+    }
 
     nsub <- ncol(geno[[1]])
     nrec <- nrow(geno[[1]])
@@ -205,7 +209,8 @@ setMethod(writeVcf, c("VCF", "connection"),
     hdr <- exptData(obj)[["header"]]
     header <- Map(.formatHeader, as.list(header(hdr)),
                   as.list(names(header(hdr))))
-    samples <- samples(hdr)
+   #samples <- samples(hdr)
+    samples <- colnames(obj) 
     colnms <- c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO")
     if (length(geno(obj)) > 0L) {
       colnms <- c(colnms, "FORMAT", samples[!is.null(samples)])
@@ -225,6 +230,8 @@ setMethod(writeVcf, c("VCF", "connection"),
         paste("##", rownames(df), "=", df[,1], sep="")
     } else {
         if ("Description" %in% colnames(df)) {
+            if (nrow(df) == 0L)
+                return(character())
             df$Description <- paste("\"", df$Description, "\"", sep="")
             prs <- paste(rep(colnames(df), each=nrow(df)), "=",
                          unlist(lapply(df, as.character), use.names=FALSE),
