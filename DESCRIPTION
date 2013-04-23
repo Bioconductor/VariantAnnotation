@@ -3,7 +3,7 @@ Type: Package
 Title: Annotation of Genetic Variants 
 Description: Annotate variants, compute amino acid coding changes, 
 	predict coding outcomes
-Version: 1.7.12
+Version: 1.7.13
 Author: Valerie Obenchain, Martin Morgan, Michael Lawrence with
 	contributions from Stephanie Gogarten. 
 Maintainer: Valerie Obenchain <vobencha@fhcrc.org> 

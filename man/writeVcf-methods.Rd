@@ -29,7 +29,10 @@
 }
 
 \details{A VCF file can be written out from data in a \code{VCF} file. More
-  general methods to write out from other objects may be added in the future. 
+  general methods to write out from other objects may be added in the future.
+
+  \code{writeVcf} conforms to the VCF standards on the 1000 Genomes Project
+  web site (see references).
 }
 
 \value{VCF file

@@ -99,20 +99,6 @@
     relist(DNAStringSet(xx), pbw)
 }
 
-.scanVcfHeader <- function(hdr, param)
-{
-    hsamples <- samples(hdr)
-    if (length(psamples <- vcfSamples(param)))
-        hdr@samples <- hsamples[hsamples %in% psamples]        
-    hinfo <- info(hdr)
-    if (length(pinfo <- vcfInfo(param)))
-        hdr@header$INFO <- hinfo[rownames(hinfo) %in% pinfo, ]
-    hgeno <- geno(hdr)
-    if (length(pgeno <- vcfGeno(param)))
-        hdr@header$FORMAT <- hgeno[rownames(hgeno) %in% pgeno, ]
-    hdr
-}
-
 .formatALT <- function(x)
 {
     if (is.null(x))

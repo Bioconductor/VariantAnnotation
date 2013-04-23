@@ -182,9 +182,9 @@
   fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation") 
   vcf <- readVcf(fl, "hg19")
 
-  ## ---------------------------------
+  ## ---------------------------------------------------------------------
   ## Header and genome information 
-  ## ---------------------------------
+  ## ---------------------------------------------------------------------
   vcf
 
   ## extract the VCFHeader object from exptData
@@ -196,9 +196,9 @@
   ## genome information is stored in the GRanges
   unique(genome(rowData(vcf)))
 
-  ## ---------------------------------
+  ## ---------------------------------------------------------------------
   ## Accessors
-  ## ---------------------------------
+  ## ---------------------------------------------------------------------
   ## fixed fields together
   head(fixed(vcf), 5)
 
@@ -216,10 +216,9 @@
   geno(vcf)
   head(geno(vcf)$GT)
 
-  ## ---------------------------------
+  ## ---------------------------------------------------------------------
   ## Data subsets 
-  ## ---------------------------------
-
+  ## ---------------------------------------------------------------------
   ## Subset on genome coordinates:
   ## 'file' must have a Tabix index
   rngs <- GRanges("20", IRanges(c(14370, 1110000), c(17330, 1234600)))
@@ -230,9 +229,10 @@
   tab <- TabixFile(compressVcf, idx)
   vcf <- readVcf(tab, "hg19", param)
 
-  ## When 'param' is used to subset the data, the 'paramRangeID' column 
-  ## in the result provides a map back to the original range in 'param'.
-  mcols(rowData(vcf))$paramRangeID
+  ## When data are subset by range ('which' argument in ScanVcfParam),
+  ## the 'paramRangeID' column provides a map back to the original 
+  ## range in 'param'.
+  rowData(vcf)[,"paramRangeID"]
   vcfWhich(param)
 
   ## Subset on samples:
@@ -242,16 +242,27 @@
   ## object to subset by sample.
   param <- ScanVcfParam(samples="NA00002")
   vcf <- readVcf(tab, "hg19", param)
+  geno(vcf)$GT
 
-
-  ## Subset on 'fixed', 'info' or 'geno' VCF elements:
+  ## Subset on 'fixed', 'info' or 'geno' fields:
   param <- ScanVcfParam(fixed="ALT", geno=c("GT", "HQ"), info=c("NS", "AF"))
   vcf_tab <- readVcf(tab, "hg19", param)
-  ## Because there are no ranges specified in the 'param' we don't have
-  ## to use the tabix file.
+  info(vcf_tab)
+  geno(vcf_tab)
+
+  ## No ranges are specified in the 'param' so tabix file is not
+  ## required. Instead, the uncompressed VCF can be used as 'file'.
   vcf_fname <- readVcf(fl, "hg19", param)
 
-  ## Subset on both genome coordinates and VCF elements: 
+  ## The header will always contain information for all variables
+  ## in the original file reguardless of how the data were subset.
+  ## For example, all 'geno' fields are listed in the header 
+  geno(header(vcf_fname))
+
+  ## but only 'GT' and 'HQ' are present in the VCF object.
+  geno(vcf_fname)
+
+  ## Subset on both genome coordinates and 'info', 'geno' fields: 
   param <- ScanVcfParam(geno="HQ", info="AF", which=rngs)
   vcf <- readVcf(tab, "hg19", param)
 
@@ -261,9 +272,11 @@
   ## all 'fixed fields, the "GT" 'geno' field and none of 'info'.
   ScanVcfParam(geno="GT", info=NA)
 
-  ## iterate through VCF file
+  ## ---------------------------------------------------------------------
+  ## Iterate through VCF with 'yieldSize' 
+  ## ---------------------------------------------------------------------
   fl <- system.file("extdata", "chr22.vcf.gz", package="VariantAnnotation")
-  param <- ScanVcfParam(fixed="ALT", geno=c("GT", "GL"), info=c("LDAF", "AF"))
+  param <- ScanVcfParam(fixed="ALT", geno=c("GT", "GL"), info=c("LDAF"))
   tab <- TabixFile(fl, yieldSize=4000)
   open(tab)
   while (nrow(vcf <- readVcf(tab, "hg19", param=param)))

@@ -93,7 +93,7 @@ exportClassPattern("^.*$")
 
 export(
     dbSNPFilter, regionFilter, ## Defunct
-    VCF, VCFHeader, 
+    VCF, VCFHeader, reference, samples, header, meta,
     vcfWhich, "vcfWhich<-", vcfFixed, "vcfFixed<-", vcfInfo, "vcfInfo<-", 
     vcfGeno, "vcfGeno<-", vcfSamples, "vcfSamples<-", vcfTrimEmpty, "vcfTrimEmpty<-", 
     duplicateRSID, CodingVariants, IntronVariants,

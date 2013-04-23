@@ -67,10 +67,12 @@ setMethod(writeVcf, c("VCF", "connection"),
     ans <- paste(CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, sep = "\t")
     if (nrow(colData(obj)) > 0L) {
       GENO <- .makeVcfGeno(geno(obj))
-      FORMAT <- GENO[,1]
-      GENO <- GENO[,-1,drop=FALSE]
-      genoPasted <- do.call(paste, c(split(GENO, col(GENO)), sep = "\t"))
-      ans <- paste(ans, FORMAT, genoPasted, sep = "\t")
+      if (!is.null(GENO)) {
+          FORMAT <- GENO[,1]
+          GENO <- GENO[,-1,drop=FALSE]
+          genoPasted <- do.call(paste, c(split(GENO, col(GENO)), sep = "\t"))
+          ans <- paste(ans, FORMAT, genoPasted, sep = "\t")
+      } 
     }
     ans
 }
@@ -124,7 +126,7 @@ setMethod(writeVcf, c("VCF", "connection"),
     FORMAT <- .makeVcfFormat(formatMat)
     if (sum(nchar(FORMAT)) == 0L) {
         warning("all geno(<VCF>) fields are NA")
-        FORMAT <- rep(paste(names(geno), sep=":"), length(formatMat))
+        return(NULL) 
     }
 
     nsub <- ncol(geno[[1]])
@@ -209,7 +211,6 @@ setMethod(writeVcf, c("VCF", "connection"),
     hdr <- exptData(obj)[["header"]]
     header <- Map(.formatHeader, as.list(header(hdr)),
                   as.list(names(header(hdr))))
-   #samples <- samples(hdr)
     samples <- colnames(obj) 
     colnms <- c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO")
     if (length(geno(obj)) > 0L) {

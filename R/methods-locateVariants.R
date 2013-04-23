@@ -522,7 +522,6 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
 
 .indexWithinUpDown <- function(x, subject, region, index)
 {
-    ## FIXME: IRanges:::normalizeSingleBracketSubscript NA handling
     isect <- pintersect(x[!is.na(index)], 
                         subject[na.omit(index)], 
                         resolve.empty="start.x")
@@ -584,4 +583,3 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
         res
     }
 }
-
