@@ -123,34 +123,22 @@ Complete Genomics Inc.\footnote{\url{http://www.completegenomics.com/public-data
   Sequencing methods documented in [Drmanac et al, 2010].}
 \end{quote}
 
+A small (1M base) subset of this data is included in the current package, and used 
+in the code presented below.
+
 \section{Filter by Genomic Region}
 
-From prior exploration we know that variants of biological interest
-suitable for this demonstration can be found in a 1M base pair region of 
-chromosome seven.  Extract just that region and write the variant calls
-to a new, small VCF file:
+We identified this subset in a prior exploration of the full data set
+(work not shown), learning that variants of biological interest
+suitable for our purpose are found in a 1M base pair region of
+chromosome seven. The appendix to this document (see below) shows the
+few lines of code required to extract variant calls in that small
+region, from the very large file obtained from Complete Genomics 
+(\emph{"somaticVcfBeta-HCC1187-H-200-37-ASM-T1-N1.vcf.gz"}) and write
+them to a new, small VCF file.
 
-\begin{small}
-\begin{verbatim}
-library(VariantAnnotation)
-file.gz <- "somaticVcfBeta-HCC1187-H-200-37-ASM-T1-N1.vcf.gz"
-stopifnot(file.exists(file.gz))
-file.gz.tbi <- paste(file.gz, ".tbi", sep="")
-if(!(file.exists(file.gz.tbi))
-    indexTabix(file.gz, format="vcf")
-start.loc <- 55000000
-end.loc   <- 56000000
-chr7.gr <- GRanges("7", IRanges(start.loc, end.loc))
-params <- ScanVcfParam(which=chr7.gr)
-vcf <- readVcf(TabixFile(file.gz), "hg19", params)
-writeVcf(vcf, "chr7-sub.vcf")
-bgzip("chr7-sub.vcf", overwrite=TRUE)
-indexTabix("chr7-sub.vcf.gz", format="vcf")
-\end{verbatim}  
 
-\end{small}
 
-This code creates the small gzipped vcf and index files we use below.
 
 \section{Introducing the \Rmethod{filterVcf} Method}
 
@@ -383,6 +371,39 @@ surveys of whole genome variation data:
      
 \end{packed_enum}
 
+
+\section{Appendix: Filter by Genomic Region}
+
+The most basic form of VCF file filtering is by genomic region.  We demonstrate that here,
+extracting variant calls in a 1M base region of chromosome 7, writing them to a new file, compressing
+and then indexing that file.   These steps created the small VCF file which accompanies this vignette,
+and is used in the code shown above.  
+
+Note that this code is \emph{NOT} executed during the creation of this vignette:  we do not supply the very large
+VCF file that it operates on.  This code is here for tutorial purposes only, showing how you
+can filter by genomic region with a possibly large VCF file of your own.
+
+\begin{small}
+\begin{verbatim}
+library(VariantAnnotation)
+file.gz <- "somaticVcfBeta-HCC1187-H-200-37-ASM-T1-N1.vcf.gz"
+stopifnot(file.exists(file.gz))
+file.gz.tbi <- paste(file.gz, ".tbi", sep="")
+if(!(file.exists(file.gz.tbi)))
+    indexTabix(file.gz, format="vcf")
+start.loc <- 55000000
+end.loc   <- 56000000
+chr7.gr <- GRanges("7", IRanges(start.loc, end.loc))
+params <- ScanVcfParam(which=chr7.gr)
+vcf <- readVcf(TabixFile(file.gz), "hg19", params)
+writeVcf(vcf, "chr7-sub.vcf")
+bgzip("chr7-sub.vcf", overwrite=TRUE)
+indexTabix("chr7-sub.vcf.gz", format="vcf")
+\end{verbatim}  
+
+\end{small}
+
+This code creates the small gzipped vcf and index files used in the examples above.
 
 \nocite{*} 
 
