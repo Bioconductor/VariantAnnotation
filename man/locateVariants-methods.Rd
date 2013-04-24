@@ -85,10 +85,10 @@ locateVariants(query, subject, region, ...)
 \details{
   \describe{
     \item{Range representation :}{
-      The ranges in \code{query} should reflect the position(s) of the reference 
-      allele. For snps the range will be of width 1. For range insertions or 
-      deletions the reference allele could be a sequence such as GGTG in which 
-      case the width of the range should be 4. 
+      The ranges in \code{query} should reflect the position(s) of the 
+      reference allele. For snps the range will be of width 1. For range 
+      insertions or deletions the reference allele could be a sequence 
+      such as GGTG in which case the width of the range should be 4. 
     }
     \item{Location :}{
       Possible locations are \sQuote{coding}, \sQuote{intron}, 
@@ -102,15 +102,15 @@ locateVariants(query, subject, region, ...)
       To be classified as a \sQuote{spliceSite} the variant must overlap 
       with any portion of the first 2 or last 2 nucleotides in an intron. 
 
-      \sQuote{intergenic} variants do not fall within a gene region as 
-      defined by the annotaion. \sQuote{transcripts by gene} are extracted
-      from the annotation and overlapped with the variant ranges. The 
-      variants that do not have a \sQuote{hit} are considered 
-      \code{intergenic}. When available, gene IDs for the flanking genes 
-      are provided as \code{PRECEDEID} and \code{FOLLOWID}. The 
-      \code{upstream} and \code{downstream} arguments to 
-      \code{IntergenicVariants()} and \code{AllVariants()} control the 
-      distance from the query for the flanking genes.
+      \sQuote{intergenic} variants are ranges that do not fall within a 
+      defined gene region. \sQuote{transcripts by gene} are extracted from 
+      the annotation and overlapped with the variant positions. Variants with 
+      no overlaps are classified as \code{intergenic}. When available, gene 
+      IDs for the flanking genes are provided as \code{PRECEDEID} and 
+      \code{FOLLOWID}. \code{upstream} and \code{downstream} arguments define 
+      the acceptable distance from the query for the flanking genes. 
+      \code{PRECEDEID} and \code{FOLLOWID} results are lists and contain all 
+      genes that fall within the defined distance.
 
       \sQuote{promoter} variants fall within a specified range upstream and 
       downstream of the transcription start site. Ranges values can be set 
@@ -160,9 +160,9 @@ locateVariants(query, subject, region, ...)
       or \sQuote{fiveUTR} the variant must fall completely within the region.
 
       \sQuote{intergenic} variants do not fall within a transcript. The 
-      \sQuote{GENEID} for these position are \code{NA} and instead the 
-      \sQuote{PRECEDEID} and \sQuote{FOLLOWID} for the flanking genes are 
-      given.
+      \sQuote{GENEID} for these positions are \code{NA}. Lists of flanking
+      genes that fall within the distance defined by \code{upstream} and 
+      \code{downstream} are given as \sQuote{PRECEDEID} and \sQuote{FOLLOWID}. 
 
       A \sQuote{spliceSite} variant overlaps any portion of the first 2 or last 
       2 nucleotides of an intron.
@@ -183,16 +183,14 @@ locateVariants(query, subject, region, ...)
       The gene id taken from the \code{TranscriptDb} object.
     }
     \item{\code{PRECEDEID}}{
-      The id of the gene the query precedes. Only present for
-      \sQuote{intergenic} variants. \code{upstream} and
-      and \code{downstream} argments control the distance
-      of \code{PRECEDEID} and \code{FOLLOWID} from the query. 
+      IDs for all genes the query precedes within the defined
+      \code{upstream} and \code{downstream} distance. Only applicable
+      for \sQuote{intergenic} variants.
     }
     \item{\code{FOLLOWID}}{
-      The id of the gene the query follows. Only present for 
-      \sQuote{intergenic} variants. \code{upstream} and
-      and \code{downstream} argments control the distance
-      of \code{PRECEDEID} and \code{FOLLOWID} from the query. 
+      IDs for all genes the query follows within the defined
+      \code{upstream} and \code{downstream} distance. Only applicable
+      for \sQuote{intergenic} variants.
     }
     All ID values will be \sQuote{NA} for variants with a location of
     \code{transcript_region} or \code{NA}.
@@ -213,46 +211,67 @@ locateVariants(query, subject, region, ...)
   txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene 
 
   ## ---------------------------------------------------------------------
-  ## TranscriptDb as subject 
+  ## Variants in all gene regions 
   ## ---------------------------------------------------------------------
-  ## Read variants from a VCF file 
+  ## Read variants from a VCF file.
   fl <- system.file("extdata", "chr7-sub.vcf.gz", 
                     package="VariantAnnotation")
   vcf <- readVcf(fl, "hg19")
 
-  ## Variant seqlevels do not match the TxDb seqlevels
+  ## Often the seqlevels in the VCF file do not match those in the TxDb.
   head(seqlevels(vcf))
   head(seqlevels(txdb))
   intersect(seqlevels(vcf), seqlevels(txdb))
 
-  ## Use the renameSeqlevels helper to rename seqlevels
+  ## renameSeqlevels() can be used to rename seqlevels.
   newnames <- paste("chr", seqlevels(vcf), sep="")
   names(newnames) <- seqlevels(vcf)
   vcf <- renameSeqlevels(vcf, newnames) 
 
-  ## Confirm
+  ## Confirm.
   intersect(seqlevels(vcf), seqlevels(txdb))
 
-  ## Overlaps for all possible variant locations
+  ## Overlaps for all possible variant locations.
   loc_all <- locateVariants(vcf, txdb, AllVariants())
   table(loc_all$LOCATION)
 
-  ## Overlaps for intergenic variants
-  region <- IntergenicVariants(upstream=700000, downstream=500000)
-  loc_int <- locateVariants(vcf, txdb, region)
-
+  ## ---------------------------------------------------------------------
+  ## Variants in intergenic regions 
+  ## ---------------------------------------------------------------------
   ## Intergenic variants do not overlap a gene range in the 
-  ## annotation therefore no GENEID is reported. Instead, the
-  ## flanking gene ids are reported as PRECEDEID and FOLLOWID.
+  ## annotation and therefore 'GENEID' is always NA. If present,
+  ## all flanking genes that fall within the 'upstream' and
+  ## 'downstream' distances are reported as PRECEDEID and FOLLOWID.
+  region <- IntergenicVariants(upstream=70000, downstream=5000)
+  loc_int <- locateVariants(vcf, txdb, region)
   mcols(loc_int)[c("LOCATION", "PRECEDEID", "FOLLOWID")] 
 
-  ## Compute distances from the variant to the flanking genes.
-  ## See the ?'distance,GenomicRanges,TranscriptDb-method'
-  ## man page in the GenomicRanges package for details on 
-  ## computing distance with a GRanges and TranscriptDb. 
-  p_dist <- distance(loc_int, txdb, id=loc_int$PRECEDEID, type="gene")
-  f_dist <- distance(loc_int, txdb, id=loc_int$FOLLOWID, type="gene")
-  DataFrame(p_dist, f_dist)
+  ## Distance to the flanking genes can be computed for variants that 
+  ## have PRECEDEID(s) or FOLLOWID(s). Each variant can have multiple 
+  ## flanking id's so we first expand PRECEDEID and the corresponding
+  ## variant ranges.
+  p_idx <- all(!is.na(loc_int$PRECEDEID))
+  p_ids <- unlist(loc_int$PRECEDEID[p_idx], use.names=FALSE) 
+  p_elt <- elementLengths(loc_int$PRECEDEID[p_idx]) 
+  exp_ranges <- rep(loc_int[p_idx], p_elt)
+  ## Provide the variant GRanges as 'x' and the TxDb annotation as 'y' 
+  ## to distance(). The 'id' and 'type' arguments describe an id found 
+  ## in the TxDb. See ?'nearest-methods' for details on the method.
+  p_dist <- distance(exp_ranges, txdb, id=p_ids, type="gene")
+  head(p_dist)
+
+  ## Expanded view of ranges, gene id and distance:
+  mcols(exp_ranges) <- DataFrame(PRECEDEID=exp_ranges$PRECEDEID, 
+                                 PRECEDE_DIST=p_dist) 
+  exp_ranges
+
+  ## Collapsed view of ranges, gene id and distance:
+  org_ranges <- loc_int[p_idx]
+  p_dist <- unname(splitAsList(p_dist, 
+                   factor(rep(seq_len(length(p_elt)), p_elt)))) 
+  mcols(org_ranges) <- DataFrame(PRECEDEID=org_ranges$"PRECEDEID", 
+                                  PRECEDE_DIST=p_dist)
+  org_ranges 
 
   ## ---------------------------------------------------------------------
   ## GRangesList as subject 

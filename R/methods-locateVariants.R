@@ -6,7 +6,7 @@
 ### CodingVariants, IntronVariants, ThreeUTRVariants, FiveUTRVariants,
 ### IntergenicVariants, SpliceSiteVariants, PromoterVariants, AllVariants
 ### 
-### Each variant region has the following methods : 
+### Each region has the following methods : 
 ### query %in% Ranges, VCF, GRanges
 ### subject %in% TranscriptDb, GRangesList 
 
@@ -211,7 +211,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb",
              ignore.strand=FALSE)
     {
         if (!exists("mask", cache, inherits=FALSE)) {
-            ## mask chromosomes not in query
+            ## Mask chromosomes not in query.
             masks <- isActiveSeq(subject)
             on.exit(isActiveSeq(subject) <- masks)
             .setActiveSubjectSeq(query, subject)
@@ -247,7 +247,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "SpliceSiteVariants"),
              ignore.strand=FALSE, asHits=FALSE)
     {
         if (!exists("mask", cache, inherits=FALSE)) {
-            ## mask chromosomes not in query
+            ## Mask chromosomes not in query.
             masks <- isActiveSeq(subject)
             on.exit(isActiveSeq(subject) <- masks)
             .setActiveSubjectSeq(query, subject)
@@ -286,7 +286,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "PromoterVariants"),
              ignore.strand=FALSE, asHits=FALSE)
     { 
         if (!exists("mask", cache, inherits=FALSE)) {
-            ## mask chromosomes not in query
+            ## Mask chromosomes not in query.
             masks <- isActiveSeq(subject)
             on.exit(isActiveSeq(subject) <- masks)
             .setActiveSubjectSeq(query, subject)
@@ -338,14 +338,15 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "PromoterVariants"),
                     TXID=as.integer(txid[subjectHits(fo)]),
                     CDSID=NA_integer_,
                     GENEID=NA_character_,
-                    PRECEDEID=NA_character_,
-                    FOLLOWID=NA_character_)
+                    PRECEDEID=CharacterList(NA),
+                    FOLLOWID=CharacterList(NA))
         } else {
             res <- GRanges()
             values(res) <- DataFrame(LOCATION=.location(), QUERYID=integer(),
                                      TXID=integer(), CDSID=integer(),
-                                     GENEID=character(), PRECEDEID=character(),
-                                     FOLLOWID=character())
+                                     GENEID=character(),
+                                     PRECEDEID=CharacterList(),
+                                     FOLLOWID=CharacterList())
             res
         }
     }
@@ -359,7 +360,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE)
     {
-        ## mask chromosomes not in query
+        ## Mask chromosomes not in query.
         masks <- isActiveSeq(subject)
         on.exit(isActiveSeq(subject) <- masks)
         .setActiveSubjectSeq(query, subject)
@@ -383,7 +384,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
                                             downstream(promoter(region))), 
                            cache=cache, ignore.strand=ignore.strand)
 
-        ## Consolidate calls for UTR data
+        ## Consolidate calls for UTR data:
         if (!exists("fiveUTRbytx", cache, inherits=FALSE)) {
             splicings <- 
                 GenomicFeatures:::.getSplicingsForTranscriptsWithCDSs(subject)
@@ -422,8 +423,8 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
     res <- GRanges()
     values(res) <- DataFrame(LOCATION=.location(), QUERYID=integer(), 
                              TXID=integer(), CDSID=integer(), 
-                             GENEID=character(), PRECEDEID=character(), 
-                             FOLLOWID=character())
+                             GENEID=character(), PRECEDEID=CharacterList(), 
+                             FOLLOWID=CharacterList())
     res
 }
 
@@ -437,7 +438,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
 
 .spliceSites <- function(query, subject, ignore.strand, asHits, ...)
 {
-    ## overlap any portion of first 2 and last 2 nucleotides of introns
+    ## Overlap any portion of first 2 and last 2 nucleotides of introns.
     usub <- unlist(subject, use.names=FALSE)
     int_start <- GRanges(seqnames(usub), IRanges(start(usub), start(usub) + 1),
         strand=strand(usub))
@@ -463,14 +464,14 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
                 TXID=as.integer(txid[subjectHits(fo)]),
                 CDSID=NA_integer_,
                 GENEID=NA_character_,
-                PRECEDEID=NA_character_,
-                FOLLOWID=NA_character_)
+                PRECEDEID=CharacterList(NA),
+                FOLLOWID=CharacterList(NA))
     } else {
         res <- GRanges()
         values(res) <- DataFrame(LOCATION=.location(), QUERYID=integer(),
                                  TXID=integer(), CDSID=integer(), 
-                                 GENEID=character(), PRECEDEID=character(),
-                                 FOLLOWID=character())
+                                 GENEID=character(), PRECEDEID=CharacterList(),
+                                 FOLLOWID=CharacterList())
         res
     }
 }
@@ -496,53 +497,66 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
         res <- GRanges()
         values(res) <- DataFrame(LOCATION=.location(), QUERYID=integer(), 
                                  TXID=integer(), CDSID=integer(), 
-                                 GENEID=character(), PRECEDEID=character(), 
-                                 FOLLOWID=character())
+                                 GENEID=character(), PRECEDEID=CharacterList(), 
+                                 FOLLOWID=CharacterList())
         res
     } else {
-        res <- query[intergenic]
-        rng <- unlist(subject, use.names=FALSE)
-        genes <- rep(names(subject), elementLengths(subject))
-        ## query precedes subject; get index for following gene 
-        pidx <- precede(res, rng, ignore.strand=ignore.strand)
-        ## query follows subject; get index for preceding gene 
-        fidx <- follow(res, rng, ignore.strand=ignore.strand)
-        ## confirm hits are within upstream/downstream ranges
-        shft <- .shiftRangeUpDown(res, upstream(region), downstream(region))
-        pidx <- .indexWithinUpDown(shft, rng, region, pidx) 
-        fidx <- .indexWithinUpDown(shft, rng, region, fidx) 
+        q_range <- query[intergenic]
+        s_range <- unlist(subject, use.names=FALSE)
+        s_genes <- rep(names(subject), elementLengths(subject))
 
-        values(res) <- DataFrame(LOCATION=.location(length(res), "intergenic"),
-                                 QUERYID=which(intergenic), TXID=NA_integer_, 
-                                 CDSID=NA_integer_, GENEID=NA_character_, 
-                                 PRECEDEID=genes[pidx], FOLLOWID=genes[fidx])
-        res
+        ## ID all genes that fall in upstream / downstream range.
+        ## upstream == follow:
+        f_range <- .shiftRangeUpDown(q_range, upstream(region), TRUE)
+        f_fo <- findOverlaps(f_range, s_range)
+        f_genes <- unname(splitAsList(s_genes[subjectHits(f_fo)],
+                                factor(queryHits(f_fo),
+                                       levels=seq_len(queryLength(f_fo)))))
+        f_genes <- unique(f_genes)
+        f_genes[elementLengths(f_genes) == 0L] <- NA_character_
+ 
+        ## downstream == precede:
+        p_range <- .shiftRangeUpDown(q_range, downstream(region), FALSE)
+        p_fo <- findOverlaps(p_range, s_range)
+        p_genes <- unname(splitAsList(s_genes[subjectHits(p_fo)],
+                                factor(queryHits(p_fo),
+                                       levels=seq_len(queryLength(p_fo)))))
+        p_genes <- unique(p_genes)
+        p_genes[elementLengths(p_genes) == 0L] <- NA_character_
+
+        values(q_range) <- 
+            DataFrame(LOCATION=.location(length(q_range), "intergenic"),
+                      QUERYID=which(intergenic), TXID=NA_integer_, 
+                      CDSID=NA_integer_, GENEID=NA_character_, 
+                      PRECEDEID=p_genes, FOLLOWID=f_genes)
+        q_range 
     }
 }
 
-.indexWithinUpDown <- function(x, subject, region, index)
+## Behaves like flank(); ranges do not include start/end values.
+.shiftRangeUpDown <- function(x, distance, upstream=TRUE)
 {
-    isect <- pintersect(x[!is.na(index)], 
-                        subject[na.omit(index)], 
-                        resolve.empty="start.x")
-    index[!is.na(index)] <- ifelse(width(isect) == 0, NA, na.omit(index))
-    index 
-}
-
-.shiftRangeUpDown <- function(x, upstream, downstream)
-{
-    ## '+' strand 
     on_plus <- which(strand(x) == "+" | strand(x) == "*")
-    on_plus_start <- start(x)[on_plus]
-    start(x)[on_plus] <- on_plus_start - upstream
-    on_plus_end <- end(x)[on_plus]
-    end(x)[on_plus] <- on_plus_end + downstream
-    ## '-' strand 
     on_minus <- which(strand(x) == "-")
-    on_minus_end <- end(x)[on_minus]
-    end(x)[on_minus] <- on_minus_end + upstream
-    on_minus_start <- start(x)[on_minus]
-    start(x)[on_minus] <- on_minus_start - downstream
+    if (upstream) {
+        ## '+' strand
+        on_plus_end <- start(x)[on_plus] - 1L 
+        on_plus_start <- start(x)[on_plus] - distance 
+        ## '-' strand
+        on_minus_start <- end(x)[on_minus] + 1L 
+        on_minus_end <- end(x)[on_minus] + distance 
+    } else {
+        ## '+' strand
+        on_plus_start <- end(x)[on_plus] + 1L 
+        on_plus_end <- end(x)[on_plus] + distance
+        ## '-' strand 
+        on_minus_start <- start(x)[on_minus] - distance
+        on_minus_end <- start(x)[on_minus] - 1L 
+    }
+    start(x)[on_plus] <- on_plus_start
+    end(x)[on_plus] <- on_plus_end
+    start(x)[on_minus] <- on_minus_start
+    end(x)[on_minus] <- on_minus_end
     x
 }
 
@@ -572,14 +586,14 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
                 TXID=as.integer(txid[subjectHits(fo)]),
                 CDSID=cdsid,
                 GENEID=NA_character_,
-                PRECEDEID=NA_character_,
-                FOLLOWID=NA_character_)
+                PRECEDEID=CharacterList(NA),
+                FOLLOWID=CharacterList(NA))
     } else {
         res <- GRanges()
         values(res) <- DataFrame(LOCATION=.location(), QUERYID=integer(),
                                  TXID=integer(), CDSID=integer(), 
-                                 GENEID=character(), PRECEDEID=character(),
-                                 FOLLOWID=character())
+                                 GENEID=character(), PRECEDEID=CharacterList(),
+                                 FOLLOWID=CharacterList())
         res
     }
 }
