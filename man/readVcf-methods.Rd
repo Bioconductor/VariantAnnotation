@@ -36,9 +36,11 @@
     more efficient than the character() methods. See ?\code{TabixFile} and
     ?\code{indexTabix} for help creating a \code{\link{TabixFile}}.
   }
-  \item{genome}{The character() name of the genome the variants are mapped 
-    to. This information is stored in the genome slot of the \code{seqinfo}
-    associated with the \code{\linkS4class{GRanges}} object in \code{rowData}.
+  \item{genome}{A character string of the genome identifier or assembly
+    name the variants are mapped to. May also be a named character vector 
+    where the names correspond to seqnames (chromosome names) in the VCF 
+    file. \code{genome} is stored in the \code{seqinfo} of the
+    \code{GRanges} in rowData.
   }
   \item{param}{A instance of \code{\linkS4class{ScanVcfParam}}, \code{GRanges},
     \code{GRangesList}, \code{RangedData} or \code{RangesList}. VCF files can be 
@@ -181,6 +183,7 @@
 \examples{
   fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation") 
   vcf <- readVcf(fl, "hg19")
+  ## vcf <- readVcf(fl, c("20"="hg19"))  ## 'genome' as named vector
 
   ## ---------------------------------------------------------------------
   ## Header and genome information 

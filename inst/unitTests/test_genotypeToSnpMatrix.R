@@ -10,11 +10,7 @@ test_gSM_array_GT <- function() {
                               0, 1, 2, 2, 3)),
                      nrow=2, byrow=TRUE, dimnames=list(1:2,1:5)))
     ref <- DNAStringSet(rep("A",5))
-    alt <- DNAStringSetList(DNAStringSet("C"),
-                            DNAStringSet("G"),
-                            DNAStringSet("T"),
-                            DNAStringSet("C"),
-                            DNAStringSet("G"))
+    alt <- DNAStringSetList("C", "G", "T", "C", "G")
     map <- DataFrame(snp.names=rownames(mat),
                              allele.1=ref, 
                              allele.2=alt,
@@ -32,9 +28,7 @@ test_gSM_array_GT_2alt <- function() {
               matrix(as.raw(rep(0,6)),
                      nrow=2, byrow=TRUE, dimnames=list(1:2,1:3)))
     ref <- DNAStringSet(rep("A",3))
-    alt <- DNAStringSetList(DNAStringSet(c("C","G")),
-                            DNAStringSet(c("G","T")),
-                            DNAStringSet(c("T","C")))
+    alt <- DNAStringSetList(c("C","G"), c("G","T"), c("T","C"))
     map <- DataFrame(snp.names=rownames(mat),
                              allele.1=ref, 
                              allele.2=alt,
@@ -52,9 +46,7 @@ test_gSM_array_GT_nonsnv <- function() {
               matrix(as.raw(rep(0,6)),
                      nrow=2, byrow=TRUE, dimnames=list(1:2,1:3)))
     ref <- DNAStringSet(c("A","ACG","ACG"))
-    alt <- DNAStringSetList(DNAStringSet("CGT"),
-                            DNAStringSet("G"),
-                            DNAStringSet("GAC"))
+    alt <- DNAStringSetList("CGT", "G", "GAC")
     map <- DataFrame(snp.names=rownames(mat),
                              allele.1=ref, 
                              allele.2=alt,
