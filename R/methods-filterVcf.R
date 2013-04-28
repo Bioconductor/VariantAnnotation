@@ -77,6 +77,9 @@ setMethod("filterVcf", "character",
     }
     close(filtered)
     needsClosing <- FALSE
+
+    if (verbose)
+        message("completed filtering")
     destination
 }
 
