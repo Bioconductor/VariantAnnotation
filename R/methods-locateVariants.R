@@ -338,8 +338,8 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "PromoterVariants"),
                     TXID=as.integer(txid[subjectHits(fo)]),
                     CDSID=NA_integer_,
                     GENEID=NA_character_,
-                    PRECEDEID=CharacterList(NA),
-                    FOLLOWID=CharacterList(NA))
+                    PRECEDEID=CharacterList(character(0)),
+                    FOLLOWID=CharacterList(character(0)))
         } else {
             res <- GRanges()
             values(res) <- DataFrame(LOCATION=.location(), QUERYID=integer(),
@@ -464,8 +464,8 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
                 TXID=as.integer(txid[subjectHits(fo)]),
                 CDSID=NA_integer_,
                 GENEID=NA_character_,
-                PRECEDEID=CharacterList(NA),
-                FOLLOWID=CharacterList(NA))
+                PRECEDEID=CharacterList(character(0)),
+                FOLLOWID=CharacterList(character(0)))
     } else {
         res <- GRanges()
         values(res) <- DataFrame(LOCATION=.location(), QUERYID=integer(),
@@ -513,7 +513,6 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
                                 factor(queryHits(f_fo),
                                        levels=seq_len(queryLength(f_fo)))))
         f_genes <- unique(f_genes)
-        f_genes[elementLengths(f_genes) == 0L] <- NA_character_
  
         ## downstream == precede:
         p_range <- .shiftRangeUpDown(q_range, downstream(region), FALSE)
@@ -522,7 +521,6 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
                                 factor(queryHits(p_fo),
                                        levels=seq_len(queryLength(p_fo)))))
         p_genes <- unique(p_genes)
-        p_genes[elementLengths(p_genes) == 0L] <- NA_character_
 
         values(q_range) <- 
             DataFrame(LOCATION=.location(length(q_range), "intergenic"),
@@ -586,8 +584,8 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
                 TXID=as.integer(txid[subjectHits(fo)]),
                 CDSID=cdsid,
                 GENEID=NA_character_,
-                PRECEDEID=CharacterList(NA),
-                FOLLOWID=CharacterList(NA))
+                PRECEDEID=CharacterList(character(0)),
+                FOLLOWID=CharacterList(character(0)))
     } else {
         res <- GRanges()
         values(res) <- DataFrame(LOCATION=.location(), QUERYID=integer(),

@@ -33,18 +33,18 @@ test_locateVariants_subject <- function()
 test_locateVariants_upstream_downstream <- function()
 {
     loc <- locateVariants(gr, txdb, IntergenicVariants(1, 1))
-    target <- CharacterList(list(NA, NA, NA))
-    checkIdentical(mcols(loc)$FOLLOWID, target)
+    target <- CharacterList(character(), character(), character())
+    checkIdentical(loc$FOLLOWID, target)
 
     loc <- locateVariants(gr, txbygene, IntergenicVariants(2, 2))
-    target <- CharacterList(list(NA, NA, "100037417"))
-    checkIdentical(mcols(loc)$FOLLOWID, target) 
+    target <- CharacterList(character(), character(), "100037417")
+    checkIdentical(loc$FOLLOWID, target) 
 
     loc <- locateVariants(gr, txbygene, IntergenicVariants(100000, 100000))
-    target <- CharacterList(list("23784", NA, c("100037417","4282", "66035")))
-    checkIdentical(mcols(loc)$FOLLOWID, target)
-    target <- CharacterList(list(NA, NA, c("23523", "2953", "391322")))
-    checkIdentical(mcols(loc)$PRECEDEID, target)
+    target <- CharacterList("23784", character(), c("100037417","4282", "66035"))
+    checkIdentical(loc$FOLLOWID, target)
+    target <- CharacterList(character(), character(), c("23523", "2953", "391322"))
+    checkIdentical(loc$PRECEDEID, target)
 }
 
 test_locateVariants_queryAsVCF <- function()

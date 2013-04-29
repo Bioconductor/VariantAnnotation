@@ -31,8 +31,10 @@
 
 \usage{
 locateVariants(query, subject, region, ...)
-\S4method{locateVariants}{VCF,TranscriptDb,VariantType}(query, subject, region, ..., cache=new.env(parent=emptyenv()), ignore.strand=FALSE, asHits=FALSE)
-\S4method{locateVariants}{GRanges,TranscriptDb,VariantType}(query, subject, region, ..., cache=new.env(parent=emptyenv()), ignore.strand=FALSE, asHits=FALSE)
+\S4method{locateVariants}{VCF,TranscriptDb,VariantType}(query, subject, region, ..., 
+    cache=new.env(parent=emptyenv()), ignore.strand=FALSE, asHits=FALSE)
+\S4method{locateVariants}{GRanges,TranscriptDb,VariantType}(query, subject, region, ..., 
+    cache=new.env(parent=emptyenv()), ignore.strand=FALSE, asHits=FALSE)
 }
 
 \arguments{
@@ -239,10 +241,10 @@ locateVariants(query, subject, region, ...)
   ## Variants in intergenic regions 
   ## ---------------------------------------------------------------------
   ## Intergenic variants do not overlap a gene range in the 
-  ## annotation and therefore 'GENEID' is always NA. If present,
-  ## all flanking genes that fall within the 'upstream' and
-  ## 'downstream' distances are reported as PRECEDEID and FOLLOWID.
-  region <- IntergenicVariants(upstream=70000, downstream=5000)
+  ## annotation and therefore 'GENEID' is always NA. Flanking genes 
+  ## that fall within the 'upstream' and 'downstream' distances are 
+  ## reported as PRECEDEID and FOLLOWID.
+  region <- IntergenicVariants(upstream=70000, downstream=70000)
   loc_int <- locateVariants(vcf, txdb, region)
   mcols(loc_int)[c("LOCATION", "PRECEDEID", "FOLLOWID")] 
 
@@ -250,10 +252,9 @@ locateVariants(query, subject, region, ...)
   ## have PRECEDEID(s) or FOLLOWID(s). Each variant can have multiple 
   ## flanking id's so we first expand PRECEDEID and the corresponding
   ## variant ranges.
-  p_idx <- all(!is.na(loc_int$PRECEDEID))
-  p_ids <- unlist(loc_int$PRECEDEID[p_idx], use.names=FALSE) 
-  p_elt <- elementLengths(loc_int$PRECEDEID[p_idx]) 
-  exp_ranges <- rep(loc_int[p_idx], p_elt)
+  #p_idx <- all(!is.na(loc_int$PRECEDEID))
+  p_ids <- unlist(loc_int$PRECEDEID, use.names=FALSE) 
+  exp_ranges <- rep(loc_int,  elementLengths(loc_int$PRECEDEID))
   ## Provide the variant GRanges as 'x' and the TxDb annotation as 'y' 
   ## to distance(). The 'id' and 'type' arguments describe an id found 
   ## in the TxDb. See ?'nearest-methods' for details on the method.
@@ -261,17 +262,12 @@ locateVariants(query, subject, region, ...)
   head(p_dist)
 
   ## Expanded view of ranges, gene id and distance:
-  mcols(exp_ranges) <- DataFrame(PRECEDEID=exp_ranges$PRECEDEID, 
-                                 PRECEDE_DIST=p_dist) 
+  exp_ranges$PRECEDE_DIST <- p_dist
   exp_ranges
 
   ## Collapsed view of ranges, gene id and distance:
-  org_ranges <- loc_int[p_idx]
-  p_dist <- unname(splitAsList(p_dist, 
-                   factor(rep(seq_len(length(p_elt)), p_elt)))) 
-  mcols(org_ranges) <- DataFrame(PRECEDEID=org_ranges$"PRECEDEID", 
-                                  PRECEDE_DIST=p_dist)
-  org_ranges 
+  loc_int$PRECEDE_DIST <- relist(p_dist, loc_int$PRECEDEID)
+  loc_int 
 
   ## ---------------------------------------------------------------------
   ## GRangesList as subject 
