@@ -453,9 +453,10 @@ setMethod(show, "VCF",
         }
     }
     cat("geno(vcf):\n")
-    printSimpleList(geno(object, withDimnames=FALSE), margin=margin) 
+    geno <- geno(object, withDimnames=FALSE)
+    printSimpleList(geno, margin=margin) 
     if (nrow(hdr <- geno(header(object))) > 0) {
-        if (nrow(df <- as.data.frame(hdr[names(geno(object)),])) > 0) {
+        if (nrow(df <- as.data.frame(hdr[names(geno),])) > 0) {
             cat("geno(header(vcf)):\n")
             headerrec(df, "geno")
         }
