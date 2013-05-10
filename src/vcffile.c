@@ -5,6 +5,7 @@
 #include "dna_hash.h"
 #include "utilities.h"
 #include "IRanges_interface.h"
+#include "XVector_interface.h"
 #include "samtools/khash.h"
 
 enum { ROWDATA_IDX = 0, REF_IDX, ALT_IDX, QUAL_IDX, FILTER_IDX,

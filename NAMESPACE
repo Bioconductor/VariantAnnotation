@@ -41,18 +41,6 @@ importMethodsFrom(GenomicFeatures,
     isActiveSeq, "isActiveSeq<-"
 )
 
-importFrom(Biostrings,
-    AAStringSet, DNAStringSet, DNAStringSetList
-)
-
-importMethodsFrom(Biostrings,
-    nchar, reverseComplement, subseq, substr, translate
-)
-
-importClassesFrom(Biostrings, 
-    DNAStringSet, DNAStringSetList
-)
-
 importFrom(IRanges, 
     CharacterList, DataFrame, DataFrameList, FilterRules, IntegerList, 
     IRanges, isSingleNumber, isSingleString, isTRUEorFALSE, LogicalList, 
@@ -70,9 +58,23 @@ importMethodsFrom(IRanges,
     countOverlaps, elementLengths, end, eval, findOverlaps, 
     follow, gsub, lapply, match, "metadata<-", narrow, order, 
     precede, queryHits, rev, Rle, runValue, sapply, shift,
-    split, start, "start<-", subjectHits, "subseq<-", substring, 
+    split, start, "start<-", subjectHits, substring, 
     unlist, values, "values<-", which, width, 
     expand
+)
+
+importFrom(XVector, "subseq", "subseq<-")
+
+importFrom(Biostrings,
+    AAStringSet, DNAStringSet, DNAStringSetList
+)
+
+importMethodsFrom(Biostrings,
+    nchar, reverseComplement, substr, translate
+)
+
+importClassesFrom(Biostrings, 
+    DNAStringSet, DNAStringSetList
 )
 
 importMethodsFrom(DBI, 
