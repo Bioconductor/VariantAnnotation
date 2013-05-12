@@ -1,0 +1,13 @@
+##source=VariantTools 1.3.2
+##phasing=unphased
+##fileformat=VCFv4.1
+##project=example
+##fileDate=20130419
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=AD,Number=A,Type=Integer,Description="Read depth for REF and ALT">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Total read count">
+##FORMAT=<ID=AP,Number=A,Type=Integer,Description="Flags indicating whether REF and/or ALT is present">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	H1993
+TP53	1011392	.	C	G	.	.	.	AD:DP:AP	41,540:582:1,1
+TP53	1012027	.	T	C	.	.	.	AD:DP:AP	0,2:2:0:1
+TP53	1011392	.	C	G	.	.	.	AD:DP:AP	41,540:582:1,1

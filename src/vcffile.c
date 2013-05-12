@@ -1,3 +1,4 @@
+#include <stdarg.h>
 #include <zlib.h>
 #include "vcffile.h"
 #include "vcftype.h"
@@ -22,27 +23,37 @@ static khash_t(WARNINGS) *vcfwarn_new()
     return kh_init(WARNINGS);
 }
 
-static void vcfwarn(khash_t(WARNINGS) *warnings, const int idx,
-		     const char *field, const char *key)
+static void vcfwarn(khash_t(WARNINGS) *warnings,
+                    const char *fmt, ...)
 {
-    char *buf = Calloc(strlen(field) + strlen(key) + 1, char);
-    sprintf(buf, "%s%s", field, key);
-    if (kh_get(WARNINGS, warnings, buf) != kh_end(warnings)) {
-	Free(buf);
-	return;
-    }
+    static const int bufsize = 2048;
+    char *buf = Calloc(strlen(fmt), char);
     int ret;
+
+    memcpy(buf, fmt, strlen(fmt) + 1);
+    if (kh_get(WARNINGS, warnings, buf) != kh_end(warnings)) {
+        Free(buf);
+        return;
+    }
     kh_put(WARNINGS, warnings, buf, &ret);
-    Rf_warning("record %d (and others?) %s '%s' not found", idx,
-	       field, key);
+
+    buf = Calloc(bufsize, char);
+    va_list argp;
+    va_start(argp, fmt);
+    (void) vsnprintf(buf, bufsize, fmt, argp);
+    va_end(argp);
+    Rf_warning(buf);
+    Free(buf);
+
+    return;
 }
 
 static void vcfwarn_free(khash_t(WARNINGS) *warnings)
 {
     khiter_t key;
     for (key = kh_begin(warnings); key != kh_end(warnings); ++key)
-	if (kh_exist(warnings, key))
-	    Free(kh_key(warnings, key));
+        if (kh_exist(warnings, key))
+            Free(kh_key(warnings, key));
     kh_destroy(WARNINGS, warnings);
 }
 
@@ -196,9 +207,11 @@ static void _parse(char *line, const int irec,
                     break;
             }
             if (imap_n == imapidx) {
-		vcfwarn(parse->warnings, idx + 1, "INFO", ikey);
-		continue;
-	    }
+                vcfwarn(parse->warnings,
+                        "record %d: header line '##INFO=<ID=%s,...>' not found",
+                        idx + 1, ikey);
+                continue;
+            }
 
             elt = info->u.list[imapidx];
             if (LGLSXP == elt->type) {
@@ -215,17 +228,26 @@ static void _parse(char *line, const int irec,
     fmt = field;
     for (field = it_init(&it2, fmt, ':'), fmtidx = 0;
          '\0' != *field; field = it_next(&it2), fmtidx++) {
+        gmapidx[fmtidx] = gmap_n; /* unknown FORMAT */
         for (j = 0; j < gmap_n; ++j) {
             if (0L == strcmp(field, gnms[j]))
                 break;
         }
-        if (gmap_n == j)
-            vcfwarn(parse->warnings, irec + 1, "FORMAT", field);
+        if (gmap_n == j) {
+            vcfwarn(parse->warnings,
+                    "record %d: header line '##FORMAT=<ID=%s,...>' not found",
+                    irec + 1, field);
+        } else if (fmtidx >= gmap_n) {
+            vcfwarn(parse->warnings,
+                    "record %d: fewer '##FORMAT=<...>' lines than FORMAT fields",
+                    irec + 1);
+        }
         gmapidx[fmtidx] = j;
     }
 
     /* sample(s) */
     struct vcftype_t *geno = vcf->u.list[GENO_IDX];
+    const int max_fmtidx = fmtidx;
     int sample_genoidx = 0; /* index into sample array */
     for (sample = it_next(&it0), sampleidx = 0;
          '\0' != *sample; sample = it_next(&it0), sampleidx++) {
@@ -233,6 +255,12 @@ static void _parse(char *line, const int irec,
             continue;    /* skip sample */
         for (field = it_init(&it2, sample, ':'), fmtidx = 0;
              '\0' != *field; field = it_next(&it2), fmtidx++) {
+            if (fmtidx >= max_fmtidx) {
+                vcfwarn(parse->warnings,
+                        "record %d sample %d: fewer FORMAT fields than GENO fields",
+                        irec + 1, sampleidx + 1);
+                continue;
+            }
             if (gmap_n == gmapidx[fmtidx])
                 continue;    /* unknown FORMAT */
             elt = geno->u.list[ gmapidx[fmtidx] ];

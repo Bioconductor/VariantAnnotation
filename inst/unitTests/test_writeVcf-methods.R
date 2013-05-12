@@ -36,7 +36,7 @@ test_writeVcf_flatgeno <- function()
     vcf2 <- readVcf(dest, "hg19")
 }
 
-test_writevcf_geno <- function()
+test_writeVcf_geno <- function()
 {
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
     dest <- tempfile()
@@ -65,7 +65,9 @@ test_writevcf_geno <- function()
     ## array 
     vcf1 <- readVcf(fl, "hg19", param=ScanVcfParam(geno="HQ")) 
     writeVcf(vcf1, dest)
-    vcf2 <- readVcf(dest, "hg19")
+    vcf2 <-                       # FORMAT descriptors for GENO fields
+        tryCatch(readVcf(dest, "hg19"), error=conditionMessage,
+                 warning=conditionMessage)
     checkIdentical(geno(vcf1)$HQ, geno(vcf2)$HQ)
     checkIdentical(geno(header(vcf1)), geno(header(vcf2)))
 

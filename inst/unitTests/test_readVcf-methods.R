@@ -1,4 +1,3 @@
-
 test_readVcf_format <- function()
 {
     ## arrays in geno
@@ -33,9 +32,10 @@ test_readVcf_unspecified_INFO_FORMAT <- function()
         warn <<- append(warn, conditionMessage(w))
         invokeRestart("muffleWarning")
     })
-    exp <- c("record 2 (and others?) INFO 'XX' not found",
-             "record 4 (and others?) FORMAT 'YY' not found")
-    #checkIdentical(exp, warn)
+    exp <- c("record 2: header line '##INFO=<ID=XX,...>' not found",
+             "record 4: header line '##FORMAT=<ID=YY,...>' not found",
+             "record 4: fewer '##FORMAT=<...>' lines than FORMAT fields")
+    checkIdentical(exp, warn)
 
     ## columns immediately after XX entries
     exp <- c(14L, 11L, 10L, 13L, 9L)
@@ -48,6 +48,22 @@ test_readVcf_unspecified_INFO_FORMAT <- function()
     checkIdentical(exp, as.vector(geno(vcf)$GT[4:5,]))
     exp <- c(56L, NA, 51L, NA, NA, NA, 60L, NA, 51L, NA, NA, NA)
     checkIdentical(exp, as.vector(geno(vcf)$HQ[4:5,,]))
+}
+
+test_readVcf_fewer_FORMAT_than_GENO <- function() {
+    fl <- system.file(package="VariantAnnotation", "unitTests",
+                      "cases", "fewer-FORMAT-than-GENO.vcf")
+    exp <- "record 2 sample 1: fewer FORMAT fields than GENO fields"
+    obs <- tryCatch(readVcf(fl, "hg19"), warning=conditionMessage)
+    checkIdentical(exp, obs)
+}
+
+test_readVcf_missing_FORMAT_metadata_elt <- function() {
+    fl <- system.file(package="VariantAnnotation", "unitTests",
+                      "cases", "missing-FORMAT-metadata-elt.vcf")
+    exp <- "record 2: header line '##FORMAT=<ID=XP,...>' not found"
+    obs <- tryCatch(readVcf(fl, "hg19"), warning=conditionMessage)
+    checkIdentical(exp, obs)
 }
 
 test_readVcf_ranges <- function()
@@ -146,7 +162,10 @@ test_readVcf_param <- function()
     ## no info, geno, samples
     checkTrue(validObject(readVcf(fl, "hg19", ScanVcfParam(geno=NA))))
     checkTrue(validObject(readVcf(fl, "hg19", ScanVcfParam(info=NA))))
-    checkTrue(validObject(readVcf(fl, "hg19", ScanVcfParam(samples=NA))))
+    obs <-                              # no warnings on samples=NA
+        tryCatch(readVcf(fl, "hg19", ScanVcfParam(samples=NA)),
+                 warning=conditionMessage)
+    checkTrue(is(obs, "VCF") && validObject(obs))
 }
 
 
