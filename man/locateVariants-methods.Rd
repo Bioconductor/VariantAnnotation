@@ -112,7 +112,8 @@ locateVariants(query, subject, region, ...)
       \code{FOLLOWID}. \code{upstream} and \code{downstream} arguments define 
       the acceptable distance from the query for the flanking genes. 
       \code{PRECEDEID} and \code{FOLLOWID} results are lists and contain all 
-      genes that fall within the defined distance.
+      genes that fall within the defined distance. See examples for how
+      to compute the distance from ranges to PRECEDEID and FOLLOWID.
 
       \sQuote{promoter} variants fall within a specified range upstream and 
       downstream of the transcription start site. Ranges values can be set 
@@ -204,8 +205,8 @@ locateVariants(query, subject, region, ...)
 \seealso{
   \code{\link{readVcf}},
   \code{\link{summarizeVariants}},
-  \code{\link{predictCoding}}
-  \code{\link{upstream}}
+  \code{\link{predictCoding}},
+  \code{\link{upstream}},
 }
 
 \examples{
@@ -254,9 +255,10 @@ locateVariants(query, subject, region, ...)
   ## variant ranges.
   p_ids <- unlist(loc_int$PRECEDEID, use.names=FALSE) 
   exp_ranges <- rep(loc_int,  elementLengths(loc_int$PRECEDEID))
+
   ## Provide the variant GRanges as 'x' and the TxDb annotation as 'y' 
   ## to distance(). The 'id' and 'type' arguments describe an id found 
-  ## in the TxDb. See ?'nearest-methods' for details on the method.
+  ## in the TxDb. See the ?'TranscriptDb' man page for details.
   p_dist <- distance(exp_ranges, txdb, id=p_ids, type="gene")
   head(p_dist)
 
