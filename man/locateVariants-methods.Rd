@@ -252,7 +252,6 @@ locateVariants(query, subject, region, ...)
   ## have PRECEDEID(s) or FOLLOWID(s). Each variant can have multiple 
   ## flanking id's so we first expand PRECEDEID and the corresponding
   ## variant ranges.
-  #p_idx <- all(!is.na(loc_int$PRECEDEID))
   p_ids <- unlist(loc_int$PRECEDEID, use.names=FALSE) 
   exp_ranges <- rep(loc_int,  elementLengths(loc_int$PRECEDEID))
   ## Provide the variant GRanges as 'x' and the TxDb annotation as 'y' 

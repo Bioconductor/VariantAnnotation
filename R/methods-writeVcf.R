@@ -88,23 +88,29 @@ setMethod(writeVcf, c("VCF", "connection"),
     }
 }
 
-.makeVcfFormatMatrix <- function(geno, cls, idx) {
-  if (length(idx) > 0) {
-    geno[idx] <- seqapply(geno[idx], function(x) {
-      matrix(unlist(x, use.names=FALSE), nrow(x), prod(tail(dim(x), -1)))
-    })
-  }
+.makeVcfFormatMatrix <- function(geno, cls, idx) 
+{
+    if (length(geno) == 1L)
+        return(matrix(rep(names(geno), nrow(geno[[1]]))))
+
+    if (length(idx) > 0) {
+        geno[idx] <- seqapply(geno[idx], 
+            function(x) {
+                matrix(unlist(x, use.names=FALSE), nrow(x), prod(tail(dim(x), -1)))
+            })
+    }
  
-  do.call(cbind, Map(function(elt, nms) {
+    do.call(cbind, Map(function(elt, nms) {
 ### Should be discussed, but it seems like if we have a list matrix,
 ### we should look for elements that are empty, not a single NA.
 ### VO: If readVcf() was used, all empty fields were converted to NA.
-    if (is.list(elt))
-      haveData <- rowSums(matrix(elementLengths(elt), nrow(elt))) > 0
-    else 
-      haveData <- rowSums(!is.na(elt)) > 0
-    as.character(ifelse(haveData, nms, NA_character_))
-  }, as.list(geno), names(geno)))
+        if (is.list(elt))
+          haveData <- rowSums(matrix(elementLengths(elt), nrow(elt))) > 0
+        else 
+          haveData <- rowSums(!is.na(elt)) > 0
+        ifelse(haveData, as.character(nms), NA_character_)
+        }, as.list(geno), names(geno))
+    )
 }
 
 .makeVcfFormat <- function(formatMat)

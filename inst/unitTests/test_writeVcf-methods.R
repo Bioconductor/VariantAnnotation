@@ -60,7 +60,7 @@ test_writeVcf_geno <- function()
     vcf2 <- readVcf(dest, "hg19")
     checkIdentical(geno(vcf1)$GT, geno(vcf2)$GT)
     checkIdentical(geno(header(vcf1)), geno(header(vcf2)))
-    #checkTrue(samples(header(vcf2)) == "NA00003")
+    checkTrue(samples(header(vcf2)) == "NA00003")
 
     ## array 
     vcf1 <- readVcf(fl, "hg19", param=ScanVcfParam(geno="HQ")) 
@@ -77,7 +77,7 @@ test_writeVcf_geno <- function()
     vcf2 <- readVcf(dest, "hg19")
     checkIdentical(geno(vcf1)$HQ, geno(vcf2)$HQ)
     checkIdentical(geno(header(vcf1)), geno(header(vcf2)))
-    #checkTrue(samples(header(vcf2)) == "NA00003")
+    checkTrue(samples(header(vcf2)) == "NA00003")
 
     ## matrix and array 
     param=ScanVcfParam(geno=c("GT", "HQ"), samples="NA00002")
@@ -86,7 +86,7 @@ test_writeVcf_geno <- function()
     vcf2 <- readVcf(dest, "hg19")
     checkIdentical(geno(vcf1)$GT, geno(vcf2)$GT)
     checkIdentical(geno(vcf1)$HQ, geno(vcf2)$HQ)
-    #checkTrue(samples(header(vcf2)) == "NA00002")
+    checkTrue(samples(header(vcf2)) == "NA00002")
 }
 
 

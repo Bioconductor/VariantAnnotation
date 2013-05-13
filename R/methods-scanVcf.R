@@ -45,13 +45,13 @@
 {
     hdr <- scanVcfHeader(file)
     samp <- samples(hdr)
-    smap <- logical(length(samp))
     if (identical(character(), samples)) {
-        smap <- !smap
+        smap <- !logical(length(samp))
+    } else if (is.na(samples)) {
+        smap <- logical(length(samp))
     } else {
         if (length(nx <- samples[!samples %in% samp]) > 0L)
-            warning(paste0("samples '", nx, "' in ",
-                    "vcfSamples(<ScanVcfParam>) not found in file"))
+            warning(paste0("samples '", nx, " not found in file"))
         smap <- samp %in% samples
     }
     names(smap) <- samp
@@ -222,6 +222,7 @@ setMethod(scanVcf, c("connection", "missing"),
             ## non-numeric
             nrow <- nrow(x)
             dimnames <- dimnames(x)
+            #x[which(x == ".")] <- NA
             x <- strsplit(x, ",", fixed=TRUE)
             x <- switch(type, 
                         Character=, String=x,
