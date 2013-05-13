@@ -15,7 +15,7 @@ importClassesFrom(Biobase,
 )
 
 importFrom(Biobase,
-    sampleNames
+    sampleNames, samples
 )
 
 importClassesFrom(AnnotationDbi, 
@@ -95,7 +95,7 @@ exportClassPattern("^.*$")
 
 export(
     dbSNPFilter, regionFilter, ## Defunct
-    VCF, VCFHeader, reference, samples, header, meta,
+    VCF, VCFHeader, reference, header, meta,
     vcfWhich, "vcfWhich<-", vcfFixed, "vcfFixed<-", vcfInfo, "vcfInfo<-", 
     vcfGeno, "vcfGeno<-", vcfSamples, "vcfSamples<-", vcfTrimEmpty, "vcfTrimEmpty<-", 
     duplicateRSID, CodingVariants, IntronVariants,

@@ -25,9 +25,9 @@ setMethod("reference", "VCFHeader",
 })
 
 setMethod("samples", "VCFHeader", 
-    function(x) 
+    function(object) 
 {
-    slot(x, "samples")
+    slot(object, "samples")
 })
 
 setMethod("header", "VCFHeader", 
