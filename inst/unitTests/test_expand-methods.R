@@ -1,3 +1,5 @@
+expand <- VariantAnnotation::expand 
+
 test_expand_info_geno <- function()
 {
     fl <- system.file("unitTests", "cases", "expand.vcf", 

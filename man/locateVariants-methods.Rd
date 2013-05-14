@@ -258,7 +258,8 @@ locateVariants(query, subject, region, ...)
 
   ## Provide the variant GRanges as 'x' and the TxDb annotation as 'y' 
   ## to distance(). The 'id' and 'type' arguments describe an id found 
-  ## in the TxDb. See the ?'TranscriptDb' man page for details.
+  ## in the TxDb. See the ?'nearest-methods' man page in GenomicFeatures
+  ## for details.
   p_dist <- distance(exp_ranges, txdb, id=p_ids, type="gene")
   head(p_dist)
 

@@ -47,7 +47,7 @@
     samp <- samples(hdr)
     if (identical(character(), samples)) {
         smap <- !logical(length(samp))
-    } else if (is.na(samples)) {
+    } else if (isTRUE(is.na(samples))) {
         smap <- logical(length(samp))
     } else {
         if (length(nx <- samples[!samples %in% samp]) > 0L)
