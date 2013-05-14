@@ -66,6 +66,14 @@ test_readVcf_missing_FORMAT_metadata_elt <- function() {
     checkIdentical(exp, obs)
 }
 
+test_readVcf_no_GENO_row <- function() {
+    fl <- system.file(package="VariantAnnotation", "unitTests",
+                      "cases", "no_GENO_row.vcf")
+    exp <- c(582L, NA, 584L, 583L, NA, 585L)
+    vcf <- readVcf(fl, "hg19")
+    checkIdentical(exp, as.vector(geno(vcf)[["DP"]]))
+}
+
 test_readVcf_ranges <- function()
 {
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
