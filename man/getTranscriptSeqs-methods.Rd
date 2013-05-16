@@ -42,7 +42,7 @@
   specified in \code{query}. 
 } 
 
-\author{Valerie Obenchain}
+\author{Valerie Obenchain <vobencha@fhcrc.org>}
 
 \seealso{
   \link{predictCoding}
@@ -56,10 +56,19 @@
  
   txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene 
   cdsByTx <- cdsBy(txdb)
-  chr20 <- keepSeqlevels(cdsByTx, "chr20")
 
-  ## BSgenome as sequence source
-  bsSource <- getTranscriptSeqs(chr20, Hsapiens)
+  ## Use only chromosome 20.
+  seqlevels(cdsByTx, force=TRUE) <- "chr20"
+
+  ## Return a DNAStringSet of sequences corresponding to 
+  ## the cds regions.
+  seqs <- getTranscriptSeqs(cdsByTx, Hsapiens)
+
+  ## Sequences for the cds regions were retrieved from the BSgenome.
+  ## Each element of the cdsByTx GRangesList is represented by
+  ## a single DNAString in 'seqs'. 
+  cdsByTx[1]
+  seqs[1]
 }
 
 \keyword{methods}

@@ -169,8 +169,8 @@
   fl <- system.file("extdata", "chr22.vcf.gz", package="VariantAnnotation")
   vcf <- readVcf(fl, "hg19")
 
-  ## Rename seqlevels in the VCF object to match those in the TxDb
-  vcf<- renameSeqlevels(vcf, c("22"="chr22"))
+  ## Rename seqlevels in the VCF object to match those in the TxDb.
+  seqlevels(vcf)<- "chr22"
   ## Confirm common seqlevels
   intersect(seqlevels(vcf), seqlevels(txdb))
  

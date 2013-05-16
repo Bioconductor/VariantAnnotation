@@ -43,7 +43,7 @@
 .vcf_scan_header_maps <-
     function(file, fixed, info, geno, samples)
 {
-    hdr <- scanVcfHeader(file)
+    hdr <- suppressWarnings(scanVcfHeader(file))
     samp <- samples(hdr)
     if (identical(character(), samples)) {
         smap <- !logical(length(samp))

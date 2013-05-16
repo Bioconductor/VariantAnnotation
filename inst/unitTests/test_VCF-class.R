@@ -194,11 +194,11 @@ test_VCF_seqlevels <- function()
     seqlev <- seqlevels(vcf)
     checkIdentical(seqlev, c("1", "2", "3", "4"))
 
-    vcf2 <- renameSeqlevels(vcf, c("1"="chr1"))
-    checkIdentical(seqlevels(vcf2), c("chr1", "2", "3", "4"))
+    seqlevels(vcf)[seqlevels(vcf) == "1"] <- "chr1"
+    checkIdentical(seqlevels(vcf), c("chr1", "2", "3", "4"))
  
-    vcf3 <- keepSeqlevels(vcf, "3")
-    checkIdentical(seqlevels(vcf3), "3")
+    seqlevels(vcf, force=TRUE) <- "3"
+    checkIdentical(seqlevels(vcf), "3")
 }
 
 quiet <- suppressWarnings

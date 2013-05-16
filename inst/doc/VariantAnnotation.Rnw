@@ -170,9 +170,10 @@ membership in dbSNP can be identified by using the appropriate
 SNPlocs package for hg19.
 <<examine_dbSNP>>=
 library(SNPlocs.Hsapiens.dbSNP.20101109)
-dbsnprd <- renameSeqlevels(rowData(vcf), c("22"="ch22"))
+rd <- rowData(vcf)
+seqlevels(rd) <- "ch22"
 ch22snps <- getSNPlocs("ch22")
-dbsnpchr22 <- sub("rs", "", names(dbsnprd)) %in% ch22snps$RefSNP_id
+dbsnpchr22 <- sub("rs", "", names(rd)) %in% ch22snps$RefSNP_id
 table(dbsnpchr22)
 @
 
@@ -293,12 +294,12 @@ promoter & falls \emph{within} a promoter region of a transcript \\
 For overlap methods to work properly the chromosome names (seqlevels)
 must be compatible in the objects being compared. The VCF data
 chromosome names are represented by number, i.e., '22', but the TxDb
-chromosome names are preceded with 'chr'. Modify the seqlevels in the
-VCF object with \Rfunction{renameSeqlevels}.
-<<locate_renameSeqlevels>>=
+chromosome names are preceded with 'chr'. Seqlevels in the VCF can
+be modified with the \Rfunction{seqlevels} function.
+<<locate_rename_seqlevels>>=
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
-vcf <- renameSeqlevels(vcf, c("22"="chr22"))
+seqlevels(vcf) <- "chr22"
 rd <- rowData(vcf)
 loc <- locateVariants(rd, txdb, CodingVariants())
 head(loc, 3)

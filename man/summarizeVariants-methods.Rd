@@ -124,13 +124,11 @@
   library(TxDb.Hsapiens.UCSC.hg19.knownGene)
   txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene 
 
-  ## Read variants from VCF and adjust seqlevels
+  ## Read variants from VCF.
   fl <- system.file("extdata", "chr22.vcf.gz", package="VariantAnnotation")
   vcf <- readVcf(fl, "hg19")
-  newnames <- paste("chr", seqlevels(vcf), sep="")
-  names(newnames) <- seqlevels(vcf)
-  vcf <- renameSeqlevels(vcf, newnames) 
-  ## Confirm seqlevels
+  ## Rename seqlevels to match TranscriptDb; confirm the match.
+  seqlevels(vcf) <- paste0("chr", seqlevels(vcf)) 
   intersect(seqlevels(vcf), seqlevels(txdb))
 
   ## ----------------------------------------

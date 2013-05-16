@@ -252,14 +252,16 @@
   \describe{
     \item{}{
       \code{renameSeqlevels(x, value)}:
-      Rename the seqlevels in the \code{GRanges} in the \code{rowData} slot
-      of the VCF object. \code{value} is a named character vector where
-      the names are the old seqlevels and the values are the new.
+      Deprecated. Use seqlevels() instead. Rename the seqlevels in the 
+      \code{GRanges} in the \code{rowData} slot of the VCF object. \code{value} 
+      is a named character vector where the names are the old seqlevels and 
+      the values are the new.
     }
     \item{}{
       \code{keepSeqlevels(x, value)}:
-      Subset the \code{GRanges} in the \code{rowData} slot of the VCF object. 
-      \code{value} is a character vector of seqlevels to keep.
+      Deprecated. Use seqlevels() instead. Subset the \code{GRanges} in the 
+      \code{rowData} slot of the VCF object. \code{value} is a character vector 
+      of seqlevels to keep.
     }
   }
 }
@@ -374,75 +376,76 @@
 }
 
 \examples{
-  fl <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
-  vcf <- readVcf(fl, genome="hg19")
+fl <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
+vcf <- readVcf(fl, genome="hg19")
 
-  ## ----------------------------------------------------------------
-  ## Accessors 
-  ## ----------------------------------------------------------------
-  ## Variant locations are stored in a GRanges in the rowData slot.
-  rowData(vcf)
+## ----------------------------------------------------------------
+## Accessors 
+## ----------------------------------------------------------------
+## Variant locations are stored in a GRanges in the rowData slot.
+rowData(vcf)
 
-  ## Individual fields can be extracted with ref(), alt(), qual() 
-  ## and filt().
-  qual(vcf)
-  ref(vcf)
+## Individual fields can be extracted with ref(), alt(), qual() 
+## and filt().
+qual(vcf)
+ref(vcf)
 
-  ## All 'info' fields can be extracted together along
-  ## with the GRanges of locations.
-  head(info(vcf))
+## All 'info' fields can be extracted together along
+## with the GRanges of locations.
+head(info(vcf))
 
-  ## All genotype fields can be seen with geno(). Individual
-  ## fields are accessed with '$' or '[['.
-  geno(vcf)
-  identical(geno(vcf)$DP, geno(vcf)[[3]])
+## All genotype fields can be seen with geno(). Individual
+## fields are accessed with '$' or '[['.
+geno(vcf)
+identical(geno(vcf)$DP, geno(vcf)[[3]])
 
-  ## ----------------------------------------------------------------
-  ## Renaming seqlevels and subsetting 
-  ## ----------------------------------------------------------------
-  ## It is often the case that chromosome names need to be
-  ## modified. In this VCF, the chromosome names (seqlevels) 
-  ## are numbers instead of preceded by "chr" or "ch".
-  seqlevels(vcf)
- 
-  ## seqlevels can be renamed with renameSeqlevels().
-  newnames <- paste("chr", seqlevels(vcf), sep="")
-  names(newnames) <- seqlevels(vcf)
-  vcf <- renameSeqlevels(vcf, newnames)
-  seqlevels(vcf)
- 
-  ## Subsetting on seqlevels can be done with keepSeqlevels().
-  vcf_subset <- keepSeqlevels(vcf, "chr2")
-  seqlevels(vcf_subset)
+## ----------------------------------------------------------------
+## Renaming seqlevels and subsetting 
+## ----------------------------------------------------------------
+## Overlap and matching operations require that the objects
+## being compared have the same seqlevels (chromosome names).
+## It is often the case that the seqlevesls in on of the objects
+## needs to be modified to match the other. In this VCF, the 
+## seqlevels are numbers instead of preceded by "chr" or "ch". 
 
-  ## ----------------------------------------------------------------
-  ## CollapsedVCF 
-  ## ----------------------------------------------------------------
-  ## readVCF() produces a CollapsedVCF object.
-  fl <- system.file("extdata", "ex2.vcf", 
-                    package="VariantAnnotation")
-  vcf <- readVcf(fl, genome="hg19")
-  vcf
+seqlevels(vcf)
 
-  ## The ALT column is a DNAStringSetList to allow for more
-  ## than one alternate allele per variant.
-  alt(vcf)
+## Rename the seqlevels to start with 'chr'.
+seqlevels(vcf) <- paste0("chr", seqlevels(vcf)) 
+seqlevels(vcf)
 
-  ## When structural variants are present, ALT is 
-  ## a CompressedCharacterList.
-  fl <- system.file("extdata", "structural.vcf", 
-                    package="VariantAnnotation")
-  vcf <- readVcf(fl, genome="hg19")
-  alt(vcf)
+## The VCF can also be subset by seqlevel. Here only 'chr2' is kept.
+seqlevels(vcf, force=TRUE) <- "chr2"
+seqlevels(vcf)
 
-  ## ----------------------------------------------------------------
-  ## ExpandedVCF
-  ## ----------------------------------------------------------------
-  ## ExpandedVCF is the 'flattened' counterpart of CollapsedVCF.
-  ## The ALT and all variables with Number='A' in the header are
-  ## expanded to one row per alternate allele.
-  fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
-  vcf <- readVcf(fl, genome="hg19")
-  vcfLong <- expand(vcf)
-  alt(vcfLong)
+## ----------------------------------------------------------------
+## CollapsedVCF 
+## ----------------------------------------------------------------
+## readVCF() produces a CollapsedVCF object.
+fl <- system.file("extdata", "ex2.vcf", 
+                  package="VariantAnnotation")
+vcf <- readVcf(fl, genome="hg19")
+vcf
+
+## The ALT column is a DNAStringSetList to allow for more
+## than one alternate allele per variant.
+alt(vcf)
+
+## When structural variants are present, ALT is 
+## a CompressedCharacterList.
+fl <- system.file("extdata", "structural.vcf", 
+                  package="VariantAnnotation")
+vcf <- readVcf(fl, genome="hg19")
+alt(vcf)
+
+## ----------------------------------------------------------------
+## ExpandedVCF
+## ----------------------------------------------------------------
+## ExpandedVCF is the 'flattened' counterpart of CollapsedVCF.
+## The ALT and all variables with Number='A' in the header are
+## expanded to one row per alternate allele.
+fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
+vcf <- readVcf(fl, genome="hg19")
+vcfLong <- expand(vcf)
+alt(vcfLong)
 }
