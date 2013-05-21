@@ -171,20 +171,16 @@ static void _parse(char *line, const int irec,
     char *sample, *field, *ifld, *ikey, *fmt;
 
     /* fixed fields */
-    char *chrom = it_init(&it0, line, '\t'); /* CHROM */
+    char *chrom, *id, *ref;
+    chrom = it_init(&it0, line, '\t'); /* CHROM */
     rle_append(parse->chrom, chrom);
     rowData = vcf->u.list[ROWDATA_IDX];
     field = it_next(&it0);      /* POS */
     rowData->u.list[POS_IDX]->u.integer[irec] = atoi(field);
-    field = it_next(&it0);      /* ID */
-    if ('.' == *field && '\0' == *(field + 1)) {
-        /* construct ID if missing: chrom\0pos\0 ==> chrom:pos\0 */
-        field = chrom;
-        *(field + strlen(chrom)) = ':';
-    }
-    rowData->u.list[ID_IDX]->u.character[irec] = Strdup(field);
 
-    field = it_next(&it0);      /* REF */
+    id = field = it_next(&it0);      /* ID */
+
+    ref = field = it_next(&it0);      /* REF */
     dna_hash_append(parse->ref, field);
     for (field = it_next(&it0), j = ALT_IDX; j <= FILTER_IDX;
          field = it_next(&it0), ++j)
@@ -192,6 +188,18 @@ static void _parse(char *line, const int irec,
         elt = vcf->u.list[j];
         _vcftype_set(elt, idx, field);
     }
+
+    if ('.' == *id && '\0' == *(id + 1)) {
+        /* construct ID if missing: chrom\0pos\0ID\0ref\0alt\0 ==> chrom:pos_ref/alt\0 */
+        id = chrom;
+        *(id + strlen(id)) = ':';
+        int len = strlen(id);
+        *(id + len) = '_';
+        *(ref + strlen(ref)) = '/'; /* ref\0alt\0 ==> ref/alt\0 */
+        strcpy(id + len + 1, ref); /* chrom:pos:ID\0ref/alt\0 ==> chrom:pos_ref/alt\0 */
+    }
+    rowData->u.list[ID_IDX]->u.character[irec] = Strdup(id);
+
 
     /* INFO */
     struct vcftype_t *info = vcf->u.list[INFO_IDX];
