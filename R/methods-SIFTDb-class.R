@@ -11,7 +11,7 @@ setMethod("keys", "SIFTDb",
     }
 ) 
 
-setMethod("cols", "SIFTDb",
+setMethod("columns", "SIFTDb",
     function(x)
     {
         c("RSID", "PROTEINID", "AACHANGE", "METHOD", "AA", "PREDICTION",

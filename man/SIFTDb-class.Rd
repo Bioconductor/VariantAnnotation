@@ -7,7 +7,7 @@
 \alias{SIFTDb-class}
 
 \alias{metadata,SIFTDb-method}
-\alias{cols,SIFTDb-method}
+\alias{columns,SIFTDb-method}
 \alias{keys,SIFTDb-method}
 \alias{select,SIFTDb-method}
 
@@ -26,8 +26,8 @@
       Returns \code{x}'s metadata in a data frame.
     }
     \item{}{
-      \code{cols(x)}:
-      Returns the names of the \code{cols} that can be used to subset the
+      \code{columns(x)}:
+      Returns the names of the \code{columns} that can be used to subset the
       data columns.
     }
     \item{}{
@@ -96,7 +96,7 @@ metadata(SIFT.Hsapiens.dbSNP132)
 head(keys(SIFT.Hsapiens.dbSNP132))
 
 ## for column descriptions see ?SIFTDbColumns
-cols(SIFT.Hsapiens.dbSNP132)
+columns(SIFT.Hsapiens.dbSNP132)
 
 ## subset on keys and cols 
 rsids <- c("rs2142947", "rs17970171", "rs8692231", "rs3026284") 

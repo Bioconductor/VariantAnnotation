@@ -75,8 +75,6 @@
 % Other methods
 \alias{genome,VCF-method}
 \alias{seqlevels,VCF-method}
-\alias{renameSeqlevels,VCF,character-method}
-\alias{keepSeqlevels,VCF,character-method}
 \alias{expand,CollapsedVCF-method}
 \alias{expand,ExpandedVCF-method}
 
@@ -247,25 +245,6 @@
   }
 }
 
-\section{Other methods}{
-  In the following code snippets \code{x} is a VCF object.
-  \describe{
-    \item{}{
-      \code{renameSeqlevels(x, value)}:
-      Deprecated. Use seqlevels() instead. Rename the seqlevels in the 
-      \code{GRanges} in the \code{rowData} slot of the VCF object. \code{value} 
-      is a named character vector where the names are the old seqlevels and 
-      the values are the new.
-    }
-    \item{}{
-      \code{keepSeqlevels(x, value)}:
-      Deprecated. Use seqlevels() instead. Subset the \code{GRanges} in the 
-      \code{rowData} slot of the VCF object. \code{value} is a character vector 
-      of seqlevels to keep.
-    }
-  }
-}
-
 \section{expand}{
   In the following code snippets \code{x} is a CollapsedVCF object.
   \describe{
@@ -411,12 +390,13 @@ identical(geno(vcf)$DP, geno(vcf)[[3]])
 seqlevels(vcf)
 
 ## Rename the seqlevels to start with 'chr'.
-seqlevels(vcf) <- paste0("chr", seqlevels(vcf)) 
-seqlevels(vcf)
+vcf2 <- renameSeqlevels(vcf, paste0("chr", seqlevels(vcf))) 
+seqlevels(vcf2)
 
-## The VCF can also be subset by seqlevel. Here only 'chr2' is kept.
-seqlevels(vcf, force=TRUE) <- "chr2"
-seqlevels(vcf)
+## The VCF can also be subset by seqlevel using 'keepSeqlevels'
+## or 'dropSeqlevels'. See ?keepSeqlevels for details. 
+vcf3 <- keepSeqlevels(vcf, "chr2")
+seqlevels(vcf3)
 
 ## ----------------------------------------------------------------
 ## CollapsedVCF 

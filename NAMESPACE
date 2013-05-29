@@ -23,7 +23,7 @@ importClassesFrom(AnnotationDbi,
 )
 
 importMethodsFrom(AnnotationDbi, 
-    colnames, cols, exists, keys, ncol, 
+    colnames, columns, exists, keys, ncol, 
     nrow, select
 )
 
@@ -118,9 +118,9 @@ exportMethods(
     filt, "filt<-", info, "info<-", geno, "geno<-", strand, 
     "strand<-", "[", "[<-", cbind, rbind, "mcols<-", 
 
-    genome, seqlevels, renameSeqlevels, keepSeqlevels,
+    genome, seqlevels,
 
     reference, samples, header, meta,
 
-    keys, cols, select
+    keys, columns, select
 )

@@ -365,29 +365,6 @@ setMethod("cbind", "VCF",
 })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-### Other methods 
-###
-
-setMethod("renameSeqlevels",  c("VCF", "character"),
-    function(x, value, ...)
-{
-    rd <- renameSeqlevels(rowData(x), value)
-    rowData(x) <- rd
-    x 
-})
-
-setMethod("keepSeqlevels",  c("VCF", "character"),
-    function(x, value, ...)
-{
-    rd <- keepSeqlevels(rowData(x), value)
-    idx <- as.vector(seqnames(rowData(x))) %in% value
-    xsub <- x[idx, ]
-    rowData(xsub) <- rd
-    xsub 
-})
-
-
-### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### show methods
 ###
 

@@ -6,7 +6,7 @@ p <- PolyPhen.Hsapiens.dbSNP131
 
 test_SIFT <- function()
 {
-    scol <- cols(s)
+    scol <- columns(s)
     checkIdentical(length(scol), 10L) 
 
     res <- select(s, "rs2142947")
@@ -23,7 +23,7 @@ test_SIFT <- function()
 
 test_PolyPhen <- function()
 {
-    pcol <- cols(p)
+    pcol <- columns(p)
     checkIdentical(length(pcol), 58L) 
 
     res <- select(p, "rs3026284")

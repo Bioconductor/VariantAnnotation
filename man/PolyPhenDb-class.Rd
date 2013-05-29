@@ -8,7 +8,7 @@
 
 \alias{duplicateRSID}
 \alias{metadata,PolyPhenDb-method}
-\alias{cols,PolyPhenDb-method}
+\alias{columns,PolyPhenDb-method}
 \alias{keys,PolyPhenDb-method}
 \alias{select,PolyPhenDb-method}
 
@@ -27,8 +27,8 @@
       Returns \code{x}'s metadata in a data frame.
     }
     \item{}{
-      \code{cols(x)}:
-      Returns the names of the \code{cols} that can be used to subset the
+      \code{columns(x)}:
+      Returns the names of the \code{columns} that can be used to subset the
       data columns. For column descriptions see \code{?PolyPhenDbColumns}.
     }
     \item{}{
@@ -113,7 +113,7 @@ metadata(PolyPhen.Hsapiens.dbSNP131)
 head(keys(PolyPhen.Hsapiens.dbSNP131))
 
 ## column descriptions found at ?PolyPhenDbColumns
-cols(PolyPhen.Hsapiens.dbSNP131)
+columns(PolyPhen.Hsapiens.dbSNP131)
 
 ## subset on keys and cols 
 subst <- c("AA1", "AA2", "PREDICTION")

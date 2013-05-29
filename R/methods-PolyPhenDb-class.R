@@ -10,7 +10,7 @@ setMethod("keys", "PolyPhenDb",
     }
 ) 
 
-setMethod("cols", "PolyPhenDb",
+setMethod("columns", "PolyPhenDb",
     function(x)
     {
         dbListFields(conn=x$conn, "ppdata")
