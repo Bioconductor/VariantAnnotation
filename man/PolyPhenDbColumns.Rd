@@ -9,7 +9,7 @@
 }
 
 \section{Column descriptions}{
-  These column names are displayed when \code{cols} is called on a
+  These column names are displayed when \code{columns} is called on a
   \code{PolyPhenDb} object.
 
     \itemize{

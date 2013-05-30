@@ -36,10 +36,10 @@
       data rows. The \code{keys} values are the rsid's.
     }
     \item{}{
-      \code{select(x, keys = NULL, cols = NULL, ...)}:
+      \code{select(x, keys = NULL, columns = NULL, ...)}:
       Returns a subset of data defined by the character vectors \code{keys} 
-      and \code{cols}. If no \code{keys} are supplied, all rows are
-      returned. If no \code{cols} are supplied, all columns
+      and \code{columns}. If no \code{keys} are supplied, all rows are
+      returned. If no \code{columns} are supplied, all columns
       are returned. For column descriptions see \code{?SIFTDbColumns}.
     }
   }
@@ -98,10 +98,10 @@ head(keys(SIFT.Hsapiens.dbSNP132))
 ## for column descriptions see ?SIFTDbColumns
 columns(SIFT.Hsapiens.dbSNP132)
 
-## subset on keys and cols 
+## subset on keys and columns 
 rsids <- c("rs2142947", "rs17970171", "rs8692231", "rs3026284") 
 subst <- c("RSID", "PREDICTION", "SCORE")
-select(SIFT.Hsapiens.dbSNP132, keys=rsids, cols=subst)
+select(SIFT.Hsapiens.dbSNP132, keys=rsids, columns=subst)
 select(SIFT.Hsapiens.dbSNP132, keys=rsids[1:2])
 }
 

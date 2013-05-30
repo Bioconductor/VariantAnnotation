@@ -12,7 +12,7 @@ test_SIFT <- function()
     res <- select(s, "rs2142947")
     checkIdentical(nrow(res), 4L)
 
-    res <- select(s, "rs2142947", cols="AACHANGE")
+    res <- select(s, "rs2142947", columns="AACHANGE")
     checkIdentical(nrow(res), 1L)
 
     res <- 
@@ -29,7 +29,7 @@ test_PolyPhen <- function()
     res <- select(p, "rs3026284")
     checkIdentical(nrow(res), 2L)
 
-    res <- select(p, "rs3026284", cols="POS")
+    res <- select(p, "rs3026284", columns="POS")
     checkIdentical(nrow(res), 1L)
 
     res <- 

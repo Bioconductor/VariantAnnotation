@@ -14,7 +14,7 @@ Depends: R (>= 2.8.0), methods, BiocGenerics, GenomicRanges (>= 1.13.16),
 	Rsamtools (>= 1.13.12), IRanges (>= 1.19.5), XVector
 Imports: methods, BiocGenerics, IRanges, XVector, Biostrings (>= 2.29.2),
 	Biobase, Rsamtools, AnnotationDbi (>= 1.17.11),
-	zlibbioc, BSgenome, GenomicFeatures (>= 1.13.7), DBI, utils
+	zlibbioc, BSgenome, GenomicFeatures (>= 1.13.11), DBI, utils
 Suggests: RUnit, BSgenome.Hsapiens.UCSC.hg19, TxDb.Hsapiens.UCSC.hg19.knownGene,
 	SNPlocs.Hsapiens.dbSNP.20110815, SNPlocs.Hsapiens.dbSNP.20101109,
 	SIFT.Hsapiens.dbSNP132, PolyPhen.Hsapiens.dbSNP131, snpStats, ggplot2

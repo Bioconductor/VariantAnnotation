@@ -18,9 +18,9 @@ setMethod("columns", "PolyPhenDb",
 ) 
 
 setMethod("select", "PolyPhenDb",
-    function(x, keys, cols, keytype, ...)
+    function(x, keys, columns, keytype, ...)
     {
-        sql <- .createPPDbQuery(keys, cols) 
+        sql <- .createPPDbQuery(keys, columns) 
         raw <- dbGetQuery(x$conn, sql)
         .formatPPDbSelect(raw, keys) 
     }

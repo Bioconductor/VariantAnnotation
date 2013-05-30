@@ -20,11 +20,11 @@ setMethod("columns", "SIFTDb",
 ) 
 
 setMethod("select", "SIFTDb",
-    function(x, keys, cols, ...)
+    function(x, keys, columns, ...)
     {
         sql <- .createSIFTDbQuery(keys)
         raw <- dbGetQuery(x$conn, sql)
-        .formatSIFTDbSelect(raw, keys, cols)
+        .formatSIFTDbSelect(raw, keys, columns)
     }
 )
 
