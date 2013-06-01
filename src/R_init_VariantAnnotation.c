@@ -13,4 +13,3 @@ void R_init_VariantAnnotation(DllInfo * info)
 {
     R_registerRoutines(info, NULL, callMethods, NULL, NULL);
 }
-

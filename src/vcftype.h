@@ -7,9 +7,9 @@
 #include "utilities.h"
 
 struct vcftype_t {
-    SEXPTYPE type;
-    Rboolean isArray;
-    int nrow, ncol;
+    SEXPTYPE type, listtype;         /* listtype for ragged arrays */
+    char number;                     /* 'A' or '.' for ragged array only */
+    int nrow, ncol, ndim, arrayDim;
     union {
         int *logical;
         int *integer;
@@ -19,32 +19,26 @@ struct vcftype_t {
     } u;
 };
 
-struct vcftype_t *_vcftype_new(SEXPTYPE type, int nrow, int ncol,
-                               const Rboolean isArray);
+struct vcftype_t *_vcftype_new(SEXPTYPE type, SEXPTYPE listtype,
+                               char number, int nrow, int ncol,
+                               int ndim, int arrayDim);
 void _vcftype_free(struct vcftype_t *vcftype);
 struct vcftype_t *_vcftype_grow(struct vcftype_t *vcftype, int nrow);
 SEXP _vcftype_as_SEXP(struct vcftype_t *vcftype);
+void _vcftype_set(struct vcftype_t *vcftype,
+                  const int idx, const char *field);
+void _vcftype_setarray(struct vcftype_t *vcftype,
+                       const int irow, const int icol, char *field,
+                       int ragged_n);
+void _vcftype_padarray(struct vcftype_t *vcftype,
+                       const int irow, const int icol, const int ragged_n);
 
-static inline void _vcftype_set(struct vcftype_t *vcftype,
-                                const int idx, const char *field)
+static inline int _vcftype_ragged_n(const char *a)
 {
-    switch (vcftype->type) {
-    case NILSXP:
-        break;
-    case INTSXP:
-        vcftype->u.integer[idx] = atoi(field);
-        break;
-    case REALSXP:
-        vcftype->u.numeric[idx] =
-            ('.' == *field) ? R_NaReal : atof(field);
-        break;
-    case STRSXP:
-        vcftype->u.character[idx] = Strdup(field);
-        break;
-    default:
-        Rf_error("(internal) unhandled field type '%s'",
-                 type2char(vcftype->type));
-    }
+    int n = (*a == '\0') ? 0 : 1;
+    while (*a != '\0')
+        if (*a++ == ',') ++n;
+    return n;
 }
 
 #endif

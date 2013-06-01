@@ -3,10 +3,8 @@
 %\VignettePackage{VariantAnntation}
 
 \documentclass[12pt]{article}
-\usepackage[utf8]{inputenc}
 
 \usepackage{url}
-
 
 \newenvironment{packed_enum}{
 \begin{enumerate}
@@ -76,7 +74,6 @@
 
 \maketitle
 \tableofcontents
-
 
 \section{Introduction}
 

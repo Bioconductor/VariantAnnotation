@@ -86,7 +86,7 @@ test_VCF_rowData_info_geno <- function() {
     checkException(info(v1) <- DataFrame(), silent=TRUE)
 
     checkTrue(class(info(vcf)$AF) == "CompressedNumericList")
-    AF <- NumericList(0.5, 0.017, c(0.333,0.667), NA, NA)
+    AF <- NumericList(0.5, 0.017, c(0.333,0.667), NA, c(NA, NA))
     checkIdentical(info(vcf)$AF, AF) 
 
     ## geno

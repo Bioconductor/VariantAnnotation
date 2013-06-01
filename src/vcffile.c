@@ -66,19 +66,33 @@ struct parse_t {
     khash_t(WARNINGS) *warnings;
 };
 
-static struct vcftype_t *_types_alloc(const int vcf_n, const int col_n,
-                                      SEXP map, const Rboolean isArray)
+static struct vcftype_t *_types_alloc(const int x_n, const int y_n,
+                                      Rboolean isInfo, SEXP map)
 {
     struct vcftype_t *types;
     const int map_n = Rf_length(map);
 
-    if (map_n == 0) {           /* no INFO or GENO in header */
-        types = _vcftype_new(VECSXP, 0, 0, FALSE);
-    } else {
-        types = _vcftype_new(VECSXP, map_n, 0, FALSE);
-        for (int j = 0; j < map_n; ++j) {
-            SEXPTYPE type = TYPEOF(VECTOR_ELT(map, j));
-            types->u.list[j] = _vcftype_new(type, vcf_n, col_n, isArray);
+    if (map_n == 0)            /* no INFO or GENO in header */
+        return _vcftype_new(VECSXP, NILSXP, '\0', 0, 0, 0, 0);
+
+    types = _vcftype_new(VECSXP, NILSXP, '\0', map_n, 1, 1, 0);
+
+    for (int j = 0; j < map_n; ++j) {
+        SEXP elt = VECTOR_ELT(map, j);
+        const char *n = CHAR(STRING_ELT(VECTOR_ELT(elt, 0), 0));
+        SEXPTYPE type = TYPEOF(VECTOR_ELT(elt, 1));
+
+        if (type == NILSXP) {   /* skip */
+            types->u.list[j] =
+                _vcftype_new(NILSXP, NILSXP, *n, 0, 0, 0, 0);
+        } else if (*n == '.' || *n == 'A' || *n == 'G') { /* ragged array */
+            types->u.list[j] =
+                _vcftype_new(VECSXP, type, *n, x_n, y_n, 1, 2);
+        } else {                /* array */
+            int z_n = atoi(n);
+            int dim = (z_n == 1) ? (isInfo ? 1 : 2) : 3;
+            types->u.list[j] =
+                _vcftype_new(type, NILSXP, *n, x_n, y_n, z_n, dim);
         }
     }
 
@@ -119,24 +133,28 @@ static struct vcftype_t *_vcf_alloc(const int vcf_n, SEXP smap,
         samp_n += INTEGER(smap)[i];
 
     if (Rf_length(fmap) != N_FLDS - 2)
-        Rf_error("[internal] 'fixed' field length %d does not equal %d",
+        Rf_error("(internal) 'fixed' field length %d does not equal %d",
                  Rf_length(fmap), N_FLDS - 2);
-    vcf = _vcftype_new(VECSXP, N_FLDS, 0, FALSE);
+    vcf = _vcftype_new(VECSXP, NILSXP, '\0', N_FLDS, 1, 1, 0);
 
     /* fixed fields */
-    rowData = _vcftype_new(VECSXP, 2, 0, FALSE);
-    rowData->u.list[POS_IDX] = _vcftype_new(INTSXP, vcf_n, 0, FALSE);
-    rowData->u.list[ID_IDX] = _vcftype_new(STRSXP, vcf_n, 0, FALSE);
+    rowData = _vcftype_new(VECSXP, VECSXP, '\0', 2, 1, 1, 0);
+    rowData->u.list[POS_IDX] =
+        _vcftype_new(INTSXP, NILSXP, '\0', vcf_n, 1, 1, 0);
+    rowData->u.list[ID_IDX] =
+        _vcftype_new(STRSXP, NILSXP, '\0', vcf_n, 1, 1, 0);
     vcf->u.list[ROWDATA_IDX] = rowData;
 
     for (int i = ALT_IDX; i <= FILTER_IDX; ++i) {
-        SEXPTYPE type = TYPEOF(VECTOR_ELT(fmap, i));
-        vcf->u.list[i] = _vcftype_new(type, vcf_n, 0, FALSE);
+        SEXP elt = VECTOR_ELT(fmap, i);
+        const char *n = CHAR(STRING_ELT(VECTOR_ELT(elt, 0), 0));
+        SEXPTYPE type = TYPEOF(VECTOR_ELT(elt, 1));
+        vcf->u.list[i] = _vcftype_new(type, NILSXP, *n, vcf_n, 1, 1, 0);
     }
 
     /* info, geno */
-    vcf->u.list[INFO_IDX] = _types_alloc(vcf_n, 1, imap, TRUE);
-    vcf->u.list[GENO_IDX] = _types_alloc(vcf_n, samp_n, gmap, TRUE);
+    vcf->u.list[INFO_IDX] = _types_alloc(vcf_n, 1, TRUE, imap);
+    vcf->u.list[GENO_IDX] = _types_alloc(vcf_n, samp_n, FALSE, gmap);
 
     return vcf;
 }
@@ -159,53 +177,55 @@ static void _vcf_grow(struct vcftype_t * vcf, int vcf_n)
 static void _parse(char *line, const int irec,
                    const struct parse_t *parse)
 {
-    struct vcftype_t *vcf = parse->vcf, *rowData, *elt;
-    const int samp_n = parse->samp_n, imap_n = parse->imap_n,
-        gmap_n = parse->gmap_n;
+    struct vcftype_t *vcf = parse->vcf, *rowData, *elt, *info;
+    const int imap_n = parse->imap_n, gmap_n = parse->gmap_n;
     const char **inms = parse->inms, **gnms = parse->gnms;
     int fmtidx, sampleidx, imapidx;
     int *gmapidx = parse->gmapidx, *sampbool = parse->sampbool;
 
-    int idx = irec, j;
+    int j;
     struct it_t it0, it1, it2;
-    char *sample, *field, *ifld, *ikey, *fmt;
+    char *sample, *ifld, *ikey, *fmt;
 
     /* fixed fields */
-    char *chrom, *id, *ref;
+    char *chrom, *pos, *id, *ref, *alt, *field;
+    int alt_n;
+
     chrom = it_init(&it0, line, '\t'); /* CHROM */
     rle_append(parse->chrom, chrom);
     rowData = vcf->u.list[ROWDATA_IDX];
-    field = it_next(&it0);      /* POS */
-    rowData->u.list[POS_IDX]->u.integer[irec] = atoi(field);
 
-    id = field = it_next(&it0);      /* ID */
+    pos = it_next(&it0);      /* POS */
+    rowData->u.list[POS_IDX]->u.integer[irec] = atoi(pos);
 
-    ref = field = it_next(&it0);      /* REF */
-    dna_hash_append(parse->ref, field);
-    for (field = it_next(&it0), j = ALT_IDX; j <= FILTER_IDX;
-         field = it_next(&it0), ++j)
-    {
-        elt = vcf->u.list[j];
-        _vcftype_set(elt, idx, field);
-    }
+    id = it_next(&it0);      /* ID */
+
+    ref = it_next(&it0);      /* REF */
+    dna_hash_append(parse->ref, ref);
+
+    alt = it_next(&it0); /* alt */
+    alt_n = _vcftype_ragged_n(alt);
+
+    _vcftype_set(vcf->u.list[ALT_IDX], irec, alt);
+    _vcftype_set(vcf->u.list[QUAL_IDX], irec, it_next(&it0)); /* QUAL */
+    _vcftype_set(vcf->u.list[FILTER_IDX], irec, it_next(&it0)); /* FILTER */
 
     if ('.' == *id && '\0' == *(id + 1)) {
-        /* construct ID if missing: chrom\0pos\0ID\0ref\0alt\0 ==> chrom:pos_ref/alt\0 */
-        id = chrom;
-        *(id + strlen(id)) = ':';
-        int len = strlen(id);
-        *(id + len) = '_';
-        *(ref + strlen(ref)) = '/'; /* ref\0alt\0 ==> ref/alt\0 */
-        strcpy(id + len + 1, ref); /* chrom:pos:ID\0ref/alt\0 ==> chrom:pos_ref/alt\0 */
+        /* construct ID if missing:
+           chrom\0pos\0ID\0ref\0alt\0 ==> chrom:pos_ref/alt\0 */
+        *(pos - 1) = ':';
+        *(id - 1) = '_';
+        *(alt - 1) = '/';
+        strcpy(id,  ref);
     }
     rowData->u.list[ID_IDX]->u.character[irec] = Strdup(id);
 
-
     /* INFO */
-    struct vcftype_t *info = vcf->u.list[INFO_IDX];
+    field = it_next(&it0);
+    info = vcf->u.list[INFO_IDX];
     if (1 == imap_n && NULL == inms) { /* no header; parse as char */
         elt = info->u.list[0];
-        elt->u.character[idx] = Strdup(field);
+        elt->u.character[irec] = Strdup(field);
     } else {
         for (ifld = it_init(&it1, field, ';'); '\0' != *ifld;
              ifld = it_next(&it1)) {
@@ -216,19 +236,20 @@ static void _parse(char *line, const int irec,
             }
             if (imap_n == imapidx) {
                 vcfwarn(parse->warnings,
-                        "record %d: header line '##INFO=<ID=%s,...>' not found",
-                        idx + 1, ikey);
+                    "record %d: header line '##INFO=<ID=%s,...>' not found",
+                    irec + 1, ikey);
                 continue;
             }
 
             elt = info->u.list[imapidx];
-            if (LGLSXP == elt->type) {
-                elt->u.logical[idx] = TRUE;
-            } else {
-                field = it_next(&it2);
-                _vcftype_set(elt, idx, field);
-            }
+            _vcftype_setarray(elt, irec, 0, it_next(&it2), alt_n);
         }
+    }
+    /* type 'A' with no data need to be padded w/ NA's */
+    for (imapidx = 0; imapidx < imap_n; ++imapidx) {
+        elt = info->u.list[imapidx];
+        if (elt->number == 'A' || elt->number == 'G')
+            _vcftype_padarray(elt, irec, 0, alt_n);
     }
 
     /* FORMAT */
@@ -256,7 +277,7 @@ static void _parse(char *line, const int irec,
     /* sample(s) */
     struct vcftype_t *geno = vcf->u.list[GENO_IDX];
     const int max_fmtidx = fmtidx;
-    int sample_genoidx = 0; /* index into sample array */
+    int isamp = 0; /* index into sample array */
     for (sample = it_next(&it0), sampleidx = 0;
          '\0' != *sample; sample = it_next(&it0), sampleidx++) {
         if (!sampbool[sampleidx])
@@ -265,17 +286,22 @@ static void _parse(char *line, const int irec,
              '\0' != *field; field = it_next(&it2), fmtidx++) {
             if (fmtidx >= max_fmtidx) {
                 vcfwarn(parse->warnings,
-                        "record %d sample %d: fewer FORMAT fields than GENO fields",
-                        irec + 1, sampleidx + 1);
+                     "record %d sample %d: fewer FORMAT fields than GENO fields",
+                     irec + 1, sampleidx + 1);
                 continue;
             }
             if (gmap_n == gmapidx[fmtidx])
                 continue;    /* unknown FORMAT */
             elt = geno->u.list[ gmapidx[fmtidx] ];
-            idx = irec * samp_n + sample_genoidx;
-            _vcftype_set(elt, idx, field);
+            _vcftype_setarray(elt, irec, isamp, field, alt_n);
         }
-        sample_genoidx += 1;
+        isamp += 1;
+        /* type 'G' need to be padded w/ NA's */
+        for (fmtidx = 0; fmtidx < gmap_n; ++fmtidx) {
+            elt = geno->u.list[fmtidx];
+            if (elt->number == 'A' || elt->number == 'G')
+                _vcftype_padarray(elt, irec, isamp, alt_n);
+        }
     }
 }
 

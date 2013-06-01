@@ -4,16 +4,19 @@ scn <- scanVcf(fl)
 test_FixedTypes <- function()
 {
     .vcf_fixed <- VariantAnnotation:::.vcf_fixed
-    exp <- exp0 <- list(rowData=NULL, REF=NULL, ALT=character(),
-                        QUAL=numeric(), FILTER=character())
+    exp <- exp0 <- list(rowData=NULL, REF=NULL,
+                        ALT=list("1", character()),
+                        QUAL=list("1", numeric()),
+                        FILTER=list("1", character()))
+    named <- names(exp)[-(1:2)]
     checkIdentical(exp, .vcf_fixed(character()))
-    exp[] <- list(NULL)
+    exp[named] <- list(list("0", NULL))
     checkIdentical(exp, .vcf_fixed(NA))
     exp <- exp0
     exp[1] <- list(NULL)
-    checkIdentical(exp, .vcf_fixed(names(exp)[-(1:2)]))
+    checkIdentical(exp, .vcf_fixed(named))
     warn <- FALSE
-    exp[] <- list(NULL)
+    exp[named] <- list(list("0", NULL))
     obs <- withCallingHandlers({
         .vcf_fixed("FOO")
     }, warning=function(w) {
@@ -74,8 +77,7 @@ test_scanVcf_no_INFO_header <- function()
     fl <- system.file(package="VariantAnnotation", "unitTests",
                       "cases", "no_INFO_header.vcf")
     info <- suppressWarnings(scanVcf(fl)[[1]]$INFO$INFO)
-    checkIdentical(c(5L, 1L), dim(info))
-    checkIdentical(".", unique(as.vector(info)))
+    checkIdentical(rep(".", 5L), info)
 }
 
 test_scanVcf_crlf <- function()

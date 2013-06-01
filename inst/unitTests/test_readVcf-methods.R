@@ -40,8 +40,8 @@ test_readVcf_unspecified_INFO_FORMAT <- function()
     ## columns immediately after XX entries
     exp <- c(14L, 11L, 10L, 13L, 9L)
     checkIdentical(exp, info(vcf)$DP)
-    exp <- list(0.5, 0.017, c(0.333, 0.667), NA_real_, NA_real_)
-    checkIdentical(exp, as(info(vcf)$AF, "list"))
+    exp <- NumericList(0.5, 0.017, c(0.333, 0.667), NA, c(NA, NA))
+    checkIdentical(exp, info(vcf)$AF)
 
     ## columns immediately after FORMAT entries
     exp <- c("0|0", "0/1", "0|0", "0/2", "0/0", "1/1")
@@ -175,7 +175,6 @@ test_readVcf_param <- function()
                  warning=conditionMessage)
     checkTrue(is(obs, "VCF") && validObject(obs))
 }
-
 
 test_readVcf_tabix <- function()
 {

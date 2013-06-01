@@ -1,12 +1,16 @@
 #include "vcftype.h"
 
-struct vcftype_t *_vcftype_new(SEXPTYPE type, int nrow, int ncol,
-                               const Rboolean isArray)
+struct vcftype_t *_vcftype_new(SEXPTYPE type, SEXPTYPE listtype,
+                               char number, int nrow, int ncol,
+                               int ndim, int arrayDim)
 {
     struct vcftype_t *vcftype = Calloc(1, struct vcftype_t);
-    vcftype->isArray = isArray;
-    vcftype->ncol = ncol;
     vcftype->type = type;
+    vcftype->listtype = listtype; /* VECSXP: ragged array */
+    vcftype->number = number;     /* 'A' or '.' for ragged array only */
+    vcftype->ncol = ncol;
+    vcftype->ndim = ndim;
+    vcftype->arrayDim = arrayDim;
 
     return _vcftype_grow(vcftype, nrow);
 }
@@ -15,7 +19,7 @@ void _vcftype_free(struct vcftype_t *vcftype)
 {
     if (NULL == vcftype)
         return;
-    int sz = vcftype->nrow * (0 == vcftype->ncol ? 1 : vcftype->ncol);
+    int sz = vcftype->nrow * vcftype->ncol * vcftype->ndim;
     switch (vcftype->type) {
     case NILSXP:
         break;
@@ -61,8 +65,10 @@ struct vcftype_t *_vcftype_grow(struct vcftype_t * vcftype, int nrow)
 {
     if (NULL == vcftype)
         return vcftype;
-    int ncol = (0 == vcftype->ncol) ? 1 : vcftype->ncol;
-    int osz = vcftype->nrow * ncol, sz = nrow * ncol;
+    int ncol = vcftype->ncol, ndim = vcftype->ndim,
+        o_nrow = vcftype->nrow, osz = o_nrow * ncol * ndim,
+        sz = nrow * ncol * ndim;
+
     switch (vcftype->type) {
     case NILSXP:
         break;
@@ -105,59 +111,64 @@ struct vcftype_t *_vcftype_grow(struct vcftype_t * vcftype, int nrow)
     return vcftype;
 }
 
-#define TPOSE(to, from, nrow, ncol)                                \
-    for (int j = 0; j < (ncol); ++j)                               \
-        for (int i = 0; i < (nrow); ++i)                           \
-            *(to)++ = (from)[i * (ncol) + j]
+#define TPOSE(to, from, nrow, ncol, ndim)                          \
+    for (int k = 0; k < (ndim); ++k)                               \
+        for (int j = 0; j < (ncol); ++j)                           \
+            for (int i = 0; i < (nrow); ++i)                       \
+                *(to)++ = (from)[i * (ncol) * (ndim) + j * (ndim) + k]
 
 SEXP _vcftype_as_SEXP(struct vcftype_t *vcftype)
 {
     if (NULL == vcftype || NILSXP == vcftype->type)
         return R_NilValue;
 
-    const int ncol = vcftype->isArray ? vcftype->ncol : 1,
-        nrow = vcftype->nrow;
-    SEXP ans = PROTECT(Rf_allocVector(vcftype->type, nrow * ncol));
+    const int ncol = vcftype->ncol, ndim = vcftype->ndim,
+        nrow = vcftype->nrow, sz = nrow * ncol * ndim;
+    SEXP ans = PROTECT(Rf_allocVector(vcftype->type, sz));
 
-    /* FIXME: transpose matricies */
     switch (vcftype->type) {
     case LGLSXP: {
         int *val = LOGICAL(ans);
-        TPOSE(val, vcftype->u.logical, nrow, ncol);
+        TPOSE(val, vcftype->u.logical, nrow, ncol, ndim);
     }
         break;
     case INTSXP: {
         int *val = INTEGER(ans);
-        TPOSE(val, vcftype->u.integer, nrow, ncol);
+        TPOSE(val, vcftype->u.integer, nrow, ncol, ndim);
     }
         break;
     case REALSXP: {
         double *val = REAL(ans);
-        TPOSE(val, vcftype->u.numeric, nrow, ncol);
+        TPOSE(val, vcftype->u.numeric, nrow, ncol, ndim);
     }
         break;
     case STRSXP: {
-        SEXP elt;
         int idx = 0;
-        for (int j = 0; j < ncol; ++j)
-            for (int i = 0; i < nrow; ++i) {
-                const char *s = vcftype->u.character[i * ncol + j];
-                elt = (NULL == s) ? R_NaString : mkChar(s);
-                SET_STRING_ELT(ans, idx++, elt);
-                Free(vcftype->u.character[i * ncol + j]);
-                vcftype->u.character[i * ncol + j] = NULL;
+        for (int k = 0; k < ndim; ++k)
+            for (int j = 0; j < ncol; ++j)
+                for (int i = 0; i < nrow; ++i) {
+                    const int idx0 = i * ncol * ndim + j * ndim + k;
+                    const char *s = vcftype->u.character[idx0];
+                    const SEXP elt = (NULL == s) || (*s == '\0') ?
+                        R_NaString : mkChar(s);
+                    SET_STRING_ELT(ans, idx++, elt);
+                    Free(vcftype->u.character[idx0]);
+                    vcftype->u.character[idx0] = NULL;
             }
     }
         break;
     case VECSXP: {
-        SEXP elt;
         int idx = 0;
-        for (int j = 0; j < ncol; ++j)
-            for (int i = 0; i < nrow; ++i) {
-                struct vcftype_t *t = vcftype->u.list[i * ncol + j];
-                elt = (NULL == t) ? R_NilValue : _vcftype_as_SEXP(t);
-                SET_VECTOR_ELT(ans, idx++, elt);
-                vcftype->u.list[i * ncol + j] = NULL;
+        for (int k = 0; k < ndim; ++k)
+            for (int j = 0; j < ncol; ++j)
+                for (int i = 0; i < nrow; ++i) {
+                    int idx0 = i * ncol * ndim + j * ndim + k;
+                    struct vcftype_t *t = vcftype->u.list[idx0];
+                    const SEXP elt = (NULL == t) ?
+                        Rf_allocVector(vcftype->listtype, 0) :
+                        _vcftype_as_SEXP(t);
+                    SET_VECTOR_ELT(ans, idx++, elt);
+                    vcftype->u.list[idx0] = NULL;
         }
     }
         break;
@@ -165,10 +176,16 @@ SEXP _vcftype_as_SEXP(struct vcftype_t *vcftype)
         Rf_error("(internal) unhandled type '%s'",
                  type2char(vcftype->type));
     }
-    if (TRUE == vcftype->isArray) {
-        SEXP dim = PROTECT(Rf_allocVector(INTSXP, 2));
-        INTEGER(dim)[0] = vcftype->nrow;
-        INTEGER(dim)[1] = vcftype->ncol;
+
+    if (vcftype->arrayDim > 1) {
+        SEXP dim = PROTECT(Rf_allocVector(INTSXP, vcftype->arrayDim));
+        INTEGER(dim)[0] = nrow;
+        if (vcftype->arrayDim == 2) {
+            INTEGER(dim)[1] = ncol * ndim;
+        } else {
+            INTEGER(dim)[1] = ncol;
+            INTEGER(dim)[2] = ndim;
+        }
         Rf_setAttrib(ans, R_DimSymbol, dim);
         UNPROTECT(1);
     }
@@ -176,4 +193,74 @@ SEXP _vcftype_as_SEXP(struct vcftype_t *vcftype)
     _vcftype_free(vcftype);
     UNPROTECT(1);
     return ans;
+}
+
+void _vcftype_set(struct vcftype_t *vcftype,
+                  const int idx, const char *field)
+{
+    switch (vcftype->type) {
+    case NILSXP:
+        break;
+    case LGLSXP:
+        vcftype->u.logical[idx] = TRUE;
+        break;
+    case INTSXP:
+        vcftype->u.integer[idx] =
+            ('.' == *field) ? R_NaInt : atoi(field);
+        break;
+    case REALSXP:
+        vcftype->u.numeric[idx] =
+            ('.' == *field) ? R_NaReal : atof(field);
+        break;
+    case STRSXP:
+        vcftype->u.character[idx] = Strdup(field);
+        break;
+    default:
+        Rf_error("(internal) unhandled field type '%s'",
+                 type2char(vcftype->type));
+    }
+}
+
+void _vcftype_padarray(struct vcftype_t *vcftype,
+                       const int irow, const int icol,
+                       const int ragged_n)
+{
+    const int offset = irow * vcftype->ncol + icol;
+    if (vcftype->u.list[offset] != NULL)
+        return;
+    _vcftype_setarray(vcftype, irow, icol, "", ragged_n);
+}
+
+void _vcftype_setarray(struct vcftype_t *vcftype,
+                       const int irow, const int icol, char *field,
+                       int ragged_n)
+{
+    struct it_t it;
+    char *ifld;
+
+    if (VECSXP == vcftype->type) { /* ragged array */
+        if (vcftype->number == 'G')
+            ragged_n *= ragged_n; /* FIXME: what does 'G' mean in VCF? */
+        else if (vcftype->number != 'A')
+            ragged_n = _vcftype_ragged_n(field);
+        
+        /* allocate and fill */
+        const int offset = irow * vcftype->ncol + icol;
+        vcftype->u.list[offset] =
+            _vcftype_new(vcftype->listtype, NILSXP, '\0', ragged_n, 1, 1, 0);
+        ifld = it_init(&it, field, ',');
+        for (int k = 0; k < ragged_n; ++k) {
+            if ('\0' == *ifld)
+                ifld = ".";
+            _vcftype_set(vcftype->u.list[offset], k, ifld);
+            ifld = it_next(&it);
+        }
+    } else {                       /* array */
+        const int offset = (irow * vcftype->ncol + icol) * vcftype->ndim;
+        ifld = it_init(&it, field, ',');
+        for (int k = 0; k < vcftype->ndim; ++k) {
+            _vcftype_set(vcftype, offset + k, ifld);
+            ifld = it_next(&it);
+        }
+    }
 }

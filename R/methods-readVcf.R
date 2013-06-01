@@ -112,7 +112,11 @@ setMethod(readVcf, c(file="character", genome="missing",
     ## colData
     colData <- DataFrame(Samples=seq_along(colnms), row.names=colnms)
 
+    ## geno
+    geno <- SimpleList(lapply(vcf$GENO, `dimnames<-`, NULL))
+
+    vcf <- NULL                         # free
     VCF(rowData=rowData, colData=colData, exptData=SimpleList(header=hdr),
-        fixed=fixed, info=info, geno=SimpleList(vcf$GENO))
+        fixed=fixed, info=info, geno=geno)
 }
 
