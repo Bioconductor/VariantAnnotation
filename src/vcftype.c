@@ -239,8 +239,8 @@ void _vcftype_setarray(struct vcftype_t *vcftype,
     char *ifld;
 
     if (VECSXP == vcftype->type) { /* ragged array */
-        if (vcftype->number == 'G')
-            ragged_n *= ragged_n; /* FIXME: what does 'G' mean in VCF? */
+        if (vcftype->number == 'G') /* FIXME: what does 'G' mean in VCF? */
+            ragged_n = (ragged_n + 1) * (ragged_n + 1);
         else if (vcftype->number != 'A')
             ragged_n = _vcftype_ragged_n(field);
         
