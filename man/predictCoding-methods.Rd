@@ -170,11 +170,11 @@
   vcf <- readVcf(fl, "hg19")
 
   ## Rename seqlevels in the VCF object to match those in the TxDb.
-  seqlevels(vcf)<- "chr22"
+  vcf <- renameSeqlevels(vcf, "chr22")
   ## Confirm common seqlevels
   intersect(seqlevels(vcf), seqlevels(txdb))
  
-  ## Note when 'query' is a VCF object the varAllele argument is missing.
+  ## When 'query' is a VCF object the varAllele argument is missing.
   coding1 <- predictCoding(vcf, txdb, Hsapiens)
   head(coding1, 3)
 

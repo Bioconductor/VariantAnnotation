@@ -226,8 +226,8 @@ locateVariants(query, subject, region, ...)
   head(seqlevels(txdb))
   intersect(seqlevels(vcf), seqlevels(txdb))
 
-  ## The seqlevels() function is used to rename seqlevels.
-  seqlevels(vcf) <- paste0("chr", seqlevels(vcf)) 
+  ## Rename seqlevels with renameSeqlevesl().
+  vcf <- renameSeqlevels(vcf, paste0("chr", seqlevels(vcf))) 
 
   ## Confirm.
   intersect(seqlevels(vcf), seqlevels(txdb))
