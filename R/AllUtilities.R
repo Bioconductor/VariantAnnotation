@@ -16,9 +16,8 @@
 
     ## single range in 'which'
     if (1L == length(vcf)) {
-        vcf[[1]][["paramRangeID"]] <- 
-            as.factor(rep(paramRangeID, length(vcf[[1]][["rowData"]]))) 
-        vcf[[1]]
+        lst <- vcf[[1]]
+        lst$paramRangeID <- as.factor(rep(paramRangeID, length(lst$rowData)))
     } else {
     ## multiple ranges in 'which'
         lst <- lapply(names(vcf[[1]]), function(elt) {
@@ -33,7 +32,7 @@
         info <- lst$INFO
         sp <- split(unname(info), unique(names(info)))
         sp <- sp[unique(names(info))] 
-        lst[["INFO"]] <- 
+        lst$INFO <- 
             lapply(sp, function(elt) {
                 d <- dim(elt[[1]])
                 if (is(elt[[1]], "list")) {
@@ -43,14 +42,14 @@
                               do.call(rbind, lapply(elt, "[", ,i,)) 
                           })
                     array(do.call(c, pc), 
-                        c(length(lst[["rowData"]]), d[2], d[3]))
+                        c(length(lst$rowData), d[2], d[3]))
                 } else {
                     do.call(c, elt)
                 }
             }) 
-        geno <- lst[["GENO"]]
+        geno <- lst$GENO
         sp <- split(geno, unique(names(geno)))
-        lst[["GENO"]] <- 
+        lst$GENO <- 
             lapply(sp, function(elt) {
                 d <- dim(elt[[1]])
                 if (!is.na(d[3])) {
@@ -58,18 +57,24 @@
                               do.call(rbind, lapply(elt, "[", ,,i)) 
                           })
                     cmb <- array(do.call(c, pc), 
-                                 c(length(lst[["rowData"]]), d[2], d[3]))
+                                 c(length(lst$rowData), d[2], d[3]))
                     cmb
                 } else {
                     trans <- lapply(elt, t)
-                    cmb <- matrix(do.call(c, trans), length(lst[["rowData"]]), 
+                    cmb <- matrix(do.call(c, trans), length(lst$rowData), 
                                   d[2], byrow=TRUE)
                     cmb
                 }
             }) 
         lst$paramRangeID <- paramRangeID
-        lst
     }
+    inames <- vcfInfo(param)
+    if (length(inames) > 0 && !is.na(inames))
+        lst$INFO <- lst$INFO[inames]
+    gnames <- vcfGeno(param)
+    if (length(gnames) > 0 && !is.na(gnames))
+        lst$GENO <- lst$GENO[gnames]
+    lst
 }
 
 .formatList <- function(data, type)
