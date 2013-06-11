@@ -80,6 +80,15 @@ test_scanVcf_no_INFO_header <- function()
     checkIdentical(rep(".", 5L), info)
 }
 
+test_scanVcf_negative_Number <- function()
+{
+    fl <- system.file(package="VariantAnnotation", "unitTests",
+                      "cases", "negative_FORMAT_Number.vcf")
+    pl <- scanVcf(fl)[[1]]$GENO$PL
+    checkIdentical(3L, unique(sapply(pl, length)))
+    checkIdentical(761L, sum(sapply(pl, sum)))
+}
+
 test_scanVcf_crlf <- function()
 {
     writeLines(readLines(fl), xx <- tempfile(), sep="\r\n")

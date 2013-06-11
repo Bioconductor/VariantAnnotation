@@ -79,6 +79,11 @@ struct vcftype_t *_vcftype_grow(struct vcftype_t * vcftype, int nrow)
         o_nrow = vcftype->nrow, osz = o_nrow * ncol * ndim,
         sz = nrow * ncol * ndim;
 
+    if (nrow < 0)
+        Rf_error("(internal) _vcftype_grow 'nrow' < 0");
+    if (sz < 0)
+        Rf_error("(internal) _vcftype_grow 'sz' < 0; cannot allocate memory?");
+
     switch (vcftype->type) {
     case NILSXP:
         break;

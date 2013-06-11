@@ -29,6 +29,8 @@
 .vcf_map <-
     function(fmt, tag, ...)
 {
+    numberOk <- grepl("^[AG\\.[:digit:]+]$", fmt$Number)
+    fmt$Number[!numberOk] <- "."
     map <- Map(function(n, t) {
         if (t == "Flag") n <- "1"
         t <- switch(t, String=character(), Integer=integer(),
