@@ -7,8 +7,9 @@
 #include "utilities.h"
 
 struct vcftype_t {
-    SEXPTYPE type, listtype;         /* listtype for ragged arrays */
-    char number;                     /* 'A' or '.' for ragged array only */
+    SEXPTYPE type, listtype;    /* listtype for ragged arrays */
+    char number,                /* 'A' or '.' for ragged array only */
+        *charDotAs;              /* '.' enocding when in character vectors */
     int nrow, ncol, ndim, arrayDim;
     union {
         int *logical;
@@ -20,8 +21,9 @@ struct vcftype_t {
 };
 
 struct vcftype_t *_vcftype_new(SEXPTYPE type, SEXPTYPE listtype,
-                               char number, int nrow, int ncol,
-                               int ndim, int arrayDim);
+                               char number, char *charDotAs,
+                               int nrow, int ncol, int ndim,
+                               int arrayDim);
 void _vcftype_free(struct vcftype_t *vcftype);
 struct vcftype_t *_vcftype_grow(struct vcftype_t *vcftype, int nrow);
 SEXP _vcftype_as_SEXP(struct vcftype_t *vcftype);

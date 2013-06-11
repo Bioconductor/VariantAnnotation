@@ -13,15 +13,6 @@ struct it_t {
 };
 
 char *it_init(struct it_t *it, char *str, char delim);
-static inline char *it_next(struct it_t *it)
-{
-    char *curr = it->str;
-    while ('\0' != *it->str && it->delim != *it->str)
-        it->str++;
-    if ('\0' != *it->str)
-        *it->str++ = '\0';
-    return curr;
-}
-
+char *it_next(struct it_t *it);
 
 #endif

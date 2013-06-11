@@ -88,18 +88,10 @@
 
 .toDNAStringSetList <- function(x)
 {
-    if (is(x, "CharacterList")) {
-        ## Called from predictCoding, genotypeToSnpMatrix, etc.
-        pbw <- PartitioningByWidth(elementLengths(x))
-        x <- unlist(x, use.names=FALSE)
-        str <- .isStructural(x)
-        x[str] <- "" 
-    } else {
-        ## Called from .formatALT
-        x <- strsplit(x, ",", fixed=TRUE)
-        pbw <- PartitioningByWidth(elementLengths(x))
-        x <- unlist(x, use.names=FALSE)
-    }
+    ## Called from predictCoding, genotypeToSnpMatrix, etc.
+    pbw <- PartitioningByWidth(elementLengths(x))
+    x <- unlist(x, use.names=FALSE)
+    x[.isStructural(x)] <- "" 
     xx <- sub(".", "", x, fixed=TRUE)
     relist(DNAStringSet(xx), pbw)
 }
@@ -108,16 +100,9 @@
 {
     if (is.null(x))
         return(NULL)
-    str <- .isStructural(x) 
-    if (sum(str) != 0L) {
-        lst <- strsplit(unlist(x, use.names=FALSE), ",")
-        lst[str] <- x[str] 
-        new("CompressedCharacterList",
-            unlistData=unlist(lst, use.names=FALSE),
-            partitioning=PartitioningByEnd(lst))
-    } else {
-        .toDNAStringSetList(x)
-    }
+    if (any(.isStructural(unlist(x, use.names=FALSE))))
+        CharacterList(x)
+    else DNAStringSetList(x)
 }
 
 .isStructural <- function(x)

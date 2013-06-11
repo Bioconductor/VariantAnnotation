@@ -69,30 +69,34 @@ struct parse_t {
 static struct vcftype_t *_types_alloc(const int x_n, const int y_n,
                                       Rboolean isInfo, SEXP map)
 {
+    SEXP elt;
+    const char *n;
+    SEXPTYPE type;
+
     struct vcftype_t *types;
     const int map_n = Rf_length(map);
 
     if (map_n == 0)            /* no INFO or GENO in header */
-        return _vcftype_new(VECSXP, NILSXP, '\0', 0, 0, 0, 0);
+        return _vcftype_new(VECSXP, NILSXP, '\0', NULL, 0, 0, 0, 0);
 
-    types = _vcftype_new(VECSXP, NILSXP, '\0', map_n, 1, 1, 0);
+    types = _vcftype_new(VECSXP, NILSXP, '\0', NULL, map_n, 1, 1, 0);
 
     for (int j = 0; j < map_n; ++j) {
-        SEXP elt = VECTOR_ELT(map, j);
-        const char *n = CHAR(STRING_ELT(VECTOR_ELT(elt, 0), 0));
-        SEXPTYPE type = TYPEOF(VECTOR_ELT(elt, 1));
+        elt = VECTOR_ELT(map, j);
+        n = CHAR(STRING_ELT(VECTOR_ELT(elt, 0), 0));
+        type = TYPEOF(VECTOR_ELT(elt, 1));
 
         if (type == NILSXP) {   /* skip */
             types->u.list[j] =
-                _vcftype_new(NILSXP, NILSXP, *n, 0, 0, 0, 0);
+                _vcftype_new(NILSXP, NILSXP, *n, NULL, 0, 0, 0, 0);
         } else if (*n == '.' || *n == 'A' || *n == 'G') { /* ragged array */
             types->u.list[j] =
-                _vcftype_new(VECSXP, type, *n, x_n, y_n, 1, 2);
+                _vcftype_new(VECSXP, type, *n, ".", x_n, y_n, 1, 2);
         } else {                /* array */
             int z_n = atoi(n);
             int dim = (z_n == 1) ? (isInfo ? 1 : 2) : 3;
             types->u.list[j] =
-                _vcftype_new(type, NILSXP, *n, x_n, y_n, z_n, dim);
+                _vcftype_new(type, NILSXP, *n, ".", x_n, y_n, z_n, dim);
         }
     }
 
@@ -127,6 +131,10 @@ static SEXP _trim_null(SEXP data, const char **cnms)
 static struct vcftype_t *_vcf_alloc(const int vcf_n, SEXP smap,
                                     SEXP fmap, SEXP imap, SEXP gmap)
 {
+    SEXP elt;
+    SEXPTYPE type;
+    const char *n;
+
     struct vcftype_t *vcf, *rowData;
     int samp_n = 0;
     for(int i = 0; i < Rf_length(smap); i++)
@@ -135,21 +143,24 @@ static struct vcftype_t *_vcf_alloc(const int vcf_n, SEXP smap,
     if (Rf_length(fmap) != N_FLDS - 2)
         Rf_error("(internal) 'fixed' field length %d does not equal %d",
                  Rf_length(fmap), N_FLDS - 2);
-    vcf = _vcftype_new(VECSXP, NILSXP, '\0', N_FLDS, 1, 1, 0);
+    vcf = _vcftype_new(VECSXP, NILSXP, '\0', NULL, N_FLDS, 1, 1, 0);
 
     /* fixed fields */
-    rowData = _vcftype_new(VECSXP, VECSXP, '\0', 2, 1, 1, 0);
+    rowData = _vcftype_new(VECSXP, VECSXP, '\0', NULL, 2, 1, 1, 0);
     rowData->u.list[POS_IDX] =
-        _vcftype_new(INTSXP, NILSXP, '\0', vcf_n, 1, 1, 0);
+        _vcftype_new(INTSXP, NILSXP, '\0', NULL, vcf_n, 1, 1, 0);
     rowData->u.list[ID_IDX] =
-        _vcftype_new(STRSXP, NILSXP, '\0', vcf_n, 1, 1, 0);
+        _vcftype_new(STRSXP, NILSXP, '\0', NULL, vcf_n, 1, 1, 0);
     vcf->u.list[ROWDATA_IDX] = rowData;
 
     for (int i = ALT_IDX; i <= FILTER_IDX; ++i) {
-        SEXP elt = VECTOR_ELT(fmap, i);
-        const char *n = CHAR(STRING_ELT(VECTOR_ELT(elt, 0), 0));
-        SEXPTYPE type = TYPEOF(VECTOR_ELT(elt, 1));
-        vcf->u.list[i] = _vcftype_new(type, NILSXP, *n, vcf_n, 1, 1, 0);
+        elt = VECTOR_ELT(fmap, i);
+        n = CHAR(STRING_ELT(VECTOR_ELT(elt, 0), 0));
+        type = TYPEOF(VECTOR_ELT(elt, 1));
+        if ('A' == *n)          /* ALT_IDX */
+            vcf->u.list[i] = _vcftype_new(VECSXP, type, *n, "", vcf_n, 1, 1, 0);
+        else
+            vcf->u.list[i] = _vcftype_new(type, NILSXP, *n, ".", vcf_n, 1, 1, 0);
     }
 
     /* info, geno */
@@ -198,15 +209,15 @@ static void _parse(char *line, const int irec,
     pos = it_next(&it0);      /* POS */
     rowData->u.list[POS_IDX]->u.integer[irec] = atoi(pos);
 
-    id = it_next(&it0);      /* ID */
+    id = it_next(&it0);       /* ID */
 
     ref = it_next(&it0);      /* REF */
     dna_hash_append(parse->ref, ref);
 
-    alt = it_next(&it0); /* alt */
+    alt = it_next(&it0);      /* alt */
     alt_n = _vcftype_ragged_n(alt);
 
-    _vcftype_set(vcf->u.list[ALT_IDX], irec, alt);
+    _vcftype_setarray(vcf->u.list[ALT_IDX], irec, 0, alt, alt_n);
     _vcftype_set(vcf->u.list[QUAL_IDX], irec, it_next(&it0)); /* QUAL */
     _vcftype_set(vcf->u.list[FILTER_IDX], irec, it_next(&it0)); /* FILTER */
 

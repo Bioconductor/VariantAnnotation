@@ -21,7 +21,7 @@
 .vcf_fixed <-
     function(tag, ...)
 {
-    map <- list(ALT=list("1", character()), QUAL=list("1", numeric()),
+    map <- list(ALT=list("A", character()), QUAL=list("1", numeric()),
                 FILTER=list("1", character()))
     c(list(rowData=NULL, REF=NULL), .vcf_usertag(map, tag, "fixed"))
 }

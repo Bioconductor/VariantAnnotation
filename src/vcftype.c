@@ -1,13 +1,15 @@
 #include "vcftype.h"
 
 struct vcftype_t *_vcftype_new(SEXPTYPE type, SEXPTYPE listtype,
-                               char number, int nrow, int ncol,
-                               int ndim, int arrayDim)
+                               char number, char *charDotAs,
+                               int nrow, int ncol, int ndim, int arrayDim)
 {
     struct vcftype_t *vcftype = Calloc(1, struct vcftype_t);
     vcftype->type = type;
     vcftype->listtype = listtype; /* VECSXP: ragged array */
     vcftype->number = number;     /* 'A' or '.' for ragged array only */
+    if (NULL != charDotAs)
+        vcftype->charDotAs = Strdup(charDotAs);
     vcftype->ncol = ncol;
     vcftype->ndim = ndim;
     vcftype->arrayDim = arrayDim;
@@ -33,14 +35,22 @@ void _vcftype_free(struct vcftype_t *vcftype)
         Free(vcftype->u.numeric);
         break;
     case STRSXP:
-        for (int i = 0; i < sz; ++i)
-            Free(vcftype->u.character[i]);
-        Free(vcftype->u.character);
+        if (NULL != vcftype->u.character) {
+            for (int i = 0; i < sz; ++i)
+                if (NULL != vcftype->u.character[i] &&
+                    vcftype->charDotAs != vcftype->u.character[i])
+                    Free(vcftype->u.character[i]);
+            Free(vcftype->u.character);
+        }
+        Free(vcftype->charDotAs);
         break;
     case VECSXP:
-        for (int i = 0; i < sz; ++i)
-            _vcftype_free(vcftype->u.list[i]);
-        Free(vcftype->u.list);
+        if (NULL != vcftype->u.list) {
+            for (int i = 0; i < sz; ++i)
+                if (NULL != vcftype->u.list[i])
+                    _vcftype_free(vcftype->u.list[i]);
+            Free(vcftype->u.list);
+        }
         break;
     default:
         Rf_error("(internal) unhandled type '%s'",
@@ -125,52 +135,53 @@ SEXP _vcftype_as_SEXP(struct vcftype_t *vcftype)
     const int ncol = vcftype->ncol, ndim = vcftype->ndim,
         nrow = vcftype->nrow, sz = nrow * ncol * ndim;
     SEXP ans = PROTECT(Rf_allocVector(vcftype->type, sz));
+    int *ival, idx;
+    double *dval;
 
     switch (vcftype->type) {
-    case LGLSXP: {
-        int *val = LOGICAL(ans);
-        TPOSE(val, vcftype->u.logical, nrow, ncol, ndim);
-    }
+    case LGLSXP:
+        ival = LOGICAL(ans);
+        TPOSE(ival, (const int *) vcftype->u.logical, nrow, ncol, ndim);
+        Free(vcftype->u.logical);
         break;
-    case INTSXP: {
-        int *val = INTEGER(ans);
-        TPOSE(val, vcftype->u.integer, nrow, ncol, ndim);
-    }
+    case INTSXP:
+        ival = INTEGER(ans);
+        TPOSE(ival, (const int *) vcftype->u.integer, nrow, ncol, ndim);
+        Free(vcftype->u.integer);
         break;
-    case REALSXP: {
-        double *val = REAL(ans);
-        TPOSE(val, vcftype->u.numeric, nrow, ncol, ndim);
-    }
+    case REALSXP:
+        dval = REAL(ans);
+        TPOSE(dval, (const double *) vcftype->u.numeric, nrow, ncol, ndim);
+        Free(vcftype->u.numeric);
         break;
-    case STRSXP: {
-        int idx = 0;
+    case STRSXP:
+        idx = 0;
         for (int k = 0; k < ndim; ++k)
             for (int j = 0; j < ncol; ++j)
                 for (int i = 0; i < nrow; ++i) {
                     const int idx0 = i * ncol * ndim + j * ndim + k;
-                    const char *s = vcftype->u.character[idx0];
-                    const SEXP elt = (NULL == s) || (*s == '\0') ?
-                        R_NaString : mkChar(s);
+                    const char * const s = vcftype->u.character[idx0];
+                    const SEXP elt = (NULL == s) ? R_NaString : mkChar(s);
                     SET_STRING_ELT(ans, idx++, elt);
-                    Free(vcftype->u.character[idx0]);
+                    if (vcftype->charDotAs != vcftype->u.character[idx0])
+                        Free(vcftype->u.character[idx0]);
                     vcftype->u.character[idx0] = NULL;
-            }
-    }
+                }
+        Free(vcftype->u.character);
         break;
-    case VECSXP: {
-        int idx = 0;
+    case VECSXP:
+        idx = 0;
         for (int k = 0; k < ndim; ++k)
             for (int j = 0; j < ncol; ++j)
                 for (int i = 0; i < nrow; ++i) {
-                    int idx0 = i * ncol * ndim + j * ndim + k;
+                    const int idx0 = i * ncol * ndim + j * ndim + k;
                     struct vcftype_t *t = vcftype->u.list[idx0];
                     const SEXP elt = (NULL == t) ?
                         Rf_allocVector(vcftype->listtype, 0) :
                         _vcftype_as_SEXP(t);
                     SET_VECTOR_ELT(ans, idx++, elt);
-                    vcftype->u.list[idx0] = NULL;
-        }
-    }
+                }
+        Free(vcftype->u.list);
         break;
     default:
         Rf_error("(internal) unhandled type '%s'",
@@ -213,7 +224,8 @@ void _vcftype_set(struct vcftype_t *vcftype,
             ('.' == *field) ? R_NaReal : atof(field);
         break;
     case STRSXP:
-        vcftype->u.character[idx] = Strdup(field);
+        vcftype->u.character[idx] =
+            ('.' == *field) ? vcftype->charDotAs : Strdup(field);
         break;
     default:
         Rf_error("(internal) unhandled field type '%s'",
@@ -247,7 +259,8 @@ void _vcftype_setarray(struct vcftype_t *vcftype,
         /* allocate and fill */
         const int offset = irow * vcftype->ncol + icol;
         vcftype->u.list[offset] =
-            _vcftype_new(vcftype->listtype, NILSXP, '\0', ragged_n, 1, 1, 0);
+            _vcftype_new(vcftype->listtype, NILSXP, '\0',
+                         vcftype->charDotAs, ragged_n, 1, 1, 0);
         ifld = it_init(&it, field, ',');
         for (int k = 0; k < ragged_n; ++k) {
             if ('\0' == *ifld)

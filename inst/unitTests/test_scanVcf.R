@@ -5,7 +5,7 @@ test_FixedTypes <- function()
 {
     .vcf_fixed <- VariantAnnotation:::.vcf_fixed
     exp <- exp0 <- list(rowData=NULL, REF=NULL,
-                        ALT=list("1", character()),
+                        ALT=list("A", character()),
                         QUAL=list("1", numeric()),
                         FILTER=list("1", character()))
     named <- names(exp)[-(1:2)]
