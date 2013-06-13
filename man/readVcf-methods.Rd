@@ -238,10 +238,9 @@
   vcfWhich(param)
 
   ## Subset on samples:
-  ## The header information contains the names of all available samples.
+  ## Consult the header for the sample names.
   samples(hdr) 
-  ## One or more names can be specified in 'samples' in a ScanVcfParam 
-  ## object to subset by sample.
+  ## Specify one or more names in 'samples' in a ScanVcfParam.
   param <- ScanVcfParam(samples="NA00002")
   vcf <- readVcf(tab, "hg19", param)
   geno(vcf)$GT

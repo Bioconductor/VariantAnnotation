@@ -102,10 +102,10 @@ test_readVcf_param <- function()
     snms <- c("NA00001", "NA00002", "NA00003")
 
     ## samples
-    samp <- snms[2]
+    samp <- snms[3:2]
     vcf <- readVcf(fl, "hg19", param=ScanVcfParam(samples=samp))
-    checkTrue(ncol(vcf) == 1L)
-    checkTrue(colnames(vcf) == samp)
+    checkTrue(ncol(vcf) == 2L)
+    checkIdentical(colnames(vcf), snms[3:2])
 
     param <- ScanVcfParam(geno=c("GT", "HQ"), samples=snms)
     vcf1 <- readVcf(fl, "hg19")

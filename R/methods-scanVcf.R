@@ -10,20 +10,43 @@
             map[] <- list(list("0", NULL))
         } else {
             map[!names(map) %in% tag] <- list(list("0", NULL))
-            if (!all(tag %in% names(map)))
+            if (!all(tag %in% names(map))) {
                 warning("ScanVcfParam '", nm, "' fields not present: '",
                         paste(tag[!tag %in% names(map)], collapse="' ' "),
                         "'")
+            } else {
+                fac <- match(c(tag, names(map)[!names(map) %in% tag]), names(map))
+                map <- map[fac]
+            }
         }
     map
 }
 
-.vcf_fixed <-
+.vcf_map_fixed <-
     function(tag, ...)
 {
     map <- list(ALT=list("A", character()), QUAL=list("1", numeric()),
                 FILTER=list("1", character()))
     c(list(rowData=NULL, REF=NULL), .vcf_usertag(map, tag, "fixed"))
+}
+
+.vcf_map_samples <-
+    function(fmt, tag, ...)
+{
+    if (identical(character(), tag)) { 
+        smap <- seq_along(fmt)
+    } else if (isTRUE(is.na(tag))) {
+        smap <- rep(0L, length(fmt))
+    } else {
+        if (any(nx <- !tag %in% fmt)) {
+            warning(paste("samples", sQuote(tag[nx]), "not found in file"))
+            tag <- tag[!nx]
+        }
+        smap <- rep(0L, length(fmt))
+        smap[match(tag, fmt)] <- seq_along(tag)
+    } 
+    names(smap) <- fmt
+    smap
 }
 
 .vcf_map <-
@@ -46,23 +69,15 @@
 .vcf_scan_header_maps <-
     function(file, fixed, info, geno, samples)
 {
+    if (isTRUE(is.na(samples)))
+       geno <- NA 
     hdr <- suppressWarnings(scanVcfHeader(file))
-    samp <- samples(hdr)
-    if (identical(character(), samples)) {
-        smap <- !logical(length(samp))
-    } else if (isTRUE(is.na(samples))) {
-        smap <- logical(length(samp))
-    } else {
-        if (length(nx <- samples[!samples %in% samp]) > 0L)
-            warning(paste("samples", sQuote(nx), "not found in file"))
-        smap <- samp %in% samples
-    }
-    names(smap) <- samp
-    fmap <- .vcf_fixed(fixed)
+    smap <- .vcf_map_samples(samples(hdr), samples)
+    gmap <- .vcf_map(geno(hdr), geno, nm="geno")
+    fmap <- .vcf_map_fixed(fixed)
     imap <- .vcf_map(info(hdr), info, nm="info")
     if (0L == length(imap))
         imap <- list(list("1", character()))
-    gmap <- .vcf_map(geno(hdr), geno, nm="geno")
     list(hdr=hdr, samples=smap, fmap=fmap, imap=imap, gmap=gmap)
 }
 

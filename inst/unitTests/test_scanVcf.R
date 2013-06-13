@@ -3,22 +3,22 @@ scn <- scanVcf(fl)
 
 test_FixedTypes <- function()
 {
-    .vcf_fixed <- VariantAnnotation:::.vcf_fixed
+    .vcf_map_fixed <- VariantAnnotation:::.vcf_map_fixed
     exp <- exp0 <- list(rowData=NULL, REF=NULL,
                         ALT=list("A", character()),
                         QUAL=list("1", numeric()),
                         FILTER=list("1", character()))
     named <- names(exp)[-(1:2)]
-    checkIdentical(exp, .vcf_fixed(character()))
+    checkIdentical(exp, .vcf_map_fixed(character()))
     exp[named] <- list(list("0", NULL))
-    checkIdentical(exp, .vcf_fixed(NA))
+    checkIdentical(exp, .vcf_map_fixed(NA))
     exp <- exp0
     exp[1] <- list(NULL)
-    checkIdentical(exp, .vcf_fixed(named))
+    checkIdentical(exp, .vcf_map_fixed(named))
     warn <- FALSE
     exp[named] <- list(list("0", NULL))
     obs <- withCallingHandlers({
-        .vcf_fixed("FOO")
+        .vcf_map_fixed("FOO")
     }, warning=function(w) {
         warn <<- TRUE
         invokeRestart("muffleWarning")

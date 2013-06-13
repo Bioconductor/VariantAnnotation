@@ -68,12 +68,6 @@
             }) 
         lst$paramRangeID <- paramRangeID
     }
-    inames <- vcfInfo(param)
-    if (length(inames) > 0 && !is.na(inames))
-        lst$INFO <- lst$INFO[inames]
-    gnames <- vcfGeno(param)
-    if (length(gnames) > 0 && !is.na(gnames))
-        lst$GENO <- lst$GENO[gnames]
     lst
 }
 

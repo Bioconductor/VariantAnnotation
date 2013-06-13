@@ -62,12 +62,14 @@
   }
   \item{geno}{A character() vector naming the \sQuote{GENO} fields to return.
     \code{scanVcfHeader()} returns a vector of available fields. If not specified, 
-    all fields are returned; if \code{geno=NA} no fields are returned.
+    all fields are returned; if \code{geno=NA} no fields are returned and
+    requests for specific samples are ignored.
   }
   \item{samples}{A character() vector of sample names to return.
-    \code{samples(scanVcfHeader())} returns all possible names. If not specified, 
-    data for all samples are returned; if \code{samples=NA} no sample data are 
-    returned.
+    \code{samples(scanVcfHeader())} returns all possible names. If not 
+    specified, data for all samples are returned; if either
+    \code{samples=NA} or \code{geno=NA} no fields are returned. Requests
+    for specific samples when \code{geno=NA} are ignored.
   }
   \item{trimEmpty}{A logical(1) indicating whether \sQuote{GENO} fields
     with no values should be returned.
