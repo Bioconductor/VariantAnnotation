@@ -120,3 +120,98 @@ setMethod(readVcf, c(file="character", genome="missing",
         fixed=fixed, info=info, geno=geno)
 }
 
+## lightweight read functions that retrieve a single variable
+
+readInfo <- function(file, x, param=ScanVcfParam(), row.names=FALSE, ...)
+{
+    lst <- .readLite(file, x, param, "info")
+    rowData <- lst$rowData
+    res <- .formatInfo(lst$INFO, info(scanVcfHeader(file)), 
+                       length(rowData))[[1]]
+    if (row.names)
+        names(res) <- names(rowData)
+    res 
+} 
+
+readGeno <- function(file, x, param=ScanVcfParam(), row.names=FALSE, ...)
+{
+    lst <- .readLite(file, x, param, "geno")
+    rowData <- lst$rowData
+    res <- lst$GENO[[1]]
+    if (row.names)
+        dimnames(res)[[1]] <- names(rowData)
+    res 
+} 
+
+readGT <- function(file, param=ScanVcfParam(), row.names=FALSE, ...)
+{
+    lst <- .readLite(file, "GT", param, "GT")
+    res <- .geno2geno(lst, row.names=row.names)
+    rowData <- lst$rowData
+    if (row.names)
+        dimnames(res)[[1]] <- names(rowData)
+    res 
+} 
+
+.geno2geno <- function(lst, row.names)
+{
+    ## ignore records with no ALT
+    ALT <- lst$ALT
+    REF <- as.character(lst$REF, use.names=FALSE)
+    GT <- lst$GENO$GT
+    idx <- ALT != ""
+    if (!all(idx)) {
+        warning("only coercing records with >=1 'alt' values")
+        ALT <- ALT[idx]
+        REF <- REF[idx]
+        GT <- GT[idx,]
+    }
+
+    ## replace
+    GT <- sub("/", "|", GT)
+    GTstr <- strsplit(as.vector(GT), "|")
+    GTmat <- matrix(unlist(GTstr), ncol=3, byrow=TRUE)
+    GTA <- as.numeric(GTmat[,1])
+    GTB <- as.numeric(GTmat[,3])
+
+    REFcs <- cumsum(elementLengths(REF))
+    ALTcs <- cumsum(elementLengths(ALT))
+    cs <- REFcs + c(0, head(ALTcs, -1)) 
+    offset <- rep(cs, ncol(GT))
+    alleles <- unlist(rbind(REF,ALT), use.names=FALSE)
+
+    alleleA <- alleles[offset + GTA]
+    alleleB <- alleles[offset + GTB]
+
+    ## FIXME: save original phasing 
+    GT <- lst$GENO$GT
+    GT[idx,] <-  paste0(alleleA, "|", alleleB)
+    GT[!idx,] <-  NA_character_
+    GT
+}
+
+
+.readLite  <- function(file, var, param, type, ...)
+{
+    msg <- NULL
+    if (!is.character(var))
+        msg <- c(msg, paste0("'", var, "'", " must be a character string"))
+    if (length(var) > 1L)
+        msg <- c(msg, paste0("'", var, "'", " must be of length 1"))
+    if (!is.null(msg))
+        stop(msg)
+
+    if (is(param, "ScanVcfParam"))
+        which <- vcfWhich(param)
+    else
+        which <- param 
+
+    if (type == "info")
+        param=ScanVcfParam(NA, var, NA, which=which)
+    else if (type == "geno") 
+        param=ScanVcfParam(NA, NA, var, which=which)
+    else if (type == "GT")
+        param=ScanVcfParam("ALT", NA, var, which=which)
+    scn <- scanVcf(file, param=param)
+    lst <- .collapseLists(scn, param)
+}

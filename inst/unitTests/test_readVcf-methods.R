@@ -196,3 +196,10 @@ test_readVcf_tabix <- function()
     checkIdentical(scn1, scn3)
 }
 
+test_readGT <- function()
+{
+    fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
+    GT <- suppressWarnings(readGT(fl))
+    checkIdentical(unname(GT[4,]), rep(NA_character_, 3))
+    checkIdentical(unname(GT[1,]), c("G|G", "A|G", "A|A")) 
+}

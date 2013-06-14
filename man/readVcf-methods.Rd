@@ -10,6 +10,11 @@
 \alias{readVcf,TabixFile,character,GRangesList-method}
 \alias{readVcf,TabixFile,character,missing-method}
 
+%% lightweight read* functions
+\alias{readInfo}
+\alias{readGeno}
+\alias{readGT}
+
 
 \title{Read VCF files}
 
@@ -25,6 +30,11 @@
   \S4method{readVcf}{character,character,ScanVcfParam}(file, genome, param, ...)
   \S4method{readVcf}{character,character,missing}(file, genome, param, ...)
   \S4method{readVcf}{character,missing,missing}(file, genome, param, ...)
+
+  ## Lightweight functions to read a single variable
+  readInfo(file, x, param=ScanVcfParam(), row.names=FALSE, ...)
+  readGeno(file, x, param=ScanVcfParam(), row.names=FALSE, ...)
+  readGT(file, param=ScanVcfParam(), row.names=FALSE, ...)
 }
 
 \arguments{
@@ -48,6 +58,12 @@
     genomic coordinates and VCF elements can be specified in a 
     \code{\linkS4class{ScanVcfParam}}. See ?\code{ScanVcfParam} for details.
   }
+  \item{x}{\code{character} name of single \code{info} or \code{geno} field to 
+    import. Applicable to \code{readInfo} and \code{readGeno} only.
+  }
+  \item{row.names}{\code{logical} to include rownames or not. Applicable to
+    \code{readInfo}, \code{readGeno} and \code{readGT}.
+  }
   \item{\dots}{Additional arguments, passed to methods.
   }
 }
@@ -61,8 +77,12 @@
           VCF files. Data are parsed into a \code{\linkS4class{VCF}} object 
           using the file header information if available. To import a subset 
           of ranges the VCF must have a Tabix index file. An index file can be 
-          created with \code{bzip} and \code{indexTabix} functions. See
-          examples. 
+          created with \code{bzip} and \code{indexTabix} functions.
+
+          The \code{readInfo}, \code{readGeno} and \code{readGT} functions
+          are lightweight versions of \code{readVcf} and import a single
+          variable. The return object is a vector, matrix or CompressedList
+          instead of a VCF class. 
           }
       } 
       \code{readVcf} calls \code{\link{scanVcf}}, the details of which can be 
@@ -189,14 +209,12 @@
   ## ---------------------------------------------------------------------
   vcf
 
-  ## extract the VCFHeader object from exptData
+  ## all header information
   hdr <- header(vcf)
-  ## use accessors to extract the data
+
+  ## header information for 'info' and 'fixed' fields
   info(hdr)
   fixed(hdr)
-
-  ## genome information is stored in the GRanges
-  unique(genome(rowData(vcf)))
 
   ## ---------------------------------------------------------------------
   ## Accessors
@@ -218,9 +236,25 @@
   geno(vcf)
   head(geno(vcf)$GT)
 
+  ## genome
+  unique(genome(rowData(vcf)))
+
   ## ---------------------------------------------------------------------
-  ## Data subsets 
+  ## Data subsets with lightweight read* functions 
   ## ---------------------------------------------------------------------
+
+  ## Import a single 'info' or 'geno' variable
+  DP <- readInfo(fl, "DP")
+  HQ <- readGeno(fl, "HQ")
+
+  ## Import GT only and convert numeric representation to nucleotides
+  GT <- readGT(fl, row.names=TRUE)
+
+
+  ## ---------------------------------------------------------------------
+  ## Data subsets with ScanVcfParam
+  ## ---------------------------------------------------------------------
+
   ## Subset on genome coordinates:
   ## 'file' must have a Tabix index
   rngs <- GRanges("20", IRanges(c(14370, 1110000), c(17330, 1234600)))
