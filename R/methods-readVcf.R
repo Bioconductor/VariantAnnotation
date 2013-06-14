@@ -122,7 +122,7 @@ setMethod(readVcf, c(file="character", genome="missing",
 
 ## lightweight read functions that retrieve a single variable
 
-readInfo <- function(file, x, param=ScanVcfParam(), row.names=FALSE, ...)
+readInfo <- function(file, x, param=ScanVcfParam(), ..., row.names=FALSE)
 {
     lst <- .readLite(file, x, param, "info")
     rowData <- lst$rowData
@@ -133,7 +133,7 @@ readInfo <- function(file, x, param=ScanVcfParam(), row.names=FALSE, ...)
     res 
 } 
 
-readGeno <- function(file, x, param=ScanVcfParam(), row.names=FALSE, ...)
+readGeno <- function(file, x, param=ScanVcfParam(), ..., row.names=FALSE)
 {
     lst <- .readLite(file, x, param, "geno")
     rowData <- lst$rowData
@@ -143,10 +143,14 @@ readGeno <- function(file, x, param=ScanVcfParam(), row.names=FALSE, ...)
     res 
 } 
 
-readGT <- function(file, param=ScanVcfParam(), row.names=FALSE, ...)
+readGT <- function(file, nucleotides=FALSE, param=ScanVcfParam(), ..., 
+                   row.names=FALSE)
 {
     lst <- .readLite(file, "GT", param, "GT")
-    res <- .geno2geno(lst, row.names=row.names)
+    if (nucleotides)
+        res <- .geno2geno(lst, row.names=row.names)
+    else
+        res <- lst$GENO$GT
     rowData <- lst$rowData
     if (row.names)
         dimnames(res)[[1]] <- names(rowData)

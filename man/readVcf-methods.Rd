@@ -32,9 +32,9 @@
   \S4method{readVcf}{character,missing,missing}(file, genome, param, ...)
 
   ## Lightweight functions to read a single variable
-  readInfo(file, x, param=ScanVcfParam(), row.names=FALSE, ...)
-  readGeno(file, x, param=ScanVcfParam(), row.names=FALSE, ...)
-  readGT(file, param=ScanVcfParam(), row.names=FALSE, ...)
+  readInfo(file, x, param=ScanVcfParam(), ..., row.names=FALSE)
+  readGeno(file, x, param=ScanVcfParam(), ..., row.names=FALSE)
+  readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=FALSE)
 }
 
 \arguments{
@@ -61,8 +61,12 @@
   \item{x}{\code{character} name of single \code{info} or \code{geno} field to 
     import. Applicable to \code{readInfo} and \code{readGeno} only.
   }
-  \item{row.names}{\code{logical} to include rownames or not. Applicable to
-    \code{readInfo}, \code{readGeno} and \code{readGT}.
+  \item{row.names}{\code{logical}. Applicable to \code{readInfo}, 
+    \code{readGeno} and \code{readGT}.
+  }
+  \item{nucleotides}{\code{logical}. Indicates if genotypes should be returned
+    as nucleotides instead of the numeric representation.
+    Applicable to \code{readGT} only.
   }
   \item{\dots}{Additional arguments, passed to methods.
   }
@@ -247,9 +251,10 @@
   DP <- readInfo(fl, "DP")
   HQ <- readGeno(fl, "HQ")
 
-  ## Import GT only and convert numeric representation to nucleotides
+  ## Import GT as numeric representation 
   GT <- readGT(fl, row.names=TRUE)
-
+  ## Import GT as nucleotides 
+  GT <- readGT(fl, nucleotides=TRUE, row.names=TRUE)
 
   ## ---------------------------------------------------------------------
   ## Data subsets with ScanVcfParam
