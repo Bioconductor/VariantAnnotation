@@ -199,7 +199,14 @@ test_readVcf_tabix <- function()
 test_readGT <- function()
 {
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
-    GT <- suppressWarnings(readGT(fl, nucleotides=TRUE))
-    checkIdentical(unname(GT[4,]), rep(NA_character_, 3))
-    checkIdentical(unname(GT[1,]), c("G|G", "A|G", "A|A")) 
+    GT <- readGT(fl, nucleotides=TRUE)
+    checkIdentical(colnames(GT), c("NA00001", "NA00002", "NA00003")) 
+    checkIdentical(unname(GT[1,]), c("G|G", "A|G", "A/A")) 
+    checkIdentical(unname(GT[2,]), c("T|T", "T|A", "T/T"))
+    checkIdentical(unname(GT[5,]), c("GTC/G", "GTC/GTCT", "G/G"))
+
+    fl <- system.file("unitTests", "cases", "no_INFO_header.vcf", 
+                      package="VariantAnnotation")
+    GT <- readGT(fl, nucleotides=TRUE)
+    checkIdentical(unname(GT[,1]), rep(".", 5)) 
 }

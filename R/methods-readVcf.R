@@ -159,39 +159,38 @@ readGT <- function(file, nucleotides=FALSE, param=ScanVcfParam(), ...,
 
 .geno2geno <- function(lst, row.names)
 {
-    ## ignore records with no ALT
+    ## ignore records with GT ".|." 
     ALT <- lst$ALT
     REF <- as.character(lst$REF, use.names=FALSE)
-    GT <- lst$GENO$GT
-    idx <- ALT != ""
-    if (!all(idx)) {
-        warning("only coercing records with >=1 'alt' values")
-        ALT <- ALT[idx]
-        REF <- REF[idx]
-        GT <- GT[idx,]
-    }
+    GT <- res <- lst$GENO$GT
+    ## FIXME: should scanVcf return ".|."
+    if (any(missing <- grepl(".", GT, fixed=TRUE))) 
+        GT[missing] <- ".|."
+    phasing <- rep("|", length(GT))
+    phasing[grepl("/", GT, fixed=TRUE)] <- "/" 
 
     ## replace
-    GT <- sub("/", "|", GT)
-    GTstr <- strsplit(as.vector(GT), "|")
-    GTmat <- matrix(unlist(GTstr), ncol=3, byrow=TRUE)
-    GTA <- as.numeric(GTmat[,1])
-    GTB <- as.numeric(GTmat[,3])
+    GTstr <- strsplit(as.vector(GT), "[|,/]")
+    GTmat <- matrix(unlist(GTstr), ncol=2, byrow=TRUE)
+    GTA <- suppressWarnings(as.numeric(GTmat[,1]))
+    GTB <- suppressWarnings(as.numeric(GTmat[,2]))
 
     REFcs <- cumsum(elementLengths(REF))
     ALTcs <- cumsum(elementLengths(ALT))
     cs <- REFcs + c(0, head(ALTcs, -1)) 
-    offset <- rep(cs, ncol(GT))
+    offset <- rep(cs, ncol(res))
     alleles <- unlist(rbind(REF,ALT), use.names=FALSE)
 
     alleleA <- alleles[offset + GTA]
     alleleB <- alleles[offset + GTB]
-
-    ## FIXME: save original phasing 
-    GT <- lst$GENO$GT
-    GT[idx,] <-  paste0(alleleA, "|", alleleB)
-    GT[!idx,] <-  NA_character_
-    GT
+    if (any(missing)) {
+        res[!missing] <-  paste0(alleleA[!missing], 
+                                 phasing[!missing],
+                                 alleleB[!missing])
+    } else {
+        res[] <- paste0(alleleA, phasing, alleleB)
+    }
+    res
 }
 
 
