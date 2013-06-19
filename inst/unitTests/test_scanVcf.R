@@ -10,13 +10,11 @@ test_FixedTypes <- function()
                         FILTER=list("1", character()))
     named <- names(exp)[-(1:2)]
     checkIdentical(exp, .vcf_map_fixed(character()))
-    exp[named] <- list(list("0", NULL))
-    checkIdentical(exp, .vcf_map_fixed(NA))
+    checkIdentical(exp[1:2], .vcf_map_fixed(NA))
     exp <- exp0
     exp[1] <- list(NULL)
     checkIdentical(exp, .vcf_map_fixed(named))
     warn <- FALSE
-    exp[named] <- list(list("0", NULL))
     obs <- withCallingHandlers({
         .vcf_map_fixed("FOO")
     }, warning=function(w) {
@@ -24,7 +22,7 @@ test_FixedTypes <- function()
         invokeRestart("muffleWarning")
     })
     checkTrue(warn)
-    checkIdentical(exp, obs)
+    checkIdentical(exp[1:2], obs)
 }
 
 test_InfoTypes <- function()

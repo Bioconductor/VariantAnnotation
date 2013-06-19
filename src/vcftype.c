@@ -214,6 +214,8 @@ SEXP _vcftype_as_SEXP(struct vcftype_t *vcftype)
 void _vcftype_set(struct vcftype_t *vcftype,
                   const int idx, const char *field)
 {
+    if (NULL == vcftype)
+        return;
     switch (vcftype->type) {
     case NILSXP:
         break;
@@ -242,6 +244,8 @@ void _vcftype_padarray(struct vcftype_t *vcftype,
                        const int irow, const int icol,
                        const int ragged_n)
 {
+    if (NULL == vcftype)
+        return;
     const int offset = irow * vcftype->ncol + icol;
     if (vcftype->u.list[offset] != NULL)
         return;
@@ -254,6 +258,9 @@ void _vcftype_setarray(struct vcftype_t *vcftype,
 {
     struct it_t it;
     char *ifld;
+
+    if (NULL == vcftype)
+        return;
 
     if (VECSXP == vcftype->type) { /* ragged array */
         if (vcftype->number == 'G') /* FIXME: what does 'G' mean in VCF? */

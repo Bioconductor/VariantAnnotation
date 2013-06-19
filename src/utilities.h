@@ -10,9 +10,11 @@ SEXP get_namespace(const char *pkg);
 struct it_t {
     char *str;
     char delim;
+    int n_fld;
 };
 
 char *it_init(struct it_t *it, char *str, char delim);
 char *it_next(struct it_t *it);
+int it_nfld(const struct it_t *it);
 
 #endif

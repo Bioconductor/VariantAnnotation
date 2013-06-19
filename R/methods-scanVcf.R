@@ -7,17 +7,15 @@
 {
     if (!identical(character(), tag))
         if (1L == length(tag) && is.na(tag)) {
-            map[] <- list(list("0", NULL))
+            map[] <- NULL
         } else {
-            map[!names(map) %in% tag] <- list(list("0", NULL))
-            if (!all(tag %in% names(map))) {
-                warning("ScanVcfParam '", nm, "' fields not present: '",
-                        paste(tag[!tag %in% names(map)], collapse="' ' "),
-                        "'")
-            } else {
-                fac <- match(c(tag, names(map)[!names(map) %in% tag]), names(map))
-                map <- map[fac]
+            ok <- tag %in% names(map)
+            if (!all(ok)) {
+                warning("ScanVcfParam ", sQuote(nm), " fields not present: ",
+                        paste(sQuote(tag[!ok]), collapse=" "))
+                tag <- tag[ok]
             }
+            map <- map[tag]             # user-requested order
         }
     map
 }
@@ -33,20 +31,21 @@
 .vcf_map_samples <-
     function(fmt, tag, ...)
 {
-    if (identical(character(), tag)) { 
-        smap <- seq_along(fmt)
+    map <- setNames(seq_along(fmt), fmt)
+    if (identical(character(), tag)) {
+        map                             # keep everyone
     } else if (isTRUE(is.na(tag))) {
-        smap <- rep(0L, length(fmt))
+        map[0]                          # drop everyone
     } else {
         if (any(nx <- !tag %in% fmt)) {
-            warning(paste("samples", sQuote(tag[nx]), "not found in file"))
+            warning("samples not in file: ",
+                    paste(sQuote(tag[nx]), collapse=" "))
             tag <- tag[!nx]
         }
-        smap <- rep(0L, length(fmt))
-        smap[match(tag, fmt)] <- seq_along(tag)
-    } 
-    names(smap) <- fmt
-    smap
+        map[] <- 0L                     # drop everyone, except...
+        map[match(tag, fmt)] <- seq_along(tag) # these guys, and...
+        map[rev(cumsum(rev(map)) > 0)]  # drop trailing unwanted samples
+    }
 }
 
 .vcf_map <-
@@ -72,12 +71,15 @@
     if (isTRUE(is.na(samples)))
        geno <- NA 
     hdr <- suppressWarnings(scanVcfHeader(file))
-    smap <- .vcf_map_samples(samples(hdr), samples)
-    gmap <- .vcf_map(geno(hdr), geno, nm="geno")
     fmap <- .vcf_map_fixed(fixed)
-    imap <- .vcf_map(info(hdr), info, nm="info")
-    if (0L == length(imap))
-        imap <- list(list("1", character()))
+    imap <- if (0L == nrow(info(hdr))) {
+        ## missing INFO lines in header --> 1 column, unparsed 
+        list(list("1", character()))
+    } else {
+        .vcf_map(info(hdr), info, nm="info")
+    }
+    gmap <- .vcf_map(geno(hdr), geno, nm="geno")
+    smap <- .vcf_map_samples(samples(hdr), samples)
     list(hdr=hdr, samples=smap, fmap=fmap, imap=imap, gmap=gmap)
 }
 
