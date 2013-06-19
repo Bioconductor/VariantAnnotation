@@ -171,6 +171,8 @@ readGT <- function(file, nucleotides=FALSE, param=ScanVcfParam(), ...,
 
     ## replace
     GTstr <- strsplit(as.vector(GT), "[|,/]")
+    if (any(elementLengths(GTstr) !=2))
+        stop("only diploid variants are supported")
     GTmat <- matrix(unlist(GTstr), ncol=2, byrow=TRUE)
     GTA <- suppressWarnings(as.numeric(GTmat[,1]))
     GTB <- suppressWarnings(as.numeric(GTmat[,2]))

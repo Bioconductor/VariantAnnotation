@@ -22,21 +22,12 @@ test_readVcf_format <- function()
 
 test_readVcf_unspecified_INFO_FORMAT <- function()
 {
-    ## 'INFO' or 'FORMAT' fields contain values not in header
+    ## As of 1.7.32, warnings are no longer thrown for 'INFO'
+    ## and 'FORMAT' fields in the data but with no header entry.
+    ## Fields are silently skipped.
     fl <- system.file(package="VariantAnnotation", "unitTests",
                       "cases", "unspecified_INFO_FORMAT_fields.vcf")
-    warn <- NULL
-    vcf <- withCallingHandlers({
-        readVcf(fl, "hg19")
-    }, warning=function(w) {
-        warn <<- append(warn, conditionMessage(w))
-        invokeRestart("muffleWarning")
-    })
-    exp <- c("record 2: header line '##INFO=<ID=XX,...>' not found",
-             "record 4: header line '##FORMAT=<ID=YY,...>' not found",
-             "record 4: fewer '##FORMAT=<...>' lines than FORMAT fields")
-    checkIdentical(exp, warn)
-
+    vcf <- readVcf(fl, "hg19")
     ## columns immediately after XX entries
     exp <- c(14L, 11L, 10L, 13L, 9L)
     checkIdentical(exp, info(vcf)$DP)
@@ -53,7 +44,7 @@ test_readVcf_unspecified_INFO_FORMAT <- function()
 test_readVcf_fewer_FORMAT_than_GENO <- function() {
     fl <- system.file(package="VariantAnnotation", "unitTests",
                       "cases", "fewer-FORMAT-than-GENO.vcf")
-    exp <- "record 2 sample 1: fewer FORMAT fields than GENO fields"
+    exp <- "record 2 sample H1993: fewer FORMAT fields than GENO fields"
     obs <- tryCatch(readVcf(fl, "hg19"), warning=conditionMessage)
     checkIdentical(exp, obs)
 }
@@ -61,9 +52,10 @@ test_readVcf_fewer_FORMAT_than_GENO <- function() {
 test_readVcf_missing_FORMAT_metadata_elt <- function() {
     fl <- system.file(package="VariantAnnotation", "unitTests",
                       "cases", "missing-FORMAT-metadata-elt.vcf")
-    exp <- "record 2: header line '##FORMAT=<ID=XP,...>' not found"
-    obs <- tryCatch(readVcf(fl, "hg19"), warning=conditionMessage)
-    checkIdentical(exp, obs)
+    vcf <- readVcf(fl, "hg19")
+    exp <- c(1L, NA_integer_, 1L) 
+    obs <- unlist(geno(vcf)$AP, use.names=FALSE)
+    checkIdentical(exp,  obs)
 }
 
 test_readVcf_no_GENO_row <- function() {
