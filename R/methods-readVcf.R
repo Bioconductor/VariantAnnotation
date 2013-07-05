@@ -73,6 +73,7 @@ setMethod(readVcf, c(file="character", genome="missing",
 
 .checkTabix <- function(x)
 {
+    ## check if Tabix index was supplied by mistake
     if (1L != length(x)) 
         stop("'x' must be character(1)")
     if (grepl("\\.tbi$", x))
