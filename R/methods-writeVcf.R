@@ -250,3 +250,12 @@ setMethod(writeVcf, c("VCF", "connection"),
     }
 }
 
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### VRanges methods
+###
+
+setMethod(writeVcf, "VRanges",
+          function(obj, filename, ...)
+          {
+            writeVcf(as(obj, "VCF"), filename, ...)
+          })

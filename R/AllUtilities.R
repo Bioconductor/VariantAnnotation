@@ -198,3 +198,11 @@
     isActiveSeq(subject)[] <- FALSE
     isActiveSeq(subject)[setdiff(queryseq, circNames)] <- TRUE
 }
+
+.rleRecycleVector <- function(x, len) {
+  if (is(x, "Rle"))
+    rep(x, length.out = len)
+  else if (length(x) == 1L)
+    Rle(x, len)
+  else IRanges:::recycleVector(x, len)
+}

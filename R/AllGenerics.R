@@ -221,3 +221,20 @@ setGeneric("genotypeToSnpMatrix", signature="x",
 
 setGeneric("snpSummary", function(x, ...) standardGeneric("snpSummary") )
 
+### -------------------------------------------------------------------------
+### VRanges class 
+###
+
+setGeneric("totalDepth", function(x, ...) standardGeneric("totalDepth"))
+setGeneric("altDepth", function(x, ...) standardGeneric("altDepth"))
+setGeneric("refDepth", function(x, ...) standardGeneric("refDepth"))
+setGeneric("softFilterMatrix",
+           function(x, value) standardGeneric("softFilterMatrix"))
+setGeneric("softFilterMatrix<-",
+           function(x, value) standardGeneric("softFilterMatrix<-"))
+setGeneric("hardFilters",
+           function(x, value) standardGeneric("hardFilters"))
+setGeneric("hardFilters<-",
+           function(x, value) standardGeneric("hardFilters<-"))
+setGeneric("called", function(x, ...) standardGeneric("called"))
+setGeneric("asVCF", function(x, ...) standardGeneric("asVCF"))

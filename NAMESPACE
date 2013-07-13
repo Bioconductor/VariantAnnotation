@@ -15,7 +15,7 @@ importClassesFrom(Biobase,
 )
 
 importFrom(Biobase,
-    sampleNames, samples
+    sampleNames, "sampleNames<-", samples
 )
 
 importClassesFrom(AnnotationDbi, 
@@ -51,7 +51,7 @@ importFrom(IRanges,
 
 importClassesFrom(IRanges, 
     CharacterList, DataFrame, Ranges, RangesList, RangedData,
-    SimpleDataFrameList, SimpleList
+    SimpleDataFrameList, SimpleList, FilterRules, FilterMatrix
 )
 
 importMethodsFrom(IRanges, 
@@ -61,7 +61,7 @@ importMethodsFrom(IRanges,
     precede, queryHits, rev, Rle, runValue, sapply, shift,
     split, start, "start<-", subjectHits, substring, 
     unlist, values, "values<-", which, width, 
-    expand
+    expand, ifelse, as.factor
 )
 
 importFrom(XVector, "subseq", "subseq<-")
@@ -98,12 +98,18 @@ export(
     dbSNPFilter, regionFilter, ## Defunct
     VCF, VCFHeader, reference, header, meta,
     vcfWhich, "vcfWhich<-", vcfFixed, "vcfFixed<-", vcfInfo, "vcfInfo<-", 
-    vcfGeno, "vcfGeno<-", vcfSamples, "vcfSamples<-", vcfTrimEmpty, "vcfTrimEmpty<-", 
+    vcfGeno, "vcfGeno<-", vcfSamples, "vcfSamples<-", vcfTrimEmpty,
+    "vcfTrimEmpty<-", 
     duplicateRSID, CodingVariants, IntronVariants,
     FiveUTRVariants, ThreeUTRVariants, IntergenicVariants,
     SpliceSiteVariants, PromoterVariants, AllVariants,
     upstream, "upstream<-", downstream, "downstream<-",
     promoter, "promoter<-", intergenic, "intergenic<-",
+    probabilityToSnpMatrix, GLtoGP,
+    VRanges, asVCF,
+    totalDepth, altDepth, refDepth, sampleNames, "sampleNames<-",
+    softFilterMatrix, "softFilterMatrix<-", hardFilters, "hardFilters<-",
+    called,
     probabilityToSnpMatrix, GLtoGP,
     readInfo, readGeno, readGT
 )
