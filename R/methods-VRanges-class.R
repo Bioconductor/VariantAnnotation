@@ -280,8 +280,6 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
                         FILTER = makeFILTERheader(x)))
   exptData <- SimpleList(header = header)
 
-  xUniq <- normalizeIndelAlleles(xUniq)
-
   alt <- as(as.character(alt(xUniq)), "List")
   alt[is.na(alt(xUniq))] <- CharacterList(character()) # empty list elements->'.'
   qual <- xUniq$QUAL
@@ -337,30 +335,6 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
 }
 
 setMethod("asVCF", "VRanges", vranges2Vcf)
-
-normArgGenome <- function(x) {
-  if (isSingleString(x))
-    x <- GmapGenome(x)
-  else if (!is(x, "GmapGenome"))
-    stop("'genome' must be either a 'GmapGenome' object or ",
-         "a single string identifying one")
-  x
-}
-
-normalizeIndelAlleles <- function(x) {
-  genome <- unique(genome(x))
-  is.indel <- nchar(ref(x)) == 0L | nchar(alt(x)) == 0L
-  if (any(is.indel)) {
-    genome <- normArgGenome(genome)
-    indels <- x[is.indel]
-    indels <- shift(indels, -1)
-    anchor <- getSeq(genome, indels)
-    ref(indels) <- paste0(anchor, ref(indels))
-    alt(alt) <- paste0(anchor, alt(indels))
-    x[is.indel] <- indels
-  }
-  x
-}
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Reading from VCF
