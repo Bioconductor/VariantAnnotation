@@ -62,7 +62,10 @@ VRanges <-
                   length(totalDepth), length(refDepth), length(altDepth),
                   length(sampleNames), nrow(softFilterMatrix))
   }
+  if (length(gr) != maxLen)
+    gr <- rep(gr, length.out = maxLen)
   ref <- as.character(ref)
+  ref <- IRanges:::recycleVector(ref, maxLen)
   alt <- .rleRecycleVector(alt, maxLen)
   alt <- as(alt, "characterOrRle")
   refDepth <- .rleRecycleVector(refDepth, maxLen)

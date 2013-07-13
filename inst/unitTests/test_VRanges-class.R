@@ -15,6 +15,7 @@
 
 integerRle <- function(...) as(Rle(...), "integerRle")
 characterRle <- function(...) as(Rle(...), "characterRle")
+factorRle <- function(...) as(Rle(...), "factorRle")
 
 make_TARGET_VRanges_simple <- function() {
   new("VRanges", .TARGET_gr, ref = .TARGET_ref,
@@ -90,13 +91,14 @@ test_VRanges_constructor <- function() {
   test.vr <- VRanges(.TARGET_seqnames, .TARGET_ranges, .TARGET_ref, .TARGET_alt,
                      softFilterMatrix = cbind(a = c(1, 0)))
   vr <- make_TARGET_VRanges_simple()
-  vr@softFilterMatrix <- .TARGET_softFilterMatrix
+  vr@softFilterMatrix <- as(.TARGET_softFilterMatrix, "matrix")
   checkIdentical(test.vr, vr)
   
   ## CHECK: all arguments, with unnamed metadata
   test.vr <- VRanges(.TARGET_seqnames, .TARGET_ranges, .TARGET_ref,
                      .TARGET_alt, .TARGET_totalDepth,
-                     .TARGET_refDepth, .TARGET_altDepth, .TARGET_tumorSpecific,
+                     .TARGET_refDepth, .TARGET_altDepth,
+                     tumorSpecific = .TARGET_tumorSpecific,
                      sampleNames = .TARGET_sampleNames,
                      softFilterMatrix = .TARGET_softFilterMatrix,
                      hardFilters = .TARGET_hardFilters)
