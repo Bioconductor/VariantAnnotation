@@ -21,6 +21,7 @@
 \description{Read Variant Call Format (VCF) files}
 
 \usage{
+
   \S4method{readVcf}{TabixFile,character,ScanVcfParam}(file, genome, param, ...)
   \S4method{readVcf}{TabixFile,character,RangedData}(file, genome, param, ...)
   \S4method{readVcf}{TabixFile,character,RangesList}(file, genome, param, ...)
@@ -31,10 +32,10 @@
   \S4method{readVcf}{character,character,missing}(file, genome, param, ...)
   \S4method{readVcf}{character,missing,missing}(file, genome, param, ...)
 
-  ## Lightweight functions to read a single variable
-  readInfo(file, x, param=ScanVcfParam(), ..., row.names=FALSE)
-  readGeno(file, x, param=ScanVcfParam(), ..., row.names=FALSE)
-  readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=FALSE)
+## Lightweight functions to read a single variable
+readInfo(file, x, param=ScanVcfParam(), ..., row.names=FALSE)
+readGeno(file, x, param=ScanVcfParam(), ..., row.names=FALSE)
+readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=FALSE)
 }
 
 \arguments{
@@ -61,10 +62,10 @@
   \item{x}{\code{character} name of single \code{info} or \code{geno} field to 
     import. Applicable to \code{readInfo} and \code{readGeno} only.
   }
-  \item{row.names}{\code{logical}. Applicable to \code{readInfo}, 
-    \code{readGeno} and \code{readGT}.
+  \item{row.names}{A \code{logical} specifying if rownames should be returned. 
+    Applicable to \code{readInfo}, \code{readGeno} and \code{readGT}.
   }
-  \item{nucleotides}{\code{logical}. Indicates if genotypes should be returned
+  \item{nucleotides}{A \code{logical} indicating if genotypes should be returned
     as nucleotides instead of the numeric representation.
     Applicable to \code{readGT} only.
   }

@@ -133,11 +133,11 @@ setReplaceMethod("rowData", c("VCF", "GRanges"),
     x
 })
 
-### We need a 'mcols<-,VCF' distinct from
-### 'mcols<-,SummarizedExperiment' because of the
-### behavior of 'rowData<-,VCF'. The 'fixed' fields
-### are stored in a separate slot and not in
-### the meta data columns of the 'rowData' slot.
+### Must define VCF methods for 'mcols<-' and 'dimnames<-'
+### instead of inheriting from SummarizedExperiment.
+### The 'fixed' fields are stored in a separtate slot
+### and not as metadata columns of 'rowData'.
+
 setReplaceMethod("mcols", "VCF",
     function(x, ..., value)
 {
@@ -147,6 +147,16 @@ setReplaceMethod("mcols", "VCF",
     fixed(x) <- value[!idx] 
     slot(x, "rowData") <- value[,idx]
     x
+})
+
+setReplaceMethod("dimnames", c("VCF", "list"),
+    function(x, value)
+{
+    rowData <- slot(x,"rowData")
+    names(rowData) <- value[[1]]
+    colData <- colData(x)
+    rownames(colData) <- value[[2]]
+    GenomicRanges:::clone(x, rowData=rowData, colData=colData)
 })
  
 ### info 
