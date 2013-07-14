@@ -290,6 +290,14 @@ setTypedRle <- function(type) {
             function(x, i, j, ..., drop = getOption("dropRle", FALSE)) {
               as(callNextMethod(), cname)
             })
+  setReplaceMethod("[", cname,
+                   function(x, i, j, ..., value) {
+                     if (missing(i))
+                       ans <- callGeneric(x = as(x, "Rle"), value = value)
+                     else
+                       ans <- callGeneric(x = as(x, "Rle"), i = i, value = value)
+                     as(ans, paste0(class(runValue(ans)), "Rle"))
+                   })
   cname
 }
 
