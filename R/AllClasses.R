@@ -233,7 +233,7 @@ setClass("AllVariants",
   c(if (any(is.na(object@ref)))
       "'ref' must not contain 'NA' values",
     if (length(which(object@ref == object@alt)) > 0L)
-      "'ref' must match 'alt', unless 'alt' is 'NA'")
+      "'ref' must not match 'alt'")
 }
 
 .valid.VRanges.alt <- function(object) {
@@ -298,6 +298,10 @@ setTypedRle <- function(type) {
                        ans <- callGeneric(x = as(x, "Rle"), i = i, value = value)
                      as(ans, paste0(class(runValue(ans)), "Rle"))
                    })
+  setMethod("window", cname,
+            function(x, ...) {
+              as(callNextMethod(), cname)
+            })
   cname
 }
 
@@ -344,3 +348,10 @@ setClass("VRanges",
                         hardFilters = "FilterRules"),
          contains = "GRanges",
          validity = .valid.VRanges)
+
+### ------------------------------------------------------------------------- 
+### VRangesList
+###
+
+setClass("SimpleVRangesList", prototype = prototype(elementType = "VRanges"),
+         contains = "SimpleGenomicRangesList")

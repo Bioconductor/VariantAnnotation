@@ -24,8 +24,20 @@ setReplaceMethod("sampleNames", "VRanges", function(object, value) {
   object
 })
 setMethod("totalDepth", "VRanges", function(x) x@totalDepth)
+`totalDepth<-` <- function(x, value) {
+  x@totalDepth <- value
+  x
+}
 setMethod("altDepth", "VRanges", function(x) x@altDepth)
+`altDepth<-` <- function(x, value) {
+  x@altDepth <- value
+  x
+}
 setMethod("refDepth", "VRanges", function(x) x@refDepth)
+`refDepth<-` <- function(x, value) {
+  x@refDepth <- value
+  x
+}
 setMethod("softFilterMatrix", "VRanges", function(x) x@softFilterMatrix)
 setReplaceMethod("softFilterMatrix", "VRanges", function(x, value) {
   x@softFilterMatrix <- value
@@ -37,8 +49,12 @@ setReplaceMethod("hardFilters", "VRanges", function(x, value) {
   x
 })
 setMethod("called", "VRanges", function(x) {
-  rowSums(filt(x)) == ncol(filt(x))
+  rowSums(softFilterMatrix(x)) == ncol(softFilterMatrix(x))
 })
+
+setMethod("altFraction", "VRanges", function(x) {
+  altDepth(x) / totalDepth(x)
+})  
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Constructor
@@ -116,7 +132,10 @@ setAs("VCF", "VRanges", function(from) {
   seqnames <- seqnames(rd)
   ranges <- unname(ranges(rd))
   ref <- rd$REF
-  alt <- as.character(unlist(rd$ALT))
+  alt <- rd$ALT
+  if (is(alt, "List"))
+    alt <- unlist(alt)
+  alt <- as.character(alt)
   alt[!nzchar(alt)] <- NA
   ad <- geno(from)$AD
   if (!is.null(ad)) {
@@ -130,9 +149,15 @@ setAs("VCF", "VRanges", function(from) {
   if (is.null(totalDepth))
     totalDepth <- NA_integer_
   nsamp <- ncol(from)
-  sampleNames <- Rle(colnames(from), rep(nrow(from), nsamp))
-  meta <- cbind(mcols(rd)["QUAL"], info(from))
-  filter <- parseFilterStrings(rd$FILTER)
+  if (ncol(vcf) > 0L)
+    sampleNames <- Rle(colnames(from), rep(nrow(from), nsamp))
+  else sampleNames <- NA_character_
+  meta <- info(from)
+  if (!is.null(mcols(rd)$QUAL))
+    meta <- cbind(mcols(rd)["QUAL"], meta)
+  if (!is.null(rd$FILTER))
+    filter <- parseFilterStrings(rd$FILTER)
+  else filter <- matrix(nrow = nrow(from), ncol = 0L)
   if (nsamp > 1L) {
     meta <- meta[rep(seq_len(nrow(meta)), nsamp),,drop=FALSE]
     filter <- filter[rep(seq_len(nrow(filter)), nsamp),,drop=FALSE]
@@ -218,7 +243,7 @@ makeFILTERheader <- function(x) {
            fixed=TRUE)
     }))
   }
-  rownames(df) <- names(rules)
+  rownames(df) <- names(rules[exprs])
   df
 }
 
@@ -256,13 +281,17 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
   metaStrings <- as.character(sapply(metadata(x)[meta], as.character))
   if (any(elementLengths(metaStrings) != 1L))
     stop("The elements named in 'meta' must be of length 1")
-  
+
+  if (any(is.na(sampleNames(x)))) {
+    stop("sampleNames(x) must not contain missing values (for VCF export)")
+  }
   sampleLevels <- levels(sampleNames(x))
   if (length(sampleLevels) > 1) {
     xUniq <- unique(x)
-  } else {
+  } else if (length(sampleLevels) == 1L) {
     xUniq <- x
   }
+  
   rowData <- xUniq
   mcols(rowData) <- NULL
   rowData <- as(rowData, "GRanges", strict=TRUE)
@@ -288,7 +317,10 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
   qual <- xUniq$QUAL
   if (is.null(qual) || !is.numeric(qual))
     qual <- rep.int(NA_real_, length(xUniq))
-  filterStrings <- makeFILTERstrings(softFilterMatrix(xUniq)[,filter,drop=FALSE])
+  filtMat <- softFilterMatrix(xUniq)
+  if (ncol(filtMat) > 0L)
+    filtMat <- filtMat[,filter,drop=FALSE]
+  filterStrings <- makeFILTERstrings(filtMat)
   fixed <- DataFrame(REF = DNAStringSet(ref(xUniq)),
                      ALT = alt,
                      QUAL = qual,
@@ -323,9 +355,10 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
     }
   }
   alleleDepth <- c(refDepth(x), altDepth(x))
-  ft <- softFilterMatrix(x)[,setdiff(colnames(softFilterMatrix(x)), filter),
-                            drop=FALSE]
-  ftStrings <- makeFILTERstrings(ft)
+  filtMat <- softFilterMatrix(x)
+  if (ncol(filtMat) > 0L)
+    filtMat <- filtMat[,setdiff(colnames(filtMat), filter), drop=FALSE]
+  ftStrings <- makeFILTERstrings(filtMat)
   geno <-
     SimpleList(AD = genoMatrix(alleleDepth),
                DP = genoMatrix(totalDepth(x)),
@@ -354,6 +387,29 @@ readVRanges <- function(x, ...) {
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Writing to VCF (see methods-writeVcf.R)
 ###
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Filtering
+###
+
+softFilter <- function(x, filters, ...) {
+  softFilterMatrix(x) <-
+    cbind(softFilterMatrix(x),
+          FilterMatrix(matrix = evalSeparately(filters, x, ...),
+                       filterRules = filters))
+  x
+}
+
+resetFilter <- function(x) {
+  softFilterMatrix(x) <- matrix(nrow = length(x), ncol = 0L)
+  x
+}
+
+setMethod("subsetByFilter", c("VRanges", "FilterRules"), function(x, filter) {
+  ans <- callNextMethod()
+  hardFilters(ans) <- c(hardFilters(ans), filter)
+  ans
+})
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Utilities
@@ -394,6 +450,17 @@ setMethod("match", c("VRanges", "VRanges"),
                                         start(table), width(table),
                                         nomatch = nomatch, method = method)
           })
+
+setMethod("tabulate", "VRanges", function(bin, nbins) {
+  if (!missing(nbins))
+    stop("'nbins' argument not relevant")
+  m <- match(bin, bin)
+  ## for dupes, 'm' always points to the subject with the lowest index
+  tab <- tabulate(m, length(bin))
+  ans <- bin[tab > 0]
+  ans$sample.count <- tab[tab > 0]
+  ans
+})
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Show

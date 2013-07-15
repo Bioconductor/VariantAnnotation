@@ -155,6 +155,21 @@ test_VRanges_subassign <- function() {
   vr <- make_TARGET_VRanges()
   vr[2:1] <- vr
   checkIdentical(vr, make_TARGET_VRanges(2:1))
+  
+  vr <- make_TARGET_VRanges()
+  sampleNames(vr) <- Rle(sampleNames(vr))
+  vr2 <- vr
+  vr2[2:1] <- vr
+  checkIdentical(vr2, vr[2:1])
+}
+
+test_VRanges_combine <- function() {
+  vr <- make_TARGET_VRanges()
+  vr.rep <- vr[rep(seq_len(length(vr)), 2)]
+  hardFilters(vr.rep) <- FilterRules()
+  attr(class(vr.rep@softFilterMatrix), "package") <- NULL #??
+  vr.combined <- c(vr, vr)
+  checkIdentical(vr.combined, vr.rep)
 }
 
 test_VRanges_coerce <- function() {

@@ -106,10 +106,10 @@ export(
     upstream, "upstream<-", downstream, "downstream<-",
     promoter, "promoter<-", intergenic, "intergenic<-",
     probabilityToSnpMatrix, GLtoGP,
-    VRanges, asVCF,
-    totalDepth, altDepth, refDepth, sampleNames, "sampleNames<-",
+    VRanges, VRangesList, asVCF, softFilter, resetFilter,
+    totalDepth, altDepth, refDepth, sampleNames, "sampleNames<-", altFraction,
     softFilterMatrix, "softFilterMatrix<-", hardFilters, "hardFilters<-",
-    called,
+    called, stackSamples,
     probabilityToSnpMatrix, GLtoGP,
     readInfo, readGeno, readGT
 )

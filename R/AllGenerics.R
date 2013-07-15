@@ -237,4 +237,14 @@ setGeneric("hardFilters",
 setGeneric("hardFilters<-",
            function(x, value) standardGeneric("hardFilters<-"))
 setGeneric("called", function(x, ...) standardGeneric("called"))
+setGeneric("altFraction", function(x, ...) standardGeneric("altFraction"))
 setGeneric("asVCF", function(x, ...) standardGeneric("asVCF"))
+setGeneric("tabulate", signature = "bin", # BiocGenerics?
+           function(bin, nbins = max(1L, bin, na.rm = TRUE))
+           standardGeneric("tabulate"))
+
+### -------------------------------------------------------------------------
+### VRangesList class 
+###
+
+setGeneric("stackSamples", function(x, ...) standardGeneric("stackSamples"))
