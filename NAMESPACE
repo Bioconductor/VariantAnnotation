@@ -109,9 +109,10 @@ export(
     VRanges, VRangesList, asVCF, softFilter, resetFilter,
     totalDepth, altDepth, refDepth, sampleNames, "sampleNames<-", altFraction,
     softFilterMatrix, "softFilterMatrix<-", hardFilters, "hardFilters<-",
-    called, stackSamples,
+    called, stackSamples, "altDepth<-", "refDepth<-", "totalDepth<-", isIndel,
     probabilityToSnpMatrix, GLtoGP,
-    readInfo, readGeno, readGT
+    readInfo, readGeno, readGT,
+    tabulate
 )
 
 exportMethods(

@@ -56,6 +56,10 @@ setMethod("altFraction", "VRanges", function(x) {
   altDepth(x) / totalDepth(x)
 })  
 
+isIndel <- function(x) {
+  nchar(ref(x)) != nchar(alt(x))
+}
+
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Constructor
 ###
@@ -133,7 +137,7 @@ setAs("VCF", "VRanges", function(from) {
   ranges <- unname(ranges(rd))
   ref <- rd$REF
   alt <- rd$ALT
-  if (is(alt, "List"))
+  if (is(alt, "DNAStringSetList") || is(alt, "CharacterList"))
     alt <- unlist(alt)
   alt <- as.character(alt)
   alt[!nzchar(alt)] <- NA
@@ -149,7 +153,7 @@ setAs("VCF", "VRanges", function(from) {
   if (is.null(totalDepth))
     totalDepth <- NA_integer_
   nsamp <- ncol(from)
-  if (ncol(vcf) > 0L)
+  if (ncol(from) > 0L)
     sampleNames <- Rle(colnames(from), rep(nrow(from), nsamp))
   else sampleNames <- NA_character_
   meta <- info(from)
@@ -401,7 +405,8 @@ softFilter <- function(x, filters, ...) {
 }
 
 resetFilter <- function(x) {
-  softFilterMatrix(x) <- matrix(nrow = length(x), ncol = 0L)
+  softFilterMatrix(x) <- FilterMatrix(nrow = length(x), ncol = 0L,
+                                      filterRules = FilterRules())
   x
 }
 
