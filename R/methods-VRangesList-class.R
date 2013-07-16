@@ -3,8 +3,8 @@
 ### -------------------------------------------------------------------------
 ###
 
-VRangesList <- function(x) {
-  new("SimpleVRangesList", GenomicRangesList(x))
+VRangesList <- function(...) {
+  new("SimpleVRangesList", GenomicRangesList(...))
 }
 
 setMethod("stackSamples", "SimpleVRangesList", function(x) {
