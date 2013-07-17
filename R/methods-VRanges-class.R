@@ -292,7 +292,7 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
   sampleLevels <- levels(sampleNames(x))
   if (length(sampleLevels) > 1) {
     xUniq <- unique(x)
-  } else if (length(sampleLevels) == 1L) {
+  } else {
     xUniq <- x
   }
   
@@ -355,7 +355,7 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
         v <- as.integer(v)
       if (length(v) > length(x))
         v <- split(v, rep(seq_len(length(x)), length(v) / length(x)))
-      matrix(v, nrow = length(x), ncol = 1L)
+      matrix(v, nrow = length(x), ncol = length(sampleLevels))
     }
   }
   alleleDepth <- c(refDepth(x), altDepth(x))
