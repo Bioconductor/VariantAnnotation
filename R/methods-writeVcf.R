@@ -47,22 +47,28 @@ setMethod(writeVcf, c("VCF", "connection"),
 
 .makeVcfMatrix <- function(obj)
 {
-    rd <- rowData(obj)
+    ## empty
+    if (length(rd <- rowData(obj)) == 0)
+        return(character())
 
     CHROM <- as.vector(seqnames(rd))
     POS <- start(rd)
     ID <- .makeVcfID(names(rd))
     REF <- as.character(ref(obj))
     ALT <- alt(obj)
-    if (is(ALT, "DNAStringSetList")) {
+    if (is(ALT, "DNAStringSetList"))
         ALT <- as(ALT, "CharacterList")
-    }
     ALT <- .pasteCollapse(ALT, ",")
     ALT[!nzchar(ALT)] <- "."
-    QUAL <- qual(obj)
-    QUAL[is.na(QUAL)] <- "."
-    FILTER <- filt(obj)
-    FILTER[is.na(FILTER)] <- "."
+
+    if (is.null(QUAL <- qual(obj)))
+        QUAL <- "."
+    else 
+        QUAL[is.na(QUAL)] <- "."
+    if (is.null(FILTER <- filt(obj)))
+        FILTER <- "."
+    else
+        FILTER[is.na(FILTER)] <- "."
     INFO <- .makeVcfInfo(info(obj), length(rd))
     ans <- paste(CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, sep = "\t")
     if (nrow(colData(obj)) > 0L) {
