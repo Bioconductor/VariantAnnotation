@@ -570,11 +570,13 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
     }
     if (length(fo) > 0) {
         queryid <- queryHits(fo)
-        txid <- rep(names(subject), elementLengths(subject))
+        txid <- NA_integer_
+        cdsid <- NA_integer_
+        if (!is.null(tx <- rep(names(subject), elementLengths(subject))))
+            txid <- tx 
         if (vtype == "coding")
-            cdsid <- values(usub)[["cds_id"]][subjectHits(fo)]
-        else
-            cdsid <- NA_integer_
+            if(!is.null(cds <- values(usub)[["cds_id"]][subjectHits(fo)]))
+                cdsid <- cds
 
         GRanges(seqnames=seqnames(query)[queryid],
                 ranges=IRanges(ranges(query)[queryid]),
