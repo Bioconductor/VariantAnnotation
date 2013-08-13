@@ -159,6 +159,7 @@ setAs("VCF", "VRanges", function(from) {
   meta <- info(from)
   if (!is.null(mcols(rd)$QUAL))
     meta <- cbind(mcols(rd)["QUAL"], meta)
+  rownames(meta) <- NULL
   if (!is.null(rd$FILTER))
     filter <- parseFilterStrings(rd$FILTER)
   else filter <- matrix(nrow = nrow(from), ncol = 0L)
@@ -192,7 +193,7 @@ makeFORMATheader <- function(x) {
               Type = c("Integer", "Integer", "String"),
               Description =
               c("Allelic depths (number of reads in each observed allele)",
-                "Total read depth", "Genotype filters"))
+                "Total read depth", "Variant filters"))
   df <- rbind(fixed, makeINFOheader(x))
   df$Type[df$Type == "Flag"] <- "Integer" # Flags not allowed in FORMAT
   df
