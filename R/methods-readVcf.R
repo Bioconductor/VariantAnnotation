@@ -52,7 +52,7 @@ setMethod(readVcf, c(file="character", genome="character",
           param="ScanVcfParam"),
     function(file, genome, param, ...)
 {
-    file <- .checkTabix(file)
+    file <- .checkFile(file)
     .readVcf(file, genome, param)
 })
 
@@ -60,7 +60,7 @@ setMethod(readVcf, c(file="character", genome="character",
           param="missing"),
     function(file, genome, param, ...)
 {
-    file <- .checkTabix(file)
+    file <- .checkFile(file)
     .readVcf(file, genome, param=ScanVcfParam())
 })
 
@@ -71,15 +71,18 @@ setMethod(readVcf, c(file="character", genome="missing",
     stop("'genome' argument is missing") 
 })
 
-.checkTabix <- function(x)
+.checkFile <- function(x)
 {
-    ## check if Tabix index was supplied by mistake
     if (1L != length(x)) 
         stop("'x' must be character(1)")
+    ## Tabix index supplied as 'file'
     if (grepl("\\.tbi$", x))
-        TabixFile(sub("\\.tbi", "", x))
-    else 
-        x 
+        return(TabixFile(sub("\\.tbi", "", x)))
+
+    ## Attempt to create TabixFile
+    tryCatch(x <- TabixFile(x), error=function(e) return(x))
+
+    x 
 }
 
 .readVcf <- function(file, genome, param, ...)
