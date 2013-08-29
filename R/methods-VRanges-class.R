@@ -215,7 +215,7 @@ makeINFOheader <- function(x) {
     if (is.integer(xi))
       "Integer"
     else if (is.numeric(xi))
-      "Numeric"
+      "Float"
     else if (is.logical(xi))
       "Flag"
     else if (is.character(xi) || is.factor(xi)) {
