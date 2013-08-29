@@ -8,7 +8,7 @@
 .TARGET_altDepth <- as.integer(c(7, 6))
 .TARGET_totalDepth <- as.integer(c(12, 17))
 .TARGET_sampleNames <- factor(letters[1:2])
-.TARGET_hardFilters <- FilterRules(list(a = function(x) softFilterMatrix[,1]))
+.TARGET_hardFilters <- FilterRules(list(a = function(x) softFilterMatrix(x)[,1]))
 .TARGET_softFilterMatrix <- FilterMatrix(matrix = cbind(a = c(TRUE, FALSE)),
                                          filterRules = .TARGET_hardFilters)
 .TARGET_tumorSpecific <- c(FALSE, TRUE)
@@ -178,9 +178,10 @@ test_VRanges_coerce <- function() {
                     totalDepth = as.vector(.TARGET_totalDepth),
                     refDepth = as.vector(.TARGET_refDepth),
                     altDepth = as.vector(.TARGET_altDepth),
-                    sampleNames = as.vector(.TARGET_sampleNames),
+                    sampleNames = as.factor(.TARGET_sampleNames),
                     softFilterMatrix = .TARGET_softFilterMatrix,
-                    tumorSpecific = .TARGET_tumorSpecific)
+                    tumorSpecific = .TARGET_tumorSpecific,
+                    stringsAsFactors = FALSE)
    vr <- make_TARGET_VRanges()
    checkIdentical(as.data.frame(vr), df)
 }
