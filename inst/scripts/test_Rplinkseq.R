@@ -55,7 +55,7 @@ fl <- paste0(path,
 ### Iterate through complete file.
 ### --------------------------------------------------------------------------
 
-### Rplinkseq:
+### (i) Rplinkseq:
 ### Rplinkseq has no 'yield' or iterating capability. Attempting to 
 ### read the full file takes > 250 GIG. The file can be read in chunks 
 ### by genomic position. Looping through positions would require previous
@@ -64,7 +64,7 @@ fl <- paste0(path,
 xx <- load.vcf(fl, limit=500000) ## requires > 250 GIG
 
 
-### scanVcf():
+### (ii) scanVcf():
 tf <- TabixFile(fl, yieldSize=10000)
 open(tf)
 system.time( while(length(scanVcf(tf)[[1]]$rowData) > 0)
@@ -76,7 +76,7 @@ close(tf)
 ### max memory used (0.053)*(396101596k) = 20 GIG
 
 
-### readGT():
+### (iii) readGT():
 tf <- TabixFile(fl, yieldSize=10000)
 open(tf)
 system.time( while(length(readGT(tf)) > 0)
@@ -164,15 +164,19 @@ res <- lapply(yieldSize, function(i) {
 ### To get a direct comparision with scanVcf() we query by genomic 
 ### range only.
 
-### scanVcf() takes approximately 14 minutes to read in the
-### subset while the equivalent set of functions in Rplinkseq
-### takes approximately 28 minutes.
+### A subset of 63088 records was chosen as a sufficient number
+### to compare runtime and memory use within a reasonable
+### time.
 
-### Rplinkseq:
+### scanVcf() took approximately 5.4 minutes to read all data in
+### the subset while the equivalent set of functions in Rplinkseq
+### took approximately 12.6 minutes.
+
+### (i) Rplinkseq:
 hdr <- scanVcfHeader(fl)
 info <- rownames(info(hdr))
 geno <- rownames(geno(hdr))
-mask <- "reg=22:20000000..30000000" ## 133449 records
+mask <- "reg=22:20000000..25000000" ## 63088 records
 
 ### load.vcf() returns a list of lists; more processing is
 ### needed to get at the rough equivalent of scanVcf() output.
@@ -183,49 +187,39 @@ fun0 <- function()
     lapply(info, function(i) x.consensus.meta(xx$VAR, i))
     lapply(geno, function(i) x.consensus.genotype(xx$VAR, i))
 }
-
 microbenchmark(fun0(), times=3)
 ### Unit: seconds
-###    expr      min      lq   median       uq      max neval
-###  fun0() 1659.694 1666.31 1672.927 1808.175 1943.423     3
+###    expr     min       lq   median       uq      max neval
+###  fun0() 729.048 743.8944 758.7409 823.2939 887.8469     3
 
-### single run memory usage (creating list of lists only)
-system.time(xx <- load.vcf(fl, mask=mask, limit=200000))
-###    user  system elapsed 
-### 798.654  46.878 848.497 
+### single run memory usage (list of lists only)
+xx <- load.vcf(fl, mask=mask, limit=200000)
 gc()
-###             used   (Mb) gc trigger    (Mb)  max used   (Mb)
-### Ncells 153940428 8221.4  222628720 11889.7 153941308 8221.4
-### Vcells 962320366 7342.0 1050991935  8018.5 962563098 7343.8
-print(object.size(xx), units="Gb")
-### 13.1 Gb
+###             used   (Mb) gc trigger   (Mb)  max used   (Mb)
+### Ncells  74163160 3960.8  106673040 5697.0  74164017 3960.8
+### Vcells 455995498 3479.0  503020304 3837.8 455998211 3479.0
 
-### max memory during runtime (0.2)*(396101596k) = 75 GIG 
+print(object.size(xx), units="Mb")
+### 6322.6 Mb
 
 
-### scanVcf():
+### (ii) scanVcf():
 tf <- TabixFile(fl)
-which <- GRanges("22", IRanges(2e7, 3e7)) ## 133449 records
+which <- GRanges("22", IRanges(2e7, 2.5e7)) ## 63088 records
 param <- ScanVcfParam(which=which)
-
 fun0 <- function()
     scn <- scanVcf(tf, param=param)
-
 microbenchmark(fun0(), times=3)
 ### Unit: seconds
-###    expr      min       lq median       uq      max neval
-###  fun0() 815.7059 828.9979 842.29 1032.187 1222.084     3
+###    expr      min       lq  median       uq      max neval
+###  fun0() 292.5651 309.4915 326.418 422.9329 519.4477     3
 
 ### single run memory usage
-system.time(scn <- scanVcf(tf, param=param))
-###     user   system  elapsed 
-### 1193.947   26.225 1220.582 
+scn <- scanVcf(tf, param=param)
 gc()
-###              used   (Mb) gc trigger    (Mb)   max used    (Mb)
-### Ncells  149149655 7965.5  463692252 24763.9  441938172 23602.1
-### Vcells 1026383299 7830.7 3609168658 27535.8 3074722381 23458.3
-print(object.size(scn), units="Gb")
-### 13.1 Gb
+###             used   (Mb) gc trigger    (Mb)   max used    (Mb)
+### Ncells  71896387 3839.7  211989258 11321.5  211989258 11321.5
+### Vcells 486275159 3710.0 1601058158 12215.2 1667942560 12725.4
 
-### max memory during runtime (0.2)*(396101596k) = 75 GIG 
-
+print(object.size(scn), units="Mb")
+### 6343.3 Mb
