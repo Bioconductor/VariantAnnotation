@@ -76,11 +76,11 @@ setMethod("expand", "CollapsedVCF",
     inms <- rownames(info(hdr))[info(hdr)$Number == "A"]
     if (length(inms) > 0L) {
         ielt <- sapply(inms, function(i) 
-                    elt - elementLengths(info(x)[[i]]))
+                    elt - elementLengths(ivar[[i]]))
         ## elementLengths same as ALT
         csums <- colSums(ielt) == 0L
         if (any(csums))
-            res <- expand(ivar, inms[csums], TRUE)
+            res <- IRanges:::.expandByColumnSet(ivar, inms[csums], TRUE)
         else
             res <- ivar[idx, ] 
         ## elementLengths shorter than ALT
