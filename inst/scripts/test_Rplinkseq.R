@@ -67,8 +67,7 @@ xx <- load.vcf(fl, limit=500000) ## requires > 250 GIG
 ### (ii) scanVcf():
 tf <- TabixFile(fl, yieldSize=10000)
 open(tf)
-system.time( while(length(scanVcf(tf)[[1]]$rowData) > 0)
-                 cat("yield\n") )
+system.time( while(length(scanVcf(tf)[[1]]$rowData) > 0) {} )
 close(tf)
 ###     user   system  elapsed 
 ### 2235.707   27.394 2263.733 
@@ -79,8 +78,7 @@ close(tf)
 ### (iii) readGT():
 tf <- TabixFile(fl, yieldSize=10000)
 open(tf)
-system.time( while(length(readGT(tf)) > 0)
-                 cat("yield\n") )
+system.time( while(length(readGT(tf)) > 0) {} )
 close(tf)
 ###    user  system elapsed 
 ### 512.220   1.172 513.525 
@@ -121,19 +119,19 @@ fun0 <- function() readInfo(tf, "THETA", param=param)
 
 
 ### --------------------------------------------------------------------------
-### Linear scaling with number of variants.
+### Scaling with number of variants and samples.
 ### --------------------------------------------------------------------------
 
-### Testing is done with scanVcf() because it is called by all other 
-### read* functions.
+### Testing done with scanVcf() because it underlies all read* functions.
 
+### Linear scaling with number of variants:
 tf <- TabixFile(fl)
 yieldSize <- c(100000, 200000, 300000, 400000, 500000) 
 res <- lapply(yieldSize, function(i) {
               tf <- TabixFile(fl, yieldSize=i)
               param <- ScanVcfParam(info=NA, geno=NA)
               system.time(scanVcf(tf, param=param))})
-> res
+res
 ## [[1]]
 ##    user  system elapsed 
 ##   9.485   0.144   9.634 
@@ -154,6 +152,36 @@ res <- lapply(yieldSize, function(i) {
 ##    user  system elapsed 
 ##  48.703   0.500  49.214 
 
+### Approximately linear scaling through ~ n=600 
+### and nlog(n) for n > 600
+tf <- TabixFile(fl)
+ids <- samples(scanVcfHeader(fl))
+sampleSize <- c(200, 400, 600, 800, 1000) 
+which <- GRanges("22", IRanges(2e7, 2.5e7)) ## 63088 records
+res <- lapply(sampleSize, function(i) {
+              param <- ScanVcfParam(which=which, samples=ids[1:i])
+              system.time(scanVcf(tf, param=param))})
+
+res
+### [[1]]
+###    user  system elapsed 
+###  48.539   0.068  48.617 
+### 
+### [[2]]
+###    user  system elapsed 
+### 101.903   0.512 102.439 
+### 
+### [[3]]
+###    user  system elapsed 
+### 180.211   0.084 180.365 
+### 
+### [[4]]
+###    user  system elapsed 
+### 320.100   1.456 321.686 
+### 
+### [[5]]
+###    user  system elapsed 
+### 378.144   4.816 383.275 
 
 ### --------------------------------------------------------------------------
 ### Targeted queries by range only.
@@ -176,7 +204,7 @@ res <- lapply(yieldSize, function(i) {
 hdr <- scanVcfHeader(fl)
 info <- rownames(info(hdr))
 geno <- rownames(geno(hdr))
-mask <- "reg=22:20000000..25000000" ## 63088 records
+mask <- "reg=22:20000000..25000000" ## 63088 record-dev
 
 ### load.vcf() returns a list of lists; more processing is
 ### needed to get at the rough equivalent of scanVcf() output.
