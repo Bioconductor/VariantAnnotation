@@ -69,8 +69,8 @@ VRanges <-
            ref = character(), alt = NA_character_,
            totalDepth = NA_integer_, refDepth = NA_integer_,
            altDepth = NA_integer_, ..., sampleNames = NA_character_,
-           softFilterMatrix = FilterMatrix(nrow = length(gr), ncol = 0L,
-             filterRules = FilterRules()),
+           softFilterMatrix = FilterMatrix(matrix(nrow = length(gr), ncol = 0L),
+             FilterRules()),
            hardFilters = FilterRules())
 {
   gr <- GRanges(seqnames, ranges,
@@ -94,7 +94,7 @@ VRanges <-
   softFilterMatrix <- as.matrix(softFilterMatrix)
   mode(softFilterMatrix) <- "logical"
   softFilterMatrix.ind <-
-    .rleRecycleVector(seq_len(nrow(softFilterMatrix)), maxLen)
+    IRanges:::recycleVector(seq_len(nrow(softFilterMatrix)), maxLen)
   softFilterMatrix <- softFilterMatrix[softFilterMatrix.ind,,drop=FALSE]
   sampleNames <- .rleRecycleVector(sampleNames, maxLen)
   new("VRanges", gr, ref = ref, alt = alt,

@@ -46,7 +46,7 @@ make_TARGET_VRanges_empty <- function() {
       refDepth = integerRle(integer()),
       altDepth = integerRle(integer()),
       sampleNames = factorRle(factor()),
-      softFilterMatrix = FilterMatrix(nrow = 0L, ncol = 0L,
+      softFilterMatrix = FilterMatrix(matrix(nrow = 0L, ncol = 0L),
         filterRules = FilterRules()),
       hardFilters = FilterRules())
 }
