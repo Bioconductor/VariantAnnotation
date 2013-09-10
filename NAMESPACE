@@ -88,6 +88,10 @@ importClassesFrom(BSgenome,
     BSgenome
 )
 
+importFrom(rtracklayer,
+    liftOver
+)
+
 importFrom(utils, 
     txtProgressBar, setTxtProgressBar
 )

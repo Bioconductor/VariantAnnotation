@@ -25,17 +25,17 @@ setReplaceMethod("sampleNames", "VRanges", function(object, value) {
 })
 setMethod("totalDepth", "VRanges", function(x) x@totalDepth)
 `totalDepth<-` <- function(x, value) {
-  x@totalDepth <- value
+  x@totalDepth <- as(.rleRecycleVector(value, length(x)), "integerOrRle")
   x
 }
 setMethod("altDepth", "VRanges", function(x) x@altDepth)
 `altDepth<-` <- function(x, value) {
-  x@altDepth <- value
+  x@altDepth <- as(.rleRecycleVector(value, length(x)), "integerOrRle")
   x
 }
 setMethod("refDepth", "VRanges", function(x) x@refDepth)
 `refDepth<-` <- function(x, value) {
-  x@refDepth <- value
+  x@refDepth <- as(.rleRecycleVector(value, length(x)), "integerOrRle")
   x
 }
 setMethod("softFilterMatrix", "VRanges", function(x) x@softFilterMatrix)
@@ -54,7 +54,7 @@ setMethod("called", "VRanges", function(x) {
 
 setMethod("altFraction", "VRanges", function(x) {
   altDepth(x) / totalDepth(x)
-})  
+})
 
 isIndel <- function(x) {
   nchar(ref(x)) != nchar(alt(x))
@@ -296,14 +296,14 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
   } else {
     xUniq <- x
   }
-  
+
   rowData <- xUniq
   mcols(rowData) <- NULL
   rowData <- as(rowData, "GRanges", strict=TRUE)
 
   colData <- DataFrame(Samples = seq_along(sampleLevels),
                        row.names = sampleLevels)
-  
+
   meta_vector <- c(source = paste("VariantAnnotation",
                      packageVersion("VariantAnnotation")),
                    phasing = "unphased", fileformat = "VCFv4.1",
@@ -337,7 +337,7 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
     })
     mergeToUniq <- function(v, sampleToUniq, default) {
       ans <- rep(default, length(xUniq))
-      ans[sampleToUniq] <- v
+      ans[sampleToUniq] <- as.vector(v)
       ans
     }
     genoMatrix <- function(v) {
@@ -356,7 +356,7 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
         v <- as.integer(v)
       if (length(v) > length(x))
         v <- split(v, rep(seq_len(length(x)), length(v) / length(x)))
-      matrix(v, nrow = length(x), ncol = length(sampleLevels))
+      matrix(as.vector(v), nrow = length(x), ncol = length(sampleLevels))
     }
   }
   alleleDepth <- c(refDepth(x), altDepth(x))
@@ -370,7 +370,7 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
                FT = genoMatrix(ftStrings))
   if (length(genoMCols) > 0L)
     geno <- c(geno, SimpleList(lapply(mcols(x)[genoMCols], genoMatrix)))
-  
+
   VCF(rowData = rowData, colData = colData, exptData = exptData, fixed = fixed,
       geno = geno, info = mcols(xUniq)[info])
 }
@@ -422,16 +422,16 @@ setMethod("subsetByFilter", c("VRanges", "FilterRules"), function(x, filter) {
 ###
 
 setMethod("duplicated", "VRanges",
-          function (x, incomparables = FALSE, fromLast = FALSE, 
+          function (x, incomparables = FALSE, fromLast = FALSE,
                     method = c("auto", "quick", "hash"))
           {
-            if (!identical(incomparables, FALSE)) 
-              stop("\"duplicated\" method for VRanges objects ", 
+            if (!identical(incomparables, FALSE))
+              stop("\"duplicated\" method for VRanges objects ",
                    "only accepts 'incomparables=FALSE'")
-            IRanges:::duplicatedIntegerQuads(as.factor(seqnames(x)), 
+            IRanges:::duplicatedIntegerQuads(as.factor(seqnames(x)),
                                              as.factor(alt(x)),
                                              start(x), width(x),
-                                             fromLast = fromLast, 
+                                             fromLast = fromLast,
                                              method = method)
           })
 
@@ -439,17 +439,17 @@ setMethod("match", c("VRanges", "VRanges"),
           function(x, table, nomatch = NA_integer_, incomparables = NULL,
                    method = c("auto", "quick", "hash"), ...)
           {
-            if (!isSingleNumberOrNA(nomatch)) 
+            if (!isSingleNumberOrNA(nomatch))
               stop("'nomatch' must be a single number or NA")
-            if (!is.integer(nomatch)) 
+            if (!is.integer(nomatch))
               nomatch <- as.integer(nomatch)
             if (!is.null(incomparables))
-              stop("\"match\" method for VRanges objects ", 
+              stop("\"match\" method for VRanges objects ",
                    "only accepts 'incomparables=NULL'")
             merge(seqinfo(x), seqinfo(table))
             altLevels <- union(alt(x), alt(table))
             IRanges:::matchIntegerQuads(as.factor(seqnames(x)),
-                                        factor(alt(x), altLevels), 
+                                        factor(alt(x), altLevels),
                                         start(x), width(x),
                                         as.factor(seqnames(table)),
                                         factor(alt(table), altLevels),
@@ -466,6 +466,31 @@ setMethod("tabulate", "VRanges", function(bin, nbins) {
   ans <- bin[tab > 0]
   ans$sample.count <- tab[tab > 0]
   ans
+})
+
+setMethod("merge", c("VRanges", "VRanges"), function(x, y, ...) {
+### FIXME: support softFilterMatrix
+  xdf <- as.data.frame(x)
+  ydf <- as.data.frame(y)
+  bothAllNA <- function(nm) all(is.na(slot(x, nm))) && all(is.na(slot(y, nm)))
+  ignore.cols <- Filter(bothAllNA, c("refDepth", "altDepth", "totalDepth"))
+  ignore.cols <- c(ignore.cols, c("width", "strand"))
+  xdf <- xdf[setdiff(colnames(xdf), ignore.cols)]
+  ydf <- ydf[setdiff(colnames(ydf), ignore.cols)]
+  by <- c("seqnames", "start", "end", "ref", "alt", "sampleNames")
+  merged <- merge(xdf, ydf, by = by, ...)
+  with(merged, VRanges(seqnames, IRanges(start, end), ref, alt, NA, NA, NA,
+                       sampleNames = sampleNames,
+                       merged[setdiff(colnames(merged), by)]))
+})
+
+setMethod("liftOver", c("VRanges", "Chain"), function(x, chain, ...) {
+  grl <- liftOver(GRanges(seqnames(x), ranges(x)), chain, ...)
+  gr <- unlist(grl, use.names=FALSE)
+  ans <- x[togroup(grl)]
+  ans <- update(ans, seqinfo = seqinfo(gr), seqnames = seqnames(gr),
+                ranges = ranges(gr))
+  relist(ans, grl)
 })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
