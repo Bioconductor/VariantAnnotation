@@ -67,7 +67,8 @@ vcfGeno <- function(object) slot(object, "geno")
     object
 }
 
-vcfSamples <- function(object) slot(object, "samples")
+vcfSamples <- function(object) 
+    IRanges:::selectSome(slot(object, "samples"))
 "vcfSamples<-" <- function(object, value) 
 {
     slot(object, "samples") <- value

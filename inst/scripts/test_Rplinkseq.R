@@ -65,6 +65,12 @@ xx <- load.vcf(fl, limit=500000) ## requires > 250 GIG
 
 
 ### (ii) scanVcf():
+> gc(reset=TRUE)
+          used  (Mb) gc trigger  (Mb) max used  (Mb)
+Ncells 2600229 138.9    3289005 175.7  2600229 138.9
+Vcells 1951494  14.9    3124965  23.9  1951494  14.9
+
+
 tf <- TabixFile(fl, yieldSize=10000)
 open(tf)
 system.time( while(length(scanVcf(tf)[[1]]$rowData) > 0) {} )
@@ -72,7 +78,12 @@ close(tf)
 ###     user   system  elapsed 
 ### 2235.707   27.394 2263.733 
 
-### max memory used (0.053)*(396101596k) = 20 GIG
+> gc(reset=TRUE)
+          used  (Mb) gc trigger   (Mb) max used  (Mb)
+Ncells 2620925 140.0   24923264 1331.1  2620925 140.0
+Vcells 1971533  15.1  182613726 1393.3  1971533  15.1
+
+## memory used : (138.9+14.9) - (140+15.1) = 1.3 Mb 
 
 
 ### (iii) readGT():
@@ -124,64 +135,78 @@ fun0 <- function() readInfo(tf, "THETA", param=param)
 
 ### Testing done with scanVcf() because it underlies all read* functions.
 
-### Linear scaling with number of variants:
+### Linear scaling by variants:
 tf <- TabixFile(fl)
 yieldSize <- c(100000, 200000, 300000, 400000, 500000) 
+param <- ScanVcfParam(info=NA, geno=NA)
+fun0 <- function(tf, param) scanVcf(tf, param=param)
+
 res <- lapply(yieldSize, function(i) {
               tf <- TabixFile(fl, yieldSize=i)
-              param <- ScanVcfParam(info=NA, geno=NA)
-              system.time(scanVcf(tf, param=param))})
-res
-## [[1]]
-##    user  system elapsed 
-##   9.485   0.144   9.634 
-## 
-## [[2]]
-##    user  system elapsed 
-##  19.453   0.176  19.636 
-## 
-## [[3]]
-##    user  system elapsed 
-##  29.150   0.296  29.454 
-## 
-## [[4]]
-##    user  system elapsed 
-##  39.502   0.424  39.936 
-## 
-## [[5]]
-##    user  system elapsed 
-##  48.703   0.500  49.214 
-
-### Approximately linear scaling through ~ n=600 
-### and nlog(n) for n > 600
-tf <- TabixFile(fl)
-ids <- samples(scanVcfHeader(fl))
-sampleSize <- c(200, 400, 600, 800, 1000) 
-which <- GRanges("22", IRanges(2e7, 2.5e7)) ## 63088 records
-res <- lapply(sampleSize, function(i) {
-              param <- ScanVcfParam(which=which, samples=ids[1:i])
-              system.time(scanVcf(tf, param=param))})
-
+              microbenchmark(fun0(tf, param), times=5)})
 res
 ### [[1]]
-###    user  system elapsed 
-###  48.539   0.068  48.617 
+### Unit: seconds
+###             expr      min       lq   median       uq      max neval
+###  fun0(tf, param) 9.883719 10.13574 10.15165 10.17318 10.70124     5
 ### 
 ### [[2]]
-###    user  system elapsed 
-### 101.903   0.512 102.439 
+### Unit: seconds
+###             expr    min      lq   median       uq      max neval
+###  fun0(tf, param) 19.385 19.6715 19.71968 19.72206 20.23362     5
 ### 
 ### [[3]]
-###    user  system elapsed 
-### 180.211   0.084 180.365 
+### Unit: seconds
+###             expr      min       lq   median       uq      max neval
+###  fun0(tf, param) 29.24268 29.33945 29.36927 29.38207 30.01012     5
 ### 
 ### [[4]]
-###    user  system elapsed 
-### 320.100   1.456 321.686 
+### Unit: seconds
+###             expr      min       lq   median      uq      max neval
+###  fun0(tf, param) 38.71675 38.73608 38.77965 38.8696 39.27382     5
 ### 
 ### [[5]]
-###    user  system elapsed 
-### 378.144   4.816 383.275 
+### Unit: seconds
+###             expr      min       lq   median       uq      max neval
+###  fun0(tf, param) 47.94605 48.76884 49.03272 49.03859 49.08618     5
+
+
+### Linear scaling by sample:
+tf <- TabixFile(fl)
+ids <- samples(scanVcfHeader(fl))
+sampleSize <- c(200, 400, 600, 800, 1000)
+which <- GRanges("22", IRanges(2e7, 2.5e7)) ## 63088 records
+fun0 <- function(tf, param) scanVcf(tf, param=param) 
+ 
+res <- lapply(sampleSize, function(i) {
+              param <- ScanVcfParam(which=which, samples=ids[1:i])
+              microbenchmark(fun0(tf, param), times=5)})
+res
+### [[1]]
+### Unit: seconds
+###             expr      min       lq   median       uq      max neval
+###  fun0(tf, param) 61.80377 61.91141 69.62993 70.10218 103.1949     5
+### 
+### [[2]]
+### Unit: seconds
+###             expr      min       lq   median      uq      max neval
+###  fun0(tf, param) 128.3595 132.1819 135.7386 135.966 150.7588     5
+### 
+### [[3]]
+### Unit: seconds
+###             expr      min       lq   median       uq     max neval
+###  fun0(tf, param) 204.0067 211.0546 219.2069 232.3388 249.188     5
+### 
+### [[4]]
+### Unit: seconds
+###             expr      min       lq   median       uq      max neval
+###  fun0(tf, param) 266.7383 269.8461 273.7986 299.7805 330.6505     5
+### 
+### [[5]]
+### Unit: seconds
+###             expr      min       lq   median       uq      max neval
+###  fun0(tf, param) 329.6348 337.1841 348.7968 359.5972 364.2781     5
+
 
 ### --------------------------------------------------------------------------
 ### Targeted queries by range only.
@@ -221,11 +246,19 @@ microbenchmark(fun0(), times=3)
 ###  fun0() 729.048 743.8944 758.7409 823.2939 887.8469     3
 
 ### single run memory usage (list of lists only)
+gc(reset=TRUE)
+###           used  (Mb) gc trigger  (Mb) max used  (Mb)
+### Ncells 2600229 138.9    3289005 175.7  2600229 138.9
+### Vcells 1951494  14.9    3124965  23.9  1951494  14.9
+
 xx <- load.vcf(fl, mask=mask, limit=200000)
-gc()
+
+gc(reset=TRUE)
 ###             used   (Mb) gc trigger   (Mb)  max used   (Mb)
-### Ncells  74163160 3960.8  106673040 5697.0  74164017 3960.8
-### Vcells 455995498 3479.0  503020304 3837.8 455998211 3479.0
+### Ncells  74151020 3960.1  106673040 5697.0  74151020 3960.1
+### Vcells 455979993 3478.9  502969959 3837.4 455979993 3478.9
+
+### memory used: (138.9 + 14.9) - (3960.1 + 3478.9) = 7285.2 Mb
 
 print(object.size(xx), units="Mb")
 ### 6322.6 Mb
@@ -243,11 +276,19 @@ microbenchmark(fun0(), times=3)
 ###  fun0() 292.5651 309.4915 326.418 422.9329 519.4477     3
 
 ### single run memory usage
+gc(reset=TRUE)
+###           used  (Mb) gc trigger  (Mb) max used  (Mb)
+### Ncells 2616411 139.8    3289005 175.7  2616411 139.8
+### Vcells 1965798  15.0    3124965  23.9  1965798  15.0
+
 scn <- scanVcf(tf, param=param)
-gc()
-###             used   (Mb) gc trigger    (Mb)   max used    (Mb)
-### Ncells  71896387 3839.7  211989258 11321.5  211989258 11321.5
-### Vcells 486275159 3710.0 1601058158 12215.2 1667942560 12725.4
+
+gc(reset=TRUE)
+###             used   (Mb) gc trigger    (Mb)  max used   (Mb)
+### Ncells  71895814 3839.7  211989258 11321.5  71895814 3839.7
+### Vcells 486274427 3710.0 1601055918 12215.1 486274427 3710.0
+
+### memory used: (139.8 + 15.0) - (3839.7 + 3710) = 7394.9 Mb
 
 print(object.size(scn), units="Mb")
 ### 6343.3 Mb
