@@ -487,11 +487,6 @@ For variant rs58108140 in sample NA06989, the "A/B" genotype is much
 more likely than the others, so the \Rcode{SnpMatrix} object displays
 the called genotype.
 
-\subsection{Expand a VCF}
-
-Coming soon ...
-CollapsedVCF and ExpandedVCF classes and expand,CollapsedVCF-method.
-
 \subsection{Write out VCF files}
 
 A VCF file can be written out from data stored in a \Rcode{VCF} class. Methods 
@@ -510,6 +505,83 @@ in3 <- readVcf(out2.vcf, "hg19")
 
 identical(in2, in3)
 @
+
+\section{Performance}
+
+Targeted queries can greatly improve the speed of data input.
+When all data from the file are needed define a \Rcode{yieldSize} 
+in the \Rcode{TabixFile} to iterate through the file in chunks.
+
+\begin{verbatim}
+    readVcf(TabixFile(fl, yieldSize=10000))
+\end{verbatim}
+
+\Rfunction{readVcf} can be used with a \Rcode{ScanVcfParam} to
+select any combination of INFO and GENO fields, samples or genomic 
+positions.
+
+\begin{verbatim}
+    readVcf(TabixFile(fl), param=ScanVcfParam(info='DP', geno='GT'))
+\end{verbatim}
+
+While \Rfunction{readvcf} offers the flexibility to define combinations
+of INFO, GENO and samples in the \Rcode{ScanVcfParam}, sometimes
+only a single field is needed. In this case the lightweight \sQuote{read} 
+functions (\Rfunction{readGT}, \Rfunction{readInfo} and 
+\Rfunction{readGeno}) can be used. These functions return the single field 
+as a matrix instead of a \Rcode{VCF} object.
+
+\begin{verbatim}
+    readGT(fl)
+\end{verbatim}
+
+The table below highlights the speed differences of targeted queries
+vs reading in all data. The test file is from 1000 Genomes and has 
+494328 variants, 1092 samples, 22 INFO, and 3 GENO fields and is located at
+\url{ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20101123/}.
+\Rcode{yieldSize} is used to define chunks of 100, 1000, 10000 and 100000
+variants. For each chunk size three function calls are compared:
+\Rfunction{readGT} reading only \Rcode{GT}, \Rfunction{readVcf} reading 
+both \Rcode{GT} and \Rcode{ALT} and finally \Rfunction{readVcf} reading 
+in all the data.
+
+\begin{verbatim}
+library(microbenchmark)
+fl <- "ALL.chr22.phase1_release_v3.20101123.snps_indels_svs.genotypes.vcf.gz"
+ys <- c(100, 1000, 10000, 100000)
+
+## readGT() input only 'GT':
+fun <- function(fl, yieldSize) readGT(TabixFile(fl, yieldSize))
+lapply(ys, function(i) microbenchmark(fun(fl, i), times=5))
+
+## readVcf() input only 'GT' and 'ALT':
+fun <- function(fl, yieldSize, param) 
+           readVcf(TabixFile(fl, yieldSize), "hg19", param=param)
+param <- ScanVcfParam(info=NA, geno="GT", fixed="ALT")
+lapply(ys, function(i) microbenchmark(fun(fl, i, param), times=5))
+
+## readVcf() input all variables:
+fun <- function(fl, yieldSize) readVcf(TabixFile(fl, yieldSize), "hg19")
+lapply(ys, function(i) microbenchmark(fun(fl, i), times=5))
+\end{verbatim}
+
+\begin{table}[h!]
+\begin{center}
+\begin{tabular}{l|l|l|l}
+\hline
+n records & readGT & readVcf (GT and ALT) & readVcf (all) \\
+\hline
+100    &  0.082  &   0.128  &  0.501  \\
+1000   &  0.609  &   0.508  &  5.878  \\
+10000  &  5.972  &   6.164  & 68.378  \\
+100000 & 78.593  &  81.156  & 693.654 \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Targeted queries (time in seconds)}
+\label{table:performance}
+\end{table}
+
 
 \section{References}
 Wang K, Li M, Hakonarson H, (2010), ANNOVAR: functional annotation of genetic 

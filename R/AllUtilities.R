@@ -183,11 +183,9 @@
     paste(unlist(sql), collapse = ",")
 }
 
-.setActiveSubjectSeq <-
-    function(query, subject)
-    ## set active state of circular sequences of subject to FALSE;
-    ## warn if query contains circular sequences
+.setSubjectSeq <- function(query, subject)
 {
+    ## Warn if query contains circular sequences.
     queryseq <- seqlevels(query)
     circular <- isCircular(subject)
     circNames <- intersect(queryseq, names(circular)[circular])
@@ -195,8 +193,14 @@
         warning("circular sequence(s) in query '",
                 paste(circNames, sep="' '"), "' ignored")
 
-    isActiveSeq(subject)[] <- FALSE
-    isActiveSeq(subject)[setdiff(queryseq, circNames)] <- TRUE
+    ## Drop circular sequences from subject.
+    if (circNames %in% seqlevels(subject)) {
+        seqlevels(subject, force=TRUE) <- 
+            seqlevels(subject)[seqlevels(subject) != circNames]
+        return(1)
+    }
+
+    return(0)
 }
 
 .rleRecycleVector <- function(x, len) {

@@ -52,10 +52,9 @@ setMethod("predictCoding", c("GRanges", "TranscriptDb", "ANY", "DNAStringSet"),
     if (!any(seqlevels(query) %in% seqlevels(subject)))
         warning("none of seqlevels(query) match seqlevels(subject)")
 
-    ## mask chromosomes not in query
-    masks <- isActiveSeq(subject)
-    on.exit(isActiveSeq(subject) <- masks)
-    .setActiveSubjectSeq(query, subject)
+    origSeqlevels <- seqlevels(subject)
+    if (.setSubjectSeq(query, subject)) 
+        on.exit(seqlevels(subject) <- origSeqlevels)
 
     if (!exists(".__init__", cache, inherits=FALSE)) {
         cache[["cdsbytx"]] <- cdsBy(subject)
