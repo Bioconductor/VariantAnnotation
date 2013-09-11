@@ -45,7 +45,7 @@ library(VariantAnnotation)
 library(Rplinkseq)
 
 ## 494328 variants, 1092 samples, 22 INFO, 3 GENO
-## ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20101123/
+## ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20110521/ALL.chr22.phase1_release_v3.20101123.snps_indels_svs.genotypes.vcf.gz
 path <- "/loc/no-backup/vobencha/"
 fl <- paste0(path,
 "ALL.chr22.phase1_release_v3.20101123.snps_indels_svs.genotypes.vcf.gz")
