@@ -194,10 +194,12 @@
                 paste(circNames, sep="' '"), "' ignored")
 
     ## Drop circular sequences from subject.
-    if (circNames %in% seqlevels(subject)) {
-        seqlevels(subject, force=TRUE) <- 
-            seqlevels(subject)[seqlevels(subject) != circNames]
-        return(1)
+    if (length(circNames)) {
+        if (circNames %in% seqlevels(subject)) {
+            seqlevels(subject, force=TRUE) <- 
+                seqlevels(subject)[seqlevels(subject) != circNames]
+            return(1)
+        }
     }
 
     return(0)

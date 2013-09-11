@@ -526,7 +526,7 @@ positions.
 
 While \Rfunction{readvcf} offers the flexibility to define combinations
 of INFO, GENO and samples in the \Rcode{ScanVcfParam}, sometimes
-only a single field is needed. In this case the lightweight \sQuote{read} 
+only a single field is needed. In this case the lightweight \Rcode{read} 
 functions (\Rfunction{readGT}, \Rfunction{readInfo} and 
 \Rfunction{readGeno}) can be used. These functions return the single field 
 as a matrix instead of a \Rcode{VCF} object.
