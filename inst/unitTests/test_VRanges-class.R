@@ -23,8 +23,9 @@ make_TARGET_VRanges_simple <- function() {
       refDepth = integerRle(NA_integer_, 2),
       altDepth = integerRle(NA_integer_, 2),
       sampleNames = factorRle(NA_character_, 2),
-      softFilterMatrix = FilterMatrix(nrow = length(.TARGET_gr), ncol = 0L,
-        filterRules = FilterRules()),
+      softFilterMatrix =
+        FilterMatrix(matrix(nrow = length(.TARGET_gr), ncol = 0L),
+                     filterRules = FilterRules()),
       hardFilters = FilterRules())
 }
 
@@ -167,7 +168,6 @@ test_VRanges_combine <- function() {
   vr <- make_TARGET_VRanges()
   vr.rep <- vr[rep(seq_len(length(vr)), 2)]
   hardFilters(vr.rep) <- FilterRules()
-  attr(class(vr.rep@softFilterMatrix), "package") <- NULL #??
   vr.combined <- c(vr, vr)
   checkIdentical(vr.combined, vr.rep)
 }
