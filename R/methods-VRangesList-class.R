@@ -7,14 +7,14 @@ VRangesList <- function(...) {
   new("SimpleVRangesList", GenomicRangesList(...))
 }
 
-setMethod("stackSamples", "SimpleVRangesList", function(x) {
+setMethod("stackSamples", "VRangesList", function(x) {
   stacked <- unlist(x, use.names=FALSE)
   if (!is.null(names(x)))
     sampleNames(stacked) <- Rle(names(x), elementLengths(x))
   stacked
 })
 
-setMethod("merge", c("SimpleVRangesList", "missing"), function(x, y) {
+setMethod("merge", c("VRangesList", "missing"), function(x, y) {
   ans <- unique(unlist(x, use.names=FALSE))
   ad.sum <- 0L
   td.sum <- 0L

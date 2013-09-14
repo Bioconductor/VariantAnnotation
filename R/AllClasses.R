@@ -1,5 +1,5 @@
-### ------------------------------------------------------------------------- 
-### VCF class hierarchy 
+### -------------------------------------------------------------------------
+### VCF class hierarchy
 ###
 
 setClass("VCF",
@@ -11,15 +11,15 @@ setClass("VCF",
 
 setClass("CollapsedVCF", contains="VCF") ## ALT is DNAStrinsSetList
 
-setClass("ExpandedVCF", contains="VCF")  ## ALT is DNAStringSet 
+setClass("ExpandedVCF", contains="VCF")  ## ALT is DNAStringSet
 
-### Coercion: 
+### Coercion:
 ### Recursion problem in an automatically generated coerce method requires
 ### that we handle coercion from subclasses to SummarizedExperiment.
 
-setAs("ExpandedVCF", "SummarizedExperiment", 
+setAs("ExpandedVCF", "SummarizedExperiment",
     def = function(from)
-    { 
+    {
         if (strict) {
             force(from)
             class(from) <- "SummarizedExperiment"
@@ -42,9 +42,9 @@ setAs("ExpandedVCF", "SummarizedExperiment",
     }
 )
 
-setAs("CollapsedVCF", "SummarizedExperiment", 
+setAs("CollapsedVCF", "SummarizedExperiment",
     def = function(from)
-    { 
+    {
         if (strict) {
             force(from)
             class(from) <- "SummarizedExperiment"
@@ -67,7 +67,7 @@ setAs("CollapsedVCF", "SummarizedExperiment",
     }
 )
 
-### Validity 
+### Validity
 
 .valid.VCF.fixed <- function(object)
 {
@@ -82,13 +82,13 @@ setAs("CollapsedVCF", "SummarizedExperiment",
         if (!all(nms %in% c("paramRangeID", "REF", "ALT", "QUAL", "FILTER")))
             return(paste("'fixed(object)' colnames must be ",
                    "'REF', 'ALT', 'QUAL' and 'FILTER'", sep=""))
-        if ("REF" %in% nms) 
+        if ("REF" %in% nms)
             if (!is(ffld$REF, "DNAStringSet"))
                 return("'ref(object)' must be a DNAStringSet")
-        if ("QUAL" %in% nms) 
+        if ("QUAL" %in% nms)
             if (!is(ffld$QUAL, "numeric"))
                 return("'qual(object)' must be numeric")
-        if ("FILTER" %in% nms) 
+        if ("FILTER" %in% nms)
             if (!is(ffld$FILTER, "character"))
                 return("'filt(object)' must be a character")
     }
@@ -110,23 +110,23 @@ setAs("CollapsedVCF", "SummarizedExperiment",
     if (length(ffld) != 0L) {
         alt <- alt(object)
         if (length(alt) != 0L)
-            if (!is(alt, "DNAStringSetList") && !is(alt, "CharacterList")) 
+            if (!is(alt, "DNAStringSetList") && !is(alt, "CharacterList"))
                 return(paste("'alt(object)' must be a DNAStringSetList or a ",
                        "CharacterList", sep=""))
-    } 
+    }
     NULL
 }
- 
+
 .valid.ExpandedVCF.alt <- function(object)
 {
     ffld <- slot(object, "fixed")
     if (length(ffld) != 0L) {
         alt <- alt(object)
         if (length(alt) != 0L)
-            if (!is(alt, "DNAStringSet") && !is.character(alt)) 
+            if (!is(alt, "DNAStringSet") && !is.character(alt))
                 return(paste("'alt(object)' must be a DNAStringSet or a ",
                        "character", sep=""))
-    } 
+    }
     NULL
 }
 
@@ -143,21 +143,21 @@ setAs("CollapsedVCF", "SummarizedExperiment",
       .valid.VCF.info(object),
       .valid.ExpandedVCF.alt(object))
 }
- 
+
 setValidity("CollapsedVCF", .valid.CollapsedVCF, where=asNamespace("VariantAnnotation"))
 setValidity("ExpandedVCF", .valid.ExpandedVCF, where=asNamespace("VariantAnnotation"))
 
-### ------------------------------------------------------------------------- 
-### ScanVcfParam class 
+### -------------------------------------------------------------------------
+### ScanVcfParam class
 ###
 
 setClass("ScanVcfParam", contains="ScanBVcfParam")
 
-### ------------------------------------------------------------------------- 
-### VCFHeader class 
+### -------------------------------------------------------------------------
+### VCFHeader class
 ###
 
-setClass("VCFHeader", 
+setClass("VCFHeader",
     representation(
         reference="character",
         samples="character",
@@ -165,16 +165,16 @@ setClass("VCFHeader",
     )
 )
 
-### ------------------------------------------------------------------------- 
-### SIFT and PolyPhen classes 
+### -------------------------------------------------------------------------
+### SIFT and PolyPhen classes
 ###
 
 .SIFTDb <- setRefClass("SIFTDb", contains = "AnnotationDb")
 
 .PolyPhenDb <- setRefClass("PolyPhenDb", contains = "AnnotationDb")
 
-### ------------------------------------------------------------------------- 
-### VariantType class hierarchy 
+### -------------------------------------------------------------------------
+### VariantType class hierarchy
 ###
 
 setClass("VariantType",
@@ -184,7 +184,7 @@ setClass("VariantType",
 )
 
 setMethod("show", "VariantType",
-    function(object) 
+    function(object)
     {
         cat("class:", class(object), "\n")
     }
@@ -200,27 +200,27 @@ setClass("FiveUTRVariants", contains="VariantType")
 
 setClass("SpliceSiteVariants", contains="VariantType")
 
-setClass("IntergenicVariants", 
+setClass("IntergenicVariants",
     contains="VariantType",
     representation(upstream="integer",
                    downstream="integer")
 )
 
-setClass("PromoterVariants", 
+setClass("PromoterVariants",
     contains="VariantType",
     representation(upstream="integer",
                    downstream="integer")
 )
 
-setClass("AllVariants", 
+setClass("AllVariants",
     contains="VariantType",
     representation(promoter="PromoterVariants",
                    intergenic="IntergenicVariants")
 )
 
 
-### ------------------------------------------------------------------------- 
-### VRanges 
+### -------------------------------------------------------------------------
+### VRanges
 ###
 
 ### This is useful when variants are the unit of analysis, especially
@@ -341,7 +341,7 @@ setClass("VRanges",
          representation(ref = "character", # or XStringSet?
                         alt = .characterOrRle,
                         totalDepth = .integerOrRle,
-                        refDepth = .integerOrRle, 
+                        refDepth = .integerOrRle,
                         altDepth = .integerOrRle,
                         sampleNames = .factorOrRle,
                         softFilterMatrix = "matrix",
@@ -349,9 +349,18 @@ setClass("VRanges",
          contains = "GRanges",
          validity = .valid.VRanges)
 
-### ------------------------------------------------------------------------- 
+### -------------------------------------------------------------------------
 ### VRangesList
 ###
 
-setClass("SimpleVRangesList", prototype = prototype(elementType = "VRanges"),
-         contains = "SimpleGenomicRangesList")
+setClass("VRangesList", representation("VIRTUAL"),
+         prototype = prototype(elementType = "VRanges"),
+         contains = "List")
+
+setClass("SimpleVRangesList",
+         contains = c("VRangesList", "SimpleGenomicRangesList"))
+
+setClass("CompressedVRangesList",
+         representation(elementMetadata = "DataFrame"),
+         prototype = prototype(unlistData = new("VRanges")),
+         contains = c("VRangesList", "GRangesList"))
