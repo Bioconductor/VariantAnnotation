@@ -42,7 +42,6 @@ void _vcftype_free(struct vcftype_t *vcftype)
                     Free(vcftype->u.character[i]);
             Free(vcftype->u.character);
         }
-        Free(vcftype->charDotAs);
         break;
     case VECSXP:
         if (NULL != vcftype->u.list) {
@@ -56,6 +55,8 @@ void _vcftype_free(struct vcftype_t *vcftype)
         Rf_error("(internal) unhandled type '%s'",
                  type2char(vcftype->type));
     }
+    if (NULL != vcftype->charDotAs)
+        Free(vcftype->charDotAs);
     Free(vcftype);
 }
 
