@@ -8,6 +8,7 @@
 #include "IRanges_interface.h"
 #include "XVector_interface.h"
 #include "samtools/khash.h"
+#include "strhash.h"
 
 enum { ROWDATA_IDX = 0, REF_IDX, ALT_IDX, QUAL_IDX, FILTER_IDX,
        INFO_IDX, GENO_IDX };
@@ -61,13 +62,15 @@ struct parse_t {
     struct vcftype_t *vcf;
     struct rle_t *chrom;
     struct dna_hash_t *ref;
+    khash_t(strhash) *str;      /* general purpose hash of strings */
     int vcf_n, imap_n, gmap_n, smap_n, *smapidx;
     const char **inms, **gnms, **snms;
     khash_t(WARNINGS) *warnings;
 };
 
 static struct vcftype_t *_types_alloc(const int x_n, const int y_n,
-                                      Rboolean isInfo, SEXP map)
+                                      Rboolean isInfo, SEXP map,
+                                      khash_t(strhash) *str)
 {
     SEXP elt;
     const char *n;
@@ -75,6 +78,7 @@ static struct vcftype_t *_types_alloc(const int x_n, const int y_n,
 
     struct vcftype_t *types;
     const int map_n = Rf_length(map);
+    const char *dot = _strhash_put(str, ".");
 
     if (map_n == 0)            /* no INFO or GENO in header */
         return _vcftype_new(VECSXP, NILSXP, '\0', NULL, 0, 0, 0, 0);
@@ -91,12 +95,12 @@ static struct vcftype_t *_types_alloc(const int x_n, const int y_n,
                 _vcftype_new(NILSXP, NILSXP, *n, NULL, 0, 0, 0, 0);
         } else if (*n == '.' || *n == 'A' || *n == 'G') { /* ragged array */
             types->u.list[j] =
-                _vcftype_new(VECSXP, type, *n, ".", x_n, y_n, 1, 2);
+                _vcftype_new(VECSXP, type, *n, dot, x_n, y_n, 1, 2);
         } else {                /* array */
             int z_n = atoi(n);
             int dim = (z_n == 1) ? (isInfo ? 1 : 2) : 3;
             types->u.list[j] =
-                _vcftype_new(type, NILSXP, *n, ".", x_n, y_n, z_n, dim);
+                _vcftype_new(type, NILSXP, *n, dot, x_n, y_n, z_n, dim);
         }
     }
 
@@ -129,7 +133,8 @@ static SEXP _trim_null(SEXP data, const char **cnms)
 }
 
 static struct vcftype_t *_vcf_alloc(const int vcf_n, SEXP smap,
-                                    SEXP fmap, SEXP imap, SEXP gmap)
+                                    SEXP fmap, SEXP imap, SEXP gmap,
+                                    khash_t(strhash) *str)
 {
     SEXP elt;
     SEXPTYPE type;
@@ -146,6 +151,7 @@ static struct vcftype_t *_vcf_alloc(const int vcf_n, SEXP smap,
         _vcftype_new(STRSXP, NILSXP, '\0', NULL, vcf_n, 1, 1, 0);
     vcf->u.list[ROWDATA_IDX] = rowData;
 
+    const char *blank = _strhash_put(str, ""), *dot = _strhash_put(str, ".");
     for (int i = 2; i < Rf_length(fmap); ++i) {
         const char *nm = CHAR(STRING_ELT(GET_NAMES(fmap), i));
         elt = VECTOR_ELT(fmap, i);
@@ -153,13 +159,13 @@ static struct vcftype_t *_vcf_alloc(const int vcf_n, SEXP smap,
         type = TYPEOF(VECTOR_ELT(elt, 1));
         if (0 == strcmp(nm, "ALT")) {
             vcf->u.list[ALT_IDX] =
-                _vcftype_new(VECSXP, type, *n, "", vcf_n, 1, 1, 0);
+                _vcftype_new(VECSXP, type, *n, blank, vcf_n, 1, 1, 0);
         } else if (0 == strcmp(nm, "QUAL")) {
             vcf->u.list[QUAL_IDX] =
-                _vcftype_new(type, NILSXP, *n, ".", vcf_n, 1, 1, 0);
+                _vcftype_new(type, NILSXP, *n, dot, vcf_n, 1, 1, 0);
         } else if (0 == strcmp(nm, "FILTER")) {
             vcf->u.list[FILTER_IDX] =
-                _vcftype_new(type, NILSXP, *n, ".", vcf_n, 1, 1, 0);
+                _vcftype_new(type, NILSXP, *n, dot, vcf_n, 1, 1, 0);
         } else
             Rf_error("(internal) unknown 'fixed' field '%s'", nm);
     }
@@ -169,8 +175,8 @@ static struct vcftype_t *_vcf_alloc(const int vcf_n, SEXP smap,
     for (int i = 0; i < Rf_length(smap); ++i)
         if (INTEGER(smap)[i] != 0)
             nonzero += 1;
-    vcf->u.list[INFO_IDX] = _types_alloc(vcf_n, 1, TRUE, imap);
-    vcf->u.list[GENO_IDX] = _types_alloc(vcf_n, nonzero, FALSE, gmap);
+    vcf->u.list[INFO_IDX] = _types_alloc(vcf_n, 1, TRUE, imap, str);
+    vcf->u.list[GENO_IDX] = _types_alloc(vcf_n, nonzero, FALSE, gmap, str);
 
     return vcf;
 }
@@ -193,6 +199,7 @@ static void _vcf_grow(struct vcftype_t * vcf, int vcf_n)
 static void _parse(char *line, const int irec,
                    const struct parse_t *parse)
 {
+    khash_t(strhash) *str = parse->str;
     struct vcftype_t *vcf = parse->vcf, *rowData, *elt, *info;
     const int imap_n = parse->imap_n, gmap_n = parse->gmap_n;
     const int smap_n = parse->smap_n;
@@ -223,9 +230,11 @@ static void _parse(char *line, const int irec,
 
     alt = it_next(&it0);      /* ALT */
     alt_n = _vcftype_ragged_n(alt);
-    _vcftype_setarray(vcf->u.list[ALT_IDX], irec, 0, alt, alt_n);
-    _vcftype_set(vcf->u.list[QUAL_IDX], irec, it_next(&it0)); /* QUAL */
-    _vcftype_set(vcf->u.list[FILTER_IDX], irec, it_next(&it0)); /* FILTER */
+    _vcftype_setarray(vcf->u.list[ALT_IDX], irec, 0, alt, alt_n, str);
+    _vcftype_set(vcf->u.list[QUAL_IDX], irec,
+                 _strhash_put(str, it_next(&it0))); /* QUAL */
+    _vcftype_set(vcf->u.list[FILTER_IDX], irec,
+                 _strhash_put(str, it_next(&it0))); /* FILTER */
 
     if ('.' == *id && '\0' == *(id + 1)) {
         /* construct ID if missing:
@@ -238,14 +247,14 @@ static void _parse(char *line, const int irec,
         *id = '\0';
         id = chrom;
     }
-    rowData->u.list[ID_IDX]->u.character[irec] = Strdup(id);
+    rowData->u.list[ID_IDX]->u.character[irec] = _strhash_put(str, id);
 
     /* INFO */
     field = it_next(&it0);
     info = vcf->u.list[INFO_IDX];
     if (1 == imap_n && NULL == inms) { /* no header; parse as char */
         elt = info->u.list[0];
-        elt->u.character[irec] = Strdup(field);
+        elt->u.character[irec] = _strhash_put(str, field);
     } else if (0 != imap_n) {
         for (ifld = it_init(&it1, field, ';'); '\0' != *ifld;
              ifld = it_next(&it1)) {
@@ -253,7 +262,7 @@ static void _parse(char *line, const int irec,
             for (imapidx = 0; imapidx < imap_n; ++imapidx)
                 if (0L == strcmp(ikey, inms[imapidx])) {
                     elt = info->u.list[imapidx];
-                    _vcftype_setarray(elt, irec, 0, it_next(&it2), alt_n);
+                    _vcftype_setarray(elt, irec, 0, it_next(&it2), alt_n, str);
                     break;
                 }
         }
@@ -261,7 +270,7 @@ static void _parse(char *line, const int irec,
         for (imapidx = 0; imapidx < imap_n; ++imapidx) {
             elt = info->u.list[imapidx];
             if (elt->number == 'A' || elt->number == 'G')
-                _vcftype_padarray(elt, irec, 0, alt_n);
+                _vcftype_padarray(elt, irec, 0, str, alt_n);
         }
     }
 
@@ -296,13 +305,13 @@ static void _parse(char *line, const int irec,
             if (gmap_n == gmapidx[fmtidx])
                 continue;    /* unknown FORMAT */
             elt = geno->u.list[ gmapidx[fmtidx] ];
-            _vcftype_setarray(elt, irec, smapidx[j] - 1, field, alt_n);
+            _vcftype_setarray(elt, irec, smapidx[j] - 1, field, alt_n, str);
         }
         /* type 'G' need to be padded w/ NA's */
         for (fmtidx = 0; fmtidx < gmap_n; ++fmtidx) {
             elt = geno->u.list[fmtidx];
             if (elt->number == 'A' || elt->number == 'G')
-                _vcftype_padarray(elt, irec, smapidx[j] - 1, alt_n);
+                _vcftype_padarray(elt, irec, smapidx[j] - 1, str, alt_n);
         }
     }
 
@@ -408,7 +417,9 @@ static struct parse_t *_parse_new(int vcf_n, SEXP smap, SEXP fmap,
     struct parse_t *parse = Calloc(1, struct parse_t);
 
     parse->vcf_n = vcf_n;
-    parse->vcf = _vcf_alloc(parse->vcf_n, smap, fmap, imap, gmap);
+    parse->str = _strhash_new();
+    parse->vcf =
+        _vcf_alloc(parse->vcf_n, smap, fmap, imap, gmap, parse->str);
 
     /* FIXED */
     parse->chrom = rle_new(parse->vcf_n);
@@ -450,6 +461,7 @@ static void _parse_free(struct parse_t *parse)
     rle_free(parse->chrom);
     dna_hash_free(parse->ref);
     vcfwarn_free(parse->warnings);
+    _strhash_free(parse->str);
     Free(parse);
 }
 

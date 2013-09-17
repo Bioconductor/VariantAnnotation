@@ -1,15 +1,14 @@
 #include "vcftype.h"
 
 struct vcftype_t *_vcftype_new(SEXPTYPE type, SEXPTYPE listtype,
-                               char number, char *charDotAs,
+                               char number, const char *charDotAs,
                                int nrow, int ncol, int ndim, int arrayDim)
 {
     struct vcftype_t *vcftype = Calloc(1, struct vcftype_t);
     vcftype->type = type;
     vcftype->listtype = listtype; /* VECSXP: ragged array */
     vcftype->number = number;     /* 'A' or '.' for ragged array only */
-    if (NULL != charDotAs)
-        vcftype->charDotAs = Strdup(charDotAs);
+    vcftype->charDotAs = charDotAs;
     vcftype->ncol = ncol;
     vcftype->ndim = ndim;
     vcftype->arrayDim = arrayDim;
@@ -35,13 +34,8 @@ void _vcftype_free(struct vcftype_t *vcftype)
         Free(vcftype->u.numeric);
         break;
     case STRSXP:
-        if (NULL != vcftype->u.character) {
-            for (int i = 0; i < sz; ++i)
-                if (NULL != vcftype->u.character[i] &&
-                    vcftype->charDotAs != vcftype->u.character[i])
-                    Free(vcftype->u.character[i]);
+        if (NULL != vcftype->u.character)
             Free(vcftype->u.character);
-        }
         break;
     case VECSXP:
         if (NULL != vcftype->u.list) {
@@ -55,8 +49,6 @@ void _vcftype_free(struct vcftype_t *vcftype)
         Rf_error("(internal) unhandled type '%s'",
                  type2char(vcftype->type));
     }
-    if (NULL != vcftype->charDotAs)
-        Free(vcftype->charDotAs);
     Free(vcftype);
 }
 
@@ -107,8 +99,8 @@ struct vcftype_t *_vcftype_grow(struct vcftype_t * vcftype, int nrow)
             vcftype->u.numeric[i] = R_NaReal;
         break;
     case STRSXP:
-        vcftype->u.character = (char **)
-            vcf_Realloc(vcftype->u.character, sz * sizeof(char *));
+        vcftype->u.character = (const char **)
+            vcf_Realloc(vcftype->u.character, sz * sizeof(const char *));
         for (int i = osz; i < sz; ++i)
             vcftype->u.character[i] = NULL;
         break;
@@ -169,9 +161,6 @@ SEXP _vcftype_as_SEXP(struct vcftype_t *vcftype)
                     const char * const s = vcftype->u.character[idx0];
                     const SEXP elt = (NULL == s) ? R_NaString : mkChar(s);
                     SET_STRING_ELT(ans, idx++, elt);
-                    if (vcftype->charDotAs != vcftype->u.character[idx0])
-                        Free(vcftype->u.character[idx0]);
-                    vcftype->u.character[idx0] = NULL;
                 }
         Free(vcftype->u.character);
         break;
@@ -233,7 +222,7 @@ void _vcftype_set(struct vcftype_t *vcftype,
         break;
     case STRSXP:
         vcftype->u.character[idx] =
-            ('.' == *field) ? vcftype->charDotAs : Strdup(field);
+            ('.' == *field) ? vcftype->charDotAs : field;
         break;
     default:
         Rf_error("(internal) unhandled field type '%s'",
@@ -243,19 +232,19 @@ void _vcftype_set(struct vcftype_t *vcftype,
 
 void _vcftype_padarray(struct vcftype_t *vcftype,
                        const int irow, const int icol,
-                       const int ragged_n)
+                       khash_t(strhash) *str, const int ragged_n)
 {
     if (NULL == vcftype)
         return;
     const int offset = irow * vcftype->ncol + icol;
     if (vcftype->u.list[offset] != NULL)
         return;
-    _vcftype_setarray(vcftype, irow, icol, "", ragged_n);
+    _vcftype_setarray(vcftype, irow, icol, "", ragged_n, str);
 }
 
 void _vcftype_setarray(struct vcftype_t *vcftype,
                        const int irow, const int icol, char *field,
-                       int ragged_n)
+                       int ragged_n, khash_t(strhash) *str)
 {
     struct it_t it;
     char *ifld;
@@ -278,14 +267,14 @@ void _vcftype_setarray(struct vcftype_t *vcftype,
         for (int k = 0; k < ragged_n; ++k) {
             if ('\0' == *ifld)
                 ifld = ".";
-            _vcftype_set(vcftype->u.list[offset], k, ifld);
+            _vcftype_set(vcftype->u.list[offset], k, _strhash_put(str, ifld));
             ifld = it_next(&it);
         }
     } else {                       /* array */
         const int offset = (irow * vcftype->ncol + icol) * vcftype->ndim;
         ifld = it_init(&it, field, ',');
         for (int k = 0; k < vcftype->ndim; ++k) {
-            _vcftype_set(vcftype, offset + k, ifld);
+            _vcftype_set(vcftype, offset + k, _strhash_put(str, ifld));
             ifld = it_next(&it);
         }
     }
