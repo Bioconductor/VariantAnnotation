@@ -1,38 +1,19 @@
 %\VignetteIndexEntry{Introduction to VariantAnnotation}
-%\VignetteKeywords{variants, sequence, sequencing, alignments}
-%\VignettePackage{VariantAnnotation}
-\documentclass[10pt]{article}
 
-\usepackage{times}
-\usepackage{hyperref}
+\documentclass{article}
 
-\textwidth=6.5in
-\textheight=8.5in
-%\parskip=.3cm
-\oddsidemargin=-.1in
-\evensidemargin=-.1in
-\headheight=-.3in
+<<style, eval=TRUE, echo=FALSE, results=tex>>=
+BiocStyle::latex()
+@
 
-\newcommand{\Rfunction}[1]{{\texttt{#1}}}
-\newcommand{\Robject}[1]{{\texttt{#1}}}
-\newcommand{\Rpackage}[1]{{\textit{#1}}}
-\newcommand{\Rmethod}[1]{{\texttt{#1}}}
-\newcommand{\Rfunarg}[1]{{\texttt{#1}}}
-\newcommand{\Rclass}[1]{{\textit{#1}}}
-\newcommand{\Rcode}[1]{{\texttt{#1}}}
-
-\newcommand{\software}[1]{\textsf{#1}}
-\newcommand{\R}{\software{R}}
-\newcommand{\Bioconductor}{\software{Bioconductor}}
-\newcommand{\VariantAnnotation}{\Rpackage{VariantAnnotation}}
-
-\title{Introduction to \VariantAnnotation}
+\title{Introduction to \Biocpkg{VariantAnnotation}}
 \author{Valerie Obenchain}
 \date{\today}
 
 \begin{document} 
 
 \maketitle
+
 \tableofcontents
 
 <<options, echo=FALSE>>=
@@ -41,7 +22,7 @@ options(width=72)
 
 \section{Introduction}
 This vignette outlines a work flow for annotating and filtering 
-genetic variants using the \VariantAnnotation  package. Sample data 
+genetic variants using the \Biocpkg{VariantAnnotation}  package. Sample data 
 are in VariantCall Format (VCF) and are a subset of chromosome 22 
 from 
 \href{ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20110521/}{1000
