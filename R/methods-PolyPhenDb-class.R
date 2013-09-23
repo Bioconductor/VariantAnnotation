@@ -20,31 +20,41 @@ setMethod("columns", "PolyPhenDb",
 setMethod("select", "PolyPhenDb",
     function(x, keys, columns, keytype, ...)
     {
-        sql <- .createPPDbQuery(keys, columns) 
-        raw <- dbGetQuery(x$conn, sql)
-        .formatPPDbSelect(raw, keys) 
+        sql <- .createPPDbQuery(x, keys, columns)
+        if (length(sql)) { 
+            raw <- dbGetQuery(x$conn, sql)
+            .formatPPDbSelect(raw, keys) 
+        } else {
+            data.frame()
+        }
     }
 )
 
-.createPPDbQuery <- function(keys, cols)
+.createPPDbQuery <- function(x, keys, cols)
 {
     if (missing(keys) && missing(cols)) {
         sql <- "SELECT * FROM ppdata"
     }
-    if (!missing(keys) && !missing(cols)) {
-        if (!"RSID" %in% cols)
-            cols <- c("RSID", cols)
-        fmtcols <- paste(cols, collapse=",")
-        fmtkeys <- .sqlIn(keys)
-        sql <- paste("SELECT ", fmtcols, " FROM ppdata WHERE RSID 
-            IN (", fmtkeys, ")", sep="")
-    }
-    if (!missing(keys) && missing(cols)) {
-        fmtkeys <- .sqlIn(keys)
-        sql <- paste("SELECT * FROM ppdata WHERE RSID IN (",
-            fmtkeys, ")", sep="")
-    }
-    if (missing(keys) & !missing(cols)) {
+    if (!missing(keys)) {
+        if(.missingKeys(x, keys, "PolyPhen"))
+            return(character()) 
+        if (!missing(cols)) {
+            if (.missingCols(x, cols, "PolyPhen"))
+                return(character()) 
+            if (!"RSID" %in% cols)
+                cols <- c("RSID", cols)
+            fmtcols <- paste(cols, collapse=",")
+            fmtkeys <- .sqlIn(keys)
+            sql <- paste("SELECT ", fmtcols, " FROM ppdata WHERE RSID 
+                IN (", fmtkeys, ")", sep="")
+        } else {
+            fmtkeys <- .sqlIn(keys)
+            sql <- paste("SELECT * FROM ppdata WHERE RSID IN (",
+                fmtkeys, ")", sep="")
+        }
+    } else {
+        if (.missingCols(x, cols, "PolyPhen"))
+            return(character())
         if (!"RSID" %in% cols)
             cols <- c("RSID", cols)
         fmtcols <- paste(cols, collapse=",")
@@ -55,6 +65,10 @@ setMethod("select", "PolyPhenDb",
 
 .formatPPDbSelect <- function(raw, keys)
 {
+    ## no data
+    if (!nrow(raw))
+        return(data.frame())
+
     if (missing(keys)) {
         df <- data.frame(raw)
         rownames(df) <- NULL
@@ -62,11 +76,6 @@ setMethod("select", "PolyPhenDb",
     } else {
     ## restore key order
         missing <- (!keys %in% as.character(raw$RSID))
-        if (any(missing)) {
-            msg <- paste(IRanges:::selectSome(keys[missing], 5), collapse=" ")
-            warning(sum(missing), " keys not found in PolyPhen database: ", msg,
-                    call.=FALSE)
-        }
         lst <- as.list(rep(NA_character_, length(keys)))
         raw <- raw[!duplicated(raw), ]
         for (i in which(missing == FALSE))

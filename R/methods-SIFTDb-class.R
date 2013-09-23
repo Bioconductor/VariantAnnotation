@@ -22,14 +22,22 @@ setMethod("columns", "SIFTDb",
 setMethod("select", "SIFTDb",
     function(x, keys, columns, ...)
     {
-        sql <- .createSIFTDbQuery(keys)
-        raw <- dbGetQuery(x$conn, sql)
-        .formatSIFTDbSelect(raw, keys, columns)
+        sql <- .createSIFTDbQuery(x, keys, columns)
+        if (length(sql)) {
+            raw <- dbGetQuery(x$conn, sql)
+            .formatSIFTDbSelect(raw, keys, columns)
+        } else {
+            data.frame()
+        }
     }
 )
 
-.createSIFTDbQuery <- function(keys)
+.createSIFTDbQuery <- function(x, keys, cols)
 {
+   if (.missingKeys(x, keys, "SIFT"))
+       return(character())
+   if (.missingCols(x, cols, "SIFT"))
+       return(character())
    if (missing(keys)) {
        sql <- paste("SELECT * FROM siftdata", sep="")
    } else {
@@ -50,12 +58,11 @@ setMethod("select", "SIFTDb",
     if (!missing(keys)) {
         fmtkeys <- .formatRSID(keys) 
         missing <- (!fmtkeys %in% as.character(raw$RSID))
-        if (any(missing)) {
-            msg <- paste(IRanges:::selectSome(keys[missing], 5), collapse=" ")
-            warning(sum(missing), " keys not found in SIFT database: ", msg,
-                    call.=FALSE)
-        }
     }
+
+    ## no data
+    if (!nrow(raw))
+        return(data.frame())
 
     ## create variable columns 
     dat <- raw[,-c(1:3)]

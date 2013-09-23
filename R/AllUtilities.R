@@ -212,3 +212,29 @@
     Rle(x, len)
   else IRanges:::recycleVector(x, len)
 }
+
+## for PolyPhen and SIFT
+.missingKeys <- function(x, keys, db)
+{
+    if (missing(keys))
+        return(0)
+    if (any(mkeys <- !keys %in% keys(x))) {
+        msg <- paste(IRanges:::selectSome(keys[mkeys], 5), collapse=" ")
+        warning(sum(mkeys), " keys not found in ", db, " database: ", msg,
+                call.=FALSE)
+    }
+    all(mkeys)
+}
+
+.missingCols <- function(x, cols, db)
+{
+    if (missing(cols))
+        return(0)
+    if (any(mcols <- !cols %in% columns(x))) {
+        msg <- paste(IRanges:::selectSome(cols[mcols], 5), collapse=" ")
+        warning(sum(mcols), " columns not found in ", db, " database: ", msg,
+                call.=FALSE)
+    }
+    all(mcols)
+}
+

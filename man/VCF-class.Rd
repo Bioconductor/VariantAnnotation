@@ -48,6 +48,7 @@
 \alias{rowData,VCF-method}
 \alias{rowData<-,VCF-method}
 \alias{mcols<-,VCF-method}
+\alias{dimnames<-,VCF-method}
 \alias{geno}
 \alias{geno,VCF-method}
 \alias{geno,VCF,ANY-method}
