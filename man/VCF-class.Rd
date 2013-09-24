@@ -48,7 +48,7 @@
 \alias{rowData,VCF-method}
 \alias{rowData<-,VCF-method}
 \alias{mcols<-,VCF-method}
-\alias{dimnames<-,VCF-method}
+\alias{dimnames<-,VCF,list-method}
 \alias{geno}
 \alias{geno,VCF-method}
 \alias{geno,VCF,ANY-method}
@@ -170,7 +170,9 @@
        Gets a SimpleList of genotype data.
        \code{value} is a SimpleList. To replace a single variable in
        the SimpleList use \code{geno(x)$variable <- value}; in this 
-       case \code{value} must be a matrix or array.
+       case \code{value} must be a matrix or array. By default
+       row names are returned; to override specify
+       \code{geno(vcf, withDimnames=FALSE)}.
     }
     \item{}{
       \code{exptData(x)}:

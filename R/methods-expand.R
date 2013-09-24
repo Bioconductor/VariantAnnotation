@@ -35,9 +35,9 @@ setMethod("expand", "CollapsedVCF",
 .expandGeno <- function(x, hdr, elt, idx)
 {
     gvar <- geno(x)
-    ## no data 
     if (length(gvar) == 0L)
         return(gvar)
+    ## expand length of ALT
     isA <- geno(hdr)$Number == "A"
     if (any(isA)) {
         gnms <- rownames(geno(hdr))[geno(hdr)$Number == "A"]
@@ -59,12 +59,29 @@ setMethod("expand", "CollapsedVCF",
         }
         gvar
     }
-    gvar[!isA] <- endoapply(gvar[!isA], function(i) {
-                      if (is(i, "matrix"))
-                          matrix(i[idx, ], ncol=ncol(x))
-                      else
-                          i[idx, , ]})
+    ## list length of ALT each with one REF,ALT pair
+    if (any(isAD <- rownames(geno(hdr)) == "AD"))
+        gvar[isAD] <- .expandAD(gvar$AD, length(idx), ncol(x)) 
+    gvar[!isA & !isAD] <- endoapply(gvar[!isA & !isAD], function(i) {
+                              if (is(i, "matrix")) {
+                                  matrix(i[idx, ], ncol=ncol(x))
+                              } else {
+                                  idim <- c(length(idx), dim(i)[2], dim(i)[3])
+                                  array(i[idx, , ], dim=idim)
+                              }})
     gvar
+}
+
+.expandAD <- function(AD, idxlen, xcols)
+{
+    elen <- elementLengths(AD)
+    AD <- unlist(AD, use.names=FALSE)
+    ref <- c(TRUE, tail(seq_along(AD), -1L) %in% (cumsum(elen) + 1L))
+    vec <- as.vector(rbind(rep(AD[ref], elen - 1L), AD[!ref]))
+    if (sum(elen-1L) != idxlen)
+        stop("length of AD does not match expanded index")
+    lst <- unname(split(vec, rep(seq_len(sum(elen-1L)), each=2)))
+    list(matrix(lst, ncol=xcols))
 }
 
 .expandInfo <- function(x, hdr, elt, idx)
