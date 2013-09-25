@@ -29,6 +29,12 @@ VCF <-
 ### Getters and Setters
 ###
 
+.checkLength <- function (x, len) 
+{
+    if (len != length(slot(x, "rowData"))) 
+        stop("length(value) must equal length(rowData(x))")
+}
+
 ### ref 
 setMethod("ref", "VCF", 
     function(x) 
@@ -39,6 +45,7 @@ setMethod("ref", "VCF",
 setReplaceMethod("ref", c("VCF", "DNAStringSet"),
     function(x, value)
 {
+    .checkLength(x, length(value))
     slot(x, "fixed")$REF <- value
     x
 })
@@ -53,8 +60,7 @@ setMethod("alt", "VCF",
 setReplaceMethod("alt", c("CollapsedVCF", "CharacterList"),
     function(x, value)
 {
-    if (length(value) != length(rowData(x)))
-        stop("length(value) must equal length(rowData(x))")
+    .checkLength(x, length(value))
     slot(x, "fixed")$ALT <- value
     x
 })
@@ -62,8 +68,7 @@ setReplaceMethod("alt", c("CollapsedVCF", "CharacterList"),
 setReplaceMethod("alt", c("ExpandedVCF", "character"),
     function(x, value)
 {
-    if (length(value) != length(rowData(x)))
-        stop("length(value) must equal length(rowData(x))")
+    .checkLength(x, length(value))
     slot(x, "fixed")$ALT <- value
     x
 })
@@ -78,6 +83,7 @@ setMethod("qual", "VCF",
 setReplaceMethod("qual", c("VCF", "integer"),
     function(x, value)
 {
+    .checkLength(x, length(value))
     slot(x, "fixed")$QUAL <- value
     x
 })
@@ -92,6 +98,7 @@ setMethod("filt", "VCF",
 setReplaceMethod("filt", c("VCF", "character"),
     function(x, value)
 {
+    .checkLength(x, length(value))
     slot(x, "fixed")$FILTER <- value
     x
 })
@@ -124,10 +131,8 @@ setMethod("rowData", "VCF",
 setReplaceMethod("rowData", c("VCF", "GRanges"),
     function(x, value)
 {
-    if (!is(value, "GRanges"))
-        stop("'value' must be a GRanges")
     idx <- names(mcols(value)) %in% "paramRangeID"
-    fixed(x) <- mcols(value)[!idx] 
+    slot(x, "fixed") <- mcols(value)[!idx] 
     slot(x, "rowData") <- value[,idx]
     validObject(x)
     x
@@ -138,11 +143,9 @@ setReplaceMethod("rowData", c("VCF", "GRanges"),
 ### The 'fixed' fields are stored in a separtate slot
 ### and not as metadata columns of 'rowData'.
 
-setReplaceMethod("mcols", "VCF",
+setReplaceMethod("mcols", c("VCF", "DataFrame"),
     function(x, ..., value)
 {
-    if (!is(value, "DataFrame"))
-        stop("'value' must be a DataFrame")
     idx <- names(value) %in% "paramRangeID"
     fixed(x) <- value[!idx] 
     slot(x, "rowData") <- value[,idx]
@@ -164,10 +167,9 @@ setMethod("info", "VCF",
     function(x) 
 {
     info <- slot(x, "info")
-    if (any(duplicated(rownames(x))))
-        return(info)
     if (length(info) != 0L)
-        rownames(info) <- rownames(x)
+        if (!sum(duplicated(rownames(x))))
+            rownames(info) <- rownames(x)
     info
 })
 

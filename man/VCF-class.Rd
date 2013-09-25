@@ -47,7 +47,7 @@
 \alias{info<-,VCF,DataFrame-method}
 \alias{rowData,VCF-method}
 \alias{rowData<-,VCF-method}
-\alias{mcols<-,VCF-method}
+\alias{mcols<-,VCF,DataFrame-method}
 \alias{dimnames<-,VCF,list-method}
 \alias{geno}
 \alias{geno,VCF-method}
