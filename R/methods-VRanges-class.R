@@ -412,7 +412,7 @@ resetFilter <- function(x) {
 }
 
 setMethod("subsetByFilter", c("VRanges", "FilterRules"), function(x, filter) {
-  ans <- callNextMethod()
+  ans <- callNextMethod(x, filter)
   hardFilters(ans) <- c(hardFilters(ans), filter)
   ans
 })
