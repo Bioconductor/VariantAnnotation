@@ -142,6 +142,14 @@
 
 \author{Valerie Obenchain <vobencha@fhcrc.org>}
 
+\seealso{
+  \itemize{
+    \item The promoters function on the 
+          \link[GenomicRanges]{intra-range-methods} man page in the 
+          GenomicRanges package.
+  }
+}
+
 \examples{
   CodingVariants()
   SpliceSiteVariants()

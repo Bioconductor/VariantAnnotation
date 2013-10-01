@@ -203,10 +203,13 @@ locateVariants(query, subject, region, ...)
 \author{Valerie Obenchain <vobencha@fhcrc.org>}
 
 \seealso{
-  \code{\link{readVcf}},
-  \code{\link{summarizeVariants}},
-  \code{\link{predictCoding}},
-  \code{\link{upstream}},
+  \itemize{
+    \item The \link{readVcf} function. 
+    \item The \link{predictCoding} function. 
+    \item The promoters function on the 
+          \link[GenomicRanges]{intra-range-methods} man page in the 
+          GenomicRanges package.
+  }
 }
 
 \examples{
