@@ -33,17 +33,17 @@ test_locateVariants_subject <- function()
 test_locateVariants_upstream_downstream <- function()
 {
     loc <- locateVariants(gr, txdb, IntergenicVariants(1, 1))
-    target <- CharacterList(character(), character(), character())
+    target <- CharacterList(character(), character())
     checkIdentical(loc$FOLLOWID, target)
 
     loc <- locateVariants(gr, txbygene, IntergenicVariants(2, 2))
-    target <- CharacterList(character(), character(), "100037417")
+    target <- CharacterList(character(), "100037417")
     checkIdentical(loc$FOLLOWID, target) 
 
     loc <- locateVariants(gr, txbygene, IntergenicVariants(100000, 100000))
-    target <- CharacterList("23784", character(), c("100037417","4282", "66035"))
+    target <- CharacterList("23784", c("100037417","4282", "66035"))
     checkIdentical(loc$FOLLOWID, target)
-    target <- CharacterList(character(), character(), c("23523", "2953", "391322"))
+    target <- CharacterList(character(), c("23523", "2953", "391322"))
     checkIdentical(loc$PRECEDEID, target)
 }
 
