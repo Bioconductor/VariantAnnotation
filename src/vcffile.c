@@ -603,6 +603,13 @@ SEXP tabix_as_vcf(tabix_t *tabix, ti_iter_t iter, const int yield,
         if (NA_INTEGER != yield && irec == parse->vcf_n)
             break;
     }
+
+    if (tabix->fp->errcode) {
+        Free(buf);
+        _parse_free(parse);
+        Rf_error("read line failed, corrupt or invalid file?");
+    }
+        
     Free(buf);
 
     _vcf_grow(parse->vcf, irec);
