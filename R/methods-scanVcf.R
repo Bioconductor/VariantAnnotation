@@ -98,8 +98,11 @@
                                       "VariantAnnotation")
         scanTabix(file, ..., param=param, tbxsym=tbxsym, tbxstate=tbxstate)
     }, error = function(err) {
-        stop("scanVcf: ", conditionMessage(err), "\n  path: ", 
-             path(file), call. = FALSE)
+        if (grepl("path:", err, fixed=TRUE))
+            stop("scanVcf: ", conditionMessage(err), call. = FALSE)
+        else
+            stop("scanVcf: ", conditionMessage(err), "\n  path: ", 
+                 path(file), call. = FALSE)
     })
 }
 
@@ -118,8 +121,11 @@
                         maps$fmap, maps$imap, maps$gmap)
         setNames(result, "*:*-*")
     }, error = function(err) {
-        stop("scanVcf: ", conditionMessage(err), "\n  path: ", 
-             file, call. = FALSE)
+        if (grepl("path:", err, fixed=TRUE))
+            stop("scanVcf: ", conditionMessage(err), call. = FALSE)
+        else
+            stop("scanVcf: ", conditionMessage(err), "\n  path: ", 
+                 path(file), call. = FALSE)
     })
 }
 
@@ -137,8 +143,11 @@
                         maps$fmap, maps$imap, maps$gmap)
         setNames(result, "*:*-*")
     }, error = function(err) {
-        stop("scanVcf: ", conditionMessage(err), "\n  path: ", 
-             summary(file)$description, call. = FALSE)
+        if (grepl("path:", err, fixed=TRUE))
+            stop("scanVcf: ", conditionMessage(err), call. = FALSE)
+        else
+            stop("scanVcf: ", conditionMessage(err), "\n  path: ", 
+                 path(file), call. = FALSE)
     })
 }
 
