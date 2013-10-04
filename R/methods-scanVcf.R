@@ -97,10 +97,9 @@
         tbxsym <- getNativeSymbolInfo(".tabix_as_vcf",
                                       "VariantAnnotation")
         scanTabix(file, ..., param=param, tbxsym=tbxsym, tbxstate=tbxstate)
-    }, error = function(err) {
-        if (grepl("path:", err, fixed=TRUE))
+    }, scanTabix_io = function(err) {
             stop("scanVcf: ", conditionMessage(err), call. = FALSE)
-        else
+    }, error = function(err) {
             stop("scanVcf: ", conditionMessage(err), "\n  path: ", 
                  path(file), call. = FALSE)
     })
@@ -120,10 +119,9 @@
                         as.integer(yieldSize), maps$samples,
                         maps$fmap, maps$imap, maps$gmap)
         setNames(result, "*:*-*")
-    }, error = function(err) {
-        if (grepl("path:", err, fixed=TRUE))
+    }, scanTabix_io = function(err) {
             stop("scanVcf: ", conditionMessage(err), call. = FALSE)
-        else
+    }, error = function(err) {
             stop("scanVcf: ", conditionMessage(err), "\n  path: ", 
                  path(file), call. = FALSE)
     })
@@ -142,10 +140,9 @@
         result <- .Call(.scan_vcf_connection, txt, maps$samples,
                         maps$fmap, maps$imap, maps$gmap)
         setNames(result, "*:*-*")
-    }, error = function(err) {
-        if (grepl("path:", err, fixed=TRUE))
+    }, scanTabix_io = function(err) {
             stop("scanVcf: ", conditionMessage(err), call. = FALSE)
-        else
+    }, error = function(err) {
             stop("scanVcf: ", conditionMessage(err), "\n  path: ", 
                  path(file), call. = FALSE)
     })
