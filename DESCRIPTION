@@ -10,7 +10,7 @@ Maintainer: Valerie Obenchain <vobencha@fhcrc.org>
 License: Artistic-2.0 
 biocViews: DataImport, Sequencing, HighThroughputSequencing, SNP, Annotation, 
 	Genetics, Homo_sapiens
-Depends: R (>= 2.8.0), methods, BiocGenerics, GenomicRanges (>= 1.13.50), 
+Depends: R (>= 2.8.0), methods, BiocGenerics, GenomicRanges (>= 1.13.51), 
 	Rsamtools (>= 1.13.47), IRanges (>= 1.19.36), XVector
 Imports: methods, BiocGenerics, IRanges, XVector, Biostrings (>= 2.29.2),
 	Biobase, Rsamtools, AnnotationDbi (>= 1.17.11),
