@@ -127,7 +127,12 @@ parseFilterStrings <- function(x) {
 genoToMCol <- function(x) {
   if (length(dim(x)) == 3)
     matrix(x, nrow(x) * ncol(x), dim(x)[3])
-  else as.vector(x)
+  else {
+    dim(x) <- NULL
+    if (is.list(x))
+      x <- as(x, "List")
+    x
+  }
 }
 
 setAs("VCF", "VRanges", function(from) {
