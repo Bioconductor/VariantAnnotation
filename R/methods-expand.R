@@ -75,13 +75,12 @@ setMethod("expand", "CollapsedVCF",
 .expandAD <- function(AD, idxlen, xcols)
 {
     elen <- elementLengths(AD)
+    if (sum(elen-1L) != idxlen)
+      stop("length of AD does not match expanded index")
     AD <- unlist(AD, use.names=FALSE)
     ref <- c(TRUE, tail(seq_along(AD), -1L) %in% (cumsum(elen) + 1L))
-    vec <- as.vector(rbind(rep(AD[ref], elen - 1L), AD[!ref]))
-    if (sum(elen-1L) != idxlen)
-        stop("length of AD does not match expanded index")
-    lst <- unname(split(vec, rep(seq_len(sum(elen-1L)), each=2)))
-    list(matrix(lst, ncol=xcols))
+    vec <- c(rep(AD[ref], elen - 1L), AD[!ref])
+    list(array(vec, c(sum(!ref), xcols, 2L)))
 }
 
 .expandInfo <- function(x, hdr, elt, idx)
