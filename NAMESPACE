@@ -46,7 +46,8 @@ importFrom(IRanges,
     CharacterList, DataFrame, DataFrameList, FilterRules, IntegerList, 
     IRanges, isSingleNumber, isSingleString, isTRUEorFALSE, LogicalList, 
     NumericList, PartitioningByEnd, PartitioningByWidth, seqsplit,
-    SimpleList, splitAsList, successiveViews, FilterMatrix
+    SimpleList, splitAsList, successiveViews, FilterMatrix,
+    isSingleNumberOrNA, endoapply
 )
 
 importClassesFrom(IRanges, 
