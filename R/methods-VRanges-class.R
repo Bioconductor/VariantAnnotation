@@ -411,7 +411,7 @@ softFilter <- function(x, filters, ...) {
 }
 
 resetFilter <- function(x) {
-  softFilterMatrix(x) <- FilterMatrix(nrow = length(x), ncol = 0L,
+  softFilterMatrix(x) <- FilterMatrix(matrix(nrow = length(x), ncol = 0L),
                                       filterRules = FilterRules())
   x
 }
