@@ -79,7 +79,7 @@ setMethod("geno", "VCFHeader",
 setMethod(show, "VCFHeader",
     function(object)
 {
-    selectSome <- IRanges:::selectSome
+    selectSome <- BiocGenerics:::selectSome
     scat <- function(fmt, vals=character(), exdent=2, ...)
     {
         vals <- ifelse(nzchar(vals), vals, "''")
