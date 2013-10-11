@@ -1,14 +1,14 @@
 \name{readVcf}
 \alias{readVcf}
-\alias{readVcf,character,character,ScanVcfParam-method}
-\alias{readVcf,character,character,missing-method}
+\alias{readVcf,character,ANY,ScanVcfParam-method}
+\alias{readVcf,character,ANY,missing-method}
 \alias{readVcf,character,missing,missing-method}
-\alias{readVcf,TabixFile,character,ScanVcfParam-method}
-\alias{readVcf,TabixFile,character,RangedData-method}
-\alias{readVcf,TabixFile,character,RangesList-method}
-\alias{readVcf,TabixFile,character,GRanges-method}
-\alias{readVcf,TabixFile,character,GRangesList-method}
-\alias{readVcf,TabixFile,character,missing-method}
+\alias{readVcf,TabixFile,ANY,ScanVcfParam-method}
+\alias{readVcf,TabixFile,ANY,RangedData-method}
+\alias{readVcf,TabixFile,ANY,RangesList-method}
+\alias{readVcf,TabixFile,ANY,GRanges-method}
+\alias{readVcf,TabixFile,ANY,GRangesList-method}
+\alias{readVcf,TabixFile,ANY,missing-method}
 
 %% lightweight read* functions
 \alias{readInfo}
@@ -22,14 +22,14 @@
 
 \usage{
 
-  \S4method{readVcf}{TabixFile,character,ScanVcfParam}(file, genome, param, ...)
-  \S4method{readVcf}{TabixFile,character,RangedData}(file, genome, param, ...)
-  \S4method{readVcf}{TabixFile,character,RangesList}(file, genome, param, ...)
-  \S4method{readVcf}{TabixFile,character,GRanges}(file, genome, param, ...)
-  \S4method{readVcf}{TabixFile,character,GRangesList}(file, genome, param, ...)
-  \S4method{readVcf}{TabixFile,character,missing}(file, genome, param, ...)
-  \S4method{readVcf}{character,character,ScanVcfParam}(file, genome, param, ...)
-  \S4method{readVcf}{character,character,missing}(file, genome, param, ...)
+  \S4method{readVcf}{TabixFile,ANY,ScanVcfParam}(file, genome, param, ...)
+  \S4method{readVcf}{TabixFile,ANY,RangedData}(file, genome, param, ...)
+  \S4method{readVcf}{TabixFile,ANY,RangesList}(file, genome, param, ...)
+  \S4method{readVcf}{TabixFile,ANY,GRanges}(file, genome, param, ...)
+  \S4method{readVcf}{TabixFile,ANY,GRangesList}(file, genome, param, ...)
+  \S4method{readVcf}{TabixFile,ANY,missing}(file, genome, param, ...)
+  \S4method{readVcf}{character,ANY,ScanVcfParam}(file, genome, param, ...)
+  \S4method{readVcf}{character,ANY,missing}(file, genome, param, ...)
   \S4method{readVcf}{character,missing,missing}(file, genome, param, ...)
 
 ## Lightweight functions to read a single variable
@@ -47,11 +47,17 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=FALSE)
     more efficient than the character() methods. See ?\code{TabixFile} and
     ?\code{indexTabix} for help creating a \code{\link{TabixFile}}.
   }
-  \item{genome}{A character string of the genome identifier or assembly
-    name the variants are mapped to. May also be a named character vector 
-    where the names correspond to seqnames (chromosome names) in the VCF 
-    file. \code{genome} is stored in the \code{seqinfo} of the
-    \code{GRanges} in rowData.
+  \item{genome}{A \code{character} or \code{Seqinfo} object.
+
+    \code{character}: Genome identifier supplied as single string or named 
+    character vector (names correspond to seqnames in the VCF file). This
+    identifier will relpace the genome information in the VCF \code{Seqinfo} 
+    (i.e., \code{seqinfo(vcf)}).
+
+    \code{Seqinfo}: When a \code{Seqinfo} is provided it is merged with
+    the existing \code{Seqinfo}. It can have greater than or equal to the
+    number of \code{seqlevels} in the current \code{Seqinfo} and the
+    \code{seqlevels} must match.
   }
   \item{param}{A instance of \code{\linkS4class{ScanVcfParam}}, \code{GRanges},
     \code{GRangesList}, \code{RangedData} or \code{RangesList}. VCF files can be 

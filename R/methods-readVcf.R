@@ -4,42 +4,42 @@
 
 ## TabixFile
 
-setMethod(readVcf, c(file="TabixFile", genome="character", 
+setMethod(readVcf, c(file="TabixFile", genome="ANY", 
           param="ScanVcfParam"), 
     function(file, genome, param, ...)
 {
     .readVcf(file, genome, param)
 })
 
-setMethod(readVcf, c(file="TabixFile", genome="character",
+setMethod(readVcf, c(file="TabixFile", genome="ANY",
           param="GRanges"),
     function(file, genome, param, ...)
 {
     .readVcf(file, genome, param=ScanVcfParam(which=param))
 })
 
-setMethod(readVcf, c(file="TabixFile", genome="character",
+setMethod(readVcf, c(file="TabixFile", genome="ANY",
           param="RangedData"),
     function(file, genome, param, ...)
 {
     .readVcf(file, genome, param=ScanVcfParam(which=param))
 })
 
-setMethod(readVcf, c(file="TabixFile", genome="character",
+setMethod(readVcf, c(file="TabixFile", genome="ANY",
           param="GRangesList"),
     function(file, genome, param, ...)
 {
     .readVcf(file, genome, param=ScanVcfParam(which=param))
 })
 
-setMethod(readVcf, c(file="TabixFile", genome="character",
+setMethod(readVcf, c(file="TabixFile", genome="ANY",
           param="RangesList"),
     function(file, genome, param, ...)
 {
     .readVcf(file, genome, param=ScanVcfParam(which=param))
 })
 
-setMethod(readVcf, c(file="TabixFile", genome="character",
+setMethod(readVcf, c(file="TabixFile", genome="ANY",
           param="missing"), 
     function(file, genome, param, ...)
 {
@@ -48,7 +48,7 @@ setMethod(readVcf, c(file="TabixFile", genome="character",
 
 ## character
 
-setMethod(readVcf, c(file="character", genome="character",
+setMethod(readVcf, c(file="character", genome="ANY",
           param="ScanVcfParam"),
     function(file, genome, param, ...)
 {
@@ -56,7 +56,7 @@ setMethod(readVcf, c(file="character", genome="character",
     .readVcf(file, genome, param)
 })
 
-setMethod(readVcf, c(file="character", genome="character",
+setMethod(readVcf, c(file="character", genome="ANY",
           param="missing"),
     function(file, genome, param, ...)
 {
@@ -87,6 +87,16 @@ setMethod(readVcf, c(file="character", genome="missing",
 
 .readVcf <- function(file, genome, param, ...)
 {
+    if (!is(genome, "character") & !is(genome, "Seqinfo"))
+        stop("'genome' must be a 'character(1)' or 'Seqinfo' object")
+    if (is(genome, "Seqinfo")) {
+        if (is(param, "ScanVcfParam"))
+            chr <- names(vcfWhich(param))
+        else
+            chr <- seqlevels(param)
+        if (any(!chr %in% seqnames(genome)))
+            stop("'seqnames' in 'vcfWhich(param)' must be present in 'genome'")
+    }
     .scanVcfToVCF(scanVcf(file, param=param), file, genome, param)
 }
 
@@ -101,8 +111,20 @@ setMethod(readVcf, c(file="character", genome="missing",
 
     ## rowData
     rowData <- vcf$rowData
-    if (length(rowData))
-        genome(seqinfo(rowData)) <- genome 
+    if (length(rowData)) {
+        if (is(genome, "character")) {
+           genome(rowData) <- genome
+        } else {
+            oldsi <- seqinfo(rowData)
+            newsi <- genome
+                if (length(newsi) > length(oldsi)) {
+                    new2old <- match(seqlevels(newsi), seqlevels(oldsi))
+                    seqinfo(rowData, new2old=new2old) <- merge(newsi, oldsi) 
+                } else {
+                    seqinfo(rowData) <- genome
+                }
+       } 
+    }
     values(rowData) <- DataFrame(vcf["paramRangeID"])
 
     ## fixed fields
@@ -119,12 +141,12 @@ setMethod(readVcf, c(file="character", genome="missing",
     ## geno
     geno <- SimpleList(lapply(vcf$GENO, `dimnames<-`, NULL))
 
-    vcf <- NULL                         # free
+    vcf <- NULL
     VCF(rowData=rowData, colData=colData, exptData=SimpleList(header=hdr),
         fixed=fixed, info=info, geno=geno)
 }
 
-## lightweight read functions that retrieve a single variable
+## lightweight read functions retrieve a single variable
 
 readInfo <- function(file, x, param=ScanVcfParam(), ..., row.names=FALSE)
 {

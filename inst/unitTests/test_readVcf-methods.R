@@ -168,6 +168,41 @@ test_readVcf_param <- function()
     checkTrue(is(obs, "VCF") && validObject(obs))
 }
 
+test_readVcf_genome <- function()
+{
+    fl <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
+    checkException(readVcf(fl, genome=2), silent=TRUE)
+
+    vcf0 <- readVcf(fl, "test")
+    si0 <- seqinfo(vcf0)
+
+    ## no param 
+    si1 <- si0 
+    isCircular(si1) <- rep(TRUE, 4)
+    vcf1 <- readVcf(fl, si1)
+    checkIdentical(si1, seqinfo(vcf1))
+    si2 <- si0[c("1", "2")]
+    checkException(readVcf(fl, si2), silent=TRUE) 
+    si3 <- Seqinfo(as.character(1:5), NA, NA, "test")
+    vcf3 <- readVcf(fl, si3)
+    checkIdentical(merge(si3, si0), seqinfo(vcf3))
+
+    ## param
+    bgz <- bgzip(fl, tempfile())
+    idx <- indexTabix(bgz, "vcf")
+    tab <- TabixFile(bgz, idx)
+
+    param <- GRanges(c("2", "3"), IRanges(c(321682, 12665100), width=1))
+    si4 <- Seqinfo(c("2", "3"), NA, NA) 
+    vcf4 <- readVcf(tab, si4, param=param) 
+    checkIdentical(si4, seqinfo(rowData(vcf4)))
+    si5 <- Seqinfo("2", NA, NA) 
+    checkException(readVcf(tab, si5, param=param), silent=TRUE) 
+    si6 <- Seqinfo(c("1", "2", "3"), NA, NA) 
+    vcf6 <- readVcf(tab, si6, param=param)
+    checkIdentical(merge(si6, si4), seqinfo(vcf6))
+}
+
 test_readVcf_tabix <- function()
 {
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
