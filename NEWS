@@ -1,3 +1,85 @@
+CHANGES IN VERSION 1.8.0
+------------------------
+
+NEW FEATURES
+
+    o Add 'upstream' and 'downstream' arguments to IntergenicVariants()
+      constructor. 
+
+    o Add 'samples' argument to ScanVcfParam(). 
+
+    o Add readGT(), readGeno() and readInfo().
+
+    o Add VRanges, VRangesList, SimpleVRangesList, and CompressedVRangesList 
+      classes.
+
+    o Add coercion VRanges -> VCF and VCF -> VRanges.
+
+    o Add methods for VRanges family:
+      altDepth(), refDepth(), totalDepth(), altFraction()
+      called(), hardFilters(), sampleNames(), softFilterMatrix()
+      isIndel(), resetFilter().
+
+    o Add stackedSamples,VRangesList method.
+
+MODIFICATIONS
+
+    o VCF validity method now requires the number of rows in info()
+      to match the length of rowData(). 
+
+    o PRECEDEID and FOLLOWID from locateVariants() are now CharacterLists
+      with all genes in 'upstream' and 'downstream' range. 
+
+    o Modify rownames on rowData() GRanges to CHRAM:POS_REF/ALT for
+      variants with no ID. 
+
+    o readVcf() returns info() and geno() in the order specified in
+      the ScanVcfParam. 
+
+    o Work on scanVcf():
+      - free parse memory at first opportunity
+      - define it_next in .c rather than .h
+      - parse ALT "." in C
+      - hash incoming strings
+      - parse only param-requested 'fixed', 'info', 'geno' fields
+
+    o Add dimnames<-,VCF method to prevent 'fixed' fields from being
+      copied into 'rowData' when new rownames or colnames were assigned. 
+
+    o Support read/write for an emtpy VCF. 
+
+    o readVcf(file=character, ...) method attempts coercion to
+      TabixFile.
+
+    o Support for read/write an emtpy VCF. 
+
+    o Add performance section to vignette; convert to BiocStyle.
+
+    o expand,CompressedVcf method expands geno() field 'AD' to
+      length ALT + 1. The expanded field is a (n x y x 2) array. 
+ 
+    o 'genome' argument to readVcf() can be a character(1) or
+      Seqinfo object.
+
+DEPRECATED and DEFUNCT
+
+    o Defunct dbSNPFilter(), regionFilter() and MatrixToSnpMatrix().
+
+    o Deprecate readVcfLongForm(). 
+
+BUG FIXES
+
+    o Fix bug in compatibility of read/writeVcf() when no INFO are columns
+      present. 
+
+    o Fix bug in locateVariants() when 'features' has no txid and cdsid. 
+
+    o Fix bug in asVCF() when writing header lines.
+
+    o Fix bug in "expand" methods for VCF to handle multiple 'A'
+      columns in info().
+
+
 CHANGES IN VERSION 1.6.0
 ------------------------
 
