@@ -37,10 +37,11 @@ setMethod("expand", "CollapsedVCF",
     gvar <- geno(x)
     if (length(gvar) == 0L)
         return(gvar)
+    ghdr <- geno(hdr)[rownames(geno(hdr)) %in% names(gvar),]
     ## expand length of ALT
-    isA <- geno(hdr)$Number == "A"
+    isA <- ghdr$Number == "A"
     if (any(isA)) {
-        gnms <- rownames(geno(hdr))[geno(hdr)$Number == "A"]
+        gnms <- rownames(ghdr)[ghdr$Number == "A"]
         gelt <- sapply(gnms, function(i) 
                     elt - elementLengths(gvar[[i]]))
         ## elementLengths same as ALT
@@ -60,7 +61,7 @@ setMethod("expand", "CollapsedVCF",
         gvar
     }
     ## list length of ALT each with one REF,ALT pair
-    if (any(isAD <- rownames(geno(hdr)) == "AD"))
+    if (any(isAD <- (rownames(ghdr) == "AD") & !is.null(gvar$AD)))
         gvar[isAD] <- .expandAD(gvar$AD, length(idx), ncol(x)) 
     gvar[!isA & !isAD] <- endoapply(gvar[!isA & !isAD], function(i) {
                               if (is(i, "matrix")) {
