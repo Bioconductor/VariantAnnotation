@@ -78,6 +78,8 @@ setMethod("expand", "CollapsedVCF",
 
 .expandAD <- function(AD, idxlen, xcols)
 {
+    if (!is.list(AD)) # something else, maybe known length, so OK
+      return(AD)
     adpart <- PartitioningByWidth(AD)
     nalt <- width(adpart) - 1L
     if (sum(nalt) != idxlen*xcols)
@@ -85,7 +87,6 @@ setMethod("expand", "CollapsedVCF",
     AD <- unlist(AD, use.names=FALSE)
     ref <- logical(length(AD))
     ref[start(adpart)] <- TRUE
-    ##ref <- c(TRUE, tail(seq_along(AD), -1L) %in% (cumsum(elen) + 1L))
     vec <- c(rep(AD[ref], nalt), AD[!ref])
     array(vec, c(idxlen, xcols, 2L))
 }
