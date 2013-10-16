@@ -97,10 +97,15 @@ VRanges <-
     IRanges:::recycleVector(seq_len(nrow(softFilterMatrix)), maxLen)
   softFilterMatrix <- softFilterMatrix[softFilterMatrix.ind,,drop=FALSE]
   sampleNames <- .rleRecycleVector(sampleNames, maxLen)
+  totalDepth <- as(totalDepth, "integerOrRle")
+  refDepth <- as(refDepth, "integerOrRle")
+  altDepth <- as(altDepth, "integerOrRle")
+  if (any(naToZero(refDepth) + naToZero(altDepth) > totalDepth, na.rm = TRUE))
+    warning("'refDepth' + 'altDepth' exceeds 'totalDepth'; using GATK?")
   new("VRanges", gr, ref = ref, alt = alt,
-      totalDepth = as(totalDepth, "integerOrRle"),
-      refDepth = as(refDepth, "integerOrRle"),
-      altDepth = as(altDepth, "integerOrRle"),
+      totalDepth = totalDepth,
+      refDepth = refDepth,
+      altDepth = altDepth,
       softFilterMatrix = softFilterMatrix,
       sampleNames = as(sampleNames, "factorOrRle"),
       hardFilters = hardFilters)

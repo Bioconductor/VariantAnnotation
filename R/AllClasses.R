@@ -246,17 +246,15 @@ setClass("AllVariants",
     paste("'strand' must always be '+'")
 }
 
+naToZero <- function(x) ifelse(is.na(x), 0L, x)
+
 .valid.VRanges.depth <- function(object) {
   checkDepth <- function(name) {
     if (any(slot(object, name) < 0, na.rm = TRUE))
       paste0("'", name, "' must be non-negative")
   }
-  naToZero <- function(x) ifelse(is.na(x), 0L, x)
   depth.slots <- c("refDepth", "altDepth", "totalDepth")
-  c(do.call(c, lapply(depth.slots, checkDepth)),
-    if (any(naToZero(object@refDepth) + naToZero(object@altDepth) >
-            object@totalDepth, na.rm = TRUE))
-      "'refDepth' + 'altDepth' exceeds 'totalDepth'")
+  do.call(c, lapply(depth.slots, checkDepth))
 }
 
 ### FIXME: we are not yet checking for redundant observations, i.e.,

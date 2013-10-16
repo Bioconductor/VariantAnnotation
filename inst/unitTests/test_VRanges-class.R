@@ -67,8 +67,10 @@ test_VRanges_constructor <- function() {
                          altDepth = -1))
   
   ## CHECK: invalid totalDepth sum
+  options(warn=2)
   checkException(VRanges(.TARGET_seqnames, .TARGET_ranges,
                          .TARGET_ref, .TARGET_alt, 0, 1))
+  options(warn=0)
   
   ## CHECK: DNAStringSet handling (ref and alt); also, coercion depth=>integer
   test.vr <- VRanges(.TARGET_seqnames, .TARGET_ranges,
