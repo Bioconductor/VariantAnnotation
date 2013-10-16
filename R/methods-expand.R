@@ -63,7 +63,8 @@ setMethod("expand", "CollapsedVCF",
         gvar
     }
     ## list length of ALT each with one REF,ALT pair
-    if (!is.null(gvar$AD))
+    isAD <- names(gvar) == "AD"
+    if (any(isAD))
         gvar$AD <- .expandAD(gvar$AD, length(idx), ncol(x)) 
     gvar[!isA & !isAD] <- endoapply(gvar[!isA & !isAD], function(i) {
                               if (is(i, "matrix")) {
