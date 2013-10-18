@@ -43,7 +43,7 @@ setMethod("expand", "CollapsedVCF",
     ## expand length of ALT
     isA <- ghdr$Number == "A"
     if (any(isA)) {
-        gnms <- rownames(ghdr)[ghdr$Number == "A"]
+        gnms <- rownames(ghdr)[isA]
         gelt <- sapply(gnms, function(i) 
                     elt - elementLengths(gvar[[i]]))
         ## elementLengths same as ALT
@@ -65,7 +65,8 @@ setMethod("expand", "CollapsedVCF",
     ## list length of ALT each with one REF,ALT pair
     isAD <- names(gvar) == "AD"
     if (any(isAD))
-        gvar$AD <- .expandAD(gvar$AD, length(idx), ncol(x)) 
+        gvar$AD <- .expandAD(gvar$AD, length(idx), ncol(x))
+    isA <- names(gvar) %in% rownames(ghdr)[isA]
     gvar[!isA & !isAD] <- endoapply(gvar[!isA & !isAD], function(i) {
                               if (is(i, "matrix")) {
                                   matrix(i[idx, ], ncol=ncol(x))
