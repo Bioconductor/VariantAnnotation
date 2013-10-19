@@ -314,9 +314,10 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
   colData <- DataFrame(Samples = seq_along(sampleLevels),
                        row.names = sampleLevels)
 
-  meta_vector <- c(source = paste("VariantAnnotation",
+  meta_vector <- c(fileformat = "VCFv4.1",
+                   source = paste("VariantAnnotation",
                      packageVersion("VariantAnnotation")),
-                   phasing = "unphased", fileformat = "VCFv4.1",
+                   phasing = "unphased", 
                    metaStrings)
   meta_header <- DataFrame(Value = meta_vector, row.names = names(meta_vector))
   genoMCols <- setdiff(names(mcols(x)), info)
