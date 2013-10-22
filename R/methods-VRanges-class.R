@@ -240,7 +240,7 @@ makeINFOheader <- function(x) {
   df$Type <- as.character(lapply(x, typeForColumn))
   if (is.null(df$Description) && nrow(df) > 0L)
     df$Description <- NA
-  df
+  df[c("Number", "Type", "Description")]
 }
 
 makeFILTERheader <- function(x) {

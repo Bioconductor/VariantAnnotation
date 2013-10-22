@@ -249,7 +249,7 @@ setMethod(writeVcf, c("VCF", "connection"),
             df$Description <-
               ifelse(is.na(df$Description), NA,
                            paste("\"", df$Description, "\"", sep=""))
-            df$ID <- rownames(df)
+            df <- DataFrame(ID = rownames(df), df)
             prs <- paste(rep(colnames(df), each=nrow(df)), "=",
                          unlist(lapply(df, as.character), use.names=FALSE),
                          sep="")
