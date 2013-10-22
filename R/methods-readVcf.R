@@ -111,6 +111,7 @@ setMethod(readVcf, c(file="character", genome="missing",
 
     ## rowData
     rowData <- vcf$rowData
+    seqinfo(rowData) <- merge(seqinfo(rowData), seqinfo(hdr))
     if (length(rowData)) {
         if (is(genome, "character")) {
            genome(rowData) <- genome

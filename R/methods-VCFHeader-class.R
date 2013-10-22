@@ -72,6 +72,18 @@ setMethod("geno", "VCFHeader",
     geno 
 })
 
+setMethod("seqinfo", "VCFHeader",
+function(x)
+{
+  contig <- slot(x, "header")$contig
+  if (is.null(contig))
+    Seqinfo()
+  else Seqinfo(rownames(contig),
+               seqlengths =
+               if (is.null(contig$length)) NA else as.integer(contig$length),
+               genome = if (is.null(contig$assembly)) NA else contig$assembly)
+})
+
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## Show
 ##

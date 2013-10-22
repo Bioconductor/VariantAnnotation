@@ -186,10 +186,12 @@ setAs("VCF", "VRanges", function(from) {
   otherGeno <- geno(from)[setdiff(names(geno(from)), c("AD", "DP", "FT"))]
   if (length(otherGeno) > 0L)
     meta <- DataFrame(meta, lapply(otherGeno, genoToMCol))
-  VRanges(seqnames, ranges, ref, alt,
-          totalDepth, refDepth, altDepth,
-          hardFilters = FilterRules(), sampleNames = sampleNames,
-          softFilterMatrix = filter, meta)
+  vr <- VRanges(seqnames, ranges, ref, alt,
+                totalDepth, refDepth, altDepth,
+                hardFilters = FilterRules(), sampleNames = sampleNames,
+                softFilterMatrix = filter, meta)
+  seqinfo(vr) <- seqinfo(from)
+  vr
 })
 
 setAs("VRanges", "VCF", function(from) {
@@ -237,7 +239,7 @@ makeINFOheader <- function(x) {
   df$Number <- as.character(lapply(x, numberForColumn))
   df$Type <- as.character(lapply(x, typeForColumn))
   if (is.null(df$Description) && nrow(df) > 0L)
-    df$Description <- ""
+    df$Description <- NA
   df
 }
 

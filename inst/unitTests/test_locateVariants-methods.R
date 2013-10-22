@@ -49,9 +49,9 @@ test_locateVariants_upstream_downstream <- function()
 
 test_locateVariants_queryAsVCF <- function()
 {
-    fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
+    fl <- system.file("extdata", "chr7-sub.vcf.gz", package="VariantAnnotation")
     vcf <- readVcf(fl, "hg19")
-    vcf <- renameSeqlevels(vcf, c("20" = "chr20"))
+    vcf <- renameSeqlevels(vcf, c("7" = "chr7"))
     loc1 <- locateVariants(vcf, txdb, IntergenicVariants())
     loc2 <- locateVariants(rowData(vcf), txdb, IntergenicVariants())
     checkIdentical(loc1, loc2) 

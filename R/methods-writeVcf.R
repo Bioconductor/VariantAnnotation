@@ -223,6 +223,7 @@ setMethod(writeVcf, c("VCF", "connection"),
     hdr <- exptData(obj)[["header"]]
     header <- Map(.formatHeader, as.list(header(hdr)),
                   as.list(names(header(hdr))))
+    header <- c(header, .contigsFromSeqinfo(seqinfo(obj)))
     samples <- colnames(obj) 
     colnms <- c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO")
     if (length(geno(obj)) > 0L) {
@@ -245,15 +246,27 @@ setMethod(writeVcf, c("VCF", "connection"),
         if ("Description" %in% colnames(df)) {
             if (nrow(df) == 0L)
                 return(character())
-            df$Description <- paste("\"", df$Description, "\"", sep="")
+            df$Description <-
+              ifelse(is.na(df$Description), NA,
+                           paste("\"", df$Description, "\"", sep=""))
+            df$ID <- rownames(df)
             prs <- paste(rep(colnames(df), each=nrow(df)), "=",
                          unlist(lapply(df, as.character), use.names=FALSE),
                          sep="")
-            lst <- split(prs, seq_len(nrow(df)))
+            lst <- split(prs[!is.na(df)], row(df)[!is.na(df)])
             lns <- .pasteCollapse(CharacterList(lst), collapse=",") 
-            paste("##", nms, "=<ID=", rownames(df), ",", lns, ">", sep="")
+            paste("##", nms, "=<", lns, ">", sep="")
         }
     }
+}
+
+.contigsFromSeqinfo <- function(si) {
+  contig <- paste0("##contig=<ID=", seqnames(si))
+  contig[!is.na(seqlengths(si))] <-
+    paste0(contig, ",length=", seqlengths(si))[!is.na(seqlengths(si))]
+  contig[!is.na(genome(si))] <-
+    paste0(contig, ",assembly=", genome(si))[!is.na(genome(si))]
+  paste0(contig, ">")
 }
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
