@@ -238,8 +238,8 @@ makeINFOheader <- function(x) {
   }
   df$Number <- as.character(lapply(x, numberForColumn))
   df$Type <- as.character(lapply(x, typeForColumn))
-  if (is.null(df$Description) && nrow(df) > 0L)
-    df$Description <- NA
+  if (is.null(df$Description))
+    df$Description <- rep(NA, nrow(df))
   df[c("Number", "Type", "Description")]
 }
 
