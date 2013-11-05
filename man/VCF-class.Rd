@@ -415,14 +415,14 @@ seqlevels(vcf3)
 ## slots of the VCFHeader object. See ?VCFHeader for details.
 
 ## Current 'info' fields.
-rownames(info(header(vcf))
+rownames(info(header(vcf)))
 
 ## Add a new field to the header.
 newInfo <- DataFrame(Number=1, Type="Integer",
                      Description="Number of Samples With Data",
                      row.names="NS")
-info(header(vcf)) <- rbind(info(hdr), newInfo)
-rownames(info(hdr))
+info(header(vcf)) <- rbind(info(header(vcf)), newInfo)
+rownames(info(header(vcf)))
 
 ## ----------------------------------------------------------------
 ## CollapsedVCF 
