@@ -63,6 +63,8 @@
 \alias{strand,VCF-method}
 \alias{strand<-,VCF-method}
 \alias{header,VCF-method}
+\alias{header<-}
+\alias{header<-,VCF,VCFHeader-method}
 
 % Subset methods
 \alias{[,VCF-method}
@@ -204,8 +206,12 @@
       \code{rowData} slot.
     }
     \item{}{
-      \code{header(x)}:
-      Extract the VCF header information.
+      \code{header(x)}, \code{header(x)<- value}:
+      Get or set the VCF header information. Replacement value
+      must be a \code{VCFHeader} object. To modify individual elements 
+      use \code{info<-}, \code{geno<-} or \code{meta<-} on a 
+      \sQuote{VCFHeader} object. See ?\code{VCFHeader} man page for
+      details.
        \itemize{
          \item{\code{info(header(x))}}
          \item{\code{geno(header(x))}}
@@ -400,6 +406,23 @@ seqlevels(vcf2)
 ## or 'dropSeqlevels'. See ?keepSeqlevels for details. 
 vcf3 <- keepSeqlevels(vcf, "chr2")
 seqlevels(vcf3)
+
+## ----------------------------------------------------------------
+## Header information 
+## ----------------------------------------------------------------
+
+## Header data can be modified in the 'meta', 'info' and 'geno'
+## slots of the VCFHeader object. See ?VCFHeader for details.
+
+## Current 'info' fields.
+rownames(info(header(vcf))
+
+## Add a new field to the header.
+newInfo <- DataFrame(Number=1, Type="Integer",
+                     Description="Number of Samples With Data",
+                     row.names="NS")
+info(header(vcf)) <- rbind(info(hdr), newInfo)
+rownames(info(hdr))
 
 ## ----------------------------------------------------------------
 ## CollapsedVCF 

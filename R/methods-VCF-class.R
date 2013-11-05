@@ -24,7 +24,7 @@ VCF <-
     new(class, SummarizedExperiment(assays=geno, rowData=rowData,
         colData=colData, exptData=exptData), fixed=fixed, info=info, ...)
 }
- 
+
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Getters and Setters
 ###
@@ -251,6 +251,14 @@ setMethod("header", "VCF",
     function(x)
 { 
     exptData(x)$header
+})
+
+setReplaceMethod("header", c("VCF", "VCFHeader"),
+    function(x, value)
+{
+    slot(x, "exptData")$header <- value
+    .valid.VCF.header(x)
+    x
 })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

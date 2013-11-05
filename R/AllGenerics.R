@@ -196,6 +196,9 @@ setGeneric("header", signature="x",
     function(x) standardGeneric("header"),
 )
 
+setGeneric("header<-", signature=c("x", "value"),
+    function(x, value) standardGeneric("header<-"),
+)
 
 setGeneric("contig", signature="x",
     function(x) standardGeneric("contig"),
@@ -203,6 +206,10 @@ setGeneric("contig", signature="x",
 
 setGeneric("meta", signature="x",
     function(x) standardGeneric("meta"),
+)
+
+setGeneric("meta<-", signature=c("x", "value"),
+    function(x, value) standardGeneric("meta<-"),
 )
 
 ### -------------------------------------------------------------------------

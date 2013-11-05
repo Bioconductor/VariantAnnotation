@@ -3,9 +3,9 @@
 ### =========================================================================
 
 
-## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-## Constructor 
-##
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Constructor 
+###
 
 VCFHeader <-
     function(reference=character(), samples=character(), 
@@ -14,9 +14,9 @@ VCFHeader <-
     new("VCFHeader", reference=reference, samples=samples, header=header, ...) 
 }
  
-## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-## Getters and Setters
-##
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Getters and Setters
+###
 
 setMethod("reference", "VCFHeader", 
     function(x) 
@@ -43,6 +43,14 @@ setMethod("meta", "VCFHeader",
     slot(x, "header")$META
 })
 
+setReplaceMethod("meta", c("VCFHeader", "DataFrame"), 
+    function(x, value) 
+{
+    slot(x, "header")$META <- value
+    validObject(x)
+    x
+})
+
 ## fixed (QUAL, FILTER, ALT, REF)
 setMethod("fixed", "VCFHeader", 
     function(x) 
@@ -62,6 +70,14 @@ setMethod("info", "VCFHeader",
     info
 })
 
+setReplaceMethod("info", c("VCFHeader", "DataFrame"), 
+    function(x, value) 
+{
+    slot(x, "header")$INFO <- value
+    validObject(x)
+    x
+})
+
 ## geno
 setMethod("geno", "VCFHeader",
     function(x)
@@ -70,6 +86,14 @@ setMethod("geno", "VCFHeader",
     if (is.null(geno))
         geno <- DataFrame()
     geno 
+})
+
+setReplaceMethod("geno", c("VCFHeader", "missing", "DataFrame"),
+    function(x, i, ..., value)
+{
+    slot(x, "header")$FORMAT <- value
+    validObject(x)
+    x
 })
 
 setMethod("seqinfo", "VCFHeader",
@@ -84,9 +108,9 @@ function(x)
                genome = if (is.null(contig$assembly)) NA else contig$assembly)
 })
 
-## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-## Show
-##
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Show
+###
 
 setMethod(show, "VCFHeader",
     function(object)

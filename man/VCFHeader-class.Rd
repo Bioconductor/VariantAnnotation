@@ -19,9 +19,13 @@
 \alias{contig,VCFHeader-method}
 \alias{meta}
 \alias{meta,VCFHeader-method}
+\alias{meta<-}
+\alias{meta<-,VCFHeader,DataFrame-method}
 \alias{fixed,VCFHeader-method}
 \alias{info,VCFHeader-method}
+\alias{info<-,VCFHeader,DataFrame-method}
 \alias{geno,VCFHeader-method}
+\alias{geno<-,VCFHeader,missing,DataFrame-method}
 
 % show method:
 \alias{show,VCFHeader-method}
@@ -56,10 +60,11 @@
       \code{meta}, \code{info} and \code{geno} if present.
     }
     \item{}{
-      \code{meta(x)}:
-      Returns a \code{DataFrameList} of meta information. This includes 
-      any information represented as simple key=value pairs in the
-      VCF file header.
+      \code{meta(x)}, \code{meta(x)<- value}:
+      Gets or sets a \code{DataFrame} of meta information. This includes 
+      any information represented as simple key-value pairs in the
+      VCF file header. Replacement value must be a \code{DataFrame}
+      with a single column named \sQuote{Value}.
     }
     \item{}{
       \code{fixed(x)}:
@@ -67,12 +72,16 @@
       \sQuote{REF}, \sQuote{ALT}, \sQuote{FILTER} and \sQuote{QUAL}. 
     }
     \item{}{
-      \code{info(x)}:
-      Returns a \code{DataFrame} of \sQuote{INFO} information.
+      \code{info(x)}, \code{info(x)<- value}:
+      Gets or sets a \code{DataFrame} of \sQuote{INFO} information.
+      Replacement value must be a \code{DataFrame} with 3 columns
+      named \sQuote{Number}, \sQuote{Type} and \sQuote{Description}. 
     }
     \item{}{
-      \code{geno(x)}:
+      \code{geno(x)}, \code{geno(x)<- value}:
       Returns a \code{DataFrame} of \sQuote{FORMAT} information.
+      Replacement value must be a \code{DataFrame} with 3 columns
+      named \sQuote{Number}, \sQuote{Type} and \sQuote{Description}. 
     }
     \item{}{
       \code{reference(x)}:

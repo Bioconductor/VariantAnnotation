@@ -3,8 +3,8 @@ test_VCF_construction <- function() {
     ## empty
     m1 <- matrix(0, 0, 0)
     checkTrue(validObject(VCF()))
-    checkTrue(validObject(new("CollapsedVCF")))
-    checkTrue(validObject(new("ExpandedVCF")))
+    checkTrue(validObject(VCF(collapsed=TRUE)))
+    checkTrue(validObject(VCF(collapsed=FALSE)))
     checkTrue(validObject(VCF(geno=SimpleList(m1))))
 
     ## substance

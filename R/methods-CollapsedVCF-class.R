@@ -6,7 +6,7 @@
 ### Constructor 
 ###
 ### See VCF() on VCF-class page
- 
+
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Getters and Setters
 ###

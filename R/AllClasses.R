@@ -130,16 +130,39 @@ setAs("CollapsedVCF", "SummarizedExperiment",
     NULL
 }
 
+.valid.VCF.header.fields <- function(object, slotname)
+{
+    dnms <- names(slotname(object))
+    hnms <- rownames(slotname(header(object)))
+    if (any(mvar <- !dnms %in% hnms)) {
+        msg <- paste(BiocGenerics:::selectSome(dnms[mvar], 5), 
+                     collapse=" ")
+        warning("missing header information for ", sum(mvar), 
+                " '", attributes(slotname)$generic[1], 
+                "' fields: ", msg, call.=FALSE)
+    }
+    NULL
+}
+
+.valid.VCF.header <- function(object)
+{
+    validObject(header(object))
+    c(.valid.VCF.header.fields(object, info),
+      .valid.VCF.header.fields(object, geno))
+} 
+
 .valid.CollapsedVCF <- function(object)
 {
-    c(.valid.VCF.fixed(object),
+    c(.valid.VCF.header(object),
+      .valid.VCF.fixed(object),
       .valid.VCF.info(object),
       .valid.CollapsedVCF.alt(object))
 }
 
 .valid.ExpandedVCF <- function(object)
 {
-    c(.valid.VCF.fixed(object),
+    c(.valid.VCF.header(object),
+      .valid.VCF.fixed(object),
       .valid.VCF.info(object),
       .valid.ExpandedVCF.alt(object))
 }
@@ -164,6 +187,53 @@ setClass("VCFHeader",
         header="SimpleDataFrameList"
     )
 )
+
+### Validity
+### Currently only 'meta', 'geno' and 'info' can be modified.
+### Warning is thrown when replacement 'info' or 'geno' 
+### does not contain all fields in the data. Data must
+### be removed manually. 
+.valid.VCFHeader.colnames <- function(value, slotname)
+{
+    if (length(value)) {
+        col <- c("Number", "Type", "Description")
+        if (ncol(value) != 3 || !all(names(value) %in% col))
+            return(paste0("'", slotname, "(VCFHeader)' must be a ",
+                   "3 column DataFrame with names ", 
+                   paste(col, collapse=", ")))
+        else
+            return(NULL)
+    }
+    NULL
+}
+
+.valid.VCFHeader.info <- function(object)
+    .valid.VCFHeader.colnames(info(object), "info")
+
+.valid.VCFHeader.geno <- function(object)
+    .valid.VCFHeader.colnames(geno(object), "geno")
+
+.valid.VCFHeader.meta <- function(object)
+{
+    value <- meta(object)
+    if (length(value)) {
+        if (ncol(value) != 1 || names(value) != "Value")
+            return(paste0("'meta(VCFHeader)' must be a single ",
+                   "column DataFrame with name 'Value'"))
+        else
+            return(NULL)
+    }
+    NULL
+}
+
+.valid.VCFHeader <- function(object)
+{
+    return(c(.valid.VCFHeader.info(object),
+             .valid.VCFHeader.geno(object),
+             .valid.VCFHeader.meta(object)))
+}
+
+setValidity("VCFHeader", .valid.VCFHeader, where=asNamespace("VariantAnnotation"))
 
 ### -------------------------------------------------------------------------
 ### SIFT and PolyPhen classes
