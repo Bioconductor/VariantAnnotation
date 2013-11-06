@@ -149,9 +149,17 @@ locateVariants(query, subject, region, ...)
 }
 \value{
   A \code{GRanges} object with a row for each variant-transcript match.
-  Columns are \code{LOCATION}, \code{QUERYID}, \code{TXID}, \code{GENEID},
-  \code{PRECEDEID}, \code{FOLLOWID} and \code{CDSID}. Each column is
-  described in detail below. 
+  The strand of the output matches the strand of the \code{subject} hit 
+  except in the case of IntergenicVariants. For intergenic, multiple precede
+  and follow gene ids are returned for each variant. When 
+  \code{ignore.strand=TRUE} the return strand is \code{*} because
+  genes on both strands are considered and it is possible to have a mixture.
+  When \code{ignore.strand=FALSE} the strand will match the \code{query}
+  because only genes on the same strand are considered.
+
+  Metadata columns are \code{LOCATION}, \code{QUERYID}, 
+  \code{TXID}, \code{GENEID}, \code{PRECEDEID}, \code{FOLLOWID} and 
+  \code{CDSID}. Each column is described in detail below. 
 
  \describe{
     \item{\code{LOCATION}}{

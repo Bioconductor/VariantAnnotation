@@ -153,16 +153,14 @@ setAs("CollapsedVCF", "SummarizedExperiment",
 
 .valid.CollapsedVCF <- function(object)
 {
-    c(.valid.VCF.header(object),
-      .valid.VCF.fixed(object),
+    c(.valid.VCF.fixed(object),
       .valid.VCF.info(object),
       .valid.CollapsedVCF.alt(object))
 }
 
 .valid.ExpandedVCF <- function(object)
 {
-    c(.valid.VCF.header(object),
-      .valid.VCF.fixed(object),
+    c(.valid.VCF.fixed(object),
       .valid.VCF.info(object),
       .valid.ExpandedVCF.alt(object))
 }
@@ -233,7 +231,7 @@ setClass("VCFHeader",
              .valid.VCFHeader.meta(object)))
 }
 
-setValidity("VCFHeader", .valid.VCFHeader, where=asNamespace("VariantAnnotation"))
+#setValidity("VCFHeader", .valid.VCFHeader, where=asNamespace("VariantAnnotation"))
 
 ### -------------------------------------------------------------------------
 ### SIFT and PolyPhen classes

@@ -82,8 +82,7 @@
 \value{
   A \link[GenomicRanges]{GRanges} with a row for each variant-transcript 
   match. The result includes only variants that fell within coding regions.
-  If the \code{query} was unstranded (*) or \code{ignore.strand=TRUE} the 
-  strand of the output \code{GRanges} represents the strand of the 
+  The strand of the output \code{GRanges} represents the strand of the 
   \code{subject} hit.
 
   At a minimum, the \code{elementMetadata} columns include,

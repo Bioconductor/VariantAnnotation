@@ -329,7 +329,7 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "PromoterVariants"),
             queryid <- queryHits(fo)
             GRanges(seqnames=seqnames(query)[queryid],
                     ranges=IRanges(ranges(query)[queryid]),
-                    strand=strand(query)[queryid],
+                    strand=strand(pm)[subjectHits(fo)],
                     LOCATION=.location(length(queryid), "promoter"), 
                     QUERYID=queryid,
                     TXID=as.integer(txid[subjectHits(fo)]),
@@ -451,9 +451,10 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
     if (length(fo) > 0) {
         txid <- rep(names(subject), elementLengths(subject))
         queryid <- queryHits(fo)
+        subject_strand <- c(strand(int_start), strand(int_end))
         GRanges(seqnames=seqnames(query)[queryid],
                 ranges=IRanges(ranges(query)[queryid]),
-                strand=strand(query)[queryid],
+                strand=subject_strand[subjectHits(fo)],
                 LOCATION=.location(length(queryid), "spliceSite"),
                 QUERYID=queryid,
                 TXID=as.integer(txid[subjectHits(fo)]),
@@ -485,8 +486,9 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
 
 .intergenic <- function(query, subject, region, ignore.strand, ...)
 {
-    co <- countOverlaps(query, subject, type="any", 
-                        ignore.strand=ignore.strand)
+    s_range <- range(subject) ## avoid duplicates 
+    co <- unname(countOverlaps(query, s_range, type="any", 
+                               ignore.strand=ignore.strand))
     intergenic <- co == 0
     if (all(!intergenic | (length(subject) == 0L))) {
         res <- GRanges()
@@ -497,26 +499,24 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
         res
     } else {
         q_range <- query[intergenic]
-        s_range <- unlist(subject, use.names=FALSE)
-        s_genes <- rep(names(subject), elementLengths(subject))
+        s_genes <- rep(names(subject), elementLengths(s_range))
+        s_unlist <- unlist(s_range, use.names=FALSE)
 
         ## ID all genes that fall in upstream / downstream range.
         ## upstream == follow:
         f_range <- .shiftRangeUpDown(q_range, upstream(region), TRUE)
-        f_fo <- findOverlaps(f_range, s_range)
-        f_genes <- unname(splitAsList(s_genes[subjectHits(f_fo)],
-                                factor(queryHits(f_fo),
-                                       levels=seq_len(queryLength(f_fo)))))
-        f_genes <- unique(f_genes)
+        f_fo <- findOverlaps(f_range, s_unlist)
+        f_factor <- factor(queryHits(f_fo), seq_len(queryLength(f_fo)))
+        f_genes <- unname(splitAsList(s_genes[subjectHits(f_fo)], f_factor))
  
         ## downstream == precede:
         p_range <- .shiftRangeUpDown(q_range, downstream(region), FALSE)
-        p_fo <- findOverlaps(p_range, s_range)
-        p_genes <- unname(splitAsList(s_genes[subjectHits(p_fo)],
-                                factor(queryHits(p_fo),
-                                       levels=seq_len(queryLength(p_fo)))))
-        p_genes <- unique(p_genes)
+        p_fo <- findOverlaps(p_range, s_unlist)
+        p_factor <- factor(queryHits(p_fo), seq_len(queryLength(p_fo)))
+        p_genes <- unname(splitAsList(s_genes[subjectHits(p_fo)], p_factor))
 
+        if (ignore.strand)
+            strand(q_range) <- "*"
         values(q_range) <- 
             DataFrame(LOCATION=.location(length(q_range), "intergenic"),
                       QUERYID=which(intergenic), TXID=NA_integer_, 
@@ -575,7 +575,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
 
         GRanges(seqnames=seqnames(query)[queryid],
                 ranges=IRanges(ranges(query)[queryid]),
-                strand=strand(query)[queryid],
+                strand=strand(usub)[subjectHits(fo)],
                 LOCATION=.location(length(queryid), vtype),
                 QUERYID=queryid,
                 TXID=as.integer(txid[subjectHits(fo)]),
