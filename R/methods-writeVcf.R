@@ -247,13 +247,13 @@ setMethod(writeVcf, c("VCF", "connection"),
             if (nrow(df) == 0L)
                 return(character())
             df$Description <-
-              ifelse(is.na(df$Description), NA,
+              ifelse(is.na(df$Description), "\".\"",
                            paste("\"", df$Description, "\"", sep=""))
             df <- DataFrame(ID = rownames(df), df)
             prs <- paste(rep(colnames(df), each=nrow(df)), "=",
                          unlist(lapply(df, as.character), use.names=FALSE),
                          sep="")
-            lst <- split(prs[!is.na(df)], row(df)[!is.na(df)])
+            lst <- splitAsList(prs, row(df))
             lns <- .pasteCollapse(CharacterList(lst), collapse=",") 
             paste("##", nms, "=<", lns, ">", sep="")
         }
