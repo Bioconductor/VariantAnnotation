@@ -218,9 +218,8 @@ setMethod(writeVcf, c("VCF", "connection"),
 .pasteCollapse <- rtracklayer:::pasteCollapse
  
 .makeVcfHeader <- function(obj, ...)
-## FIXME : not writing out reference or sample
 {
-    hdr <- exptData(obj)[["header"]]
+    hdr <- header(obj)
     header <- Map(.formatHeader, as.list(header(hdr)),
                   as.list(names(header(hdr))))
     header <- c(header, .contigsFromSeqinfo(seqinfo(obj)))
