@@ -105,6 +105,20 @@
       Format file on disk. 
     }
     \item{}{
+      \code{CollapsedVCF(rowData = GRanges(), colData = DataFrame(), 
+                exptData = SimpleList(header = VCFHeader()), 
+                fixed = DataFrame(), info = DataFrame(), 
+                geno = SimpleList(), ..., verbose = FALSE)}
+      Creates a CollapsedVCF.
+    }
+    \item{}{
+      \code{ExpandedVCF(rowData = GRanges(), colData = DataFrame(), 
+                exptData = SimpleList(header = VCFHeader()), 
+                fixed = DataFrame(), info = DataFrame(), 
+                geno = SimpleList(), ..., verbose = FALSE)}
+      Creates an ExpandedVCF.
+    }
+    \item{}{
       \code{expand(rowData = GRanges(), colData = DataFrame(), 
                 exptData = SimpleList(), fixed = DataFrame(), 
                 info = DataFrame(), geno = SimpleList(), 

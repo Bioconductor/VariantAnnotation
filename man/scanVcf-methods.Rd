@@ -93,13 +93,11 @@ scanVcf(file, ..., param)
 }
 
 \value{
-  \code{scanVcfHeader} returns a list, with one element for each file 
-  named in \code{file}. Each element of the list is itself a list 
-  containing three elements. The \code{reference} element is a character() 
-  vector with names of reference sequences. The \code{sample} element is 
-  a character() vector of names of samples. The \code{header} element is 
-  a character() vector of the header lines (preceeded by \dQuote{##}) 
-  present in the VCF file.
+  \code{scanVcfHeader} returns a \code{VCFHeader} object with
+  header information parsed into five categories, \code{samples}, 
+  \code{meta}, \code{fixed}, \code{info} and \code{geno}. Each
+  can be accessed with a `getter' of the same name
+  (e.g., info(<VCFHeader>)).
 
   \code{scanVcf} returns a list, with one element per range. Each list
   has 7 elements, obtained from the columns of the VCF specification:

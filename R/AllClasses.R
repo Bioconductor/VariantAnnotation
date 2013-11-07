@@ -1,73 +1,19 @@
+### =========================================================================
+### All classes 
+### =========================================================================
+
+
 ### -------------------------------------------------------------------------
-### VCF class hierarchy
+### VCF (VIRTUAL) 
 ###
 
 setClass("VCF",
     contains=c("VIRTUAL", "SummarizedExperiment"),
-    representation(
+    representation( 
         fixed="DataFrame",
         info="DataFrame")
+    #prototype(exptData=SimpleList(header=VCFHeader())) 
 )
-
-setClass("CollapsedVCF", contains="VCF") ## ALT is DNAStrinsSetList
-
-setClass("ExpandedVCF", contains="VCF")  ## ALT is DNAStringSet
-
-### Coercion:
-### Recursion problem in an automatically generated coerce method requires
-### that we handle coercion from subclasses to SummarizedExperiment.
-
-setAs("ExpandedVCF", "SummarizedExperiment",
-    def = function(from)
-    {
-        if (strict) {
-            force(from)
-            class(from) <- "SummarizedExperiment"
-        }
-        from
-    },
-    replace = function(from, to, value)
-    {
-        firstTime <- TRUE
-        for (nm in slotNames(value)) {
-            v <- slot(value, nm)
-            if (firstTime) {
-                slot(from, nm, FALSE) <- v
-                firstTime <- FALSE
-            } else {
-                `slot<-`(from, nm, FALSE, v)
-            }
-        }
-        from
-    }
-)
-
-setAs("CollapsedVCF", "SummarizedExperiment",
-    def = function(from)
-    {
-        if (strict) {
-            force(from)
-            class(from) <- "SummarizedExperiment"
-        }
-        from
-    },
-    replace = function(from, to, value)
-    {
-        firstTime <- TRUE
-        for (nm in slotNames(value)) {
-            v <- slot(value, nm)
-            if (firstTime) {
-                slot(from, nm, FALSE) <- v
-                firstTime <- FALSE
-            } else {
-                `slot<-`(from, nm, FALSE, v)
-            }
-        }
-        from
-    }
-)
-
-### Validity
 
 .valid.VCF.fixed <- function(object)
 {
@@ -104,78 +50,101 @@ setAs("CollapsedVCF", "SummarizedExperiment",
     NULL
 }
 
-.valid.CollapsedVCF.alt <- function(object)
+.valid.VCF.alt <- function(object)
 {
-    ffld <- slot(object, "fixed")
-    if (length(ffld) != 0L) {
-        alt <- alt(object)
-        if (length(alt) != 0L)
-            if (!is(alt, "DNAStringSetList") && !is(alt, "CharacterList"))
-                return(paste("'alt(object)' must be a DNAStringSetList or a ",
-                       "CharacterList", sep=""))
-    }
-    NULL
-}
-
-.valid.ExpandedVCF.alt <- function(object)
-{
-    ffld <- slot(object, "fixed")
-    if (length(ffld) != 0L) {
-        alt <- alt(object)
-        if (length(alt) != 0L)
+    if (length(alt <- alt(object))) {
+        if (is(object, "ExpandedVCF")) {
             if (!is(alt, "DNAStringSet") && !is.character(alt))
                 return(paste("'alt(object)' must be a DNAStringSet or a ",
                        "character", sep=""))
+        } else if (is(object, "CollapsedVCF")) {
+            if (!is(alt, "DNAStringSetList") && !is(alt, "CharacterList"))
+                return(paste("'alt(object)' must be a DNAStringSetList or a ",
+                       "CharacterList", sep=""))
+        }
     }
     NULL
 }
 
-.valid.VCF.header.fields <- function(object, slotname)
-{
-    dnms <- names(slotname(object))
-    hnms <- rownames(slotname(header(object)))
-    if (any(mvar <- !dnms %in% hnms)) {
-        msg <- paste(BiocGenerics:::selectSome(dnms[mvar], 5), 
-                     collapse=" ")
-        warning("missing header information for ", sum(mvar), 
-                " '", attributes(slotname)$generic[1], 
-                "' fields: ", msg, call.=FALSE)
-    }
-    NULL
-}
-
-.valid.VCF.header <- function(object)
-{
-    validObject(header(object))
-    c(.valid.VCF.header.fields(object, info),
-      .valid.VCF.header.fields(object, geno))
-} 
-
-.valid.CollapsedVCF <- function(object)
+.valid.VCF <- function(object)
 {
     c(.valid.VCF.fixed(object),
       .valid.VCF.info(object),
-      .valid.CollapsedVCF.alt(object))
+      .valid.VCF.alt(object))
 }
-
-.valid.ExpandedVCF <- function(object)
-{
-    c(.valid.VCF.fixed(object),
-      .valid.VCF.info(object),
-      .valid.ExpandedVCF.alt(object))
-}
-
-setValidity("CollapsedVCF", .valid.CollapsedVCF, where=asNamespace("VariantAnnotation"))
-setValidity("ExpandedVCF", .valid.ExpandedVCF, where=asNamespace("VariantAnnotation"))
 
 ### -------------------------------------------------------------------------
-### ScanVcfParam class
+### CollapsedVCF 
 ###
 
-setClass("ScanVcfParam", contains="ScanBVcfParam")
+setClass("CollapsedVCF", 
+    contains="VCF",
+    validity=.valid.VCF)
+
+setAs("CollapsedVCF", "SummarizedExperiment",
+    def = function(from)
+    {
+        if (strict) {
+            force(from)
+            class(from) <- "SummarizedExperiment"
+        }
+        from
+    },
+    replace = function(from, to, value)
+    {
+        firstTime <- TRUE
+        for (nm in slotNames(value)) {
+            v <- slot(value, nm)
+            if (firstTime) {
+                slot(from, nm, FALSE) <- v
+                firstTime <- FALSE
+            } else {
+                `slot<-`(from, nm, FALSE, v)
+            }
+        }
+        from
+    }
+)
 
 ### -------------------------------------------------------------------------
-### VCFHeader class
+### ExpandedVCF 
+###
+
+setClass("ExpandedVCF", 
+    contains="VCF",
+    validity=.valid.VCF)
+
+### Coercion:
+### Recursion problem in an automatically generated coerce method requires
+### that we handle coercion from subclasses to SummarizedExperiment.
+
+setAs("ExpandedVCF", "SummarizedExperiment",
+    def = function(from)
+    {
+        if (strict) {
+            force(from)
+            class(from) <- "SummarizedExperiment"
+        }
+        from
+    },
+    replace = function(from, to, value)
+    {
+        firstTime <- TRUE
+        for (nm in slotNames(value)) {
+            v <- slot(value, nm)
+            if (firstTime) {
+                slot(from, nm, FALSE) <- v
+                firstTime <- FALSE
+            } else {
+                `slot<-`(from, nm, FALSE, v)
+            }
+        }
+        from
+    }
+)
+
+### -------------------------------------------------------------------------
+### VCFHeader
 ###
 
 setClass("VCFHeader",
@@ -186,11 +155,6 @@ setClass("VCFHeader",
     )
 )
 
-### Validity
-### Currently only 'meta', 'geno' and 'info' can be modified.
-### Warning is thrown when replacement 'info' or 'geno' 
-### does not contain all fields in the data. Data must
-### be removed manually. 
 .valid.VCFHeader.colnames <- function(value, slotname)
 {
     if (length(value)) {
@@ -224,17 +188,46 @@ setClass("VCFHeader",
     NULL
 }
 
+## Test VCFHeader only 
 .valid.VCFHeader <- function(object)
 {
     return(c(.valid.VCFHeader.info(object),
              .valid.VCFHeader.geno(object),
              .valid.VCFHeader.meta(object)))
 }
+setValidity("VCFHeader", .valid.VCFHeader, where=asNamespace("VariantAnnotation"))
 
-#setValidity("VCFHeader", .valid.VCFHeader, where=asNamespace("VariantAnnotation"))
+## These validity checks test the fields in the VCF against 
+## the VCFHeader. Called from header<-,VCF-method. 
+.valid.VCFHeadervsVCF.fields <- function(object, slotname)
+{
+    dnms <- names(slotname(object))
+    hnms <- rownames(slotname(header(object)))
+    if (any(mvar <- !dnms %in% hnms)) {
+        msg <- paste(BiocGenerics:::selectSome(dnms[mvar], 5), 
+                     collapse=" ")
+        warning(paste0(sum(mvar), " ", attributes(slotname)$generic[1],
+                "fields have missing header information: ",
+                , msg, call.=FALSE))
+    }
+    NULL
+}
+
+.valid.VCFHeadervsVCF <- function(object)
+{
+    validObject(header(object))
+    c(.valid.VCFHeadervsVCF.fields(object, info),
+      .valid.VCFHeadervsVCF.fields(object, geno))
+} 
 
 ### -------------------------------------------------------------------------
-### SIFT and PolyPhen classes
+### ScanVcfParam
+###
+
+setClass("ScanVcfParam", contains="ScanBVcfParam")
+
+### -------------------------------------------------------------------------
+### SIFT and PolyPhen
 ###
 
 .SIFTDb <- setRefClass("SIFTDb", contains = "AnnotationDb")
@@ -285,7 +278,6 @@ setClass("AllVariants",
     representation(promoter="PromoterVariants",
                    intergenic="IntergenicVariants")
 )
-
 
 ### -------------------------------------------------------------------------
 ### VRanges

@@ -257,7 +257,7 @@ setReplaceMethod("header", c("VCF", "VCFHeader"),
     function(x, value)
 {
     slot(x, "exptData")$header <- value
-    .valid.VCF.header(x)
+    .valid.VCFHeadervsVCF(x)
     x
 })
 

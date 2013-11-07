@@ -1,5 +1,5 @@
 ### =========================================================================
-### vcfHeader class methods 
+### VCFHeader class methods 
 ### =========================================================================
 
 
@@ -11,7 +11,7 @@ VCFHeader <-
     function(reference=character(), samples=character(), 
              header=DataFrameList(), ...)
 {
-    new("VCFHeader", reference=reference, samples=samples, header=header, ...) 
+    new("VCFHeader", reference=reference, samples=samples, header=header, ...)
 }
  
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
