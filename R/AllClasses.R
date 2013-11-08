@@ -12,7 +12,6 @@ setClass("VCF",
     representation( 
         fixed="DataFrame",
         info="DataFrame")
-    #prototype(exptData=SimpleList(header=VCFHeader())) 
 )
 
 .valid.VCF.fixed <- function(object)

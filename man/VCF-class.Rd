@@ -105,18 +105,13 @@
       Format file on disk. 
     }
     \item{}{
-      \code{CollapsedVCF(rowData = GRanges(), colData = DataFrame(), 
+      \code{VCF(rowData = GRanges(), colData = DataFrame(), 
                 exptData = SimpleList(header = VCFHeader()), 
                 fixed = DataFrame(), info = DataFrame(), 
-                geno = SimpleList(), ..., verbose = FALSE)}
-      Creates a CollapsedVCF.
-    }
-    \item{}{
-      \code{ExpandedVCF(rowData = GRanges(), colData = DataFrame(), 
-                exptData = SimpleList(header = VCFHeader()), 
-                fixed = DataFrame(), info = DataFrame(), 
-                geno = SimpleList(), ..., verbose = FALSE)}
-      Creates an ExpandedVCF.
+                geno = SimpleList(), ..., collapsed=TRUE, 
+                verbose = FALSE)}
+      Creates CollapsedVCF when \code{collapsed = TRUE} and an
+      ExpandedVCF when \code{collapsed = FALSE}.
     }
     \item{}{
       \code{expand(rowData = GRanges(), colData = DataFrame(), 
@@ -124,16 +119,6 @@
                 info = DataFrame(), geno = SimpleList(), 
                 ..., collapsed=TRUE, verbose = FALSE)}
       Creates an ExpandedVCF from a CollapsedVCF.
-    }
-    \item{}{
-      \code{VCF(rowData = GRanges(), colData = DataFrame(), 
-                exptData = SimpleList(header = VCFHeader()), 
-                fixed = DataFrame(), info = DataFrame(), 
-                geno = SimpleList(), ..., collapsed=TRUE, 
-                verbose = FALSE)}
-      Low-level constructor. Generally not used directly. If 
-      \code{collapsed = TRUE} a CollapsedVCF is created, else
-      an ExpandedVCF.
     }
   }
 }

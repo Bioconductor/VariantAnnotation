@@ -155,8 +155,8 @@ setMethod(writeVcf, c("VCF", "connection"),
                              recursive = FALSE),
                       nsub * nrec, length(geno))
 
-    ## convert NA values to '.' and get a simple character matrix
-    genoMatFlat <- as.character(unlist(genoMat))
+    ## convert NA values to '.'
+    genoMatFlat <- as.character(unlist(genoMat, use.names=FALSE))
     genoMatFlat[is.na(genoMatFlat)] <- "."
     if (is.list(genoMat)) {
       genoMatList <- relist(genoMatFlat, PartitioningByEnd(genoMat))

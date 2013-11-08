@@ -5,18 +5,7 @@
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Constructor 
 ###
-
-ExpandedVCF <- 
-    function(rowData=GRanges(), colData=DataFrame(), 
-             exptData=SimpleList(header=VCFHeader()), 
-             fixed=DataFrame(),
-             info=DataFrame(row.names=seq_along(rowData)), 
-             geno=SimpleList(),
-             ..., verbose=FALSE)
-{
-    VCF(rowData, colData, exptData, fixed, info, geno,
-        collapsed=FALSE, verbose=verbose)
-}
+### See VCF(..., collapsed=FALSE) in methods-VCF-class.R
  
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Getters and Setters
