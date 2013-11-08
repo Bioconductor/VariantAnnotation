@@ -443,19 +443,25 @@ setMethod(show, "VCF",
     printSmallGRanges(rowData(object), margin=margin)
     cat("info(vcf):\n")
     printSmallDataTable(info(object), margin=margin) 
-    if (length(hdr <- info(header(object))) > 0) {
-        if (nrow(df <- as.data.frame(hdr[colnames(info(object)),])) > 0) {
-            cat("info(header(vcf)):\n")
-            headerrec(df, "info")
+    if (length(header(object))) {
+        if (length(hdr <- info(header(object)))) {
+            df <- as.data.frame(hdr[colnames(info(object)),])
+            if (nrow(df) > 0) {
+                cat("info(header(vcf)):\n")
+                headerrec(df, "info")
+            }
         }
     }
     cat("geno(vcf):\n")
     geno <- geno(object, withDimnames=FALSE)
     printSimpleList(geno, margin=margin) 
-    if (nrow(hdr <- geno(header(object))) > 0) {
-        if (nrow(df <- as.data.frame(hdr[names(geno),])) > 0) {
-            cat("geno(header(vcf)):\n")
-            headerrec(df, "geno")
+    if (length(header(object))) {
+        if (length(hdr <- geno(header(object)))) {
+            df <- as.data.frame(hdr[names(geno),])
+            if (nrow(df) > 0) {
+                cat("geno(header(vcf)):\n")
+                headerrec(df, "geno")
+            }
         }
     }
 }
