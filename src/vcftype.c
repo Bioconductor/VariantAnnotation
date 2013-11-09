@@ -253,11 +253,12 @@ void _vcftype_setarray(struct vcftype_t *vcftype,
         return;
 
     if (VECSXP == vcftype->type) { /* ragged array */
-        if (vcftype->number == 'G') /* FIXME: what does 'G' mean in VCF? */
-            ragged_n = (ragged_n + 1) * (ragged_n + 1);
+        /* 'G' indicates one value per genotype */
+        if (vcftype->number == 'G')
+            ragged_n = ((ragged_n + 1) * (ragged_n + 2))/2;
         else if (vcftype->number != 'A')
             ragged_n = _vcftype_ragged_n(field);
-        
+ 
         /* allocate and fill */
         const int offset = irow * vcftype->ncol + icol;
         vcftype->u.list[offset] =

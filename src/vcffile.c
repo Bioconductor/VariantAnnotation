@@ -307,7 +307,7 @@ static void _parse(char *line, const int irec,
             elt = geno->u.list[ gmapidx[fmtidx] ];
             _vcftype_setarray(elt, irec, smapidx[j] - 1, field, alt_n, str);
         }
-        /* type 'G' need to be padded w/ NA's */
+        /* type 'A' and 'G' need to be padded w/ NA's */
         for (fmtidx = 0; fmtidx < gmap_n; ++fmtidx) {
             elt = geno->u.list[fmtidx];
             if (elt->number == 'A' || elt->number == 'G')
