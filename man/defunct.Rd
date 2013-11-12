@@ -1,9 +1,9 @@
 \name{VariantAnnotation-defunct}
 \alias{VariantAnnotation-defunct}
+\alias{readVcfLongForm}
 \alias{dbSNPFilter}
 \alias{regionFilter}
 \alias{MatrixToSnpMatrix}
-\alias{MatrixToSnpMatrix,matrix,DNAStringSet,DNAStringSetList-method}
 
 \title{Defunct Functions in Package \code{VariantAnnotation}}
 
@@ -13,16 +13,20 @@
 }
 
 \section{usage}{
-  ## Defunct in 1.7.z
+  ## Defunct in 1.9.z
+  readVcfLongForm()
+
+  ## Removed in 1.9.z
   dbSNPFilter()
   regionFilter()
   MatrixToSnpMatrix(callMatrix, ref, alt, ...)
 }
 
 \details{
-  \code{dbSNPFilter}, \code{regionFilter} and \code{MatrixToSnpMatrix}
-  have stubs which report they are defunct.
+  ## Defunct in 1.9.z:
+  \code{readVcfLongForm} has been replaced by \code{expand}.
 
+  ## Removed in 1.9.z:
   \code{dbSNPFilter} and \code{regionFilter} have been replaced by
   \code{filterVcf}.
 

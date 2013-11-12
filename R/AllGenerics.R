@@ -216,11 +216,6 @@ setGeneric("meta<-", signature=c("x", "value"),
 ### snp encoding methods 
 ###
 
-setGeneric("MatrixToSnpMatrix", signature=c("callMatrix", "ref", "alt"),
-    function(callMatrix, ref, alt, ...)
-    standardGeneric("MatrixToSnpMatrix")
-)
-
 setGeneric("genotypeToSnpMatrix", signature="x",
     function(x, ...)
     standardGeneric("genotypeToSnpMatrix")

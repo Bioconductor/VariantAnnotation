@@ -100,7 +100,6 @@ importFrom(utils,
 exportClassPattern("^.*$")
 
 export(
-    dbSNPFilter, regionFilter, ## Defunct
     VCF, VCFHeader, reference, 
     header, "header<-", meta, "meta<-",
     vcfWhich, "vcfWhich<-", vcfFixed, "vcfFixed<-", vcfInfo, "vcfInfo<-", 
@@ -123,9 +122,10 @@ export(
 
 exportMethods(
     filterVcf, scanVcf, scanVcfHeader, ScanVcfParam,
-    readVcf, readVcfLongForm, writeVcf, expand,
+    readVcf, writeVcf, expand,
+    readVcfLongForm, ## Defunct
     predictCoding, getTranscriptSeqs, refLocsToLocalLocs, 
-    MatrixToSnpMatrix, genotypeToSnpMatrix, snpSummary,
+    genotypeToSnpMatrix, snpSummary,
     locateVariants, summarizeVariants,
 
     fixed, "fixed<-", ref, "ref<-", alt, "alt<-", qual, "qual<-",

@@ -136,15 +136,3 @@ setMethod("filterVcf", "TabixFile",
 
     invisible(destination)
 })
-
-dbSNPFilter <-
-    function(dbSNP=character(0), .name="dbSNPFilter")
-{
-    .Defunct("filterVcf")
-}
-
-regionFilter <-
-    function(txdb, region="coding", .name="regionFilter")
-{
-    .Defunct("filterVcf")
-}

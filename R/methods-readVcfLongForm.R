@@ -4,13 +4,13 @@
 
 ## TabixFile
 
-msg <- paste0("'readVcfLongForm' is deprecated. Use 'expand' instead. ",
+msg <- paste0("'readVcfLongForm' is defunct. Use 'expand' instead. ",
               "See ?'expand,CollapsedVCF-method'")
 setMethod(readVcfLongForm, c(file="TabixFile", genome="character", 
           param="ScanVcfParam"), 
     function(file, genome, param, ...)
 {
-    .Deprecated(msg=msg)
+    .Defunct(msg=msg)
     .readVcfLongForm(file, genome, param)
 })
 
@@ -18,7 +18,7 @@ setMethod(readVcfLongForm, c(file="TabixFile", genome="character",
           param="GRanges"),
     function(file, genome, param, ...)
 {
-    .Deprecated(msg=msg)
+    .Defunct(msg=msg)
     .readVcfLongForm(file, genome, param=ScanVcfParam(which=param))
 })
 
@@ -26,7 +26,7 @@ setMethod(readVcfLongForm, c(file="TabixFile", genome="character",
           param="RangedData"),
     function(file, genome, param, ...)
 {
-    .Deprecated(msg=msg)
+    .Defunct(msg=msg)
     .readVcfLongForm(file, genome, param=ScanVcfParam(which=param))
 })
 
@@ -34,7 +34,7 @@ setMethod(readVcfLongForm, c(file="TabixFile", genome="character",
           param="RangesList"),
     function(file, genome, param, ...)
 {
-    .Deprecated(msg=msg)
+    .Defunct(msg=msg)
     .readVcfLongForm(file, genome, param=ScanVcfParam(which=param))
 })
 
@@ -42,7 +42,7 @@ setMethod(readVcfLongForm, c(file="TabixFile", genome="character",
           param="missing"), 
     function(file, genome, param, ...)
 {
-    .Deprecated(msg=msg)
+    .Defunct(msg=msg)
     .readVcfLongForm(file, genome, param=ScanVcfParam())
 })
 
@@ -52,7 +52,7 @@ setMethod(readVcfLongForm, c(file="character", genome="character",
           param="ScanVcfParam"),
     function(file, genome, param, ...)
 {
-    .Deprecated(msg=msg)
+    .Defunct(msg=msg)
     file <- .checkTabix(file)
     .readVcfLongForm(file, genome, param)
 })
@@ -61,7 +61,7 @@ setMethod(readVcfLongForm, c(file="character", genome="character",
           param="missing"),
     function(file, genome, param, ...)
 {
-    .Deprecated(msg=msg)
+    .Defunct(msg=msg)
     file <- .checkTabix(file)
     .readVcfLongForm(file, genome, param=ScanVcfParam())
 })
@@ -70,7 +70,7 @@ setMethod(readVcfLongForm, c(file="character", genome="missing",
           param="missing"),
     function(file, genome, param, ...)
 {
-    .Deprecated(msg=msg)
+    .Defunct(msg=msg)
     stop("'genome' argument is missing") 
 })
 
