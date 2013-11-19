@@ -1,6 +1,14 @@
 \name{VariantAnnotation-defunct}
 \alias{VariantAnnotation-defunct}
 \alias{readVcfLongForm}
+\alias{readVcfLongForm,TabixFile,character,GRanges-method}
+\alias{readVcfLongForm,TabixFile,character,missing-method}
+\alias{readVcfLongForm,TabixFile,character,RangedData-method}
+\alias{readVcfLongForm,TabixFile,character,RangesList-method}
+\alias{readVcfLongForm,TabixFile,character,ScanVcfParam-method}
+\alias{readVcfLongForm,character,character,ScanVcfParam-method}
+\alias{readVcfLongForm,character,character,missing-method}
+\alias{readVcfLongForm,character,missing,missing-method}
 \alias{dbSNPFilter}
 \alias{regionFilter}
 \alias{MatrixToSnpMatrix}
