@@ -71,7 +71,8 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "CodingVariants"),
         res <- callGeneric(query, cache[["cdsbytx"]], region, ..., 
             ignore.strand=ignore.strand, asHits=asHits)
         if (is(res, "GenomicRanges") & length(res) > 0L) {
-            res$GENEID <- select(subject, res$TXID, "GENEID", "TXID")$GENEID 
+            res$GENEID <- select(subject, as.character(res$TXID), 
+                                 "GENEID", "TXID")$GENEID 
         }
         res
     }
@@ -109,7 +110,8 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "IntronVariants"),
         res <- callGeneric(query, cache[["intbytx"]], region, ...,
             ignore.strand=ignore.strand, asHits=asHits)
         if (is(res, "GenomicRanges") & length(res) > 0L) {
-            res$GENEID <- select(subject, res$TXID, "GENEID", "TXID")$GENEID 
+            res$GENEID <- select(subject, as.character(res$TXID), 
+                                 "GENEID", "TXID")$GENEID 
         }
         res
     }
@@ -148,7 +150,8 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "ThreeUTRVariants"),
         res <- callGeneric(query, cache[["threeUTRbytx"]], region, ...,
             ignore.strand=ignore.strand, asHits=asHits)
         if (is(res, "GenomicRanges") & length(res) > 0L) {
-            res$GENEID <- select(subject, res$TXID, "GENEID", "TXID")$GENEID 
+            res$GENEID <- select(subject, as.character(res$TXID), 
+                                 "GENEID", "TXID")$GENEID 
         }
         res
     }
@@ -187,7 +190,8 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "FiveUTRVariants"),
         res <- callGeneric(query, cache[["fiveUTRbytx"]], region, ...,
             ignore.strand=ignore.strand, asHits=asHits)
         if (is(res, "GenomicRanges") & length(res) > 0L) {
-            res$GENEID <- select(subject, res$TXID, "GENEID", "TXID")$GENEID 
+            res$GENEID <- select(subject, as.character(res$TXID), 
+                                 "GENEID", "TXID")$GENEID 
         }
         res
     }
@@ -262,7 +266,8 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "SpliceSiteVariants"),
         res <- callGeneric(query, cache[["intbytx"]], region, ...,
             ignore.strand=ignore.strand, asHits=asHits)
         if (is(res, "GenomicRanges") & length(res) > 0L) {
-            res$GENEID <- select(subject, res$TXID, "GENEID", "TXID")$GENEID 
+            res$GENEID <- select(subject, as.character(res$TXID), 
+                                 "GENEID", "TXID")$GENEID 
         }
         res
     }
@@ -304,7 +309,8 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "PromoterVariants"),
             ignore.strand=ignore.strand, asHits=asHits)
         if (is(res, "GenomicRanges") & length(res) > 0L) {
             if (!is.null(res$TXID))
-                res$GENEID <- select(subject, res$TXID, "GENEID", "TXID")$GENEID
+                res$GENEID <- select(subject, as.character(res$TXID), 
+                                     "GENEID", "TXID")$GENEID
         }
         res
     }
