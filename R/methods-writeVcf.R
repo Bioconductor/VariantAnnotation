@@ -31,6 +31,8 @@ setMethod(writeVcf, c("VCF", "connection"),
         writeLines(hdr, filename)
     }
 
+    if (index)
+        obj <- sort(obj)
     mat <- .makeVcfMatrix(obj)
     writeLines(mat, filename)
     flush(filename)
