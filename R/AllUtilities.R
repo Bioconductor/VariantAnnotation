@@ -213,13 +213,13 @@
   else IRanges:::recycleVector(x, len)
 }
 
-## for PolyPhen and SIFT
+## for PolyPhen, SIFT and PROVEAN
 .missingKeys <- function(x, keys, db)
 {
     if (missing(keys))
         return(0)
     if (any(mkeys <- !keys %in% keys(x))) {
-        msg <- paste(BiocGenerics:::selectSome(keys[mkeys], 5), collapse=" ")
+        msg <- paste(BiocGenerics:::selectSome(keys[mkeys]), collapse=" ")
         warning(sum(mkeys), " keys not found in ", db, " database: ", msg,
                 call.=FALSE)
     }

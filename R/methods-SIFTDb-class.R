@@ -11,6 +11,16 @@ setMethod("keys", "SIFTDb",
     }
 ) 
 
+## NOTE: The database table has 23 columns. There are two
+## 'METHODS' (BEST HITS and ALL HITS) of obtaining related 
+## sequences using PSI-BLAST. Each variable outcome was listed
+## once for each method which created a very wide non-coehesive
+## table. We decided to consolidate the data by these methods 
+## to return a more compact result. (Not sure if this was wise 
+## or not.) This 'consolidating' of the data could have been 
+## done before creating the database or here before returning 
+## results to the user. We decided to keep the database table
+## table as close to original as possible so curating is done here. 
 setMethod("columns", "SIFTDb",
     function(x)
     {

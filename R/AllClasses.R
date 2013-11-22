@@ -226,10 +226,12 @@ setValidity("VCFHeader", .valid.VCFHeader, where=asNamespace("VariantAnnotation"
 setClass("ScanVcfParam", contains="ScanBVcfParam")
 
 ### -------------------------------------------------------------------------
-### SIFT and PolyPhen
+### SIFT, PROVEAN and PolyPhen
 ###
 
 .SIFTDb <- setRefClass("SIFTDb", contains = "AnnotationDb")
+
+.PROVEANDb <- setRefClass("PROVEANDb", contains = "AnnotationDb")
 
 .PolyPhenDb <- setRefClass("PolyPhenDb", contains = "AnnotationDb")
 
