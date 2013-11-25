@@ -8,6 +8,7 @@
 
 \alias{columns,PROVEANDb-method}
 \alias{keys,PROVEANDb-method}
+\alias{keytypes,PROVEANDb-method}
 \alias{select,PROVEANDb-method}
 
 \title{PROVEANDb objects}
@@ -30,12 +31,17 @@
       data columns.
     }
     \item{}{
-      \code{keys(x)}:
+      \code{keys(x, keytype="DBSNPID", ...)}:
       Returns the names of the \code{keys} that can be used to subset the
-      data rows. The \code{keys} values are the rsid's.
+      data rows. For SIFT.Hsapiens.dbSNP137 the \code{keys} are NCBI dbSNP ids.
     }
     \item{}{
-      \code{select(x, keys = NULL, columns = NULL, ...)}:
+      \code{keytypes(x)}:
+      Returns the names of the \code{columns} that can be used as \code{keys}.
+      For SIFT.Hsapiens.dbSNP137 the NCBI dbSNP ids are the only keytype.
+    }
+    \item{}{
+      \code{select(x, keys = NULL, columns = NULL, keytype = "DBSNPID", ...)}:
       Returns a subset of data defined by the character vectors \code{keys} 
       and \code{columns}. If no \code{keys} are supplied, all rows are
       returned. If no \code{columns} are supplied, all columns

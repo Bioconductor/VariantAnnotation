@@ -217,24 +217,26 @@
 .missingKeys <- function(x, keys, db)
 {
     if (missing(keys))
-        return(0)
+        return(FALSE)
     if (any(mkeys <- !keys %in% keys(x))) {
         msg <- paste(BiocGenerics:::selectSome(keys[mkeys]), collapse=" ")
         warning(sum(mkeys), " keys not found in ", db, " database: ", msg,
                 call.=FALSE)
-    }
+    } 
     all(mkeys)
 }
 
 .missingCols <- function(x, cols, db)
 {
     if (missing(cols))
-        return(0)
+        return(FALSE)
     if (any(mcols <- !cols %in% columns(x))) {
         msg <- paste(BiocGenerics:::selectSome(cols[mcols], 5), collapse=" ")
         warning(sum(mcols), " columns not found in ", db, " database: ", msg,
                 call.=FALSE)
-    }
-    all(mcols)
+        return(TRUE)
+    } else {
+        return(FALSE)
+    } 
 }
 

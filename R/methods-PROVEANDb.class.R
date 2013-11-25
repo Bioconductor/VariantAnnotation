@@ -2,38 +2,43 @@
 ### PROVEANDb methods 
 ### =========================================================================
 
-## FIXME: make index reference generic
-
 setMethod("keys", "PROVEANDb",
-    function(x)
+    function(x, keytype, ...)
     {
-        sql <- paste("SELECT DISTINCT DBSNPID FROM siftdata ", sep="") 
+        if (missing(keytype))
+            keytype <- "DBSNPID"
+        sql <- paste("SELECT DISTINCT ", keytype, " FROM proveandata ", sep="") 
         dbGetQuery(x$conn, sql)[,1]
     }
 ) 
 
 setMethod("columns", "PROVEANDb",
     function(x)
-        DBI:::dbListFields(x$conn, "siftdata") 
+        DBI:::dbListFields(x$conn, "proveandata") 
+) 
+
+setMethod("keytypes", "PROVEANDb",
+    function(x) "DBSNPID"
 ) 
 
 setMethod("select", "PROVEANDb",
-    function(x, keys, columns)
+    function(x, keys, columns, keytype, ...)
     {
-        sql <- .createPROVEANDbQuery(x, keys, columns)
+        if (missing(keytype)) keytype <- "DBSNPID"
+        sql <- .createPROVEANDbQuery(x, keys, columns, keytype)
         if (length(sql)) {
             raw <- dbGetQuery(x$conn, sql)
-            .formatPROVEANDbSelect(raw, keys, columns)
+            .formatPROVEANDbSelect(raw, keys, columns, keytype)
         } else {
             data.frame()
         }
     }
 )
 
-.createPROVEANDbQuery <- function(x, keys, columns)
+.createPROVEANDbQuery <- function(x, keys, columns, keytype)
 {
     if (missing(keys) && missing(columns)) {
-        sql <- "SELECT * FROM siftdata"
+        sql <- "SELECT * FROM proveandata"
     }
     if (!missing(keys)) {
         if(.missingKeys(x, keys, "PROVEAN"))
@@ -41,27 +46,27 @@ setMethod("select", "PROVEANDb",
         if (!missing(columns)) {
             if (.missingCols(x, columns, "PROVEAN"))
                 return(character())
-            columns <- union("DBSNPID", columns)
+            columns <- union(keytype, columns)
             fmtcols <- paste(columns, collapse=",")
             fmtkeys <- .sqlIn(keys)
-            sql <- paste("SELECT ", fmtcols, " FROM siftdata WHERE ",
-                         "DBSNPID IN (", fmtkeys, ")", sep="")
+            sql <- paste("SELECT ", fmtcols, " FROM proveandata WHERE ",
+                         keytype, " IN (", fmtkeys, ")", sep="")
         } else {
             fmtkeys <- .sqlIn(keys)
-            sql <- paste("SELECT * FROM siftdata WHERE DBSNPID ",
-                         "IN (", fmtkeys, ")", sep="")
+            sql <- paste("SELECT * FROM proveandata WHERE ", keytype,
+                         " IN (", fmtkeys, ")", sep="")
         }
     } else {
-        if (.missingCols(x, columns, "PROVEAN"))
+        if (.missingCols(x, columns, db="PROVEAN"))
             return(character())
-        columns <- union("DBSNPID", columns)
+        columns <- union(keytype, columns)
         fmtcols <- paste(columns, collapse=",")
-        sql <- paste("SELECT ", fmtcols, " FROM siftdata", sep="")
+        sql <- paste("SELECT ", fmtcols, " FROM proveandata", sep="")
     }
     sql
 }
 
-.formatPROVEANDbSelect <- function(raw, keys, columns)
+.formatPROVEANDbSelect <- function(raw, keys, columns, keytype)
 {
     ## no data
     if (!nrow(raw))
@@ -73,22 +78,22 @@ setMethod("select", "PROVEANDb",
 
     ## reorder columns 
     if (!missing(columns)) {
-      if (!"DBSNPID" %in% columns) columns <- c("DBSNPID", columns)
+      if (!keytypes %in% columns) columns <- c(keytypes, columns)
           raw <- raw[,colnames(raw) %in% columns] 
     }
 
     ## return keys not found 
-    index <- unique(raw$DBSNPID)
+    index <- unique(raw[[keytype]])
     missing <- rep(FALSE, length(index))
     if (!missing(keys)) 
         missing <- (!keys %in% as.character(index))
 
     lst <- as.list(rep(NA_character_, length(keys)))
     for (i in which(missing == FALSE))
-        lst[[i]] <- raw[raw$DBSNPID %in% keys[i], ]
+        lst[[i]] <- raw[raw[[keytype]] %in% keys[i], ]
 
     df <- do.call(rbind, lst)
-    df$DBSNPID[is.na(df$DBSNPID)] <- keys[missing]
+    df[[keytype]][is.na(df[[keytype]])] <- keys[missing]
     rownames(df) <- NULL
     df
 }
