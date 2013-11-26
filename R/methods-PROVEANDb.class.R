@@ -78,24 +78,26 @@ setMethod("select", "PROVEANDb",
 
     ## reorder columns 
     if (!missing(columns)) {
-      if (!keytypes %in% columns) columns <- c(keytypes, columns)
+      if (!keytype %in% columns) columns <- c(keytype, columns)
           raw <- raw[,colnames(raw) %in% columns] 
     }
 
     ## return keys not found 
     index <- unique(raw[[keytype]])
     missing <- rep(FALSE, length(index))
-    if (!missing(keys)) 
+    if (!missing(keys)) { 
         missing <- (!keys %in% as.character(index))
-
-    lst <- as.list(rep(NA_character_, length(keys)))
-    for (i in which(missing == FALSE))
-        lst[[i]] <- raw[raw[[keytype]] %in% keys[i], ]
-
-    df <- do.call(rbind, lst)
-    df[[keytype]][is.na(df[[keytype]])] <- keys[missing]
-    rownames(df) <- NULL
-    df
+        lst <- as.list(rep(NA_character_, length(keys)))
+        for (i in which(missing == FALSE))
+            lst[[i]] <- raw[raw[[keytype]] %in% keys[i], ]
+        df <- do.call(rbind, lst)
+        df[[keytype]][is.na(df[[keytype]])] <- keys[missing]
+        rownames(df) <- NULL
+        df
+    } else {
+        rownames(raw) <- NULL
+        raw
+    } 
 }
 
 
