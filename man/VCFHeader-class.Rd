@@ -22,6 +22,7 @@
 \alias{meta<-}
 \alias{meta<-,VCFHeader,DataFrame-method}
 \alias{fixed,VCFHeader-method}
+\alias{fixed<-,VCFHeader,DataFrameList-method}
 \alias{info,VCFHeader-method}
 \alias{info<-,VCFHeader,DataFrame-method}
 \alias{geno,VCFHeader-method}
@@ -67,9 +68,11 @@
       with a single column named \sQuote{Value}.
     }
     \item{}{
-      \code{fixed(x)}:
+      \code{fixed(x), fixed(x)<- value}:
       Returns a \code{DataFrameList} of information pertaining to any of
       \sQuote{REF}, \sQuote{ALT}, \sQuote{FILTER} and \sQuote{QUAL}. 
+      Replacement value must be a \code{DataFrameList} with names 
+      \sQuote{QUAL} or \sQuote{FILTER}. 
     }
     \item{}{
       \code{info(x)}, \code{info(x)<- value}:

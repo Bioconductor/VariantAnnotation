@@ -55,9 +55,20 @@ setReplaceMethod("meta", c("VCFHeader", "DataFrame"),
 setMethod("fixed", "VCFHeader", 
     function(x) 
 {
-    fixed <- c("REF", "ALT", "QUAL", "FILTER") 
+    fixed <- c("QUAL", "FILTER") 
     lst <- slot(x, "header")
     lst[names(lst) %in% fixed]
+})
+
+setReplaceMethod("fixed", c("VCFHeader", "DataFrameList"), 
+    function(x, value) 
+{
+    validObject(value)
+    if (!all(names(value) %in% c("QUAL", "FILTER")))
+        stop("names for 'fixed' must be 'QUAL' or 'FILTER'")
+    slot(x, "header")$FILTER <- value$FILTER
+    slot(x, "header")$QUAL <- value$QUAL
+    x
 })
 
 ## info 
