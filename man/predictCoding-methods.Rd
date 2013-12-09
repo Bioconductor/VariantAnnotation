@@ -104,12 +104,13 @@
       Internal gene id from the annotation
     }
     \item{\code{CDSLOC}}{
-      Location in coding region-based coordinates of the first nucleotide in
-      the variant.
+      Variant location in coding region-based coordinates. This position is 
+      relative to the start of the coding (cds) region defined in the 
+      \code{subject} annotation.
     }
     \item{\code{PROTEINLOC}}{
-      Location in cds-based coordinates of the first nucleotide in
-      the variant. This position is relative to the start of the cds region
+      Variant codon triplet location in coding region-based coordinates.
+      This position is relative to the start of the coding (cds) region
       defined in the \code{subject} annotation. 
     }
     \item{\code{CONSEQUENCE}}{
