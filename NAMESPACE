@@ -47,12 +47,12 @@ importFrom(IRanges,
     IRanges, isSingleNumber, isSingleString, isTRUEorFALSE, LogicalList, 
     NumericList, PartitioningByEnd, PartitioningByWidth, seqsplit,
     SimpleList, splitAsList, successiveViews, FilterMatrix,
-    isSingleNumberOrNA, endoapply, metadata
+    isSingleNumberOrNA, endoapply, metadata, filterRules
 )
 
 importClassesFrom(IRanges, 
     CharacterList, DataFrame, Ranges, RangesList, RangedData,
-    SimpleDataFrameList, SimpleList, FilterRules, FilterMatrix
+    SimpleDataFrameList, SimpleList, FilterRules, FilterMatrix, 
 )
 
 importMethodsFrom(IRanges, 
@@ -62,7 +62,7 @@ importMethodsFrom(IRanges,
     precede, queryHits, rev, Rle, runValue, sapply, shift,
     split, start, "start<-", subjectHits, substring, 
     unlist, values, "values<-", which, width, 
-    expand, ifelse, as.factor
+    expand, ifelse, as.factor, relist
 )
 
 importFrom(XVector, "subseq", "subseq<-")
