@@ -115,10 +115,11 @@ setMethod(writeVcf, c("VCF", "connection"),
 {
     if (ncol(formatMat) == 1L) {
         formatMat[is.na(formatMat)] <- ""
-        .pasteCollapse(seqsplit(formatMat, row(formatMat)), ":")
+        .pasteCollapse(CharacterList(split(formatMat, row(formatMat))), ":")
     } else {
         keep <- !is.na(formatMat)
-        .pasteCollapse(seqsplit(formatMat[keep], row(formatMat)[keep]), ":")
+        .pasteCollapse(CharacterList(
+                       split(formatMat[keep], row(formatMat)[keep])), ":")
     }
 }
 
@@ -170,7 +171,8 @@ setMethod(writeVcf, c("VCF", "connection"),
         formatMatPerSub <- matrix(rep(t(formatMat), nsub), nsub*nrec,
                                   length(geno), byrow=TRUE)
         keep <- !is.na(formatMatPerSub)
-        genoListBySub <- seqsplit(genoMat[keep], row(genoMat)[keep])
+        genoListBySub <- CharacterList(split(
+                           genoMat[keep], row(genoMat)[keep]))
         genoMatCollapsed <- matrix(.pasteCollapse(genoListBySub, ":"), nrec, nsub)
         cbind(FORMAT, genoMatCollapsed)
     }
@@ -207,7 +209,7 @@ setMethod(writeVcf, c("VCF", "connection"),
 
     keep <- !is.na(infoMat)
     infoRows <- factor(row(infoMat), seq_len(nrow(infoMat)))
-    infoList <- seqsplit(infoMat[keep], infoRows[keep])
+    infoList <- CharacterList(split(infoMat[keep], infoRows[keep]))
     infoList[elementLengths(infoList) == 0L] <- "."
     .pasteCollapse(infoList, ";")
 }

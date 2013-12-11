@@ -228,7 +228,7 @@ locateVariants(query, subject, region, ...)
   ## Variants in all gene regions 
   ## ---------------------------------------------------------------------
   ## Read variants from a VCF file.
-  fl <- system.file("extdata", "chr7-sub.vcf.gz", 
+  fl <- system.file("extdata", "gl_chr1.vcf", 
                     package="VariantAnnotation")
   vcf <- readVcf(fl, "hg19")
 
