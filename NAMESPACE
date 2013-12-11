@@ -52,7 +52,7 @@ importFrom(IRanges,
 
 importClassesFrom(IRanges, 
     CharacterList, DataFrame, Ranges, RangesList, RangedData,
-    SimpleDataFrameList, SimpleList, FilterRules, FilterMatrix, 
+    SimpleDataFrameList, SimpleList, FilterRules, FilterMatrix
 )
 
 importMethodsFrom(IRanges, 
@@ -117,7 +117,7 @@ export(
     called, stackSamples, "altDepth<-", "refDepth<-", "totalDepth<-", isIndel,
     probabilityToSnpMatrix, GLtoGP,
     readInfo, readGeno, readGT,
-    tabulate, pileupAsVRanges
+    tabulate
 )
 
 exportMethods(
