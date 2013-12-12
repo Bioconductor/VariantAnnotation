@@ -394,8 +394,12 @@ setMethod("asVCF", "VRanges", vranges2Vcf)
 ### Reading from VCF
 ###
 
-readVRangesFromVCF <- function(x, ...) {
-  as(readVcf(x, ...), "VRanges")
+VRangesScanVcfParam <- function(fixed="ALT", info=NA, geno="AD", ...) {
+  ScanVcfParam(fixed=fixed, info=info, geno=geno, ...)
+}
+
+readVRangesFromVCF <- function(x, genome, param=VRangesScanVcfParam(), ...) {
+  as(readVcf(x, genome, param=param, ...), "VRanges")
 }
 
 readVRanges <- function(x, ...) {

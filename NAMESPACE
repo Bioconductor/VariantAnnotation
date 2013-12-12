@@ -117,7 +117,7 @@ export(
     called, stackSamples, "altDepth<-", "refDepth<-", "totalDepth<-", isIndel,
     probabilityToSnpMatrix, GLtoGP,
     readInfo, readGeno, readGT,
-    tabulate
+    tabulate, readVcfAsVRanges, VRangesScanVcfParam
 )
 
 exportMethods(
