@@ -40,7 +40,7 @@ setMethod("expand", "CollapsedVCF",
     if (length(gvar) == 0L)
         return(gvar)
     ghdr <- geno(hdr)[rownames(geno(hdr)) %in% names(gvar),]
-    ## expand length of ALT
+    ## 'Number=A': one value per ALT
     isA <- ghdr$Number == "A"
     if (any(isA)) {
         gnms <- rownames(ghdr)[isA]
@@ -62,10 +62,25 @@ setMethod("expand", "CollapsedVCF",
         }
         gvar
     }
-    ## list length of ALT each with one REF,ALT pair
-    isAD <- names(gvar) == "AD"
-    if (any(isAD))
-        gvar$AD <- .expandAD(gvar$AD, length(idx), ncol(x))
+    ## AD field: one value for REF and each ALT
+    if (any(isAD <- names(gvar) == "AD")) {
+        AD <- gvar$AD
+        if (!is.list(AD)) {
+            ## 'Number' is integer
+            if (is(AD, "array")) {
+                if ((length(unique(elt)) != 1L) && (dim(AD)[3] != unique(elt))) {
+                    warning("'AD' was ignored: number of 'AD' values ",
+                            "do not match REF + ALT")
+                    isAD[isAD] <- FALSE 
+                }
+            } else {
+               isAD[isAD] <- FALSE 
+            }
+        } else {
+            ## 'Number' is '.'
+            gvar$AD <- .expandAD(AD, length(idx), ncol(x))
+        }
+    }
     isA <- names(gvar) %in% rownames(ghdr)[isA]
     gvar[!isA & !isAD] <- endoapply(gvar[!isA & !isAD], function(i) {
                               if (is(i, "matrix")) {
@@ -77,19 +92,22 @@ setMethod("expand", "CollapsedVCF",
     gvar
 }
 
+## returns an array of REF,ALT pairs
 .expandAD <- function(AD, idxlen, xcols)
 {
-    if (!is.list(AD)) # something else, maybe known length, so OK
-      return(AD)
-    adpart <- PartitioningByWidth(AD)
-    nalt <- width(adpart) - 1L
-    if (sum(nalt) != idxlen*xcols)
-      stop("length of AD does not match expanded index")
-    AD <- unlist(AD, use.names=FALSE)
-    ref <- logical(length(AD))
-    ref[start(adpart)] <- TRUE
-    vec <- c(rep(AD[ref], nalt), AD[!ref])
-    array(vec, c(idxlen, xcols, 2L))
+    if (is(AD, "list")) {
+        adpart <- PartitioningByWidth(AD)
+        nalt <- width(adpart) - 1L
+        if (sum(nalt) != idxlen*xcols)
+          stop("length of AD does not match expanded index")
+        AD <- unlist(AD, use.names=FALSE)
+        ref <- logical(length(AD))
+        ref[start(adpart)] <- TRUE
+        vec <- c(rep(AD[ref], nalt), AD[!ref])
+        array(vec, c(idxlen, xcols, 2L))
+    } else {
+        AD
+    }
 }
 
 .expandInfo <- function(x, hdr, elt, idx)
