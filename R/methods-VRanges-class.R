@@ -398,12 +398,8 @@ VRangesScanVcfParam <- function(fixed="ALT", info=NA, geno="AD", ...) {
   ScanVcfParam(fixed=fixed, info=info, geno=geno, ...)
 }
 
-readVRangesFromVCF <- function(x, genome, param=VRangesScanVcfParam(), ...) {
+readVcfAsVRanges <- function(x, genome, param=VRangesScanVcfParam(), ...) {
   as(readVcf(x, genome, param=param, ...), "VRanges")
-}
-
-readVRanges <- function(x, ...) {
-  readVRangesFromVCF(x, ...)
 }
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
