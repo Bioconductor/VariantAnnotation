@@ -298,8 +298,9 @@ locateVariants(query, subject, region, ...)
   ## Using the cache 
   ## ---------------------------------------------------------------------
   ## When processing multiple VCF files, the 'cache' can be used
-  ## to store and reuse extracted components of the TranscriptDb
-  ## thereby enhancing performance.
+  ## to store the extracted components of the TranscriptDb
+  ## (i.e., cds by tx, introns by tx etc.). This avoids having to 
+  ## re-extract these GRangesLists during each loop.
   \dontrun{
   myenv <- new.env()
   files <- list(vcf1, vcf2, vcf3)
@@ -311,6 +312,40 @@ locateVariants(query, subject, region, ...)
           locateVariants(vcf_mod, txdb, AllVariants(), cache=myenv)
       }) 
   }
-}
 
+  ## ---------------------------------------------------------------------
+  ## Parallel implmentation 
+  ## ---------------------------------------------------------------------
+  \dontrun{
+  library(BiocParallel)
+
+  ## When a TranscriptDb package is loaded a connection to the
+  ## sqlite db is established. Each process reading from an sqlite 
+  ## db must have a unique connection; this prevents the passing of
+  ## a TranscriptDb as an argument when running in parallel.
+ 
+  ## Forking:
+  ## In the case of forking, the TranscriptDb cannot be loaded
+  ## in the current workspace.
+  ## To detach the NAMESPACE:
+  ##     unloadNamespace("TxDb.Hsapiens.UCSC.hg19.knownGene")
+
+  fun <- function(x) {
+      library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+      locateVariants(x, TxDb.Hsapiens.UCSC.hg19.knownGene, 
+                     IntronVariants())
+  }
+  mclapply(c(vcf, vcf), fun)
+
+  ## Clusters:
+  cl <- makeCluster(2, type = "SOCK")
+  fun <- function(query, subject, region) {
+      library(VariantAnnotation)
+      library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+      locateVariants(query, TxDb.Hsapiens.UCSC.hg19.knownGene, region)
+  }
+  parLapply(cl, c(vcf, vcf), fun, region=IntronVariants())
+  stopCluster(cl)
+  }
+}
 \keyword{methods}

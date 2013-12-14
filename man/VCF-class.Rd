@@ -259,10 +259,10 @@
     \item{}{
       \code{expand(x)}:
       Expand (unlist) the ALT column of a CollapsedVCF object to one row 
-      per ALT value. In addition to ALT, all variables with Number='A' in the 
-      header are also expanded. The 'A' indicates one value per alternate
-      allele. Data without Number='A' in the header are replicated
-      the appropriate number of times. 
+      per ALT value. Variables with Number='A' have one value per alternate
+      allele and are expanded accordingly. The 'AD' genotype field
+      is expanded into REF/ALT pairs. For all other fields, the rows
+      are replicated to match the elementLengths of ALT.
 
       The output is an ExpandedVCF object with ALT as a \code{DNAStringSet} 
       or \code{character} (structural variants). 
