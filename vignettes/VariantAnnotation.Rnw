@@ -470,8 +470,7 @@ the called genotype.
 
 \subsection{Write out VCF files}
 
-A VCF file can be written out from data stored in a \Rcode{VCF} class. Methods 
-to write out from  more general structures are in progress.
+A VCF file can be written out from data stored in a \Rcode{VCF} class.
 
 <<writeVcf>>=
 fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")

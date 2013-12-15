@@ -251,7 +251,7 @@ setMethod(writeVcf, c("VCF", "connection"),
             prs <- paste(rep(colnames(df), each=nrow(df)), "=",
                          unlist(lapply(df, as.character), use.names=FALSE),
                          sep="")
-            lst <- splitAsList(prs, row(df))
+            lst <- split(prs, row(df))
             lns <- .pasteCollapse(CharacterList(lst), collapse=",") 
             paste("##", nms, "=<", lns, ">", sep="")
         }
