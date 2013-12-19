@@ -319,10 +319,30 @@ locateVariants(query, subject, region, ...)
   \dontrun{
   library(BiocParallel)
 
-  ## When a TranscriptDb package is loaded a connection to the
-  ## sqlite db is established. Each process reading from an sqlite 
-  ## db must have a unique connection; this prevents the passing of
-  ## a TranscriptDb as an argument when running in parallel.
+  ## A connection to a TranscriptDb object is established when
+  ## the package is loaded. Because each process reading from an 
+  ## sqlite db must have a unique connection the TranscriptDb
+  ## object cannot be passed as an argument when running in 
+  ## parallel. Instead the package must be loaded on each worker.
+
+  ## The overhead of the multiple loading may defeat the
+  ## purpose of running the job in parallel. An alternative is
+  ## to instead pass the appropriate GRangesList as an argument.
+  ## The details section on this man page under the heading
+  ## 'Subject as GRangesList' explains what GRangesList is
+  ## appropriate for each variant type.
+
+  ## A. Passing a GRangesList:
+
+  fun <- function(x, subject, ...)
+      locateVariants(x, subject, IntronVariants())
+
+  library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+  grl <- intronsByTranscript(TxDb.Hsapiens.UCSC.hg19.knownGene)
+  mclapply(c(vcf, vcf), fun, subject=grl)
+
+
+  ## B. Passing a TranscriptDb:
  
   ## Forking:
   ## In the case of forking, the TranscriptDb cannot be loaded
