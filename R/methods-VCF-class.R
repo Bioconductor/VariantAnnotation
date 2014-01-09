@@ -178,6 +178,7 @@ setReplaceMethod("info", c("VCF", "DataFrame"),
 {
     slot(x, "info") <- value
     .valid.VCFHeadervsVCF.fields(x, info)
+    validObject(x)
     x
 })
 
