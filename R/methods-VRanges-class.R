@@ -450,7 +450,7 @@ setMethod("duplicated", "VRanges",
 
 setMethod("match", c("VRanges", "VRanges"),
           function(x, table, nomatch = NA_integer_, incomparables = NULL,
-                   method = c("auto", "quick", "hash"), ...)
+                   method = c("auto", "quick", "hash"))
           {
             if (!isSingleNumberOrNA(nomatch))
               stop("'nomatch' must be a single number or NA")
@@ -469,6 +469,13 @@ setMethod("match", c("VRanges", "VRanges"),
                                         factor(alt(table), altLevels),
                                         start(table), width(table),
                                         nomatch = nomatch, method = method)
+          })
+
+setMethod("%in%", c("VRanges", "TabixFile"),
+          function(x, table)
+          {
+            table <- readVcfAsVRanges(table, genome=genome(x), param=x)
+            x %in% table
           })
 
 setMethod("tabulate", "VRanges", function(bin, nbins) {
