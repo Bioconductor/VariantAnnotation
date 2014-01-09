@@ -177,7 +177,7 @@ setReplaceMethod("info", c("VCF", "DataFrame"),
     function(x, value)
 {
     slot(x, "info") <- value
-    validObject(x)
+    .valid.VCFHeadervsVCF.fields(x, info)
     x
 })
 
@@ -207,6 +207,7 @@ setReplaceMethod("geno", c("VCF", "missing", "SimpleList"),
     function(x, i, ..., value)
 {
     assays(x) <- value
+    .valid.VCFHeadervsVCF.fields(x, geno)
     x
 })
 
@@ -214,6 +215,7 @@ setReplaceMethod("geno", c("VCF", "character", "matrix"),
     function(x, i, ..., value)
 {
     assay(x, i) <- value
+    .valid.VCFHeadervsVCF.fields(x, geno)
     x
 })
 
@@ -221,6 +223,7 @@ setReplaceMethod("geno", c("VCF", "numeric", "matrix"),
     function(x, i, ..., value)
 {
     assay(x, i) <- value
+    .valid.VCFHeadervsVCF.fields(x, geno)
     x
 })
 
@@ -228,6 +231,7 @@ setReplaceMethod("geno", c("VCF", "missing", "matrix"),
     function(x, i, ..., value)
 {
     assay(x) <- value
+    .valid.VCFHeadervsVCF.fields(x, geno)
     x
 })
 
@@ -445,11 +449,15 @@ setMethod(show, "VCF",
     printSmallDataTable(info(object), margin=margin) 
     if (length(header(object))) {
         if (length(hdr <- info(header(object)))) {
-            df <- as.data.frame(hdr[colnames(info(object)),])
-            if (nrow(df) > 0) {
+            nms <- intersect(colnames(info(object)), rownames(hdr))
+            diff <- setdiff(colnames(info(object)), rownames(hdr))
+            if (length(nms)) {
                 cat("info(header(vcf)):\n")
-                headerrec(df, "info")
+                headerrec(as.data.frame(hdr[nms,]), "info")
             }
+            if (length(diff))
+                cat("  Fields with no header:", 
+                    paste(diff, collapse=","), "\n")
         }
     }
     cat("geno(vcf):\n")
@@ -457,11 +465,15 @@ setMethod(show, "VCF",
     printSimpleList(geno, margin=margin) 
     if (length(header(object))) {
         if (length(hdr <- geno(header(object)))) {
-            df <- as.data.frame(hdr[names(geno),])
-            if (nrow(df) > 0) {
+            nms <- intersect(names(geno(object)), rownames(hdr))
+            diff <- setdiff(names(geno(object)), rownames(hdr))
+            if (length(nms)) {
                 cat("geno(header(vcf)):\n")
-                headerrec(df, "geno")
+                headerrec(as.data.frame(hdr[nms,]), "geno")
             }
+            if (length(diff))
+                cat("  Fields with no header:", 
+                    paste(diff, collapse=","), "\n")
         }
     }
 }

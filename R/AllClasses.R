@@ -200,14 +200,11 @@ setValidity("VCFHeader", .valid.VCFHeader, where=asNamespace("VariantAnnotation"
 ## the VCFHeader. Called from header<-,VCF-method. 
 .valid.VCFHeadervsVCF.fields <- function(object, slotname)
 {
-    dnms <- names(slotname(object))
-    hnms <- rownames(slotname(header(object)))
-    if (any(mvar <- !dnms %in% hnms)) {
-        msg <- paste(BiocGenerics:::selectSome(dnms[mvar], 5), 
-                     collapse=" ")
-        warning(paste0(sum(mvar), " ", attributes(slotname)$generic[1],
-                "fields have missing header information: ",
-                , msg, call.=FALSE))
+    diff <- setdiff(names(slotname(object)), rownames(slotname(header(object))))
+    if (length(diff)) {
+        warning(paste0(attributes(slotname)$generic[1],
+                " fields with no header: ", paste(diff, collapse=",")), 
+                call.=FALSE)
     }
     NULL
 }
