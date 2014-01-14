@@ -55,11 +55,6 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "CodingVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE, asHits=FALSE)
     {
-        if (!exists("mask", cache, inherits=FALSE)) {
-            origSeqlevels <- seqlevels(subject)
-            if (.setSubjectSeq(query, subject)) 
-                on.exit(seqlevels(subject) <- origSeqlevels)
-        } 
         if (!any(seqlevels(query) %in% seqlevels(subject)))
             return(.returnEmpty())
 
@@ -94,11 +89,6 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "IntronVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE, asHits=FALSE)
     {
-        if (!exists("mask", cache, inherits=FALSE)) {
-            origSeqlevels <- seqlevels(subject)
-            if (.setSubjectSeq(query, subject)) 
-                on.exit(seqlevels(subject) <- origSeqlevels)
-        } 
         if (!any(seqlevels(query) %in% seqlevels(subject)))
             return(.returnEmpty())
 
@@ -133,11 +123,6 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "ThreeUTRVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE, asHits=FALSE)
     {
-        if (!exists("mask", cache, inherits=FALSE)) {
-            origSeqlevels <- seqlevels(subject)
-            if (.setSubjectSeq(query, subject)) 
-                on.exit(seqlevels(subject) <- origSeqlevels)
-        } 
         if (!any(seqlevels(query) %in% seqlevels(subject)))
             return(.returnEmpty())
 
@@ -173,11 +158,6 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "FiveUTRVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE, asHits=FALSE)
     {
-        if (!exists("mask", cache, inherits=FALSE)) {
-            origSeqlevels <- seqlevels(subject)
-            if (.setSubjectSeq(query, subject)) 
-                on.exit(seqlevels(subject) <- origSeqlevels)
-        } 
         if (!any(seqlevels(query) %in% seqlevels(subject)))
             return(.returnEmpty())
 
@@ -214,11 +194,6 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb",
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE)
     {
-        if (!exists("mask", cache, inherits=FALSE)) {
-            origSeqlevels <- seqlevels(subject)
-            if (.setSubjectSeq(query, subject)) 
-                on.exit(seqlevels(subject) <- origSeqlevels)
-        } 
         if (!any(seqlevels(query) %in% seqlevels(subject)))
             return(.returnEmpty())
 
@@ -249,11 +224,6 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "SpliceSiteVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE, asHits=FALSE)
     {
-        if (!exists("mask", cache, inherits=FALSE)) {
-            origSeqlevels <- seqlevels(subject)
-            if (.setSubjectSeq(query, subject)) 
-                on.exit(seqlevels(subject) <- origSeqlevels)
-        } 
         if (!any(seqlevels(query) %in% seqlevels(subject)))
             return(.returnEmpty())
 
@@ -288,11 +258,6 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "PromoterVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE, asHits=FALSE)
     { 
-        if (!exists("mask", cache, inherits=FALSE)) {
-            origSeqlevels <- seqlevels(subject)
-            if (.setSubjectSeq(query, subject)) 
-                on.exit(seqlevels(subject) <- origSeqlevels)
-        } 
         if (!any(seqlevels(query) %in% seqlevels(subject)))
             return(.returnEmpty())
 
@@ -363,9 +328,6 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE)
     {
-        origSeqlevels <- seqlevels(subject)
-        if (.setSubjectSeq(query, subject)) 
-            on.exit(seqlevels(subject) <- origSeqlevels) 
         if (!any(seqlevels(query) %in% seqlevels(subject)))
             return(.returnEmpty())
         cache[["mask"]] <- TRUE

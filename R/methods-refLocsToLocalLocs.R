@@ -6,8 +6,6 @@ setMethod("refLocsToLocalLocs",
     signature("GRanges", "TranscriptDb", "missing"),
     function(ranges, txdb, cdsbytx, ...)
 {
-    ## remove circular
-    .setSubjectSeq(ranges, txdb)
     cdsbytx <- cdsBy(txdb, "tx")
     callGeneric(ranges=ranges, cdsbytx=cdsbytx)
 })

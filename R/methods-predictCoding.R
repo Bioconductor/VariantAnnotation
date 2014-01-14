@@ -52,10 +52,6 @@ setMethod("predictCoding", c("GRanges", "TranscriptDb", "ANY", "DNAStringSet"),
     if (!any(seqlevels(query) %in% seqlevels(subject)))
         warning("none of seqlevels(query) match seqlevels(subject)")
 
-    origSeqlevels <- seqlevels(subject)
-    if (.setSubjectSeq(query, subject)) 
-        on.exit(seqlevels(subject) <- origSeqlevels)
-
     if (!exists(".__init__", cache, inherits=FALSE)) {
         cache[["cdsbytx"]] <- cdsBy(subject)
         cache[["txbygene"]] <- transcriptsBy(subject, "gene")
