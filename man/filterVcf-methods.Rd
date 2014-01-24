@@ -43,8 +43,10 @@
     filtering fully parsed VCF objects.}
 
   \item{param}{A \code{\link{ScanVcfParam}} instance restricting input
-    of particular \code{info} or \code{geno} fileds, or genomic
-    locations.}
+    of particular \code{info} or \code{geno} fields, or genomic
+    locations. Applicable when applying a \code{filter} only.
+    Prefiltering involves a grep of unparsed lines in the file; 
+    indexing is not used.}
 
 }
 

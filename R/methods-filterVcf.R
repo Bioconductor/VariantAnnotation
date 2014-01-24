@@ -24,6 +24,10 @@ setMethod("filterVcf", "character",
 {
     if (verbose)
         message("starting prefilter")
+    if (length(vcfWhich(param))) {
+        warning("vcfWhich(param) ignored when using prefilter")
+        vcfWhich(param) <- GRanges()
+    }
     if (!isOpen(tbxFile)) {
         open(tbxFile)
         on.exit(close(tbxFile), add=TRUE)
@@ -58,26 +62,34 @@ setMethod("filterVcf", "character",
 {
     if (verbose)
         message("starting filter")
-    if (!isOpen(tbxFile)) {
-        open(tbxFile)
-        on.exit(close(tbxFile), add=TRUE)
-    }
-
-    filtered <- file(destination, open="w")
-    needsClosing <- TRUE
-    on.exit(if (needsClosing) close(filtered), add=TRUE)
-
-    nTotal <- 0L
-    while (nrow(vcfChunk <- readVcf(tbxFile, genome, ..., param=param))) {
+    if (length(vcfWhich(param))) {
+        yieldSize(tbxFile) <- NA_integer_ 
+        vcfChunk <- readVcf(tbxFile, genome, ..., param=param)
         if (verbose)
-            message("filtering ", nTotal <- nTotal + nrow(vcfChunk),
-                    " records")
+            message("filtering ", nrow(vcfChunk), " records")
         vcfChunk <- subsetByFilter(vcfChunk, filters)
         writeVcf(vcfChunk, filtered)
-    }
-    close(filtered)
-    needsClosing <- FALSE
+    } else {
+        if (!isOpen(tbxFile)) {
+            open(tbxFile)
+            on.exit(close(tbxFile), add=TRUE)
+        }
 
+        filtered <- file(destination, open="w")
+        needsClosing <- TRUE
+        on.exit(if (needsClosing) close(filtered), add=TRUE)
+
+        nTotal <- 0L
+        while (nrow(vcfChunk <- readVcf(tbxFile, genome, ..., param=param))) {
+            if (verbose)
+                message("filtering ", nTotal <- nTotal + nrow(vcfChunk),
+                        " records")
+            vcfChunk <- subsetByFilter(vcfChunk, filters)
+            writeVcf(vcfChunk, filtered)
+        }
+        close(filtered)
+        needsClosing <- FALSE
+    }
     if (verbose)
         message("completed filtering")
     destination
