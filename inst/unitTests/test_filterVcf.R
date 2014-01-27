@@ -120,7 +120,7 @@ test_prefilterOnSomaticStatusThenFilterOnSnps <- function()
         a <- alt(x)
         altSnp <- elementLengths(a) == 1L
         ai <- unlist(a[altSnp])    # all length 1, so unlisting is 1:1 map
-        altSnp[altSnp] <- nchar(ai) == 1L & (ai == c("A", "C", "G", "T"))
+        altSnp[altSnp] <- nchar(ai) == 1L & (ai %in% c("A", "C", "G", "T"))
         refSnp & altSnp
         }
  
