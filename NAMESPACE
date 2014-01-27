@@ -47,7 +47,7 @@ importFrom(IRanges,
     IRanges, isSingleNumber, isSingleString, isTRUEorFALSE, LogicalList, 
     NumericList, PartitioningByEnd, PartitioningByWidth, seqsplit,
     SimpleList, splitAsList, successiveViews, FilterMatrix,
-    isSingleNumberOrNA, endoapply, metadata, filterRules
+    isSingleNumberOrNA, endoapply, metadata, filterRules, subsetByFilter
 )
 
 importClassesFrom(IRanges, 

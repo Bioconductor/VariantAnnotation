@@ -245,5 +245,5 @@ readGT <- function(file, nucleotides=FALSE, param=ScanVcfParam(), ...,
     else if (type == "GT")
         param=ScanVcfParam("ALT", NA, var, which=which)
     scn <- scanVcf(file, param=param)
-    lst <- .collapseLists(scn, param)
+    .collapseLists(scn, param)
 }
