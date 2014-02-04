@@ -28,7 +28,7 @@ importMethodsFrom(AnnotationDbi,
 )
 
 importFrom(GenomicFeatures, 
-    extractTranscriptsFromGenome
+    extractTranscriptSeqs
 )
 
 importClassesFrom(GenomicFeatures, 

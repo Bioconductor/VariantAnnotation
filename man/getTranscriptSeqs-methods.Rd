@@ -30,7 +30,7 @@
 
 \details{
   \code{getTranscriptSeqs} is a wrapper for the
-  \code{extractTranscriptsFromGenome} and \code{getSeq} functions. The 
+  \code{extractTranscriptSeqs} and \code{getSeq} functions. The 
   purpose is to allow sequence extraction from either a
   \link[BSgenome]{BSgenome} or \link[Rsamtools]{FaFile}. Transcript
   sequences are extracted based on the boundaries of the feature
@@ -46,7 +46,7 @@
 
 \seealso{
   \link{predictCoding}
-  \link[GenomicFeatures]{extractTranscriptsFromGenome}
+  \link[GenomicFeatures]{extractTranscriptSeqs}
   \link[Biostrings]{getSeq}
 }
 

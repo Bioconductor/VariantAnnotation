@@ -52,10 +52,6 @@ setMethod("predictCoding", c("GRanges", "TranscriptDb", "ANY", "DNAStringSet"),
     if (!any(seqlevels(query) %in% seqlevels(subject)))
         warning("none of seqlevels(query) match seqlevels(subject)")
 
-    origSeqlevels <- seqlevels(subject)
-    if (.setSubjectSeq(query, subject)) 
-        on.exit(seqlevels(subject) <- origSeqlevels)
-
     if (!exists(".__init__", cache, inherits=FALSE)) {
         cache[["cdsbytx"]] <- cdsBy(subject)
         cache[["txbygene"]] <- transcriptsBy(subject, "gene")
@@ -68,15 +64,15 @@ setMethod("predictCoding", c("GRanges", "TranscriptDb", "ANY", "DNAStringSet"),
                           use.names=FALSE))[["tx_id"]],
                       stringsAsFactors=FALSE)
 
-    txlocal <- .predictCodingGRangesList(query, cache[["cdsbytx"]], seqSource, 
-                                         varAllele, ignore.strand=ignore.strand)
+    txlocal <- .predictCodingGRangesList(query, cache[["cdsbytx"]], 
+                   seqSource, varAllele, ..., ignore.strand=ignore.strand)
     txid <- values(txlocal)[["TXID"]] 
     values(txlocal)[["GENEID"]] <- map$geneid[match(txid, map$txid)]
     txlocal
 }
 
-.predictCodingGRangesList <- function(query, cdsbytx, seqSource, varAllele, ...,
-                                      ignore.strand=FALSE)
+.predictCodingGRangesList <- function(query, cdsbytx, seqSource, varAllele, 
+                                      ..., ignore.strand=FALSE)
 {
     ## FIXME : set query back after olaps
     if (any(insertion <- width(query) == 0))
@@ -125,9 +121,12 @@ setMethod("predictCoding", c("GRanges", "TranscriptDb", "ANY", "DNAStringSet"),
             altallele[translateidx]
 
         ## translation
-        refAA <- translate(refCodon)
+        refAA <- translate(refCodon, genetic.code=GENETIC_CODE,
+                           if.fuzzy.codon="error")
         varAA <- AAStringSet(rep("", length(txlocal))) 
-        varAA[translateidx] <- translate(varCodon[translateidx])
+        varAA[translateidx] <- translate(varCodon[translateidx],
+                                         genetic.code=GENETIC_CODE, 
+                                         if.fuzzy.codon="error")
     } else {
         refAA <- varAA <- AAStringSet(rep("", length(txlocal))) 
     }

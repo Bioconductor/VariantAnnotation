@@ -5,7 +5,7 @@
 setMethod("getTranscriptSeqs",  c("GRangesList", "BSgenome"),
     function(query, subject, ...)
     {
-    extractTranscriptsFromGenome(subject, query)
+    extractTranscriptSeqs(subject, query)
     }
 )
 

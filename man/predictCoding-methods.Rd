@@ -49,7 +49,9 @@
     will be missing. This value is taken internally from the \code{VCF} with
     \code{alt(<VCF>)}.
   }
-  \item{\dots}{Additional arguments passed to methods.
+  \item{\dots}{Additional arguments passed to methods. Arguments
+    \code{genetic.code} and \code{if.fuzzy.codon} are supported for the
+    \code{translate} function.
   }
   \item{ignore.strand}{A \code{logical} indicating if strand should be ignored
     when performing overlaps.

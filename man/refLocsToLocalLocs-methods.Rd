@@ -87,7 +87,7 @@ refLocsToLocalLocs(ranges, txdb, cdsbytx, ...)
   \code{predictCoding}
   \code{getTranscriptSeqs}
   \link[GenomicFeatures]{transcriptLocs2refLocs}
-  \link[GenomicFeatures]{extractTranscriptsFromGenome}
+  \link[GenomicFeatures]{extractTranscriptSeqs}
 }
 
 \examples{
