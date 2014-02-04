@@ -72,7 +72,9 @@ setMethod("predictCoding", c("GRanges", "TranscriptDb", "ANY", "DNAStringSet"),
 }
 
 .predictCodingGRangesList <- function(query, cdsbytx, seqSource, varAllele, 
-                                      ..., ignore.strand=FALSE)
+                                      ..., genetic.code=GENETIC_CODE,
+                                      if.fuzzy.codon="error", 
+                                      ignore.strand=FALSE)
 {
     ## FIXME : set query back after olaps
     if (any(insertion <- width(query) == 0))
@@ -121,12 +123,12 @@ setMethod("predictCoding", c("GRanges", "TranscriptDb", "ANY", "DNAStringSet"),
             altallele[translateidx]
 
         ## translation
-        refAA <- translate(refCodon, genetic.code=GENETIC_CODE,
-                           if.fuzzy.codon="error")
+        refAA <- translate(refCodon, genetic.code=genetic.code,
+                           if.fuzzy.codon=if.fuzzy.codon)
         varAA <- AAStringSet(rep("", length(txlocal))) 
         varAA[translateidx] <- translate(varCodon[translateidx],
-                                         genetic.code=GENETIC_CODE, 
-                                         if.fuzzy.codon="error")
+                                         genetic.code=genetic.code, 
+                                         if.fuzzy.codon=if.fuzzy.codon)
     } else {
         refAA <- varAA <- AAStringSet(rep("", length(txlocal))) 
     }
