@@ -347,7 +347,7 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
   if (length(sampleLevels) > 1) {
     samplesToUniq <- tapply(x, sampleNames(x), function(xi) {
       match(xi, xUniq)
-    })
+    }, simplify=FALSE)
     mergeToUniq <- function(v, sampleToUniq, default) {
       ans <- rep(default, length(xUniq))
       ans[sampleToUniq] <- as.vector(v)
@@ -357,7 +357,7 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
       default <- NA_integer_
       if (length(v) > length(x)) {
         number <- length(v) / length(x)
-        v <- split(v, rep(seq_len(length(x)), number))
+        v <- split(as.vector(v), rep(seq_len(length(x)), number))
         default <- list(rep(default, number))
       }
       mapply(mergeToUniq, split(v, as.factor(sampleNames(x))), samplesToUniq,
