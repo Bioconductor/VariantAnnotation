@@ -190,7 +190,6 @@ readGT <- function(file, nucleotides=FALSE, param=ScanVcfParam(), ...,
     ALT <- lst$ALT
     REF <- as.character(lst$REF, use.names=FALSE)
     GT <- res <- lst$GENO$GT
-    ## FIXME: should scanVcf return ".|."
     if (any(missing <- grepl(".", GT, fixed=TRUE))) 
         GT[missing] <- ".|."
     phasing <- rep("|", length(GT))
@@ -233,17 +232,20 @@ readGT <- function(file, nucleotides=FALSE, param=ScanVcfParam(), ...,
     if (!is.null(msg))
         stop(msg)
 
-    if (is(param, "ScanVcfParam"))
+    if (is(param, "ScanVcfParam")) {
         which <- vcfWhich(param)
-    else
+        samples <- vcfSamples(param)
+    } else {
         which <- param 
+        samples <- character()
+    } 
 
     if (type == "info")
         param=ScanVcfParam(NA, var, NA, which=which)
     else if (type == "geno") 
-        param=ScanVcfParam(NA, NA, var, which=which)
+        param=ScanVcfParam(NA, NA, var, samples, which=which)
     else if (type == "GT")
-        param=ScanVcfParam("ALT", NA, var, which=which)
+        param=ScanVcfParam("ALT", NA, var, samples, which=which)
     scn <- scanVcf(file, param=param)
     .collapseLists(scn, param)
 }
