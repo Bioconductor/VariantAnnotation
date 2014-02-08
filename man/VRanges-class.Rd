@@ -184,6 +184,15 @@
           in the VCF header; a component is required to be coercible to
           a character vector of length one.}
       }
+
+      Note that \code{identical(x, as(as(x, "VCF"), "VRanges"))}
+      generally return \code{FALSE}.  During coercion to VCF, the "geno"
+      components are reshaped into matrix form, with NAs filling the
+      empty cells. The reverse coercion will not drop the NA values, so
+      rows are added to the new VRanges. All logical values will become
+      integers in VCF, and there is no automatic way of regenerating the
+      logical column with the reverse coercion. There are many other
+      cases of irreversibility.
     }
     \item{}{
       \code{as(from, "VCF")}: Like calling \code{asVCF(from)}.

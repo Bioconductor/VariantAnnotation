@@ -258,6 +258,23 @@ test_VRanges_vcf <- function() {
                             ncol = 0L))
   seqinfo(vrA.stripped) <- seqinfo(vrA)
   checkIdenticalVCF(vrA.stripped, vrA.vcf)
+
+  vr <- VRanges(seqnames = c("chr1", "chr2"),
+                ranges = IRanges(c(1, 10), c(5, 20)),
+                ref = c("T", "A"), alt = c("C", "T"),
+                refDepth = c(5, 10), altDepth = c(7, 6),
+                totalDepth = c(12, 17), sampleNames = Rle(letters[1:2]),
+                softFilterMatrix =
+                cbind(depth = c(TRUE, FALSE)),
+                tumorSpecific = c(FALSE, TRUE))
+
+  vr_small <- vr
+  width(vr_small) <- 1
+  vcf_small <- as(vr_small, "VCF")
+  vr_back <- as(vcf_small, "VRanges")
+  vr_back$QUAL <- NULL
+  vr_back$tumorSpecific <- as.logical(vr_back$tumorSpecific)
+  checkIdentical(vr_small, vr_back[-(2:3)])
 }
 
 

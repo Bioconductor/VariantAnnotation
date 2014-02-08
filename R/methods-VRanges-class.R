@@ -348,41 +348,50 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
     samplesToUniq <- tapply(x, sampleNames(x), function(xi) {
       match(xi, xUniq)
     }, simplify=FALSE)
-    mergeToUniq <- function(v, sampleToUniq, default) {
-      ans <- rep(default, length(xUniq))
-      ans[sampleToUniq] <- as.vector(v)
-      ans
+  }
+  
+  genoArray <- function(v) {
+    v <- as.vector(v) # handles e.g. Rle
+    if (is.logical(v)) {
+      v <- as.integer(v)
     }
-    genoMatrix <- function(v) {
-      default <- NA_integer_
-      if (length(v) > length(x)) {
-        number <- length(v) / length(x)
-        v <- split(as.vector(v), rep(seq_len(length(x)), number))
-        default <- list(rep(default, number))
+    width <- length(v)/length(x)
+    if (width > 1L) {
+      v <- matrix(v, nrow=length(x), ncol=width)
+    }
+    if (length(sampleLevels) > 1L) {
+      sample.ord <- order(sampleNames(x))
+      if (is.matrix(v)) {
+        v <- v[sample.ord,,drop=FALSE]
+      } else {
+        v <- v[sample.ord]
       }
-      mapply(mergeToUniq, split(v, as.factor(sampleNames(x))), samplesToUniq,
-             MoreArgs = list(default))
+      ind <- unlist(samplesToUniq, use.names=FALSE) +
+        (togroup(samplesToUniq)-1L)*length(xUniq)
+      a <- matrix(NA_integer_, nrow=length(xUniq)*length(sampleLevels),
+                  ncol=width)
+      a[ind,] <- v
+    } else {
+      a <- v
     }
-  } else {
-    genoMatrix <- function(v) {
-      if (is.logical(v))
-        v <- as.integer(v)
-      if (length(v) > length(x))
-        v <- split(v, rep(seq_len(length(x)), length(v) / length(x)))
-      matrix(as.vector(v), nrow = length(x), ncol = length(sampleLevels))
+    if (width > 1L) {
+      array(a, c(length(xUniq), length(sampleLevels), ncol(a)))
+    } else {
+      matrix(a, length(xUniq), length(sampleLevels))
     }
   }
+
   alleleDepth <- c(refDepth(x), altDepth(x))
   filtMat <- softFilterMatrix(x)
   if (ncol(filtMat) > 0L)
     filtMat <- filtMat[,setdiff(colnames(filtMat), filter), drop=FALSE]
   ftStrings <- makeFILTERstrings(filtMat)
   geno <-
-    SimpleList(AD = genoMatrix(alleleDepth),
-               DP = genoMatrix(totalDepth(x)),
-               FT = genoMatrix(ftStrings))
+    SimpleList(AD = genoArray(alleleDepth),
+               DP = genoArray(totalDepth(x)),
+               FT = genoArray(ftStrings))
   if (length(genoMCols) > 0L)
-    geno <- c(geno, SimpleList(lapply(mcols(x)[genoMCols], genoMatrix)))
+    geno <- c(geno, SimpleList(lapply(mcols(x)[genoMCols], genoArray)))
 
   VCF(rowData = rowData, colData = colData, exptData = exptData, fixed = fixed,
       geno = geno, info = mcols(xUniq)[info])
