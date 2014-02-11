@@ -149,7 +149,7 @@ setMethod(readVcf, c(file="character", genome="missing",
 
 ## lightweight read functions retrieve a single variable
 
-readInfo <- function(file, x, param=ScanVcfParam(), ..., row.names=FALSE)
+readInfo <- function(file, x, param=ScanVcfParam(), ..., row.names=TRUE)
 {
     lst <- .readLite(file, x, param, "info")
     rowData <- lst$rowData
@@ -160,7 +160,7 @@ readInfo <- function(file, x, param=ScanVcfParam(), ..., row.names=FALSE)
     res 
 } 
 
-readGeno <- function(file, x, param=ScanVcfParam(), ..., row.names=FALSE)
+readGeno <- function(file, x, param=ScanVcfParam(), ..., row.names=TRUE)
 {
     lst <- .readLite(file, x, param, "geno")
     rowData <- lst$rowData
@@ -171,7 +171,7 @@ readGeno <- function(file, x, param=ScanVcfParam(), ..., row.names=FALSE)
 } 
 
 readGT <- function(file, nucleotides=FALSE, param=ScanVcfParam(), ..., 
-                   row.names=FALSE)
+                   row.names=TRUE)
 {
     lst <- .readLite(file, "GT", param, "GT")
     if (nucleotides)

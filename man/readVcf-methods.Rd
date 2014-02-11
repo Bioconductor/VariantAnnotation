@@ -33,9 +33,9 @@
   \S4method{readVcf}{character,missing,missing}(file, genome, param, ...)
 
 ## Lightweight functions to read a single variable
-readInfo(file, x, param=ScanVcfParam(), ..., row.names=FALSE)
-readGeno(file, x, param=ScanVcfParam(), ..., row.names=FALSE)
-readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=FALSE)
+readInfo(file, x, param=ScanVcfParam(), ..., row.names=TRUE)
+readGeno(file, x, param=ScanVcfParam(), ..., row.names=TRUE)
+readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
 }
 
 \arguments{
@@ -259,9 +259,9 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=FALSE)
   HQ <- readGeno(fl, "HQ")
 
   ## Import GT as numeric representation 
-  GT <- readGT(fl, row.names=TRUE)
+  GT <- readGT(fl)
   ## Import GT as nucleotides 
-  GT <- readGT(fl, nucleotides=TRUE, row.names=TRUE)
+  GT <- readGT(fl, nucleotides=TRUE)
 
   ## ---------------------------------------------------------------------
   ## Data subsets with ScanVcfParam
