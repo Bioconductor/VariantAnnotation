@@ -130,13 +130,20 @@ parseFilterStrings <- function(x) {
 }
 
 genoToMCol <- function(x) {
-  if (length(dim(x)) == 3)
-    I(matrix(x, nrow(x) * ncol(x), dim(x)[3]))
-  else {
-    dim(x) <- NULL
-    if (is.list(x))
-      x <- as(x, "List")
-    x
+  if (length(dim(x)) == 3) {
+    I(matrix(x, nrow(x) * max(ncol(x), 1L), dim(x)[3]))
+  } else {
+    if (ncol(x) == 0L) {
+      if (is.list(x)) {
+        x <- as.logical(x)
+      }
+      x <- Rle(x[NA], nrow(x))
+    } else {
+      dim(x) <- NULL
+      if (is.list(x))
+        x <- as(x, "List")
+      x
+    }
   }
 }
 
@@ -184,7 +191,7 @@ setAs("VCF", "VRanges", function(from) {
   if (!is.null(geno(from)$FT))
     filter <- cbind(filter, parseFilterStrings(as.vector(geno(from)$FT)))
   otherGeno <- geno(from)[setdiff(names(geno(from)), c("AD", "DP", "FT"))]
-  if (length(otherGeno) > 0L && ncol(from) > 0L)
+  if (length(otherGeno) > 0L)
     meta <- DataFrame(meta, lapply(otherGeno, genoToMCol))
   vr <- VRanges(seqnames, ranges, ref, alt,
                 totalDepth, refDepth, altDepth,
