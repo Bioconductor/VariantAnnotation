@@ -131,7 +131,7 @@ parseFilterStrings <- function(x) {
 
 genoToMCol <- function(x) {
   if (length(dim(x)) == 3)
-    matrix(x, nrow(x) * ncol(x), dim(x)[3])
+    I(matrix(x, nrow(x) * ncol(x), dim(x)[3]))
   else {
     dim(x) <- NULL
     if (is.list(x))
@@ -152,7 +152,7 @@ setAs("VCF", "VRanges", function(from) {
   alt <- as.character(alt)
   alt[!nzchar(alt)] <- NA
   ad <- geno(from)$AD
-  if (!is.null(ad)) {
+  if (!is.null(ad) && ncol(from) > 0L) {
     refDepth <- ad[,,1,drop=FALSE]
     altDepth <- ad[,,2,drop=FALSE]
   } else {
@@ -160,7 +160,7 @@ setAs("VCF", "VRanges", function(from) {
     altDepth <- NA_integer_
   }
   totalDepth <- geno(from)$DP
-  if (is.null(totalDepth))
+  if (is.null(totalDepth) || ncol(from) == 0L)
     totalDepth <- NA_integer_
   nsamp <- ncol(from)
   if (ncol(from) > 0L)
@@ -184,7 +184,7 @@ setAs("VCF", "VRanges", function(from) {
   if (!is.null(geno(from)$FT))
     filter <- cbind(filter, parseFilterStrings(as.vector(geno(from)$FT)))
   otherGeno <- geno(from)[setdiff(names(geno(from)), c("AD", "DP", "FT"))]
-  if (length(otherGeno) > 0L)
+  if (length(otherGeno) > 0L && ncol(from) > 0L)
     meta <- DataFrame(meta, lapply(otherGeno, genoToMCol))
   vr <- VRanges(seqnames, ranges, ref, alt,
                 totalDepth, refDepth, altDepth,

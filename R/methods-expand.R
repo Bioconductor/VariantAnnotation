@@ -84,7 +84,8 @@ setMethod("expand", "CollapsedVCF",
     isA <- names(gvar) %in% rownames(ghdr)[isA]
     gvar[!isA & !isAD] <- endoapply(gvar[!isA & !isAD], function(i) {
                               if (is(i, "matrix")) {
-                                  matrix(i[idx, ], ncol=ncol(x))
+                                  matrix(i[idx, ], nrow=length(idx),
+                                         ncol=ncol(x))
                               } else {
                                   idim <- c(length(idx), dim(i)[2], dim(i)[3])
                                   array(i[idx, , ], dim=idim)
@@ -95,12 +96,12 @@ setMethod("expand", "CollapsedVCF",
 ## returns an array of REF,ALT pairs
 .expandAD <- function(AD, idxlen, xcols)
 {
-    if (is(AD, "list")) {
+    if (is.list(AD)) {
         adpart <- PartitioningByWidth(AD)
         nalt <- width(adpart) - 1L
         if (sum(nalt) != idxlen*xcols)
           stop("length of AD does not match expanded index")
-        AD <- unlist(AD, use.names=FALSE)
+        AD <- as.integer(unlist(AD, use.names=FALSE))
         ref <- logical(length(AD))
         ref[start(adpart)] <- TRUE
         vec <- c(rep(AD[ref], nalt), AD[!ref])
