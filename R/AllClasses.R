@@ -78,6 +78,9 @@ setClass("VCF",
 
 setClass("CollapsedVCF", 
     contains="VCF",
+    prototype=prototype(
+      fixed=DataFrame(REF=DNAStringSet(), ALT=DNAStringSetList(),
+                      QUAL=numeric(), FILTER=character())),
     validity=.valid.VCF)
 
 setAs("CollapsedVCF", "SummarizedExperiment",
@@ -111,6 +114,9 @@ setAs("CollapsedVCF", "SummarizedExperiment",
 
 setClass("ExpandedVCF", 
     contains="VCF",
+    prototype=prototype(
+      fixed=DataFrame(REF=DNAStringSet(), ALT=DNAStringSet(),
+                      QUAL=numeric(), FILTER=character())),
     validity=.valid.VCF)
 
 ### Coercion:

@@ -16,10 +16,25 @@ VCF <-
              ..., collapsed=TRUE, verbose=FALSE)
 {
     rownames(info) <- rownames(fixed) <- NULL
-    if (collapsed)
+    if (collapsed) {
         class <- "CollapsedVCF"
-    else
+        if (!length(fixed)) {
+            fixed=DataFrame(
+                REF=DNAStringSet(rep("", length(rowData))), 
+                ALT=DNAStringSetList(as.list(rep("", length(rowData)))),
+                QUAL=rep(NA_real_, length(rowData)), 
+                FILTER=rep(NA_character_, length(rowData)))
+        }
+    } else {
         class <- "ExpandedVCF"
+        if (!length(fixed)) {
+            fixed=DataFrame(
+                REF=DNAStringSet(rep("", length(rowData))), 
+                ALT=DNAStringSet(rep("", length(rowData))),
+                QUAL=rep(NA_real_, length(rowData)), 
+                FILTER=rep(NA_character_, length(rowData)))
+        }
+    }
 
     new(class, SummarizedExperiment(assays=geno, rowData=rowData,
         colData=colData, exptData=exptData), fixed=fixed, info=info, ...)
@@ -80,7 +95,7 @@ setMethod("qual", "VCF",
     slot(x, "fixed")$QUAL
 })
 
-setReplaceMethod("qual", c("VCF", "integer"),
+setReplaceMethod("qual", c("VCF", "numeric"),
     function(x, value)
 {
     .checkLength(x, length(value))

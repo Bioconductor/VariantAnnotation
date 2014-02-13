@@ -32,7 +32,7 @@
 \alias{qual}
 \alias{qual,VCF-method}
 \alias{qual<-}
-\alias{qual<-,VCF,integer-method}
+\alias{qual<-,VCF,numeric-method}
 \alias{filt}
 \alias{filt,VCF-method}
 \alias{filt<-}
@@ -154,7 +154,7 @@
         }
         \item{\code{qual(x)}, \code{qual(x) <- value}:
           Returns or sets the quality scores (QUAL). \code{value} must 
-          be an \code{integer(1L)}.
+          be an \code{numeric(1L)}.
         }
         \item{\code{filt(x)}, \code{filt(x) <- value}:
           Returns or sets the filter data (FILT). \code{value} must 
@@ -384,7 +384,7 @@ head(info(vcf))
 ## All genotype fields can be seen with geno(). Individual
 ## fields are accessed with '$' or '[['.
 geno(vcf)
-identical(geno(vcf)$DP, geno(vcf)[[3]])
+identical(geno(vcf)$GQ, geno(vcf)[[2]])
 
 ## ----------------------------------------------------------------
 ## Renaming seqlevels and subsetting 
@@ -403,7 +403,7 @@ seqlevels(vcf2)
 
 ## The VCF can also be subset by seqlevel using 'keepSeqlevels'
 ## or 'dropSeqlevels'. See ?keepSeqlevels for details. 
-vcf3 <- keepSeqlevels(vcf, "chr2")
+vcf3 <- keepSeqlevels(vcf2, "chr2")
 seqlevels(vcf3)
 
 ## ----------------------------------------------------------------
@@ -436,8 +436,7 @@ vcf
 ## than one alternate allele per variant.
 alt(vcf)
 
-## When structural variants are present, ALT is 
-## a CompressedCharacterList.
+## For structural variants ALT is a CharacterList.
 fl <- system.file("extdata", "structural.vcf", 
                   package="VariantAnnotation")
 vcf <- readVcf(fl, genome="hg19")
