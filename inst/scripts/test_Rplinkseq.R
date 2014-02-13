@@ -1,8 +1,8 @@
-### --------------------------------------------------------------------------
+### ======================================================================
 ### Testing Rplinkseq and VariantAnnotation
-### --------------------------------------------------------------------------
+### ======================================================================
 ###
-### September 2013
+### February 2014
 ### 'rhino03' Ubuntu server, 387 Gb RAM
 ### 16 processors with the following configuration:
 ###
@@ -36,110 +36,195 @@
 ### address sizes	: 46 bits physical, 48 bits virtual
 ### power management:
 
+### --------------------------------------------------------------------------
+### Objectives
+### --------------------------------------------------------------------------
+
+### Compare runtimes between Rplinkseq and VariantAnnotation packages.
+###
+###
+### Test functions:
+###
+### load.vcf:    Data are loaded from a vcf file into a list of lists 
+###              and accessed with x.consensus* functions. (Rplinkseq) 
+###
+### var.fetch:   Data are loaded from a PLINK/Seq 'project' into a list of
+###              lists and accessed with x.consensus* functions. (Rplinkseq) 
+###
+### meta.fetch:  Data are loaded from a PLINK/Seq 'project' and parsed into
+###              a data.frame. (Rplinkseq)
+###
+### var.iterate: Applies a function to data from a PLINK/Seq 'project'
+###              while iterating. Result of function is returned.
+###              (Rplinkseq)
+###
+### scanVcf:     Data are loaded from a vcf file. Info and geno fields are 
+###              parsed into a list of lists; other 'core' fields are
+###              returned as a GRAnges object. (VariantAnnotation)
+###
+###
+### Test cases:
+###
+### Test I:      Query by range.
+###              Import data by randomly chosen genomic range. 
+###              (Functions: load.vcf, var.fetch, scanVcf)
+###
+### Test II:     Query by range and fields.
+###              Import data by genomic range and 4 randomly
+###              chosen info (2) and geno (2) fields.
+###              (Functions: meta.fetch, scanVcf)
+### 
+### Test III.    Iterate through file.
+###              A simple function is applied to all records in the
+###              file in an iterative fashion.
+###              (Functions: var.iterate, scanVcf)
+###
 
 ### --------------------------------------------------------------------------
-### Set up.
+### Data
+### --------------------------------------------------------------------------
+
+### Test file:
+### Size on disk: 1.8G compressed
+### Contents: 494328 variants, 1092 samples, 22 INFO, and 3 GENO fields
+### Download location: 
+### ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20110521/ALL.chr22.phase1_release_v3.20101123.snps_indels_svs.genotypes.vcf.gz
+###
+### Test subset:
+### An arbitrary subset of data was chosen for testing because the full file 
+### requires >250G in memory. The subset range is 2e7 to 2.5e7 and contains 
+### 63088 records. This subset is the 'range' in the mask and param objects. 
+###
+### PLINK/Seq 'project':
+### From the raw vcf on disk we creted a PLINK/Seq 'project' so we could use 
+### the var.iterate function. A 'project' creates compressed, indexed, SQLite
+### database from input files. This one took ~30 minutes to create.
+### pseq proj new-project
+### pseq proj load-vcf --vcf 'ALL.chr22.phase1_release_v3.20101123.snps_indels_svs.genotypes.vcf.gz'
+
+### --------------------------------------------------------------------------
+### Set up 
 ### --------------------------------------------------------------------------
 library(microbenchmark)
 library(VariantAnnotation)
 library(Rplinkseq)  ## version 0.08
-
-## 494328 variants, 1092 samples, 22 INFO, 3 GENO
-## ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20110521/ALL.chr22.phase1_release_v3.20101123.snps_indels_svs.genotypes.vcf.gz
-path <- "/loc/no-backup/vobencha/"
-fl <- paste0(path,
-"ALL.chr22.phase1_release_v3.20101123.snps_indels_svs.genotypes.vcf.gz")
-
+fl <- "/loc/no-backup/vobencha/ALL.chr22.phase1_release_v3.20101123.snps_indels_svs.genotypes.vcf.gz"
+### Attach the 'project' to the R session:
+pseq.project("proj") 
 
 ### --------------------------------------------------------------------------
-### Iterate through complete file.
+### Test I. Query by range
 ### --------------------------------------------------------------------------
 
-### (i) Rplinkseq:
-### Rplinkseq has no 'yield' or iterating capability. Attempting to 
-### read the full file takes > 250 GIG. The file can be read in chunks 
-### by genomic position. Looping through positions would require previous
-### knowledge of the number of records in each range.
+### load.vcf:
+mask <- "reg=22:20000000..25000000"
+loadvcf_1 <- function()
+    load.vcf(fl, mask=mask, limit=200000)
 
-xx <- load.vcf(fl, limit=500000) ## requires > 250 GIG
+### var.fetch:
+varfetch_1 <- function()
+     var.fetch(mask=mask, limit=200000)
 
-
-### (ii) scanVcf():
-> gc(reset=TRUE)
-          used  (Mb) gc trigger  (Mb) max used  (Mb)
-Ncells 2600229 138.9    3289005 175.7  2600229 138.9
-Vcells 1951494  14.9    3124965  23.9  1951494  14.9
-
-
-tf <- TabixFile(fl, yieldSize=10000)
-open(tf)
-system.time( while(length(scanVcf(tf)[[1]]$rowData) > 0) {} )
-close(tf)
-###     user   system  elapsed 
-### 2235.707   27.394 2263.733 
-
-> gc(reset=TRUE)
-          used  (Mb) gc trigger   (Mb) max used  (Mb)
-Ncells 2620925 140.0   24923264 1331.1  2620925 140.0
-Vcells 1971533  15.1  182613726 1393.3  1971533  15.1
-
-## memory used : (138.9+14.9) - (140+15.1) = 1.3 Mb 
-
-
-### (iii) readGT():
-tf <- TabixFile(fl, yieldSize=10000)
-open(tf)
-system.time( while(length(readGT(tf)) > 0) {} )
-close(tf)
-###    user  system elapsed 
-### 512.220   1.172 513.525 
-
-
-### --------------------------------------------------------------------------
-### Targeted queries by field and range.
-### --------------------------------------------------------------------------
-
-### No comparisions for Rplinkseq because load.vcf() cannot read a 
-### specific field from a VCF file.
-
-### Define a range of 133499 records.
-tf <- TabixFile(fl)
-which <- GRanges("22", IRanges(2e7, 3e7))
+### scanVcf:
+tfile <- TabixFile(fl)
+which <- GRanges("22", IRanges(2e7, 2.5e7))
 param <- ScanVcfParam(which=which)
+scanvcf_1 <- function() 
+    scanVcf(tfile, param=param)
 
-### (i) 'DS' geno field
-fun0 <- function() readGeno(tf, "DS", param=param)
-> microbenchmark(fun0(), times=5)
-### Unit: seconds
-###    expr      min       lq   median       uq      max neval
-###  fun0() 44.84508 45.10242 45.15887 45.18403 45.29007     5
+micro <- microbenchmark(loadvcf_1(), varfetch_1(), scanvcf_1(), times=5)
+micro
+###Unit: seconds
+###         expr      min       lq   median       uq      max neval
+###  loadvcf_1() 313.1729 335.5738 359.7979 368.4054 369.9397     5
+### varfetch_1() 264.4101 283.2388 291.7533 305.7028 318.7879     5
+###  scanvcf_1() 300.5585 308.5507 359.0814 400.2049 678.2296     5
 
-### (ii) 'GT' geno field
-fun0 <- function() readGT(tf, param=param)
-> microbenchmark(fun0(), times=5)
-### Unit: seconds
-###    expr      min      lq   median       uq      max neval
-###  fun0() 107.1373 107.604 108.2043 108.3288 110.3359     5
+### --------------------------------------------------------------------------
+### Test II. Query by range and fields
+### --------------------------------------------------------------------------
 
-### (iii) 'THETA' info field
-fun0 <- function() readInfo(tf, "THETA", param=param)
-> microbenchmark(fun0(), times=5)
-### Unit: seconds
-###    expr      min       lq   median       uq      max neval
-###  fun0() 18.31676 18.32141 18.32868 18.33132 18.34386     5
+### Randomly select 2 INFO and 2 GENO fields:
+info_var <- c("RSQ", "THETA")
+geno_var <- c("GT", "DS")
+### Other fields parsed by scanVcf:
+other_var <- c("CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER")
+
+### load.vcf: To the best of our knowledge, this function can import
+###           by range but not by select fields. To isolate a field,
+###           all fields are read in and parsed with the x.consensus 
+###           functions. There is no equivalent comparision for 
+###           load.vcf in this test case.
+
+### meta.fetch:
+mask <- "reg=22:20000000..25000000"
+metafetch_2 <- function()
+    meta.fetch(c(info_var, geno_var, other_var), mask=mask) 
+
+### scanVcf:  NOTE: Fields in 'other_var' are imported and parsed by
+###           scanVcf() under names of 'rowData' and 'fixed'.
+tfile <- TabixFile(fl)
+which <- GRanges("22", IRanges(2e7, 2.5e7))
+param <- ScanVcfParam(which=which, info=info_var, geno=geno_var)
+scanvcf_2 <- function()
+    scanVcf(tfile, param=param)
+
+micro <- microbenchmark(metafetch_2(), scanvcf_2(), times=5)
+micro
+###Unit: seconds
+###          expr       min        lq    median        uq       max neval
+### metafetch_2() 118.14090 120.65009 120.87346 120.88615 121.13340     5
+###   scanvcf_2()  35.45512  35.46179  35.51305  35.59804  37.41809     5
 
 
 ### --------------------------------------------------------------------------
-### Scaling with number of variants and samples.
+### Test III. Iterate through file 
 ### --------------------------------------------------------------------------
 
-### Testing done with scanVcf() because it underlies all read* functions.
+### load.vcf: To the best of our knowledge Rplinkseq cannot iterate on 
+###           raw vcf files. Iteration must be done on a 'project' with
+###           var.iterate. There is no equivalent comparision for load.vcf
+###           in this test case.
+
+### var.iterate:
+simple_ct <- function(v)
+    ct <<- ct + length(v$ID) 
+
+variterate_3 <- function()
+{
+    ct <<- 0
+    var.iterate(simple_ct)
+}
+
+### scanVcf:
+tfile <- TabixFile(fl, yieldSize=10000)
+param <- ScanVcfParam(fixed=c("ALT"), info=NA, geno=NA)
+scanvcf_3 <- function()
+{
+    ct2 <<- 0
+    open(tfile)
+    while((len <- length(scanVcf(tfile, param=param)[[1]]$rowData)) > 0) 
+        ct2 <<- ct2 + len 
+    close(tfile)
+}
+
+micro <- microbenchmark(variterate_3(), scanvcf_3(), times=5)
+micro
+##Unit: seconds
+##           expr        min         lq     median         uq        max neval
+## variterate_3() 1552.88520 1576.55856 1583.13120 1585.65281 1591.96375     5
+##    scanvcf_3()   50.04566   50.06945   50.27194   50.56145   50.70112     5
+
+
+### --------------------------------------------------------------------------
+### Scaling with number of variants and samples (scanVcf only)
+### --------------------------------------------------------------------------
 
 ### Linear scaling by variants:
-tf <- TabixFile(fl)
+tfile <- TabixFile(fl)
 yieldSize <- c(100000, 200000, 300000, 400000, 500000) 
 param <- ScanVcfParam(info=NA, geno=NA)
-fun0 <- function(tf, param) scanVcf(tf, param=param)
+fun0 <- function(tfile, param) scanVcf(tfile, param=param)
 
 res <- lapply(yieldSize, function(i) {
               tf <- TabixFile(fl, yieldSize=i)
@@ -206,89 +291,3 @@ res
 ### Unit: seconds
 ###             expr      min       lq   median       uq      max neval
 ###  fun0(tf, param) 329.6348 337.1841 348.7968 359.5972 364.2781     5
-
-
-### --------------------------------------------------------------------------
-### Targeted queries by range only.
-### --------------------------------------------------------------------------
-
-### Rplinkseq cannot read specific fields from the VCF file and
-### reading the entire file with load.vcf() requires > 250 GIG. 
-### To get a direct comparision with scanVcf() we query by genomic 
-### range only.
-
-### A subset of 63088 records was chosen as a sufficient number
-### to compare runtime and memory use within a reasonable
-### time.
-
-### scanVcf() took approximately 5.4 minutes to read all data in
-### the subset while the equivalent set of functions in Rplinkseq
-### took approximately 12.6 minutes.
-
-### (i) Rplinkseq:
-hdr <- scanVcfHeader(fl)
-info <- rownames(info(hdr))
-geno <- rownames(geno(hdr))
-mask <- "reg=22:20000000..25000000" ## 63088 record-dev
-
-### load.vcf() returns a list of lists; more processing is
-### needed to get at the rough equivalent of scanVcf() output.
-fun0 <- function()
-{
-    xx <- load.vcf(fl, mask=mask, limit=200000)
-    ## Collate INFO and GENO
-    lapply(info, function(i) x.consensus.meta(xx$VAR, i))
-    lapply(geno, function(i) x.consensus.genotype(xx$VAR, i))
-}
-microbenchmark(fun0(), times=3)
-### Unit: seconds
-###    expr     min       lq   median       uq      max neval
-###  fun0() 729.048 743.8944 758.7409 823.2939 887.8469     3
-
-### single run memory usage (list of lists only)
-gc(reset=TRUE)
-###           used  (Mb) gc trigger  (Mb) max used  (Mb)
-### Ncells 2600229 138.9    3289005 175.7  2600229 138.9
-### Vcells 1951494  14.9    3124965  23.9  1951494  14.9
-
-xx <- load.vcf(fl, mask=mask, limit=200000)
-
-gc(reset=TRUE)
-###             used   (Mb) gc trigger   (Mb)  max used   (Mb)
-### Ncells  74151020 3960.1  106673040 5697.0  74151020 3960.1
-### Vcells 455979993 3478.9  502969959 3837.4 455979993 3478.9
-
-### memory used: (138.9 + 14.9) - (3960.1 + 3478.9) = 7285.2 Mb
-
-print(object.size(xx), units="Mb")
-### 6322.6 Mb
-
-
-### (ii) scanVcf():
-tf <- TabixFile(fl)
-which <- GRanges("22", IRanges(2e7, 2.5e7)) ## 63088 records
-param <- ScanVcfParam(which=which)
-fun0 <- function()
-    scn <- scanVcf(tf, param=param)
-microbenchmark(fun0(), times=3)
-### Unit: seconds
-###    expr      min       lq  median       uq      max neval
-###  fun0() 292.5651 309.4915 326.418 422.9329 519.4477     3
-
-### single run memory usage
-gc(reset=TRUE)
-###           used  (Mb) gc trigger  (Mb) max used  (Mb)
-### Ncells 2616411 139.8    3289005 175.7  2616411 139.8
-### Vcells 1965798  15.0    3124965  23.9  1965798  15.0
-
-scn <- scanVcf(tf, param=param)
-
-gc(reset=TRUE)
-###             used   (Mb) gc trigger    (Mb)  max used   (Mb)
-### Ncells  71895814 3839.7  211989258 11321.5  71895814 3839.7
-### Vcells 486274427 3710.0 1601055918 12215.1 486274427 3710.0
-
-### memory used: (139.8 + 15.0) - (3839.7 + 3710) = 7394.9 Mb
-
-print(object.size(scn), units="Mb")
-### 6343.3 Mb
