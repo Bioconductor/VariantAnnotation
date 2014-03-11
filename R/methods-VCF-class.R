@@ -20,8 +20,8 @@ VCF <-
         class <- "CollapsedVCF"
         if (!length(fixed)) {
             fixed=DataFrame(
-                REF=DNAStringSet(rep("", length(rowData))), 
-                ALT=DNAStringSetList(as.list(rep("", length(rowData)))),
+                REF=DNAStringSet(rep(".", length(rowData))), 
+                ALT=DNAStringSetList(as.list(rep(".", length(rowData)))),
                 QUAL=rep(NA_real_, length(rowData)), 
                 FILTER=rep(NA_character_, length(rowData)))
         }
