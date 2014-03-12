@@ -90,9 +90,13 @@
   stored as either an atomic vector or an Rle. 
   \describe{
     \item{\code{ref}}{(\code{character}), the reference
-      allele}
+      allele. The range (start/end/width) should always correspond to
+      this sequence.}
     \item{\code{alt}}{(\code{character/Rle}),
-      the alternative allele (NA allowed)}
+      the alternative allele (NA allowed). By convention there is only
+      a single alt allele per element (row) of the VRanges. Many methods,
+      like \code{match}, make this assumption. 
+    }
     \item{\code{refCount}}{(\code{integer/Rle}), read count for the
       reference allele (NA allowed)}
     \item{\code{altCount}}{(\code{integer/Rle}), read count for the
@@ -116,6 +120,13 @@
   sequence in \code{ref}. Indels are typically represented by the VCF
   convention, i.e., the start position is one upstream of the event. The
   strand is always constrained to be positive (+).
+
+  Indels, by convention, should be encoded VCF-style, with the upstream
+  reference base prepended to the indel sequence. The ref/alt for a
+  deletion of GCGT before A might be AGCGT/A and for an insertion might
+  be A/AGCGT. Since the range always matches the \code{ref} sequence,
+  this means a deletion will be the width of the deletion + 1, and an
+  insertion is always of width 1.
 }
 
 \section{Constructor}{
