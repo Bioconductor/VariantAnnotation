@@ -13,10 +13,10 @@ setMethod("expand", "CollapsedVCF",
               geno(x)$AD <- .expandAD(geno(x)$AD, nrow(x), ncol(x))
             return(VCF(rowData=rowData(x), colData=colData(x), 
                        exptData=exptData(x), fixed=fxd, 
-                       info=info(x), geno=geno(x), 
+                       info=.unlistAltInfo(x), geno=geno(x), 
                        ..., collapsed=FALSE))
         }
-        idx <- rep.int(seq_len(nrow(x)), elt) 
+        idx <- rep.int(seq_len(nrow(x)), elt)
         hdr <- exptData(x)$header
         ## info
         iexp <- .expandInfo(x, hdr, elt, idx)
@@ -140,6 +140,14 @@ setMethod("expand", "CollapsedVCF",
     } else {
         ivar[idx, ]
     }
+}
+
+.unlistAltInfo <- function(x) {
+  hdr <- exptData(x)$header
+  inms <- rownames(info(hdr))[info(hdr)$Number == "A"]
+  ivar <- info(x)
+  ivar[inms] <- lapply(ivar[inms], drop)
+  ivar
 }
 
 setMethod("expand", "ExpandedVCF",
