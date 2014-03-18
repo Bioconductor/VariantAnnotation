@@ -110,7 +110,7 @@ export(
     SpliceSiteVariants, PromoterVariants, AllVariants,
     upstream, "upstream<-", downstream, "downstream<-",
     promoter, "promoter<-", intergenic, "intergenic<-",
-    probabilityToSnpMatrix, GLtoGP,
+    probabilityToSnpMatrix, GLtoGP, restrictToSNV,
     VRanges, VRangesList, asVCF, softFilter, resetFilter,
     totalDepth, altDepth, refDepth, sampleNames, "sampleNames<-", altFraction,
     softFilterMatrix, "softFilterMatrix<-", hardFilters, "hardFilters<-",

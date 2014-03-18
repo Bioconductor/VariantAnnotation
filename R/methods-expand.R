@@ -26,8 +26,12 @@ setMethod("expand", "CollapsedVCF",
         ## geno 
         gexp <- .expandGeno(x, hdr, elt, idx)
         ## rowData
-        rdexp <- rowData(x)[idx, "paramRangeID"]
-
+        if (is.null(rowData(x)$paramRangeID)) {
+            rdexp <- rowData(x)[idx, ]
+            mcols(rdexp) <- NULL
+        } else {
+            rdexp <- rowData(x)[idx, "paramRangeID"]
+        }
         ## exptData, colData untouched
         VCF(rowData=rdexp, colData=colData(x), exptData=exptData(x),
             fixed=fexp, info=iexp, geno=gexp, ..., collapsed=FALSE)

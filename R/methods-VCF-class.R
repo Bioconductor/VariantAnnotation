@@ -508,3 +508,27 @@ setMethod("updateObject", "VCF",
             info=mcols(info(object))[-1], fixed=mcols(fixed(object))[-1], geno=geno(object))
     }
 )
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### restrictToSNV 
+###
+
+### Creates a subset VCF with SNVs only. 'x' can be a CollapsedVCF 
+### or ExpandedVCF. Data in 'alt(x)' must be DNAStringSet or DNAStringSetList.
+restrictToSNV <- function(x, ...)
+{
+    if (!is(x, "VCF"))
+        stop("'x' must be a VCF object")
+    if (is(alt <- alt(x), "CharacterList"))
+        stop("'alt' must be non-structural nucleotide values")
+
+    ref_snp <- nchar(ref(x)) == 1
+    if (is(alt, "DNAStringSetList"))
+        alt_snp <- any(relist((nchar(unlist(alt)) == 1), alt))
+    else if (is(alt, "DNAStringSet"))
+        alt_snp <- nchar(alt) == 1
+    else
+        stop("unrecognized 'alt' data type")
+
+    x[ref_snp & alt_snp]
+}

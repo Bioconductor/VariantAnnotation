@@ -75,11 +75,12 @@
 \alias{cbind,VCF-method}
 \alias{rbind,VCF-method}
 
-% Other methods
+% Other methods / functions
 \alias{genome,VCF-method}
 \alias{seqlevels,VCF-method}
 \alias{expand,CollapsedVCF-method}
 \alias{expand,ExpandedVCF-method}
+\alias{restrictToSNV}
 
 % show method:
 \alias{show,VCF-method}
@@ -270,6 +271,19 @@
   }
 }
 
+\section{restrictToSNV}{
+  In the following code \code{x} is a VCF object.
+  \describe{
+    \item{}{
+      \code{restrictToSNV(x, ...)}:
+      Subset a VCF object on single nucleotide variants (SNV)s.
+      A variant is considered a SNV if the nucleotide sequences
+      in both \code{ref(x)} and \code{alt(x)} are of length 1.
+      Output is a subset VCF object containing only SNVs.
+    }
+  }
+}
+
 \section{Arguments}{
   \describe{
     \item{geno}{A \code{list} or \code{SimpleList} of matrix elements,
@@ -452,4 +466,28 @@ fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
 vcf <- readVcf(fl, genome="hg19")
 vcfLong <- expand(vcf)
 alt(vcfLong)
+
+## ----------------------------------------------------------------
+## restrictToSNV() 
+## ----------------------------------------------------------------
+## restrictToSNV() returns a subset VCF containing SNVs only.
+## The VCF can be a CollapsedVCF or ExpandedVCF. 'alt(x)' must
+## contain nucleotides (i.e., no structural variants).
+
+vcf1 <- VCF(rowData = GRanges("chr1", IRanges(1:4*3, width=c(1, 2, 1, 1))))
+alt(vcf1) <- DNAStringSetList("A", c("TT"), c("G", "A"), c("TT", "C"))
+ref(vcf1) <- DNAStringSet(c("G", c("AA"), "T", "G"))
+
+## SNVs are present in rows 1 (single ALT value), 3 (both ALT values) 
+## and 4 (1 of the 2 ALT values).
+fixed(vcf1)[c("REF", "ALT")]
+
+## CollapsedVcf
+res1 <- restrictToSNV(vcf1)
+rowData(res1)[ ,1:2]
+
+## ExpandedVcf
+vcf2 <- expand(vcf1)
+res2 <- restrictToSNV(vcf2)
+rowData(res2)[ ,1:2]
 }
