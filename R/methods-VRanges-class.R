@@ -56,8 +56,20 @@ setMethod("altFraction", "VRanges", function(x) {
   altDepth(x) / totalDepth(x)
 })
 
+isDeletion <- function(x) {
+  nchar(alt(x)) == 1L & nchar(ref(x)) > 1L & substring(ref(x), 1, 1) == alt(x)
+}
+
+isInsertion <- function(x) {
+  nchar(ref(x)) == 1L & nchar(alt(x)) > 1L & substring(alt(x), 1, 1) == ref(x)
+}
+
 isIndel <- function(x) {
-  nchar(ref(x)) != nchar(alt(x))
+  isDeletion(x) | isInsertion(x)
+}
+
+isSNV <- function(x) {
+  nchar(alt(x)) == 1L & nchar(ref(x)) == 1L
 }
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -401,7 +413,7 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
     geno <- c(geno, SimpleList(lapply(mcols(x)[genoMCols], genoArray)))
 
   VCF(rowData = rowData, colData = colData, exptData = exptData, fixed = fixed,
-      geno = geno, info = mcols(xUniq)[info])
+      geno = geno, info = mcols(xUniq)[info], collapsed = FALSE)
 }
 
 setMethod("asVCF", "VRanges", vranges2Vcf)
@@ -529,6 +541,26 @@ setMethod("liftOver", c("VRanges", "Chain"), function(x, chain, ...) {
                 ranges = ranges(gr))
   relist(ans, grl)
 })
+
+pileupGRanges <- function(x) {
+  x <- x[!isIndel(x)]
+  gr <- GRanges(seqnames(x), ranges(x), strand(x))
+  sm <- selfmatch(gr)
+  uniq <- sm == seq_len(length(gr))
+  map <- integer()
+  map[sm[uniq]] <- seq_len(sum(uniq))
+  pos <- map[sm]
+  base <- match(c(alt(x), ref(x)), DNA_BASES)
+  depth <- c(altDepth(x), refDepth(x))
+  samp <- as.factor(sampleNames(x))
+  pileup <- array(0L, c(sum(uniq), length(levels(samp)), length(DNA_BASES)),
+                  dimnames=list(NULL, levels(samp), base=DNA_BASES))
+  pileup[cbind(pos, samp, base)[!is.na(base),]] <- depth[!is.na(base)]
+  ugr <- gr[uniq]
+  ugr$ref[pos] <- ref(x)
+  ugr$pileup <- pileup
+  ugr
+}
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Show
