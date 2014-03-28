@@ -60,12 +60,11 @@ setMethod(writeVcf, c("VCF", "connection"),
     REF <- as.character(ref(obj))
     if (is.null(ALT <- alt(obj)))
         ALT <- rep(".", length(REF))
-    if (is(ALT, "DNAStringSetList"))
+    if (is(ALT, "XStringSetList")) {
         ALT <- as(ALT, "CharacterList")
-    if (is(ALT, "CharacterList")) { 
-        ALT <- .pasteCollapse(ALT, ",")
-        ALT[!nzchar(ALT)] <- "."
     }
+    ALT <- as.character(unstrsplit(ALT, ","))
+    ALT[nchar(ALT) == 0L | is.na(ALT)] <- "."
     if (is.null(QUAL <- qual(obj)))
         QUAL <- "."
     else 
@@ -117,11 +116,11 @@ setMethod(writeVcf, c("VCF", "connection"),
 {
     if (ncol(formatMat) == 1L) {
         formatMat[is.na(formatMat)] <- ""
-        .pasteCollapse(CharacterList(split(formatMat, row(formatMat))), ":")
+        unstrsplit(CharacterList(split(formatMat, row(formatMat))), ":")
     } else {
         keep <- !is.na(formatMat)
-        .pasteCollapse(CharacterList(
-                       split(formatMat[keep], row(formatMat)[keep])), ":")
+        unstrsplit(CharacterList(split(formatMat[keep], row(formatMat)[keep])),
+                   ":")
     }
 }
 
@@ -160,7 +159,7 @@ setMethod(writeVcf, c("VCF", "connection"),
     genoMatFlat[is.na(genoMatFlat)] <- "."
     if (is.list(genoMat)) {
       genoMatList <- relist(genoMatFlat, PartitioningByEnd(genoMat))
-      genoMatFlat <- .pasteCollapse(genoMatList, ",")
+      genoMatFlat <- unstrsplit(genoMatList, ",")
     }
     genoMat <- matrix(genoMatFlat, nrow(genoMat), ncol(genoMat))
 
@@ -175,7 +174,7 @@ setMethod(writeVcf, c("VCF", "connection"),
         keep <- !is.na(formatMatPerSub)
         genoListBySub <- CharacterList(split(
                            genoMat[keep], row(genoMat)[keep]))
-        genoMatCollapsed <- matrix(.pasteCollapse(genoListBySub, ":"), nrec, nsub)
+        genoMatCollapsed <- matrix(unstrsplit(genoListBySub, ":"), nrec, nsub)
         cbind(FORMAT, genoMatCollapsed)
     }
  
@@ -194,7 +193,7 @@ setMethod(writeVcf, c("VCF", "connection"),
     info[lists] <- lapply(info[lists], function(l) {
       charList <- as(l, "CharacterList")
       charList@unlistData[is.na(charList@unlistData)] <- "."
-      collapsed <- .pasteCollapse(charList, ",")
+      collapsed <- unstrsplit(charList, ",")
       ifelse(sum(!is.na(l)) > 0L, collapsed, NA_character_)
     })
 
@@ -213,11 +212,9 @@ setMethod(writeVcf, c("VCF", "connection"),
     infoRows <- factor(row(infoMat), seq_len(nrow(infoMat)))
     infoList <- CharacterList(split(infoMat[keep], infoRows[keep]))
     infoList[elementLengths(infoList) == 0L] <- "."
-    .pasteCollapse(infoList, ";")
+    unstrsplit(infoList, ";")
 }
 
-.pasteCollapse <- rtracklayer:::pasteCollapse
- 
 .makeVcfHeader <- function(obj, ...)
 {
     hdr <- header(obj)
@@ -254,7 +251,7 @@ setMethod(writeVcf, c("VCF", "connection"),
                          unlist(lapply(df, as.character), use.names=FALSE),
                          sep="")
             lst <- split(prs, row(df))
-            lns <- .pasteCollapse(CharacterList(lst), collapse=",") 
+            lns <- unstrsplit(CharacterList(lst), ",") 
             paste("##", nms, "=<", lns, ">", sep="")
         }
     }

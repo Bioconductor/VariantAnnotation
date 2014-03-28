@@ -294,7 +294,7 @@ makeFILTERstrings <- function(x) {
   failedRows <- rowSums(!x, na.rm=TRUE) > 0L
   ftStrings[passedRows & !failedRows] <- "PASS"
   ftStrings[failedRows] <-
-    .pasteCollapse(seqsplit(ftNames, row(x)[failed]), ";")
+    unstrsplit(seqsplit(ftNames, row(x)[failed]), ";")
   ftStrings
 }
 
@@ -349,8 +349,7 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
                         FILTER = makeFILTERheader(x)))
   exptData <- SimpleList(header = header)
 
-  alt <- as(as.character(alt(xUniq)), "List")
-  alt[is.na(alt(xUniq))] <- CharacterList(character()) # empty list elements->'.'
+  alt <- as.character(alt(xUniq))
   qual <- xUniq$QUAL
   if (is.null(qual) || !is.numeric(qual))
     qual <- rep.int(NA_real_, length(xUniq))
