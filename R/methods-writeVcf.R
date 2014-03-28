@@ -58,12 +58,14 @@ setMethod(writeVcf, c("VCF", "connection"),
     if (is.null(ID <- names(rd)))
         ID <- "."
     REF <- as.character(ref(obj))
-    ALT <- alt(obj)
+    if (is.null(ALT <- alt(obj)))
+        ALT <- rep(".", length(REF))
     if (is(ALT, "DNAStringSetList"))
         ALT <- as(ALT, "CharacterList")
-    ALT <- .pasteCollapse(ALT, ",")
-    ALT[!nzchar(ALT)] <- "."
-
+    if (is(ALT, "CharacterList")) { 
+        ALT <- .pasteCollapse(ALT, ",")
+        ALT[!nzchar(ALT)] <- "."
+    }
     if (is.null(QUAL <- qual(obj)))
         QUAL <- "."
     else 
