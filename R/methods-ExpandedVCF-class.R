@@ -22,6 +22,40 @@ setReplaceMethod("alt", c("ExpandedVCF", "DNAStringSet"),
 })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Utilities
+###
+
+VRangesForMatching <- function(x) {
+    with(rowData(x), VRanges(seqnames, IRanges(start, end), ref=REF, alt=ALT))
+}
+
+setMethod("match", c("ExpandedVCF", "ExpandedVCF"),
+    function(x, table, nomatch = NA_integer_, incomparables = NULL,
+             method = c("auto", "quick", "hash"))
+{
+    x <- VRangesForMatching(x)
+    table <- VRangesForMatching(table)
+    callGeneric()
+})
+
+setMethod("match", c("ExpandedVCF", "VRanges"),
+    function(x, table, nomatch = NA_integer_, incomparables = NULL,
+             method = c("auto", "quick", "hash"))
+{
+    x <- VRangesForMatching(x)
+    callGeneric()
+})
+
+setMethod("match", c("VRanges", "ExpandedVCF"),
+    function(x, table, nomatch = NA_integer_, incomparables = NULL,
+             method = c("auto", "quick", "hash"))
+{
+    table <- VRangesForMatching(table)
+    callGeneric()
+})
+
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### show
 ###
 
