@@ -1,3 +1,96 @@
+CHANGES IN VERSION 1.10.0
+------------------------
+
+NEW FEATURES
+
+    o add support for ##contig in VCF header 
+
+    o add 'meta<-', 'info<-', 'geno<-' replacement methods for
+      VCFHeader
+
+    o add 'header<-' replacement method for VCF 
+
+    o add strand to output from locationVariants() 
+
+    o add support for writeVcf() to process Rle data in geno matrix 
+
+    o readVcf() now parses 'geno' fields with Number=G as
+      ((#alleles + 1) * (#alleles + 2)) / 2
+
+    o writeVcf() now sorts the VCF when 'index=TRUE' 
+
+    o add 'fixed<-,VCFHeader,DataFrameList' method 
+
+    o add convenience functions for reading VCF into VRanges 
+
+    o add Rplinkseq test script 
+
+    o add 'isSNV', 'isInsertion', 'isDeletion', 'isIndel',
+      'isTransition', 'isPrecise', 'isSV' and 'isSubstitution'
+      generics 
+
+    o add 'isSNV', 'isInsertion', 'isDeletion', 'isIndel'
+      methods for VRanges and VCF classes
+
+    o add match methods between ExpandedVCF and VRanges
+
+MODIFICATIONS
+
+    o expand,VCF-method ignores 'AD' header of 'AD' geno is NULL
+
+    o add support for SIFT.Hsapiens.dbSNP137 
+
+    o remove locateVariants() dependence on chr7-sub.vcf.gz 
+
+    o modify expand() to handle 'AD' field where 'Number' is integer 
+
+    o rename readVRangesFromVCF() to readVcfAsVRanges() 
+
+    o remove check for circular chromosomes in locateVariants()
+      and predictCoding() and refLocsToLocalLocs() 
+
+    o modify filterVcf() to handle ranges in ScanVcfParam 
+
+    o pass 'genetic.code' through predictCoding()
+
+    o change default to 'row.names=TRUE' for readGT(), readGeno(),
+      and readInfo() 
+
+    o fixed() on empty VCF now returns DataFrame with column names
+      and data types vs an empty DataFrame 
+
+    o update biocViews 
+
+    o modify 'show,VCF' to represent empty values in XStringSet 
+      with '.'
+
+    o replace rtracklayer:::pasteCollapse with unstrsplit()
+
+DEPRECATED and DEFUNCT
+
+    o remove defunct dbSNPFilter(), regionfilter() and MatrixToSnpMatrix() 
+
+    o deprecate defunct readVcfLongForm() 
+
+BUG FIXES
+
+    o modify expand.geno() to handle case where header and geno don't match
+
+    o modify writeVcf() to write out rownames with ":" character
+      instead of treating as missing
+
+    o fix how sample names were passed from 'ScanVcfParam' to scanVcf() 
+
+    o fix bug in 'show,VCF' method
+
+    o fix bugs in VRanges -> VCF coercion methods 
+
+    o fix bug in lightweight read* functions that were ignoring
+      samples in ScanVcfParam
+
+    o fix bug in writeVcf() when no 'ALT' is present
+
+
 CHANGES IN VERSION 1.8.0
 ------------------------
 
