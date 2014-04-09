@@ -24,7 +24,7 @@ setMethod("snpSummary", "CollapsedVCF",
     }
 
     ## Genotype count
-    snv <- .isSNV(ref(x), alt)
+    snv <- .testForSNV(ref(x), alt)
     if (sum(snv) == 0L) {
         warning("No valid SNPs found in VCF.")
         return(.emptySnpSummary())
@@ -77,11 +77,10 @@ setMethod("snpSummary", "CollapsedVCF",
         setNames(value, name)
 }
 
-## Detects valid SNVs based on having a ref allele and
-## single alt allele both of length 1.
-## ref = DNAStringSet
-## alt = DNASTringSetList
-.isSNV <- function(ref, alt)
+## Expects 'ref' as DNAStringSet and 'alt' as
+## DNAStringSetList. Returns a logical vector
+## the same length as 'ref'. 
+.testForSNV <- function(ref, alt)
 {
     altelt <- elementLengths(alt) == 1L
     altseq <- logical(length(alt))

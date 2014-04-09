@@ -56,21 +56,33 @@ setMethod("altFraction", "VRanges", function(x) {
   altDepth(x) / totalDepth(x)
 })
 
-isDeletion <- function(x) {
-  nchar(alt(x)) == 1L & nchar(ref(x)) > 1L & substring(ref(x), 1, 1) == alt(x)
-}
+setMethod("isDeletion", "VRanges", function(x, ...) 
+  .isDeletion(ref(x), alt(x))
+)
+  #nchar(alt(x)) == 1L & nchar(ref(x)) > 1L & substring(ref(x), 1, 1) == alt(x)
 
-isInsertion <- function(x) {
-  nchar(ref(x)) == 1L & nchar(alt(x)) > 1L & substring(alt(x), 1, 1) == ref(x)
-}
+setMethod("isInsertion", "VRanges", function(x, ...) 
+    .isInsertion(ref(x), alt(x)) 
+)
+ # nchar(ref(x)) == 1L & nchar(alt(x)) > 1L & substring(alt(x), 1, 1) == ref(x)
 
-isIndel <- function(x) {
-  isDeletion(x) | isInsertion(x)
-}
+setMethod("isIndel", "VRanges", function(x, ...)
+    .isIndel(ref(x), alt(x)) 
+)
+ # isDeletion(x) | isInsertion(x)
 
-isSNV <- function(x) {
-  nchar(alt(x)) == 1L & nchar(ref(x)) == 1L
-}
+setMethod("isSNV", "VRanges", function(x, ...)
+    .isSNV(ref(x), alt(x)) 
+)
+ # nchar(alt(x)) == 1L & nchar(ref(x)) == 1L
+
+setMethod("isSubstitution", "VRanges", function(x, ...)
+    .isSubstitution(ref(x), alt(x)) 
+)
+
+setMethod("isTransition", "VRanges", function(x, ...)
+    .isTransition(ref(x), alt(x)) 
+)
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Constructor

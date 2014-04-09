@@ -117,7 +117,9 @@ export(
     called, stackSamples, "altDepth<-", "refDepth<-", "totalDepth<-", isIndel,
     probabilityToSnpMatrix, GLtoGP,
     readInfo, readGeno, readGT,
-    tabulate, VRangesScanVcfParam, readVcfAsVRanges
+    tabulate, VRangesScanVcfParam, readVcfAsVRanges,
+    isSNV, isInsertion, isDeletion, isIndel, isTransition,
+    isSubstitution
 )
 
 exportMethods(
@@ -127,6 +129,8 @@ exportMethods(
     predictCoding, getTranscriptSeqs, refLocsToLocalLocs, 
     genotypeToSnpMatrix, snpSummary,
     locateVariants, summarizeVariants,
+    isSNV, isInsertion, isDeletion, isIndel, isTransition,
+    isSubstitution,
 
     fixed, "fixed<-", ref, "ref<-", alt, "alt<-", qual, "qual<-",
     filt, "filt<-", info, "info<-", geno, "geno<-", strand, 

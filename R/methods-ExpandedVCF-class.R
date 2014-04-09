@@ -54,6 +54,46 @@ setMethod("match", c("VRanges", "ExpandedVCF"),
     callGeneric()
 })
 
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### isSNV family 
+###
+
+.dispatchSNV_ExpandedVCF <- function(FUN, x)
+{
+    if (is(alt <- alt(x), "character"))
+        stop("'alt' must be non-structural nucleotide values")
+    FUN(ref(x), alt)
+}
+
+setMethod("isSNV", "ExpandedVCF", 
+    function(x, ...) 
+        .dispatchSNV_ExpandedVCF(.isSNV, x) 
+)
+
+setMethod("isInsertion", "ExpandedVCF", 
+    function(x, ...) 
+        .dispatchSNV_ExpandedVCF(.isInsertion, x) 
+)
+
+setMethod("isDeletion", "ExpandedVCF", 
+    function(x, ...) 
+        .dispatchSNV_ExpandedVCF(.isDeletion, x) 
+)
+
+setMethod("isIndel", "ExpandedVCF", 
+    function(x, ...) 
+        .dispatchSNV_ExpandedVCF(.isIndel, x) 
+)
+
+setMethod("isTransition", "ExpandedVCF",
+    function(x, ...) 
+        .dispatchSNV_ExpandedVCF(.isTransition, x) 
+)
+
+setMethod("isSubstitution", "ExpandedVCF",
+    function(x, ...) 
+        .dispatchSNV_ExpandedVCF(.isSubstitution, x) 
+)
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### show

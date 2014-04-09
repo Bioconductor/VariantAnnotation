@@ -71,7 +71,7 @@ setMethod("genotypeToSnpMatrix", "array",
         stop("'alt' must be a DNAStringSetList")
     # query ref and alt alleles for valid SNPs
     altelt <- elementLengths(alt) == 1L 
-    snv <- .isSNV(ref, alt) 
+    snv <- .testForSNV(ref, alt) 
  
     # if x is a matrix, we have GT with a single value for each snp
     if (is.matrix(x)) {

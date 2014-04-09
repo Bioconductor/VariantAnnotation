@@ -271,17 +271,11 @@
   }
 }
 
-\section{restrictToSNV}{
-  In the following code \code{x} is a VCF object.
-  \describe{
-    \item{}{
-      \code{restrictToSNV(x, ...)}:
-      Subset a VCF object on single nucleotide variants (SNV)s.
-      A variant is considered a SNV if the nucleotide sequences
-      in both \code{ref(x)} and \code{alt(x)} are of length 1.
-      Output is a subset VCF object containing only SNVs.
-    }
-  }
+\section{Variant Type}{
+  Functions to identify variant type include \link{isSNV}, 
+  \link{isInsertion}, \link{isDeletion}, \link{isIndel}, 
+  \link{isSubstitution} and \link{isTransition}. See the ?\code{isSNV} 
+  man page for details.
 }
 
 \section{Arguments}{

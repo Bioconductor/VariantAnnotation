@@ -46,7 +46,6 @@
 \alias{softFilterMatrix,VRanges-method}
 \alias{softFilterMatrix<-}
 \alias{softFilterMatrix<-,VRanges-method}
-\alias{isIndel}
 \alias{resetFilter}
 
 % Aggregation:
@@ -263,11 +262,6 @@
       \code{hardFilters(x), hardFilters(x) <- value}: Gets or
       sets the hard filters (those applied to yield the current subset).
     }
-    \item{}{
-      \code{isIndel(x)}: Returns a logical vector indicating which
-      variants are insertions or deletions (defined by having a
-      different length for \code{ref} and \code{alt}).
-    }
   }
 }
 
@@ -294,6 +288,13 @@
   }  
 }
  
+\section{Variant Type}{
+  Functions to identify variant type include \link{isSNV}, 
+  \link{isInsertion}, \link{isDeletion}, \link{isIndel}, 
+  \link{isSubstitution} and \link{isTransition}. See the ?\code{isSNV} 
+  man page for details.
+}
+
 \author{Michael Lawrence}
 
 \seealso{

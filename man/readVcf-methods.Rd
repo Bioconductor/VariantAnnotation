@@ -145,8 +145,9 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
 }
 
 \value{
-  The object returned is a \code{\linkS4class{VCF}} class instance.
-  See ?\code{VCF} for complete details of the class structure.
+  \code{readVcf} returns a \code{\linkS4class{VCF}} object. See ?\code{VCF} for 
+  complete details of the class structure. \code{readGT}, \code{readInfo} and
+  \code{readGeno} return a \code{matrix}.
 
   \describe{
     \item{rowData: }{

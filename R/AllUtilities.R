@@ -2,6 +2,10 @@
 ### Helper functions not exported 
 ### =========================================================================
 
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### readVcf()
+###
+
 .collapseLists <- function(vcf, param)
 {
     idx <- sapply(vcf, function(elt) length(elt$rowData) > 0L)
@@ -84,7 +88,7 @@
 
 .toDNAStringSetList <- function(x)
 {
-    ## Called from predictCoding, genotypeToSnpMatrix, etc.
+    ### also used in predictCoding(), genotypeToSnpMatrix() 
     pbw <- PartitioningByWidth(elementLengths(x))
     x <- unlist(x, use.names=FALSE)
     x[.isStructural(x)] <- "" 
@@ -162,6 +166,18 @@
   shifted
 }
 
+.rleRecycleVector <- function(x, len) {
+  if (is(x, "Rle"))
+    rep(x, length.out = len)
+  else if (length(x) == 1L)
+    Rle(x, len)
+  else IRanges:::recycleVector(x, len)
+}
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### PolyPhen, SIFT and PROVEAN
+###
+
 .getKcol <- function(conn)
 {
     sql <- "SELECT value FROM metadata WHERE name='Key column'"
@@ -183,37 +199,6 @@
     paste(unlist(sql), collapse = ",")
 }
 
-.setSubjectSeq <- function(query, subject)
-{
-    ## Warn if query contains circular sequences.
-    queryseq <- seqlevels(query)
-    circular <- isCircular(subject)
-    circNames <- intersect(queryseq, names(circular)[circular])
-    if (0L != length(circNames))
-        warning("circular sequence(s) in query '",
-                paste(circNames, sep="' '"), "' ignored")
-
-    ## Drop circular sequences from subject.
-    if (length(circNames)) {
-        if (circNames %in% seqlevels(subject)) {
-            seqlevels(subject, force=TRUE) <- 
-                seqlevels(subject)[seqlevels(subject) != circNames]
-            return(1)
-        }
-    }
-
-    return(0)
-}
-
-.rleRecycleVector <- function(x, len) {
-  if (is(x, "Rle"))
-    rep(x, length.out = len)
-  else if (length(x) == 1L)
-    Rle(x, len)
-  else IRanges:::recycleVector(x, len)
-}
-
-## for PolyPhen, SIFT and PROVEAN
 .missingKeys <- function(x, keys, db)
 {
     if (missing(keys))
@@ -240,3 +225,38 @@
     } 
 }
 
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### isSNV helpers 
+###
+
+.isSNV <- function(ref, alt) {
+    nchar(ref) == 1L & nchar(alt) == 1L
+}
+
+.isDeletion <- function(ref, alt) {
+    nchar(alt) == 1L & 
+    nchar(ref) > 1L & 
+    substring(ref, 1, 1) == alt
+}
+
+.isInsertion <- function(ref, alt) {
+    nchar(ref) == 1L & 
+    nchar(alt) > 1L & 
+    substring(alt, 1, 1) == ref
+}
+
+.isIndel <- function(ref, alt) {
+    .isDeletion(ref, alt) | .isInsertion(ref, alt)
+}
+
+.isTransition <- function(ref, alt) {
+    m1 <- match(as.character(ref), c("A", "G", "T", "C"))
+    m2 <- match(as.character(alt), c("G", "A", "C", "T"))
+    res <- (m1 - m2) == 0
+    res[is.na(res)] <- FALSE
+    res
+}
+
+.isSubstitution <- function(ref, alt) {
+    nchar(ref) == nchar(alt)
+}

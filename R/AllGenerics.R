@@ -224,6 +224,50 @@ setGeneric("genotypeToSnpMatrix", signature="x",
 setGeneric("snpSummary", function(x, ...) standardGeneric("snpSummary") )
 
 ### -------------------------------------------------------------------------
+### isSNV helpers 
+###
+
+setGeneric("isSNV", signature="x",
+    function(x, ...)
+    standardGeneric("isSNV")
+)
+
+setGeneric("isInsertion", signature="x",
+    function(x, ...)
+    standardGeneric("isInsertion")
+)
+
+setGeneric("isDeletion", signature="x",
+    function(x, ...)
+    standardGeneric("isDeletion")
+)
+
+setGeneric("isIndel", signature="x",
+    function(x, ...)
+    standardGeneric("isIndel")
+)
+
+setGeneric("isTransition", signature="x",
+    function(x, ...)
+    standardGeneric("isTransition")
+)
+
+setGeneric("isSV", signature="x",
+    function(x, ...)
+    standardGeneric("isSV")
+)
+
+setGeneric("isSVPrecise", signature="x",
+    function(x, ...)
+    standardGeneric("isSVPrecise")
+)
+
+setGeneric("isSubstitution", signature="x",
+    function(x, ...)
+    standardGeneric("isSubstitution")
+)
+
+### -------------------------------------------------------------------------
 ### VRanges class 
 ###
 
