@@ -52,8 +52,10 @@
 \alias{tabulate}
 \alias{tabulate,VRanges-method}
 
-% VCF writing:
+% VCF reading/writing:
 \alias{writeVcf,VRanges,ANY-method}
+\alias{VRangesScanVcfParam}
+\alias{readVcfAsVRanges}
 
 % Utilities:
 \alias{match,VRanges,VRanges-method}
@@ -277,17 +279,34 @@
       stored in \code{mcols(bin)$sample.count}.
     }
     \item{}{
-      \code{writeVcf(obj, filename, ...)}: coerces to a VCF object and
-      writes it to a file; see \code{\link{writeVcf}}.
-    }
-    \item{}{
       \code{softFilter(x, filters, ...)}: applies the \code{FilterRules}
       in \code{filters} to \code{x}, storing the results in
       \code{softFilterMatrix}.
     }
   }  
 }
- 
+
+\section{Input/Output to/from VCF}{
+  \describe{
+    \item{}{
+      \code{writeVcf(obj, filename, ...)}: coerces to a VCF object and
+      writes it to a file; see \code{\link{writeVcf}}.
+    }
+    \item{}{
+      \code{readVcfAsVRanges(x, genome, param = VRangesScanVcfParam(), ...)}:
+      Reads a VCF \code{x} directly into a \code{VRanges};
+      see \code{\link{readVcf}} for details on the arguments.
+    }
+    \item{}{
+      \code{VRangesScanVcfParam(fixed = "ALT", info = NA, geno = "AD", ...)}:
+      Convenience constructor for a \code{\linkS4class{ScanVcfParam}}
+      object that is well suited for import to a \code{VRanges}. The
+      \code{fixed}, \code{info} and \code{geno} parameters, and anything
+      in \code{\dots} are passed to \code{\link{ScanVcfParam}}.
+    }
+  }
+}
+
 \section{Variant Type}{
   Functions to identify variant type include \link{isSNV}, 
   \link{isInsertion}, \link{isDeletion}, \link{isIndel}, 
