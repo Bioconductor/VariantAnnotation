@@ -37,6 +37,7 @@ test_isSNV_CollapsedVCF <- function() {
     checkIdentical(res2, c(rep(TRUE, 5), rep(FALSE, 3)))
 }
 
+expand <- VariantAnnotation::expand 
 test_isSNV_ExpandedVCF <- function() {
     evcf <- expand(vcf)
     checkException(isSNV(evcf), silent=TRUE)
