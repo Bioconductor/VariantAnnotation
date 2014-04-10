@@ -182,6 +182,7 @@ setAs("VCF", "VRanges", function(from) {
     alt <- unlist(alt)
   alt <- as.character(alt)
   alt[!nzchar(alt)] <- NA
+  alt[alt == "."] <- NA
   ad <- geno(from)$AD
   if (!is.null(ad) && ncol(from) > 0L) {
     refDepth <- ad[,,1,drop=FALSE]
@@ -194,9 +195,13 @@ setAs("VCF", "VRanges", function(from) {
   if (is.null(totalDepth) || ncol(from) == 0L)
     totalDepth <- NA_integer_
   nsamp <- ncol(from)
-  if (ncol(from) > 0L)
-    sampleNames <- Rle(colnames(from), rep(nrow(from), nsamp))
-  else sampleNames <- NA_character_
+  if (ncol(from) > 0L) {
+    if (!is.null(colnames(from))) {
+      sampleNames <- Rle(colnames(from), rep(nrow(from), nsamp))
+    } else {
+      sampleNames <- as.character(seq_len(ncol(from)))
+    }
+  } else sampleNames <- NA_character_
   meta <- info(from)
   if (!is.null(mcols(rd)$QUAL))
     meta <- cbind(mcols(rd)["QUAL"], meta)
