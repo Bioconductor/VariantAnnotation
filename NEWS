@@ -34,6 +34,8 @@ NEW FEATURES
 
     o add match methods between ExpandedVCF and VRanges
 
+    o add support for VRanges %in% TabixFile
+
 MODIFICATIONS
 
     o expand,VCF-method ignores 'AD' header of 'AD' geno is NULL
