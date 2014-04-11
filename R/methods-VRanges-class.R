@@ -507,10 +507,11 @@ setMethod("match", c("VRanges", "VRanges"),
             altLevels <- union(alt(x), alt(table))
             x_seqnames <- GenomicRanges:::relevelSeqnamesForMatch(x, table)
             IRanges:::matchIntegerQuads(x_seqnames,
-                                        factor(alt(x), altLevels),
+                                        factor(as.character(alt(x)), altLevels),
                                         start(x), width(x),
                                         as.factor(seqnames(table)),
-                                        factor(alt(table), altLevels),
+                                        factor(as.character(alt(table)),
+                                               altLevels),
                                         start(table), width(table),
                                         nomatch = nomatch, method = method)
           })
