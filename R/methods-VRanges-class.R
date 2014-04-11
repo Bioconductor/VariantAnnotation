@@ -504,7 +504,7 @@ setMethod("match", c("VRanges", "VRanges"),
               stop("\"match\" method for VRanges objects ",
                    "only accepts 'incomparables=NULL'")
             merge(seqinfo(x), seqinfo(table))
-            altLevels <- union(alt(x), alt(table))
+            altLevels <- as.character(union(alt(x), alt(table)))
             x_seqnames <- GenomicRanges:::relevelSeqnamesForMatch(x, table)
             IRanges:::matchIntegerQuads(x_seqnames,
                                         factor(as.character(alt(x)), altLevels),
