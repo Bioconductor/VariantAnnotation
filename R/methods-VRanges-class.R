@@ -109,7 +109,7 @@ VRanges <-
   if (length(gr) != maxLen)
     gr <- rep(gr, length.out = maxLen)
   ref <- as.character(ref)
-  ref <- IRanges:::recycleVector(ref, maxLen)
+  ref <- S4Vectors:::recycleVector(ref, maxLen)
   alt <- .rleRecycleVector(alt, maxLen)
   alt <- as(alt, "characterOrRle")
   refDepth <- .rleRecycleVector(refDepth, maxLen)
@@ -118,7 +118,7 @@ VRanges <-
   softFilterMatrix <- as.matrix(softFilterMatrix)
   mode(softFilterMatrix) <- "logical"
   softFilterMatrix.ind <-
-    IRanges:::recycleVector(seq_len(nrow(softFilterMatrix)), maxLen)
+    S4Vectors:::recycleVector(seq_len(nrow(softFilterMatrix)), maxLen)
   softFilterMatrix <- softFilterMatrix[softFilterMatrix.ind,,drop=FALSE]
   sampleNames <- .rleRecycleVector(sampleNames, maxLen)
   totalDepth <- as(totalDepth, "integerOrRle")

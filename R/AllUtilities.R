@@ -171,7 +171,7 @@
     rep(x, length.out = len)
   else if (length(x) == 1L)
     Rle(x, len)
-  else IRanges:::recycleVector(x, len)
+  else S4Vectors:::recycleVector(x, len)
 }
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
