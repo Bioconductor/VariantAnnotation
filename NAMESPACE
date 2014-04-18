@@ -6,9 +6,11 @@ import(BiocGenerics)
 
 import(Rsamtools)
 
-import(GenomicRanges)
-
 import(zlibbioc)
+
+import(S4Vectors)
+
+import(GenomicRanges)
 
 importClassesFrom(Biobase, 
     AssayData
@@ -44,10 +46,9 @@ importMethodsFrom(GenomicFeatures,
 
 importFrom(IRanges, 
     CharacterList, DataFrame, DataFrameList, FilterRules, IntegerList, 
-    IRanges, isSingleNumber, isSingleString, isTRUEorFALSE, LogicalList, 
-    NumericList, PartitioningByEnd, PartitioningByWidth, seqsplit,
-    SimpleList, splitAsList, successiveViews, FilterMatrix, expand,
-    isSingleNumberOrNA, endoapply, metadata, filterRules, subsetByFilter
+    IRanges, LogicalList, NumericList, PartitioningByEnd, PartitioningByWidth,
+    seqsplit, SimpleList, splitAsList, successiveViews, FilterMatrix, expand,
+    endoapply, metadata, filterRules, subsetByFilter
 )
 
 importClassesFrom(IRanges, 
