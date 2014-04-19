@@ -63,7 +63,7 @@ importMethodsFrom(IRanges,
     precede, queryHits, rev, Rle, runValue, sapply, shift,
     split, start, "start<-", subjectHits, substring, 
     unlist, values, "values<-", which, width, 
-    expand, ifelse, as.factor, relist, subsetByFilter, selfmatch, unstrsplit
+    expand, ifelse, as.factor, relist, subsetByFilter, selfmatch
 )
 
 importFrom(XVector, "subseq", "subseq<-")
