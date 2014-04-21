@@ -48,7 +48,7 @@ importFrom(IRanges,
     CharacterList, DataFrame, DataFrameList, FilterRules, IntegerList, 
     IRanges, LogicalList, NumericList, PartitioningByEnd, PartitioningByWidth,
     seqsplit, SimpleList, splitAsList, successiveViews, FilterMatrix, expand,
-    endoapply, metadata, filterRules, subsetByFilter
+    endoapply, filterRules, subsetByFilter
 )
 
 importClassesFrom(IRanges, 
