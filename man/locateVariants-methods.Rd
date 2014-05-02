@@ -79,7 +79,7 @@ locateVariants(query, subject, region, ...)
     igored when performing overlaps.
   }
   \item{asHits}{A \code{logical} indicating if the results should be 
-    returned as a \link[IRanges]{Hits} object. Not applicable when
+    returned as a \link[S4Vectors]{Hits} object. Not applicable when
     \code{region} is AllVariants or IntergenicVariants.
   }
 }
