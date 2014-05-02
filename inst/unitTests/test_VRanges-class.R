@@ -192,8 +192,8 @@ make_TARGET_VRanges_vcf <- function() {
   gr <- GRanges(c("1", "1", "3", "2", "1", "2"),
                 IRanges(c(1, 20, 15, 5, 20, 5), width = 1L), "+",
                 TS = c(TRUE, FALSE, FALSE, TRUE, TRUE, NA))
-  seqinfo(gr) <- Seqinfo(c("1", "2", "3"), c(NA, 25, 22),
-                         genome = c(NA, NA, "foo"))
+  seqinfo(gr) <- Seqinfo(c("1", "3", "2"), c(NA, 22, 25),
+                         genome = c(NA, "foo", NA))
   new("VRanges", gr, ref = c("A", "C", "G", "T", "C", "T"),
       alt = c("T", "G", NA, "A", "G", "C"),
       totalDepth = c(NA, 10L, 15L, 10L, 5L, 3L),
