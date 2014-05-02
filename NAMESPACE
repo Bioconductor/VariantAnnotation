@@ -4,13 +4,15 @@ import(methods)
 
 import(BiocGenerics)
 
+import(S4Vectors)
+
+import(GenomeInfoDb)
+
+import(GenomicRanges)
+
 import(Rsamtools)
 
 import(zlibbioc)
-
-import(S4Vectors)
-
-import(GenomicRanges)
 
 importClassesFrom(Biobase, 
     AssayData
@@ -57,13 +59,13 @@ importClassesFrom(IRanges,
 )
 
 importMethodsFrom(IRanges, 
-    "%in%", append, as.matrix, as.vector,
+    as.matrix, as.vector,
     countOverlaps, elementLengths, end, eval, findOverlaps, 
-    follow, gsub, lapply, match, narrow, order, 
-    precede, queryHits, rev, Rle, runValue, sapply, shift,
-    split, start, "start<-", subjectHits, substring, 
-    unlist, values, "values<-", which, width, 
-    expand, ifelse, as.factor, relist, subsetByFilter, selfmatch
+    follow, gsub, lapply, narrow, order, 
+    precede, rev, Rle, runValue, sapply, shift,
+    split, start, "start<-", substring, 
+    unlist, which, width, 
+    expand, ifelse, as.factor, relist, subsetByFilter
 )
 
 importFrom(XVector, "subseq", "subseq<-")
