@@ -139,7 +139,7 @@ exportMethods(
     filt, "filt<-", info, "info<-", geno, "geno<-", strand, 
     "strand<-", "[", "[<-", cbind, rbind, "mcols<-", 
 
-    genome, seqlevels,
+    genome, seqlevels, seqinfo,
 
     reference, samples, header, meta,
 
