@@ -262,7 +262,7 @@ setMethod(writeVcf, c("VCF", "connection"),
   contig[!is.na(seqlengths(si))] <-
     paste0(contig, ",length=", seqlengths(si))[!is.na(seqlengths(si))]
   contig[!is.na(genome(si))] <-
-    paste0(contig, ",assembly=", genome(si))[!is.na(genome(si))]
+    paste0(contig, ",assembly=\"", genome(si), "\"")[!is.na(genome(si))]
   paste0(contig, ">")
 }
 
