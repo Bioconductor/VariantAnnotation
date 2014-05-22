@@ -160,7 +160,7 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
 
       One elementMetadata column, \code{paramRangeID}, is included with the
       \code{rowData}. This ID is meaningful when multiple ranges are specified 
-      in the \code{ScanVcfParam}. This ID distinguishes which records match
+      in the \code{ScanVcfParam} and distinguishes which records match
       each range.
     }
     \item{fixed: }{

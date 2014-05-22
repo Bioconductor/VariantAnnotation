@@ -164,6 +164,13 @@
       }
     }
     \item{}{
+      \code{fixed(x)}, \code{fixed(x) <- value}:
+       Gets or sets a DataFrame of REF, ALT, QUAL and FILTER only. 
+       Note these fields are displayed as metadata columns when
+       \code{rowData(VCF)} is invoked. The fields can be replaced using 
+       \code{rowData<-} but it is more efficient to do so with \code{fixed<-}. 
+    }
+    \item{}{
       \code{info(x)}, \code{info(x) <- value}:
        Gets or sets a DataFrame of INFO variables. 
     }
@@ -327,10 +334,10 @@
 
   Slots unique to \code{VCF} and subclasses,
   \itemize{
-    \item \code{fixed}: A \link{DataFrame} containing information from the 
-           REF, ALT, QUAL and FILTER fields from a VCF file.
-    \item \code{info}: A \link{DataFrame} containing information from the INFO 
-           fields from a VCF file.
+    \item \code{fixed}: A \link{DataFrame} containing the REF, ALT, QUAL 
+      and FILTER fields from a VCF file.
+    \item \code{info}: A \link{DataFrame} containing the INFO fields from 
+      a VCF file.
   }
 
   Slots inherited from \code{SummarizedExperiment},

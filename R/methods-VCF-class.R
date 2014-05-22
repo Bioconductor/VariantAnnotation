@@ -146,9 +146,9 @@ setMethod("rowData", "VCF",
 setReplaceMethod("rowData", c("VCF", "GRanges"),
     function(x, value)
 {
-    idx <- names(mcols(value)) %in% "paramRangeID"
-    slot(x, "fixed") <- mcols(value)[!idx] 
-    slot(x, "rowData") <- value[,idx]
+    fixed_idx <- names(mcols(value)) %in% c("REF", "ALT", "QUAL", "FILTER")
+    slot(x, "fixed") <- mcols(value)[fixed_idx] 
+    slot(x, "rowData") <- value[,!fixed_idx]
     validObject(x)
     x
 })
