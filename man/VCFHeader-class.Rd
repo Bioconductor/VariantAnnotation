@@ -27,6 +27,7 @@
 \alias{info<-,VCFHeader,DataFrame-method}
 \alias{geno,VCFHeader-method}
 \alias{geno<-,VCFHeader,missing,DataFrame-method}
+\alias{seqinfo,VCFHeader-method}
 
 % show method:
 \alias{show,VCFHeader-method}
