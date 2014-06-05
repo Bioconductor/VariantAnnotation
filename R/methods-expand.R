@@ -147,11 +147,16 @@ setMethod("expand", "CollapsedVCF",
 }
 
 .unlistAltInfo <- function(x) {
-  hdr <- exptData(x)$header
-  inms <- rownames(info(hdr))[info(hdr)$Number == "A"]
-  ivar <- info(x)
-  ivar[inms] <- lapply(ivar[inms], drop)
-  ivar
+    ivar <- info(x)
+    if (ncol(ivar) == 0L)
+        return(ivar)
+    hdr <- header(x)
+    inms <- rownames(info(hdr))[info(hdr)$Number == "A"]
+    inms <- inms[inms %in% names(ivar)]
+    if (length(inms))
+        return(ivar)
+    ivar[inms] <- lapply(ivar[inms], drop)
+    ivar
 }
 
 setMethod("expand", "ExpandedVCF",
