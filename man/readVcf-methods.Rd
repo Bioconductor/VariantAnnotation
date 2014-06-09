@@ -22,15 +22,24 @@
 
 \usage{
 
-  \S4method{readVcf}{TabixFile,ANY,ScanVcfParam}(file, genome, param, ...)
-  \S4method{readVcf}{TabixFile,ANY,RangedData}(file, genome, param, ...)
-  \S4method{readVcf}{TabixFile,ANY,RangesList}(file, genome, param, ...)
-  \S4method{readVcf}{TabixFile,ANY,GRanges}(file, genome, param, ...)
-  \S4method{readVcf}{TabixFile,ANY,GRangesList}(file, genome, param, ...)
-  \S4method{readVcf}{TabixFile,ANY,missing}(file, genome, param, ...)
-  \S4method{readVcf}{character,ANY,ScanVcfParam}(file, genome, param, ...)
-  \S4method{readVcf}{character,ANY,missing}(file, genome, param, ...)
-  \S4method{readVcf}{character,missing,missing}(file, genome, param, ...)
+  \S4method{readVcf}{TabixFile,ANY,ScanVcfParam}(file, genome, param, 
+      ..., row.names=TRUE)
+  \S4method{readVcf}{TabixFile,ANY,RangedData}(file, genome, param, 
+      ..., row.names=TRUE)
+  \S4method{readVcf}{TabixFile,ANY,RangesList}(file, genome, param, 
+      ..., row.names=TRUE)
+  \S4method{readVcf}{TabixFile,ANY,GRanges}(file, genome, param, 
+      ..., row.names=TRUE)
+  \S4method{readVcf}{TabixFile,ANY,GRangesList}(file, genome, param, 
+      ..., row.names=TRUE)
+  \S4method{readVcf}{TabixFile,ANY,missing}(file, genome, param, 
+      ..., row.names=TRUE)
+  \S4method{readVcf}{character,ANY,ScanVcfParam}(file, genome, param, 
+      ..., row.names=TRUE)
+  \S4method{readVcf}{character,ANY,missing}(file, genome, param, 
+      ..., row.names=TRUE)
+  \S4method{readVcf}{character,missing,missing}(file, genome, param, 
+      ..., row.names=TRUE)
 
 ## Lightweight functions to read a single variable
 readInfo(file, x, param=ScanVcfParam(), ..., row.names=TRUE)
@@ -69,7 +78,8 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
     import. Applicable to \code{readInfo} and \code{readGeno} only.
   }
   \item{row.names}{A \code{logical} specifying if rownames should be returned. 
-    Applicable to \code{readInfo}, \code{readGeno} and \code{readGT}.
+    In the case of \code{readVcf}, rownames appear on the \code{GRanges} in the
+    \code{rowData} slot.
   }
   \item{nucleotides}{A \code{logical} indicating if genotypes should be returned
     as nucleotides instead of the numeric representation.
