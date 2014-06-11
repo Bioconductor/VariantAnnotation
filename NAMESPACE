@@ -42,7 +42,6 @@ importClassesFrom(GenomicFeatures,
 importMethodsFrom(GenomicFeatures, 
     cdsBy, exons, transcripts,
     fiveUTRsByTranscript, threeUTRsByTranscript,
-    isActiveSeq, "isActiveSeq<-",
     distance
 )
 
