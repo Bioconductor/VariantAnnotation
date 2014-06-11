@@ -85,7 +85,8 @@
 
 .vcf_scan <- 
    function(file, ..., fixed=character(), info=character(),
-            geno=character(), samples=character(), param)
+            geno=character(), samples=character(), param,
+            row.names=TRUE)
 {
     tryCatch({
         if (!isOpen(file)) {
@@ -96,7 +97,8 @@
         tbxstate <- maps[c("samples", "fmap", "imap", "gmap")]
         tbxsym <- getNativeSymbolInfo(".tabix_as_vcf",
                                       "VariantAnnotation")
-        scanTabix(file, ..., param=param, tbxsym=tbxsym, tbxstate=tbxstate)
+        scanTabix(file, ..., param=param, tbxsym=tbxsym, 
+                  tbxstate=tbxstate, row.names=row.names)
     }, scanTabix_io = function(err) {
             stop("scanVcf: ", conditionMessage(err), call. = FALSE)
     }, error = function(err) {
@@ -108,16 +110,16 @@
 .vcf_scan_character <-
     function(file, ..., fixed=character(), info=character(),
              geno=character(), samples=character(), 
-             yieldSize=100000L)
+             yieldSize=100000L, row.names=TRUE)
 {
     tryCatch({
         file <- normalizePath(path.expand(file))
         if (!file.exists(file))
             stop("file does not exist")
         maps <- .vcf_scan_header_maps(file, fixed, info, geno, samples)
-        result <- .Call(.scan_vcf_character, file,
-                        as.integer(yieldSize), maps$samples,
-                        maps$fmap, maps$imap, maps$gmap)
+        result <- .Call(.scan_vcf_character, file, as.integer(yieldSize), 
+                        maps$samples, maps$fmap, maps$imap, maps$gmap,
+                        row.names)
         setNames(result, "*:*-*")
     }, scanTabix_io = function(err) {
             stop("scanVcf: ", conditionMessage(err), call. = FALSE)
@@ -129,7 +131,7 @@
 
 .vcf_scan_connection <-
     function(file, ..., fixed=character(), info=character(),
-             geno=character(), samples=character())
+             geno=character(), samples=character(), row.names=TRUE)
 {
     tryCatch({
         file <- summary(file)$description
@@ -138,7 +140,7 @@
         txt <- readLines(file, ...)
         txt <- txt[!grepl("^#", txt)] # FIXME: handle header lines better
         result <- .Call(.scan_vcf_connection, txt, maps$samples,
-                        maps$fmap, maps$imap, maps$gmap)
+                        maps$fmap, maps$imap, maps$gmap, row.names)
         setNames(result, "*:*-*")
     }, scanTabix_io = function(err) {
             stop("scanVcf: ", conditionMessage(err), call. = FALSE)

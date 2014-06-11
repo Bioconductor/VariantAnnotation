@@ -108,7 +108,8 @@ setGeneric("scanVcfHeader", signature="file",
 )
 
 setGeneric("scanVcf", signature=c("file", "param"),
-           function(file, ..., param) standardGeneric("scanVcf")
+           function(file, ..., param) 
+               standardGeneric("scanVcf")
 )
 
 ### -------------------------------------------------------------------------

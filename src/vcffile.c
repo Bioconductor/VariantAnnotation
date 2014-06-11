@@ -170,7 +170,7 @@ static struct vcftype_t *_vcf_alloc(const int vcf_n, SEXP smap,
             Rf_error("(internal) unknown 'fixed' field '%s'", nm);
     }
 
-    /* info, geno */
+    /* INFO, FORMAT fields */
     int nonzero = 0;
     for (int i = 0; i < Rf_length(smap); ++i)
         if (INTEGER(smap)[i] != 0)
@@ -196,8 +196,8 @@ static void _vcf_grow(struct vcftype_t * vcf, int vcf_n)
     _types_grow(vcf->u.list[GENO_IDX], vcf_n);
 }
 
-static void _parse(char *line, const int irec,
-                   const struct parse_t *parse)
+static void _parse(char *line, const int irec, 
+                   const struct parse_t *parse, Rboolean row_names)
 {
     khash_t(strhash) *str = parse->str;
     struct vcftype_t *vcf = parse->vcf, *rowData, *elt, *info;
@@ -212,7 +212,7 @@ static void _parse(char *line, const int irec,
     struct it_t it0, it1, it2;
     char *sample, *ifld, *ikey;
 
-    /* fixed fields */
+    /* FIXED fields */
     char *chrom, *pos, *id, *ref, *alt, *field;
     int alt_n;
 
@@ -236,18 +236,20 @@ static void _parse(char *line, const int irec,
     _vcftype_set(vcf->u.list[FILTER_IDX], irec,
                  _strhash_put(str, it_next(&it0))); /* FILTER */
 
-    if ('.' == *id && '\0' == *(id + 1)) {
-        /* construct ID if missing:
-           chrom\0pos\0ID\0ref\0alt\0 ==> chrom:pos_ref/alt\0 */
-        *(pos - 1) = ':';
-        *(id - 1) = '_';
-        *(alt - 1) = '/';
-        while (*ref != '\0')
-            *id++ = *ref++;
-        *id = '\0';
-        id = chrom;
+    if (row_names) {
+        if ('.' == *id && '\0' == *(id + 1)) {
+            /* construct ID if missing:
+               chrom\0pos\0ID\0ref\0alt\0 ==> chrom:pos_ref/alt\0 */
+            *(pos - 1) = ':';
+            *(id - 1) = '_';
+            *(alt - 1) = '/';
+            while (*ref != '\0')
+                *id++ = *ref++;
+            *id = '\0';
+            id = chrom;
+        }
+        rowData->u.list[ID_IDX]->u.character[irec] = _strhash_put(str, id);
     }
-    rowData->u.list[ID_IDX]->u.character[irec] = _strhash_put(str, id);
 
     /* INFO */
     field = it_next(&it0);
@@ -318,7 +320,8 @@ static void _parse(char *line, const int irec,
     Free(gmapidx);
 }
 
-static SEXP _vcf_as_SEXP(struct parse_t *parse, SEXP fmap, SEXP smap)
+static SEXP _vcf_as_SEXP(struct parse_t *parse, SEXP fmap, SEXP smap,
+                         Rboolean row_names)
 {
     SEXP result = PROTECT(_vcftype_as_SEXP(parse->vcf));
 
@@ -331,7 +334,10 @@ static SEXP _vcf_as_SEXP(struct parse_t *parse, SEXP fmap, SEXP smap)
     PROTECT(seqnames = rle_as_Rle(parse->chrom));
     rowData = VECTOR_ELT(result, ROWDATA_IDX);
     start = VECTOR_ELT(rowData, POS_IDX);
-    names = VECTOR_ELT(rowData, ID_IDX);
+    if (!row_names)
+        names = R_NilValue;
+    else
+        names = VECTOR_ELT(rowData, ID_IDX);
     width = get_XVectorList_width(dna);
 
     SEXP ranges, nmspc, fun, expr;
@@ -475,21 +481,22 @@ static void _parse_grow(struct parse_t *parse, int size)
 }
 
 SEXP scan_vcf_connection(SEXP txt, SEXP smap, SEXP fmap, SEXP imap,
-                         SEXP gmap)
+                         SEXP gmap, SEXP rownames)
 {
     struct parse_t *parse;
+    Rboolean row_names = LOGICAL(rownames)[0];
 
     parse = _parse_new(Rf_length(txt), smap, fmap, imap, gmap);
 
     /* parse each line */
     for (int irec = 0; irec < parse->vcf_n; irec++) {
         char *line = Strdup(CHAR(STRING_ELT(txt, irec)));
-        _parse(line, irec, parse);
+        _parse(line, irec, parse, row_names);
         Free(line);
     }
 
     SEXP result = PROTECT(Rf_allocVector(VECSXP, 1));
-    SET_VECTOR_ELT(result, 0, _vcf_as_SEXP(parse, fmap, smap));
+    SET_VECTOR_ELT(result, 0, _vcf_as_SEXP(parse, fmap, smap, row_names));
     _vcf_types_tidy(parse, result);
     _parse_free(parse);
     UNPROTECT(1);
@@ -497,15 +504,18 @@ SEXP scan_vcf_connection(SEXP txt, SEXP smap, SEXP fmap, SEXP imap,
     return result;
 }
 
-SEXP scan_vcf_character(SEXP file, SEXP yield,
-                        SEXP smap, SEXP fmap, SEXP imap, SEXP gmap)
+SEXP scan_vcf_character(SEXP file, SEXP yield, SEXP smap, SEXP fmap, 
+                        SEXP imap, SEXP gmap, SEXP rownames)
 {
     struct parse_t *parse;
+    Rboolean row_names = LOGICAL(rownames)[0];
 
     if (!IS_INTEGER(yield) || 1L != Rf_length(yield))
         Rf_error("'yield' must be integer(1)");
     if (!IS_CHARACTER(file) || 1L != Rf_length(file))
         Rf_error("'file' must be character(1) or as on ?scanVcf");
+    if (!IS_LOGICAL(rownames))
+        Rf_error("'row.names' must be TRUE or FALSE");
 
     parse = _parse_new(INTEGER(yield)[0], smap, fmap, imap, gmap);
 
@@ -545,7 +555,7 @@ SEXP scan_vcf_character(SEXP file, SEXP yield,
             else break;
         }
 
-        _parse(buf0, irec, parse);
+        _parse(buf0, irec, parse, row_names);
 
         irec += 1;
         buf = buf0;
@@ -557,7 +567,7 @@ SEXP scan_vcf_character(SEXP file, SEXP yield,
     _vcf_grow(parse->vcf, irec);
 
     SEXP result = PROTECT(Rf_allocVector(VECSXP, 1));
-    SET_VECTOR_ELT(result, 0, _vcf_as_SEXP(parse, fmap, smap));
+    SET_VECTOR_ELT(result, 0, _vcf_as_SEXP(parse, fmap, smap, row_names));
     _vcf_types_tidy(parse, VECTOR_ELT(result, 0));
     _parse_free(parse);
     UNPROTECT(1);
@@ -566,8 +576,9 @@ SEXP scan_vcf_character(SEXP file, SEXP yield,
 }
 
 SEXP tabix_as_vcf(tabix_t *tabix, ti_iter_t iter, const int yield,
-                  SEXP state)
+                  SEXP state, SEXP rownames)
 {
+    Rboolean row_names = LOGICAL(rownames)[0];
     const ti_conf_t *conf = ti_get_conf(tabix->idx);
     SEXP sample = VECTOR_ELT(state, 0), fmap = VECTOR_ELT(state, 1);
     const int nrec = NA_INTEGER == yield ? TBX_INIT_SIZE : yield;
@@ -598,7 +609,7 @@ SEXP tabix_as_vcf(tabix_t *tabix, ti_iter_t iter, const int yield,
         memcpy(buf, line, linelen);
         buf[linelen] = '\0';
 
-        _parse(buf, irec, parse);
+        _parse(buf, irec, parse, row_names);
         irec += 1;
         if (NA_INTEGER != yield && irec == parse->vcf_n)
             break;
@@ -614,7 +625,7 @@ SEXP tabix_as_vcf(tabix_t *tabix, ti_iter_t iter, const int yield,
 
     _vcf_grow(parse->vcf, irec);
 
-    SEXP result = PROTECT(_vcf_as_SEXP(parse, fmap, sample));
+    SEXP result = PROTECT(_vcf_as_SEXP(parse, fmap, sample, row_names));
     _vcf_types_tidy(parse, result);
     _parse_free(parse);
     UNPROTECT(1);

@@ -8,42 +8,47 @@ setMethod(readVcf, c(file="TabixFile", genome="ANY",
           param="ScanVcfParam"), 
     function(file, genome, param, ..., row.names=TRUE)
 {
-    .readVcf(file, genome, param, row.names)
+    .readVcf(file, genome, param, row.names=row.names, ...)
 })
 
 setMethod(readVcf, c(file="TabixFile", genome="ANY",
           param="GRanges"),
     function(file, genome, param, ..., row.names=TRUE)
 {
-    .readVcf(file, genome, param=ScanVcfParam(which=param), row.names=row.names)
+    .readVcf(file, genome, param=ScanVcfParam(which=param),
+             row.names=row.names, ...)
 })
 
 setMethod(readVcf, c(file="TabixFile", genome="ANY",
           param="RangedData"),
     function(file, genome, param, ..., row.names=TRUE)
 {
-    .readVcf(file, genome, param=ScanVcfParam(which=param), row.names=row.names)
+    .readVcf(file, genome, param=ScanVcfParam(which=param), 
+             row.names=row.names, ...)
 })
 
 setMethod(readVcf, c(file="TabixFile", genome="ANY",
           param="GRangesList"),
     function(file, genome, param, ..., row.names=TRUE)
 {
-    .readVcf(file, genome, param=ScanVcfParam(which=param), row.names=row.names)
+    .readVcf(file, genome, param=ScanVcfParam(which=param), 
+             row.names=row.names, ...)
 })
 
 setMethod(readVcf, c(file="TabixFile", genome="ANY",
           param="RangesList"),
     function(file, genome, param, ..., row.names=TRUE)
 {
-    .readVcf(file, genome, param=ScanVcfParam(which=param), row.names=row.names)
+    .readVcf(file, genome, param=ScanVcfParam(which=param), 
+             row.names=row.names, ...)
 })
 
 setMethod(readVcf, c(file="TabixFile", genome="ANY",
           param="missing"), 
     function(file, genome, param, ..., row.names=TRUE)
 {
-    .readVcf(file, genome, param=ScanVcfParam(), row.names=row.names)
+    .readVcf(file, genome, param=ScanVcfParam(), 
+             row.names=row.names, ...)
 })
 
 ## character
@@ -53,7 +58,7 @@ setMethod(readVcf, c(file="character", genome="ANY",
     function(file, genome, param, ..., row.names=TRUE)
 {
     file <- .checkFile(file)
-    .readVcf(file, genome, param, row.names=row.names)
+    .readVcf(file, genome, param, row.names=row.names, ...)
 })
 
 setMethod(readVcf, c(file="character", genome="ANY",
@@ -61,7 +66,8 @@ setMethod(readVcf, c(file="character", genome="ANY",
     function(file, genome, param, ..., row.names=TRUE)
 {
     file <- .checkFile(file)
-    .readVcf(file, genome, param=ScanVcfParam(), row.names=row.names)
+    .readVcf(file, genome, param=ScanVcfParam(), 
+             row.names=row.names, ...)
 })
 
 setMethod(readVcf, c(file="character", genome="missing",
@@ -97,11 +103,11 @@ setMethod(readVcf, c(file="character", genome="missing",
         if (any(!chr %in% seqnames(genome)))
             stop("'seqnames' in 'vcfWhich(param)' must be present in 'genome'")
     }
-    .scanVcfToVCF(scanVcf(file, param=param), file, genome, param,
-                  row.names=row.names)
+    .scanVcfToVCF(scanVcf(file, param=param, row.names=row.names), file, 
+                  genome, param)
 }
 
-.scanVcfToVCF <- function(vcf, file, genome, param, ..., row.names)
+.scanVcfToVCF <- function(vcf, file, genome, param, ...)
 {
     hdr <- scanVcfHeader(file)
     if (length(vcf[[1]]$GENO) > 0L)
@@ -112,8 +118,6 @@ setMethod(readVcf, c(file="character", genome="missing",
 
     ## rowData
     rowData <- vcf$rowData
-    if (!row.names)
-        names(rowData) <- NULL
     seqinfo(rowData) <- merge(seqinfo(rowData), seqinfo(hdr))
     if (length(rowData)) {
         if (is(genome, "character")) {
@@ -152,42 +156,7 @@ setMethod(readVcf, c(file="character", genome="missing",
 
 ## lightweight read functions retrieve a single variable
 
-readInfo <- function(file, x, param=ScanVcfParam(), ..., row.names=TRUE)
-{
-    lst <- .readLite(file, x, param, "info")
-    rowData <- lst$rowData
-    res <- .formatInfo(lst$INFO, info(scanVcfHeader(file)), 
-                       length(rowData))[[1]]
-    if (row.names)
-        names(res) <- names(rowData)
-    res 
-} 
-
-readGeno <- function(file, x, param=ScanVcfParam(), ..., row.names=TRUE)
-{
-    lst <- .readLite(file, x, param, "geno")
-    rowData <- lst$rowData
-    res <- lst$GENO[[1]]
-    if (row.names)
-        dimnames(res)[[1]] <- names(rowData)
-    res 
-} 
-
-readGT <- function(file, nucleotides=FALSE, param=ScanVcfParam(), ..., 
-                   row.names=TRUE)
-{
-    lst <- .readLite(file, "GT", param, "GT")
-    if (nucleotides)
-        res <- .geno2geno(lst, row.names=row.names)
-    else
-        res <- lst$GENO$GT
-    rowData <- lst$rowData
-    if (row.names)
-        dimnames(res)[[1]] <- names(rowData)
-    res 
-} 
-
-.geno2geno <- function(lst, row.names)
+.geno2geno <- function(lst)
 {
     ## ignore records with GT ".|." 
     ALT <- lst$ALT
@@ -224,8 +193,7 @@ readGT <- function(file, nucleotides=FALSE, param=ScanVcfParam(), ...,
     res
 }
 
-
-.readLite  <- function(file, var, param, type, ...)
+.readLite  <- function(file, var, param, type, ..., row.names)
 {
     msg <- NULL
     if (!is.character(var))
@@ -249,6 +217,42 @@ readGT <- function(file, nucleotides=FALSE, param=ScanVcfParam(), ...,
         param=ScanVcfParam(NA, NA, var, samples, which=which)
     else if (type == "GT")
         param=ScanVcfParam("ALT", NA, var, samples, which=which)
-    scn <- scanVcf(file, param=param)
+    scn <- scanVcf(file, param=param, row.names=row.names)
     .collapseLists(scn, param)
 }
+
+readInfo <- function(file, x, param=ScanVcfParam(), ..., row.names=TRUE)
+{
+    lst <- .readLite(file, x, param, "info", row.names=row.names)
+    rowData <- lst$rowData
+    res <- .formatInfo(lst$INFO, info(scanVcfHeader(file)), 
+                       length(rowData))[[1]]
+    if (row.names)
+        names(res) <- names(rowData)
+    res 
+} 
+
+readGeno <- function(file, x, param=ScanVcfParam(), ..., row.names=TRUE)
+{
+    lst <- .readLite(file, x, param, "geno", row.names=row.names)
+    rowData <- lst$rowData
+    res <- lst$GENO[[1]]
+    if (row.names)
+        dimnames(res)[[1]] <- names(rowData)
+    res 
+} 
+
+readGT <- function(file, nucleotides=FALSE, param=ScanVcfParam(), ..., 
+                   row.names=TRUE)
+{
+    lst <- .readLite(file, "GT", param, "GT", row.names=row.names)
+    if (nucleotides)
+        res <- .geno2geno(lst)
+    else
+        res <- lst$GENO$GT
+    rowData <- lst$rowData
+    if (row.names)
+        dimnames(res)[[1]] <- names(rowData)
+    res 
+} 
+

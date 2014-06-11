@@ -110,3 +110,15 @@ test_scanVcfHeader_VarScan <- function()
     checkIdentical(length(names(header(hd))), 5L)
     checkIdentical(header(hd)$contig[["assembly"]], "B36")
 } 
+
+test_scan_row.names <- function()
+{
+    fl <- system.file("extdata", "chr7-sub.vcf.gz", package="VariantAnnotation")
+    scn <- scanVcf(fl)[[1]]
+    checkTrue(!is.null(names(scn$rowData)))
+    scn <- scanVcf(fl, row.names=FALSE)
+    checkTrue(is.null(names(scn$rowData)))
+    param <- ScanVcfParam(which=GRanges("7", IRanges(55000723, 55000789)))
+    scn <- scanVcf(fl, param=param, row.names=FALSE) 
+    checkTrue(is.null(names(scn$rowData)))
+}
