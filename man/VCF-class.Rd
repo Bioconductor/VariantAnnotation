@@ -375,6 +375,7 @@
   \link[GenomicRanges]{SummarizedExperiment},
   \code{\link{readVcf}},
   \code{\link{writeVcf}}
+  \code{\link{isSNV}}
 }
 
 \examples{
@@ -439,7 +440,7 @@ info(header(vcf)) <- rbind(info(header(vcf)), newInfo)
 rownames(info(header(vcf)))
 
 ## ----------------------------------------------------------------
-## CollapsedVCF 
+## Collapsed and Expanded VCF 
 ## ----------------------------------------------------------------
 ## readVCF() produces a CollapsedVCF object.
 fl <- system.file("extdata", "ex2.vcf", 
@@ -457,38 +458,28 @@ fl <- system.file("extdata", "structural.vcf",
 vcf <- readVcf(fl, genome="hg19")
 alt(vcf)
 
-## ----------------------------------------------------------------
-## ExpandedVCF
-## ----------------------------------------------------------------
 ## ExpandedVCF is the 'flattened' counterpart of CollapsedVCF.
 ## The ALT and all variables with Number='A' in the header are
 ## expanded to one row per alternate allele.
-fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
-vcf <- readVcf(fl, genome="hg19")
 vcfLong <- expand(vcf)
 alt(vcfLong)
 
-## ----------------------------------------------------------------
-## restrictToSNV() 
-## ----------------------------------------------------------------
-## restrictToSNV() returns a subset VCF containing SNVs only.
-## The VCF can be a CollapsedVCF or ExpandedVCF. 'alt(x)' must
-## contain nucleotides (i.e., no structural variants).
+## Also see the ?VRanges class for an alternative form of
+## 'flattened' VCF data.
 
-vcf1 <- VCF(rowData = GRanges("chr1", IRanges(1:4*3, width=c(1, 2, 1, 1))))
-alt(vcf1) <- DNAStringSetList("A", c("TT"), c("G", "A"), c("TT", "C"))
-ref(vcf1) <- DNAStringSet(c("G", c("AA"), "T", "G"))
+## ----------------------------------------------------------------
+## isSNV()
+## ----------------------------------------------------------------
+## NOTE: isSNV() and family have replaced restrictToSNV().
+## isSNV() returns a subset VCF containing SNVs only.
+
+vcf <- VCF(rowData = GRanges("chr1", IRanges(1:4*3, width=c(1, 2, 1, 1))))
+alt(vcf) <- DNAStringSetList("A", c("TT"), c("G", "A"), c("TT", "C"))
+ref(vcf) <- DNAStringSet(c("G", c("AA"), "T", "G"))
+fixed(vcf)[c("REF", "ALT")]
 
 ## SNVs are present in rows 1 (single ALT value), 3 (both ALT values) 
 ## and 4 (1 of the 2 ALT values).
-fixed(vcf1)[c("REF", "ALT")]
-
-## CollapsedVcf
-res1 <- restrictToSNV(vcf1)
-rowData(res1)[ ,1:2]
-
-## ExpandedVcf
-vcf2 <- expand(vcf1)
-res2 <- restrictToSNV(vcf2)
-rowData(res2)[ ,1:2]
+vcf[isSNV(vcf, singleAltOnly=TRUE)] 
+vcf[isSNV(vcf, singleAltOnly=FALSE)] ## all 3 SNVs
 }
