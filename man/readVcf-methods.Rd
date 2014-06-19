@@ -337,7 +337,7 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
   param <- ScanVcfParam(fixed="ALT", geno=c("GT", "GL"), info=c("LDAF"))
   tab <- TabixFile(fl, yieldSize=4000)
   open(tab)
-  while (nrow(vcf <- readVcf(tab, "hg19", param=param)))
+  while (nrow(vcf_yield <- readVcf(tab, "hg19", param=param)))
       cat("vcf dim:", dim(vcf), "\n")
   close(tab)
 
