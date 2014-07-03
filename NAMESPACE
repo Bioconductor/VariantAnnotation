@@ -61,10 +61,10 @@ importMethodsFrom(IRanges,
     as.matrix, as.vector,
     countOverlaps, elementLengths, end, eval, findOverlaps, 
     follow, gsub, lapply, narrow, order, 
-    precede, rev, Rle, runValue, sapply, shift,
-    split, start, "start<-", substring, 
+    precede, rev, sapply, shift,
+    split, start, "start<-",
     unlist, which, width, 
-    expand, ifelse, as.factor, relist, subsetByFilter
+    expand, subsetByFilter
 )
 
 importFrom(XVector, "subseq", "subseq<-")
