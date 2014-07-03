@@ -3,6 +3,15 @@
 ### -------------------------------------------------------------------------
 ###
 
+### Thoughts on the gVCF format.
+## The gVCF format is essentially a run-length encoding of wildtype
+## calls. We could represent the run as a range, but we would need
+## somewhat to indicate "WT". Probably best to go the VCF route: have
+## the first ref base, and an NA alt. We can distinguish this from an
+## SNV or indel, because the width of the range is > 1, but there is
+## only a single ref base. This will break the assertion that the ref
+## length always equal the range width, but that is not a big deal.
+
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Accessors
 ###
@@ -54,6 +63,10 @@ setMethod("called", "VRanges", function(x) {
 
 setMethod("altFraction", "VRanges", function(x) {
   altDepth(x) / totalDepth(x)
+})
+
+setMethod("refFraction", "VRanges", function(x) {
+  refDepth(x) / totalDepth(x)
 })
 
 setMethod("isDeletion", "VRanges", function(x, ...) 
@@ -175,7 +188,7 @@ setAs("VCF", "VRanges", function(from) {
   from <- expand(from)
   rd <- rowData(from)
   seqnames <- seqnames(rd)
-  ranges <- unname(ranges(rd))
+  ranges <- ranges(rd)
   ref <- rd$REF
   alt <- rd$ALT
   if (is(alt, "DNAStringSetList") || is(alt, "CharacterList"))
@@ -203,8 +216,12 @@ setAs("VCF", "VRanges", function(from) {
     }
   } else sampleNames <- NA_character_
   meta <- info(from)
-  if (!is.null(mcols(rd)$QUAL))
+  if (!is.null(mcols(rd)$QUAL)) {
     meta <- cbind(mcols(rd)["QUAL"], meta)
+  }
+  if (!is.null(meta$END)) {
+    end(ranges)[!is.na(meta$END)] <- meta$END[!is.na(meta$END)]
+  }
   rownames(meta) <- NULL
   if (!is.null(rd$FILTER))
     filter <- parseFilterStrings(rd$FILTER)
@@ -313,6 +330,14 @@ makeFILTERstrings <- function(x) {
   ftStrings[failedRows] <-
     unstrsplit(seqsplit(ftNames, row(x)[failed]), ";")
   ftStrings
+}
+
+isGVCFRun <- function(x) {
+  nchar(ref(x)) == 1L & width(x) > 1L
+}
+
+gVCFRunEnds <- function(x) {
+  ifelse(isGVCFRun(xUniq), end(x), NA_integer_)
 }
 
 vranges2Vcf <- function(x, info = character(), filter = character(),
@@ -428,8 +453,13 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
   if (length(genoMCols) > 0L)
     geno <- c(geno, SimpleList(lapply(mcols(x)[genoMCols], genoArray)))
 
+  info <- mcols(xUniq)[info]
+  if (is.null(xUniq$END)) {
+    info$END <- gVCFRunEnds(xUniq)
+  }
+  
   VCF(rowData = rowData, colData = colData, exptData = exptData, fixed = fixed,
-      geno = geno, info = mcols(xUniq)[info], collapsed = FALSE)
+      geno = geno, info = info, collapsed = FALSE)
 }
 
 setMethod("asVCF", "VRanges", vranges2Vcf)
@@ -442,13 +472,30 @@ VRangesScanVcfParam <- function(fixed="ALT", info=NA, geno="AD", ...) {
   ScanVcfParam(fixed=fixed, info=info, geno=geno, ...)
 }
 
-readVcfAsVRanges <- function(x, genome, param=VRangesScanVcfParam(), ...) {
-  as(readVcf(x, genome, param=param, ...), "VRanges")
+readVcfAsVRanges <- function(x, genome, param=VRangesScanVcfParam(),
+                             use.names=FALSE, ...)
+{
+  if (!isTRUEorFALSE(use.names)) {
+    stop("'use.names' must be TRUE or FALSE")
+  }
+  as(readVcf(x, genome, param=param, row.names=use.names, ...), "VRanges")
 }
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Writing to VCF (see methods-writeVcf.R)
 ###
+
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### gVCF support
+###
+
+addTotalDepthRuns <- function(x, runs, genome) {
+  mins <- viewMins(runs)
+  gr <- as(ranges(runs), "GRanges")
+  ref <- getSeq(genome, resize(gr, 1L))
+  vr <- VRanges(seqnames(gr), ranges, ref, alt, totalDepth=mins)
+}
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Filtering
