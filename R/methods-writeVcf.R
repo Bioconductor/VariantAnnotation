@@ -93,10 +93,10 @@ setMethod(writeVcf, c("VCF", "connection"),
         return(matrix(rep(names(geno), nrow(geno[[1]]))))
 
     if (length(idx) > 0) {
-        geno[idx] <- seqapply(geno[idx], 
+        geno[idx] <- as(lapply(geno[idx], 
             function(x) {
                 matrix(unlist(x, use.names=FALSE), nrow(x), prod(tail(dim(x), -1)))
-            })
+            }), "List")
     }
  
     do.call(cbind, Map(function(elt, nms) {
