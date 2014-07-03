@@ -2,7 +2,7 @@
 ### getTranscriptSeqs methods 
 ### =========================================================================
 
-setMethod("getTranscriptSeqs",  c("GRangesList", "BSgenome"),
+setMethod("getTranscriptSeqs",  c("GRangesList", "ANY"),
     function(query, subject, ...)
     {
     extractTranscriptSeqs(subject, query)

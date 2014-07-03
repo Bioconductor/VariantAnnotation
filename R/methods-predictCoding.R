@@ -32,8 +32,10 @@ setMethod("predictCoding", c("CollapsedVCF", "TranscriptDb", "ANY", "missing"),
 setMethod("predictCoding", c("ExpandedVCF", "TranscriptDb", "ANY", "missing"),
     function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 {
-    ## ExpandedVCF ALT must be DNAStringSet (CharacterList not supported)
-    callGeneric(rowData(query), subject, seqSource, alt, ..., 
+    if (is(alt(query), "CharacterList")) {
+      stop("alt(query) must be a DNAStringSet (not a CharacterList)")
+    }
+    callGeneric(rowData(query), subject, seqSource, alt(query), ..., 
                 ignore.strand=ignore.strand) 
 })
 
@@ -42,6 +44,13 @@ setMethod("predictCoding", c("GRanges", "TranscriptDb", "ANY", "DNAStringSet"),
 {
     .predictCoding(query, subject, seqSource, varAllele, ...,
                    ignore.strand=ignore.strand)
+})
+
+setMethod("predictCoding", c("VRanges", "TranscriptDb", "ANY", "missing"),
+function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
+{
+  .predictCoding(query, subject, seqSource, alt(query), ...,
+                 ignore.strand=ignore.strand)
 })
 
 .predictCoding <-
