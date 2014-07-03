@@ -188,6 +188,16 @@ GLtoGP <- function(gl) {
     }
 }
 
+.listMatrixToArray <- function(x) {
+  n <- elementLengths(x)
+  maxn <- max(n)
+  v <- unlist(x, use.names=FALSE)
+  a <- array(as(NA, class(v)), dim=c(maxn, nrow(x), ncol(x)),
+             dimnames=list(NULL, rownames(x), colnames(x)))
+  a[as.integer(IRanges(seq(1L, length(a), maxn), width=n))] <- v
+  aperm(a, c(2,3,1))
+}
+
 .matrixOfListsToArray <- function(x) {
     # find number of elements of each cell of x
     n <- elementLengths(x)
