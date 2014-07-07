@@ -337,7 +337,7 @@ isGVCFRun <- function(x) {
 }
 
 gVCFRunEnds <- function(x) {
-  ifelse(isGVCFRun(xUniq), end(x), NA_integer_)
+  ifelse(isGVCFRun(x), end(x), NA_integer_)
 }
 
 vranges2Vcf <- function(x, info = character(), filter = character(),
