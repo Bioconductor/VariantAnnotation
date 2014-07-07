@@ -418,18 +418,20 @@ setMethod(show, "VCF",
 ### methods for CollapsedVCF and ExapandedVCF
 .showVCFSubclass <- function(object)
 {
-    prettydescr <- function(desc) {
+    prettydescr <- function(desc, wd0=30L) {
         desc <- as.character(desc)
-        wd <- options()[["width"]] - 30
+        wd <- options()[["width"]] - wd0
         dwd <- nchar(desc)
         desc <- substr(desc, 1, wd)
         idx <- dwd > wd
         substr(desc[idx], wd - 2, dwd[idx]) <- "..."
         desc
     }
-    headerrec <- function(df, lbl, margin="  ") {
-        df$Description <- prettydescr(df$Description)
-        rownames(df) <- paste(margin, rownames(df))
+    headerrec <- function(df, margin="   ") {
+        wd <- max(nchar(rownames(df))) + nchar("Number") +
+            max(nchar(df$Type)) + 7L
+        df$Description <- prettydescr(df$Description, wd)
+        rownames(df) <- paste0(margin, rownames(df))
         print(df, right=FALSE)
     }
     printSmallGRanges <- function(x, margin)
@@ -469,7 +471,7 @@ setMethod(show, "VCF",
             diff <- setdiff(colnames(info(object)), rownames(hdr))
             if (length(nms)) {
                 cat("info(header(vcf)):\n")
-                headerrec(as.data.frame(hdr[nms,]), "info")
+                headerrec(as.data.frame(hdr[nms,]))
             }
             if (length(diff))
                 cat("  Fields with no header:", 
@@ -485,7 +487,7 @@ setMethod(show, "VCF",
             diff <- setdiff(names(geno(object)), rownames(hdr))
             if (length(nms)) {
                 cat("geno(header(vcf)):\n")
-                headerrec(as.data.frame(hdr[nms,]), "geno")
+                headerrec(as.data.frame(hdr[nms,]))
             }
             if (length(diff))
                 cat("  Fields with no header:", 
