@@ -6,6 +6,9 @@
 \title{refLocsToLocalLocs}
 
 \description{
+  \code{refLocsToLocalLocs} is deprecated. See ?\code{mapCoords}
+  methods in the GenomicRanges and GenomicAlignments packages.
+
   Converts reference locations (aka chromosome-based or genomic)
   to coding regions, and protein based locations
 }
