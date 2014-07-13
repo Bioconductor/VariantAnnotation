@@ -180,6 +180,11 @@
   coding1 <- predictCoding(vcf, txdb, Hsapiens)
   head(coding1, 3)
 
+  ## Exon-centric or cDNA locations:
+  exonsbytx <- exonsBy(txdb, "tx")
+  cDNA <- mapCoords(coding1[!duplicated(ranges(coding1))], exonsbytx)
+  coding1$cDNA <- ranges(cDNA)[togroup(coding1$QUERYID)]
+
   ## ----------------------------
   ## GRanges object as query 
   ## ----------------------------
