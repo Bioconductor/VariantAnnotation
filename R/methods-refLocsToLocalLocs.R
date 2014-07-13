@@ -43,10 +43,11 @@ setMethod("refLocsToLocalLocs",
         txid <- NA_integer_
 
     ## protein-centric
-    res <- from[qolap]
     pends <- c(ceiling(start(map)/3), ceiling(end(map)/3))
     plocs <- unique(IntegerList(split(pends, rep(seq_len(length(pends)/2)), 2)))
 
+    res <- from[qolap]
+    strand(res) <- strand(map)
     mcols(res) <- append(values(res), 
         DataFrame(CDSLOC=ranges(map), 
                   PROTEINLOC=plocs, 

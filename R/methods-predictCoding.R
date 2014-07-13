@@ -93,10 +93,9 @@ function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
     ## retrieve local coordinates
     mcols(query) <- append(mcols(query), DataFrame(varAllele=varAllele))
     txlocal <- .localCoordinates(query, cdsbytx, ...)
-
     if (length(txlocal) == 0)
         return(txlocal)
- 
+
     rwidth <- width(txlocal)
     translateidx <- rep(TRUE, length(txlocal)) 
     ## reverse complement variant alleles for "-" strand

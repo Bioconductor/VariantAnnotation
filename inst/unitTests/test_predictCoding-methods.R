@@ -15,8 +15,7 @@ test_predictCoding_empty <- function()
     query <- GRanges("chr1", IRanges(start=c(1, 10, 20), width=1))
     alt <- DNAStringSet(c("G", "T", "A"))
     current <- fun(query, cdsbytx, Hsapiens, alt)
-    expected <- GRanges()
-    checkIdentical(current, expected)
+    checkIdentical(dim(mcols(current)), c(0L, 8L))
 }
 
 test_predictCoding_varAllele <- function()
@@ -88,7 +87,7 @@ test_predictCoding_strand <- function()
     current <- suppressWarnings(fun(query, cdsbytx, Hsapiens, variant))
 
     expected <- c("G", "C", "C", "C", "G", "G", "T", "A", "C")
-    checkIdentical(as.character(values(current)[["varAllele"]]), expected)
+    checkIdentical(as.character(mcols(current)$varAllele), expected)
 
     ## ignore.strand
     strand(query) <- "+"
