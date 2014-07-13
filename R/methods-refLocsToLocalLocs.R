@@ -17,33 +17,37 @@ setMethod("refLocsToLocalLocs",
     if (is.null(names(cdsbytx)))
         stop("the outer list elements of cdsbytx must have ",
              " names (i.e., transcript identifiers)") 
-    ## cds and protein
-    cdsGR <- unlist(cdsbytx, use.names=FALSE)
-    cdsFO <- findOverlaps(ranges, cdsGR, type="within")
+    ## cds-centric 
+    map <- mapCoords(ranges, cdsbytx, eltHits=TRUE, ...)
+    if (length(map) == 0) {
+        gr <- GRanges()
+        mcols(gr) <- DataFrame(REF=DNAStringSet(), ALT=DNAStringSetList(),
+                               varAllele=DNAStringSet(), CDSLOC=IRanges(),
+                               PROTEINLOC=IntegerList(), QUERYID=integer(),
+                               TXID=character(), CDSID=integer())
+        return(gr)
+    }
+    eolap <- map$eltHits
+    qolap <- map$queryHits
     cdsid <- 
-        values(unlist(cdsbytx, use.names=FALSE))[["cds_id"]][subjectHits(cdsFO)]
+        values(unlist(cdsbytx, use.names=FALSE))[["cds_id"]][eolap]
     if (is.null(cdsid))
         cdsid <- NA_character_
-    if (length(cdsFO) == 0)
-        return(GRanges())
-    nstrand <- as.vector(strand(cdsGR)[subjectHits(cdsFO)] == "-")
-    qsub <- ranges[queryHits(cdsFO)]
-    names(qsub) <- names(ranges)[queryHits(cdsFO)]
-    cds <- .refLocsToCDSLocs(qsub, nstrand, cdsbytx, cdsGR, cdsFO)
-    pends <- c(ceiling(start(cds)/3), ceiling(end(cds)/3))
-    protein <- unique(IntegerList(split(pends, rep(seq_len(length(pends)/2)), 2)))
-
-    ## set strand to match subject overlap
-    strand(qsub) <- strand(cdsGR[subjectHits(cdsFO)]) 
-    txid <- rep(names(cdsbytx), elementLengths(cdsbytx))[subjectHits(cdsFO)]
+    txid <- rep(names(cdsbytx), elementLengths(cdsbytx))[eolap]
     if (is.null(txid))
         txid <- NA_integer_
-    values(qsub) <- append(values(qsub), 
-        DataFrame(CDSLOC=cds, 
-                  PROTEINLOC=protein, 
-                  QUERYID=queryHits(cdsFO), 
+
+    ## protein-centric
+    res <- ranges[qolap]
+    pends <- c(ceiling(start(map)/3), ceiling(end(map)/3))
+    plocs <- unique(IntegerList(split(pends, rep(seq_len(length(pends)/2)), 2)))
+
+    mcols(res) <- append(values(res), 
+        DataFrame(CDSLOC=ranges(map), 
+                  PROTEINLOC=plocs, 
+                  QUERYID=qolap, 
                   TXID=txid, CDSID=cdsid))
-    qsub
+    res 
 })
 
 .refLocsToCDSLocs <- function(reflocs, nstrand, grlist, lform, olaps)

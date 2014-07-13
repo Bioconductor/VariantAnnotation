@@ -85,7 +85,6 @@ function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
                                       if.fuzzy.codon="error", 
                                       ignore.strand=FALSE)
 {
-    ## FIXME : set query back after olaps
     if (any(insertion <- width(query) == 0))
         start(query)[insertion] <- start(query)[insertion] - 1
     if (ignore.strand)
@@ -94,6 +93,7 @@ function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
     ## retrieve local coordinates
     values(query) <- append(values(query), DataFrame(varAllele=varAllele))
     txlocal <- refLocsToLocalLocs(ranges=query, cdsbytx=cdsbytx)
+    #txlocal <- .localCoordinates(ranges=query, cdsbytx=cdsbytx)
 
     if (length(txlocal) == 0)
         return(txlocal)
