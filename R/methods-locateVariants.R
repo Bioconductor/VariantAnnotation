@@ -302,6 +302,8 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "PromoterVariants"),
                     ranges=IRanges(ranges(query)[queryid]),
                     strand=strand(pm)[subjectHits(fo)],
                     LOCATION=.location(length(queryid), "promoter"), 
+                    LOCSTART=NA_integer_,
+                    LOCEND=NA_integer_,
                     QUERYID=queryid,
                     TXID=as.integer(txid[subjectHits(fo)]),
                     CDSID=NA_integer_,
@@ -310,9 +312,10 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "PromoterVariants"),
                     FOLLOWID=CharacterList(character(0)))
         } else {
             res <- GRanges()
-            values(res) <- DataFrame(LOCATION=.location(), QUERYID=integer(),
-                                     TXID=integer(), CDSID=integer(),
-                                     GENEID=character(),
+            values(res) <- DataFrame(LOCATION=.location(), 
+                                     LOCSTART=integer(), LOCEND=integer(),
+                                     QUERYID=integer(), TXID=integer(), 
+                                     CDSID=integer(), GENEID=character(),
                                      PRECEDEID=CharacterList(),
                                      FOLLOWID=CharacterList())
             res
@@ -384,9 +387,11 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
 {
     warning("none of seqlevels(query) match seqlevels(subject)")
     res <- GRanges()
-    values(res) <- DataFrame(LOCATION=.location(), QUERYID=integer(), 
-                             TXID=integer(), CDSID=integer(), 
-                             GENEID=character(), PRECEDEID=CharacterList(), 
+    values(res) <- DataFrame(LOCATION=.location(),
+                             LOCSTART=integer(), LOCEND=integer(),
+                             QUERYID=integer(), TXID=integer(), 
+                             CDSID=integer(), GENEID=character(), 
+                             PRECEDEID=CharacterList(), 
                              FOLLOWID=CharacterList())
     res
 }
@@ -424,6 +429,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
                 ranges=IRanges(ranges(query)[queryid]),
                 strand=subject_strand[subjectHits(fo)],
                 LOCATION=.location(length(queryid), "spliceSite"),
+                LOCSTART=NA_integer_, LOCEND=NA_integer_,
                 QUERYID=queryid,
                 TXID=as.integer(txid[subjectHits(fo)]),
                 CDSID=NA_integer_,
@@ -432,9 +438,11 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
                 FOLLOWID=CharacterList(character(0)))
     } else {
         res <- GRanges()
-        values(res) <- DataFrame(LOCATION=.location(), QUERYID=integer(),
-                                 TXID=integer(), CDSID=integer(), 
-                                 GENEID=character(), PRECEDEID=CharacterList(),
+        values(res) <- DataFrame(LOCATION=.location(), 
+                                 LOCSTART=integer(), LOCEND=integer(),
+                                 QUERYID=integer(), TXID=integer(), 
+                                 CDSID=integer(), GENEID=character(), 
+                                 PRECEDEID=CharacterList(),
                                  FOLLOWID=CharacterList())
         res
     }
@@ -460,9 +468,11 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
     intergenic <- co == 0
     if (all(!intergenic | (length(subject) == 0L))) {
         res <- GRanges()
-        values(res) <- DataFrame(LOCATION=.location(), QUERYID=integer(), 
-                                 TXID=integer(), CDSID=integer(), 
-                                 GENEID=character(), PRECEDEID=CharacterList(), 
+        values(res) <- DataFrame(LOCATION=.location(), 
+                                 LOCSTART=integer(), LOCEND=integer(),
+                                 QUERYID=integer(), TXID=integer(), 
+                                 CDSID=integer(), GENEID=character(), 
+                                 PRECEDEID=CharacterList(), 
                                  FOLLOWID=CharacterList())
         res
     } else {
@@ -487,6 +497,7 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
             strand(q_range) <- "*"
         values(q_range) <- 
             DataFrame(LOCATION=.location(length(q_range), "intergenic"),
+                      LOCSTART=NA_integer_, LOCEND=NA_integer_,
                       QUERYID=which(intergenic), TXID=NA_integer_, 
                       CDSID=NA_integer_, GENEID=NA_character_, 
                       PRECEDEID=p_genes, FOLLOWID=f_genes)
@@ -528,34 +539,39 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
             ignore.strand=ignore.strand))
     } else {
         usub <- unlist(subject, use.names=FALSE)
-        fo <- findOverlaps(query, usub, type="within", 
-            ignore.strand=ignore.strand)
+        map <- mapCoords(query, subject, ignore.strand=ignore.strand,
+                         eltHits=TRUE) 
     }
-    if (length(fo) > 0) {
-        queryid <- queryHits(fo)
+    if (length(map) > 0) {
+        queryid <- map$queryHits 
+        solap <- map$eltHits 
         txid <- NA_integer_
         cdsid <- NA_integer_
         if (!is.null(tx <- rep(names(subject), elementLengths(subject))))
             txid <- tx 
         if (vtype == "coding")
-            if(!is.null(cds <- values(usub)[["cds_id"]][subjectHits(fo)]))
+            if(!is.null(cds <- values(usub)[["cds_id"]][solap]))
                 cdsid <- cds
 
         GRanges(seqnames=seqnames(query)[queryid],
                 ranges=IRanges(ranges(query)[queryid]),
-                strand=strand(usub)[subjectHits(fo)],
+                strand=strand(usub)[solap],
                 LOCATION=.location(length(queryid), vtype),
+                LOCSTART=start(map),
+                LOCEND=end(map),
                 QUERYID=queryid,
-                TXID=as.integer(txid[subjectHits(fo)]),
+                TXID=as.integer(txid[solap]),
                 CDSID=cdsid,
                 GENEID=NA_character_,
                 PRECEDEID=CharacterList(character(0)),
                 FOLLOWID=CharacterList(character(0)))
     } else {
         res <- GRanges()
-        values(res) <- DataFrame(LOCATION=.location(), QUERYID=integer(),
-                                 TXID=integer(), CDSID=integer(), 
-                                 GENEID=character(), PRECEDEID=CharacterList(),
+        values(res) <- DataFrame(LOCATION=.location(),
+                                 LOCSTART=integer(), LOCEND=integer(),
+                                 QUERYID=integer(), TXID=integer(), 
+                                 CDSID=integer(), GENEID=character(), 
+                                 PRECEDEID=CharacterList(),
                                  FOLLOWID=CharacterList())
         res
     }

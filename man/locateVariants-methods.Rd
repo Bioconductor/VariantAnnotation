@@ -178,6 +178,16 @@ locateVariants(query, subject, region, ...)
       A \sQuote{spliceSite} variant overlaps any portion of the first 2 or last 
       2 nucleotides of an intron.
     }
+    \item{\code{LOCSTART, LOCEND}}{
+      Genomic position in LOCATION-centric coordinates. 
+      If LOCATION is `intron`, these are intron-centric coordinates,
+      if LOCATION is `coding` then cds-centric. All coordinates are
+      relative to the start of the transcript. SpliceSiteVariants,
+      IntergenicVariants and PromoterVariants have no formal
+      extraction `by transcript` so for these variants LOCSTART and
+      LOCEND are NA. Coordinates are computed with \code{mapCoords}; 
+      see ?\code{mapCoords} in the GenomicRanges package for details.
+    }
     \item{\code{QUERYID}}{
       The \code{QUERYID} column provides a map back to the row in the
       original \code{query}. If the \code{query} was a \code{VCF} object this
