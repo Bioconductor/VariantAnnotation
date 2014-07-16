@@ -369,7 +369,7 @@ setTypedRle <- function(type) {
               ### FIXME: cannot use callNextMethod, because broken for
               ### primitive generics where the actual primitive object
               ### is part of the call, e.g., do.call(generic, args)
-              as(lapply(list(x, ...), as, "Rle"), cname)
+              as(do.call(c, lapply(list(x, ...), as, "Rle")), cname)
             })
   cname
 }
