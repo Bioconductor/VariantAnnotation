@@ -328,7 +328,7 @@ makeFILTERstrings <- function(x) {
   failedRows <- rowSums(!x, na.rm=TRUE) > 0L
   ftStrings[passedRows & !failedRows] <- "PASS"
   ftStrings[failedRows] <-
-    unstrsplit(seqsplit(ftNames, row(x)[failed]), ";")
+    unstrsplit(splitAsList(ftNames, row(x)[failed]), ";")
   ftStrings
 }
 
