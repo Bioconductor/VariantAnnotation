@@ -251,6 +251,13 @@ setAs("VRanges", "VCF", function(from) {
   asVCF(from)
 })
 
+optionalDescriptions <- c(
+  GT = "Genotype",
+  GQ = "Genotype quality",
+  PL = "Normalized, Phred-scaled likelihoods for genotypes",
+  MIN_DP = "Minimum DP observed within the GVCF block"
+  )
+  
 makeFORMATheader <- function(x) {
   fixed <-
     DataFrame(row.names = c("AD", "DP", "FT"),
@@ -292,7 +299,7 @@ makeINFOheader <- function(x) {
   df$Number <- as.character(lapply(x, numberForColumn))
   df$Type <- as.character(lapply(x, typeForColumn))
   if (is.null(df$Description))
-    df$Description <- rep(NA, nrow(df))
+    df$Description <- optionalDescriptions[rownames(df)]
   df[c("Number", "Type", "Description")]
 }
 
