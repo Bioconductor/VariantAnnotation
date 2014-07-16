@@ -364,6 +364,10 @@ setTypedRle <- function(type) {
             function(x, ...) {
               as(callNextMethod(), cname)
             })
+  setMethod("c", cname,
+            function(x, ...) {
+              as(callNextMethod(), cname)
+            })
   cname
 }
 
