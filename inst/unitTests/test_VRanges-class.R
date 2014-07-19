@@ -212,6 +212,7 @@ checkIdenticalVCF <- function(orig, vcf) {
   if (!is.null(orig$TS))
     orig$TS <- as.integer(orig$TS)
   softFilterMatrix(orig) <- as(softFilterMatrix(orig), "matrix")
+  names(orig) <- names(vcf)
   ## Information loss due to binary nature of VCF filters
   if (!identical(softFilterMatrix(orig), softFilterMatrix(vcf))) {
     origFilt <- softFilterMatrix(orig)

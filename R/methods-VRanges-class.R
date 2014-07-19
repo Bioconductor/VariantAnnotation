@@ -462,7 +462,10 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
 
   info <- mcols(xUniq)[info]
   if (is.null(xUniq$END)) {
-    info$END <- gVCFRunEnds(xUniq)
+    END <- gVCFRunEnds(xUniq)
+    if (!all(is.na(END))) {
+      info$END <- END
+    }
   }
   
   VCF(rowData = rowData, colData = colData, exptData = exptData, fixed = fixed,
