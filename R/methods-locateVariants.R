@@ -422,16 +422,15 @@ setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
         return(.consolidateHits(fo, length(query), length(subject),
             elementLengths(subject))) 
     if (length(fo) > 0) {
-        txid <- rep(names(subject), elementLengths(subject))
-        queryid <- queryHits(fo)
-        subject_strand <- c(strand(int_start), strand(int_end))
-        GRanges(seqnames=seqnames(query)[queryid],
-                ranges=IRanges(ranges(query)[queryid]),
-                strand=subject_strand[subjectHits(fo)],
-                LOCATION=.location(length(queryid), "spliceSite"),
+        df <- unique(data.frame(queryid=queryHits(fo),
+                     subjectid=togroup(subject)[subjectHits(fo)]))
+        GRanges(seqnames=seqnames(query)[df$queryid],
+                ranges=IRanges(ranges(query)[df$queryid]),
+                strand=unlist(strand(subject), use.names=FALSE)[df$subjectid],
+                LOCATION=.location(length(df$queryid), "spliceSite"),
                 LOCSTART=NA_integer_, LOCEND=NA_integer_,
-                QUERYID=queryid,
-                TXID=as.integer(txid[subjectHits(fo)]),
+                QUERYID=df$queryid,
+                TXID=as.integer(names(subject)[df$subjectid]),
                 CDSID=NA_integer_,
                 GENEID=NA_character_,
                 PRECEDEID=CharacterList(character(0)),
