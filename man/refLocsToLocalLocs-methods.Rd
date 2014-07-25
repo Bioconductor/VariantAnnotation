@@ -1,6 +1,6 @@
 \name{refLocsToLocalLocs}
 \alias{refLocsToLocalLocs}
-\alias{refLocsToLocalLocs,GRanges,TranscriptDb,missing-method}
+\alias{refLocsToLocalLocs,GRanges,TxDb,missing-method}
 \alias{refLocsToLocalLocs,GRanges,missing,GRangesList-method}
 
 \title{refLocsToLocalLocs}
@@ -15,7 +15,7 @@
 
 \usage{
 refLocsToLocalLocs(ranges, txdb, cdsbytx, ...)
-\S4method{refLocsToLocalLocs}{GRanges,TranscriptDb,missing}(ranges, txdb, cdsbytx, ...)
+\S4method{refLocsToLocalLocs}{GRanges,TxDb,missing}(ranges, txdb, cdsbytx, ...)
 \S4method{refLocsToLocalLocs}{GRanges,missing,GRangesList}(ranges, txdb, cdsbytx, ...)
 }
 
@@ -23,7 +23,7 @@ refLocsToLocalLocs(ranges, txdb, cdsbytx, ...)
   \item{ranges}{A \link[GenomicRanges]{GRanges} object containing 
     the variants in reference-based coordinates. 
   }
-  \item{txdb}{A \link[GenomicFeatures]{TranscriptDb} object that serves
+  \item{txdb}{A \link[GenomicFeatures]{TxDb} object that serves
     as the annotation reference.
   }
   \item{cdsbytx}{A \link[GenomicRanges]{GRangesList} object with transcripts
@@ -72,12 +72,12 @@ refLocsToLocalLocs(ranges, txdb, cdsbytx, ...)
     }
     \item{\code{TXID}}{
       Character vector of internal transcript ids from the 
-      \link[GenomicFeatures]{TranscriptDb} or the names of the outer list 
+      \link[GenomicFeatures]{TxDb} or the names of the outer list 
       elements of the \code{cdsbytx} object.
     }
     \item{\code{CDSID}}{
       Character vector of internal coding region ids from the 
-      \link[GenomicFeatures]{TranscriptDb} or the names of the outer list 
+      \link[GenomicFeatures]{TxDb} or the names of the outer list 
       elements of the \code{cdsbytx} object.
     }
   }

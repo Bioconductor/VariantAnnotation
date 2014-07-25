@@ -1,12 +1,12 @@
 \name{summarizeVariants}
 
 \alias{summarizeVariants}
-\alias{summarizeVariants,TranscriptDb,VCF,CodingVariants-method}
-\alias{summarizeVariants,TranscriptDb,VCF,FiveUTRVariants-method}
-\alias{summarizeVariants,TranscriptDb,VCF,ThreeUTRVariants-method}
-\alias{summarizeVariants,TranscriptDb,VCF,SpliceSiteVariants-method}
-\alias{summarizeVariants,TranscriptDb,VCF,IntronVariants-method}
-\alias{summarizeVariants,TranscriptDb,VCF,PromoterVariants-method}
+\alias{summarizeVariants,TxDb,VCF,CodingVariants-method}
+\alias{summarizeVariants,TxDb,VCF,FiveUTRVariants-method}
+\alias{summarizeVariants,TxDb,VCF,ThreeUTRVariants-method}
+\alias{summarizeVariants,TxDb,VCF,SpliceSiteVariants-method}
+\alias{summarizeVariants,TxDb,VCF,IntronVariants-method}
+\alias{summarizeVariants,TxDb,VCF,PromoterVariants-method}
 \alias{summarizeVariants,GRangesList,VCF,VariantType-method}
 \alias{summarizeVariants,GRangesList,VCF,function-method}
 
@@ -20,20 +20,20 @@
 }
 
 \usage{
-\S4method{summarizeVariants}{TranscriptDb,VCF,CodingVariants}(query, subject, mode, ...)
-\S4method{summarizeVariants}{TranscriptDb,VCF,FiveUTRVariants}(query, subject, mode, ...)
-\S4method{summarizeVariants}{TranscriptDb,VCF,ThreeUTRVariants}(query, subject, mode, ...)
-\S4method{summarizeVariants}{TranscriptDb,VCF,SpliceSiteVariants}(query, subject, mode, ...)
-\S4method{summarizeVariants}{TranscriptDb,VCF,IntronVariants}(query, subject, mode, ...)
-\S4method{summarizeVariants}{TranscriptDb,VCF,PromoterVariants}(query, subject, mode, ...)
+\S4method{summarizeVariants}{TxDb,VCF,CodingVariants}(query, subject, mode, ...)
+\S4method{summarizeVariants}{TxDb,VCF,FiveUTRVariants}(query, subject, mode, ...)
+\S4method{summarizeVariants}{TxDb,VCF,ThreeUTRVariants}(query, subject, mode, ...)
+\S4method{summarizeVariants}{TxDb,VCF,SpliceSiteVariants}(query, subject, mode, ...)
+\S4method{summarizeVariants}{TxDb,VCF,IntronVariants}(query, subject, mode, ...)
+\S4method{summarizeVariants}{TxDb,VCF,PromoterVariants}(query, subject, mode, ...)
 \S4method{summarizeVariants}{GRangesList,VCF,VariantType}(query, subject, mode, ...)
 \S4method{summarizeVariants}{GRangesList,VCF,function}(query, subject, mode, ...)
 }
 
 \arguments{
-  \item{query}{A \link[GenomicFeatures]{TranscriptDb} or \code{GRangesList}
+  \item{query}{A \link[GenomicFeatures]{TxDb} or \code{GRangesList}
     object that serves as the annotation. GFF files can be converted to
-    \link[GenomicFeatures]{TranscriptDb} objects with 
+    \link[GenomicFeatures]{TxDb} objects with 
     \code{makeTranscriptDbFromGFF()} in the \code{GenomicFeatures} package.
   }
   \item{subject}{A \linkS4class{VCF} object containing the variants.
@@ -88,7 +88,7 @@
         \item{PromoterVariants :}{list of transcripts}
       }
 
-      When \code{query} is a \code{TranscriptDb}, the appropriate 
+      When \code{query} is a \code{TxDb}, the appropriate 
       region-by-transcript \code{GRangesList} listed above is extracted 
       internally and used as the annotation. 
 
@@ -127,14 +127,14 @@
   ## Read variants from VCF.
   fl <- system.file("extdata", "chr22.vcf.gz", package="VariantAnnotation")
   vcf <- readVcf(fl, "hg19")
-  ## Rename seqlevels to match TranscriptDb; confirm the match.
+  ## Rename seqlevels to match TxDb; confirm the match.
   seqlevels(vcf) <- paste0("chr", seqlevels(vcf)) 
   intersect(seqlevels(vcf), seqlevels(txdb))
 
   ## ----------------------------------------
   ## Counting with locateVariants()
   ## ----------------------------------------
-  ## TranscriptDb as the 'query'
+  ## TxDb as the 'query'
   coding1 <- summarizeVariants(txdb, vcf, CodingVariants())
   colSums(assays(coding1)$counts)
 

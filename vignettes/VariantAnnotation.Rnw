@@ -387,7 +387,7 @@ as some of the other variables.
 
 It is important to keep in mind the pre-computed predictions in the
 SIFT and PolyPhen packages are based on specific gene models. SIFT is
-based on Ensembl and PolyPhen on UCSC Known Gene. The \Rcode{TranscriptDb}
+based on Ensembl and PolyPhen on UCSC Known Gene. The \Rcode{TxDb}
 we used to identify the coding snps was based on UCSC Known Gene so we
 will use PolyPhen for predictions. PolyPhen provides predictions using two 
 different training datasets and has considerable information about 3D protein 

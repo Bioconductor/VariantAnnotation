@@ -8,14 +8,14 @@
 ### 
 ### Each region has the following methods : 
 ### query %in% Ranges, VCF, GRanges
-### subject %in% TranscriptDb, GRangesList 
+### subject %in% TxDb, GRangesList 
 
 
 ### -------------------------------------------------------------------------
 ### methods applicable to all variant regions 
 ###
 
-setMethod("locateVariants", c("Ranges", "TranscriptDb", "VariantType"),
+setMethod("locateVariants", c("Ranges", "TxDb", "VariantType"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE, asHits=FALSE)
 {
@@ -31,7 +31,7 @@ setMethod("locateVariants", c("Ranges", "GRangesList", "VariantType"),
         ignore.strand=ignore.strand, asHits=asHits)
 })
 
-setMethod("locateVariants", c("VCF", "TranscriptDb", "VariantType"),
+setMethod("locateVariants", c("VCF", "TxDb", "VariantType"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE, asHits=FALSE)
 {
@@ -51,7 +51,7 @@ setMethod("locateVariants", c("VCF", "GRangesList", "VariantType"),
 ### region = CodingVariants 
 ###
 
-setMethod("locateVariants", c("GRanges", "TranscriptDb", "CodingVariants"),
+setMethod("locateVariants", c("GRanges", "TxDb", "CodingVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE, asHits=FALSE)
     {
@@ -85,7 +85,7 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "CodingVariants"),
 ### region = IntronVariants 
 ###
 
-setMethod("locateVariants", c("GRanges", "TranscriptDb", "IntronVariants"),
+setMethod("locateVariants", c("GRanges", "TxDb", "IntronVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE, asHits=FALSE)
     {
@@ -119,7 +119,7 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "IntronVariants"),
 ### region = ThreeUTRVariants 
 ###
 
-setMethod("locateVariants", c("GRanges", "TranscriptDb", "ThreeUTRVariants"),
+setMethod("locateVariants", c("GRanges", "TxDb", "ThreeUTRVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE, asHits=FALSE)
     {
@@ -154,7 +154,7 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "ThreeUTRVariants"),
 ### region = FiveUTRVariants 
 ###
 
-setMethod("locateVariants", c("GRanges", "TranscriptDb", "FiveUTRVariants"),
+setMethod("locateVariants", c("GRanges", "TxDb", "FiveUTRVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE, asHits=FALSE)
     {
@@ -189,7 +189,7 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "FiveUTRVariants"),
 ### region = IntergenicVariants 
 ###
 
-setMethod("locateVariants", c("GRanges", "TranscriptDb", 
+setMethod("locateVariants", c("GRanges", "TxDb", 
           "IntergenicVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE)
@@ -220,7 +220,7 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "IntergenicVariants"),
 ## region = SpliceSiteVariants 
 ##
 
-setMethod("locateVariants", c("GRanges", "TranscriptDb", "SpliceSiteVariants"),
+setMethod("locateVariants", c("GRanges", "TxDb", "SpliceSiteVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE, asHits=FALSE)
     {
@@ -254,7 +254,7 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "SpliceSiteVariants"),
 ### region = PromoterVariants 
 ###
 
-setMethod("locateVariants", c("GRanges", "TranscriptDb", "PromoterVariants"),
+setMethod("locateVariants", c("GRanges", "TxDb", "PromoterVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE, asHits=FALSE)
     { 
@@ -327,7 +327,7 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "PromoterVariants"),
 ### region = AllVariants 
 ###
 
-setMethod("locateVariants", c("GRanges", "TranscriptDb", "AllVariants"),
+setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE)
     {

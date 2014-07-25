@@ -1,9 +1,9 @@
 \name{predictCoding}
 \alias{predictCoding}
-\alias{predictCoding,Ranges,TranscriptDb,ANY,DNAStringSet-method}
-\alias{predictCoding,GRanges,TranscriptDb,ANY,DNAStringSet-method}
-\alias{predictCoding,CollapsedVCF,TranscriptDb,ANY,missing-method}
-\alias{predictCoding,ExpandedVCF,TranscriptDb,ANY,missing-method}
+\alias{predictCoding,Ranges,TxDb,ANY,DNAStringSet-method}
+\alias{predictCoding,GRanges,TxDb,ANY,DNAStringSet-method}
+\alias{predictCoding,CollapsedVCF,TxDb,ANY,missing-method}
+\alias{predictCoding,ExpandedVCF,TxDb,ANY,missing-method}
 
 \title{Predict amino acid coding changes for variants}
 
@@ -12,10 +12,10 @@
 }
 
 \usage{
-\S4method{predictCoding}{CollapsedVCF,TranscriptDb,ANY,missing}(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
-\S4method{predictCoding}{ExpandedVCF,TranscriptDb,ANY,missing}(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
-\S4method{predictCoding}{Ranges,TranscriptDb,ANY,DNAStringSet}(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
-\S4method{predictCoding}{GRanges,TranscriptDb,ANY,DNAStringSet}(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
+\S4method{predictCoding}{CollapsedVCF,TxDb,ANY,missing}(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
+\S4method{predictCoding}{ExpandedVCF,TxDb,ANY,missing}(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
+\S4method{predictCoding}{Ranges,TxDb,ANY,DNAStringSet}(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
+\S4method{predictCoding}{GRanges,TxDb,ANY,DNAStringSet}(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 }
 
 \arguments{
@@ -31,9 +31,9 @@
     the \code{query} must be expanded to one row per each alternate allele.
     See examples.
   }
-  \item{subject}{A \link[GenomicFeatures]{TranscriptDb} object that serves 
+  \item{subject}{A \link[GenomicFeatures]{TxDb} object that serves 
     as the annotation. GFF files can be converted to 
-    \link[GenomicFeatures]{TranscriptDb} objects with 
+    \link[GenomicFeatures]{TxDb} objects with 
     \code{makeTranscriptDbFromGFF()} in the \code{GenomicFeatures} package.
   } 
   \item{seqSource}{A \code{\link[BSgenome]{BSgenome}} instance or an \link{FaFile}

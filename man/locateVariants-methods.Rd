@@ -1,28 +1,28 @@
 \name{locateVariants}
 \alias{locateVariants}
 
-\alias{locateVariants,Ranges,TranscriptDb,VariantType-method}
+\alias{locateVariants,Ranges,TxDb,VariantType-method}
 \alias{locateVariants,Ranges,GRangesList,VariantType-method}
-\alias{locateVariants,GRanges,TranscriptDb,VariantType-method}
+\alias{locateVariants,GRanges,TxDb,VariantType-method}
 \alias{locateVariants,GRanges,GRangesList,VariantType-method}
-\alias{locateVariants,VCF,TranscriptDb,VariantType-method}
+\alias{locateVariants,VCF,TxDb,VariantType-method}
 \alias{locateVariants,VCF,GRangesList,VariantType-method}
 
-\alias{locateVariants,GRanges,TranscriptDb,CodingVariants-method}
+\alias{locateVariants,GRanges,TxDb,CodingVariants-method}
 \alias{locateVariants,GRanges,GRangesList,CodingVariants-method}
-\alias{locateVariants,GRanges,TranscriptDb,IntronVariants-method}
+\alias{locateVariants,GRanges,TxDb,IntronVariants-method}
 \alias{locateVariants,GRanges,GRangesList,IntronVariants-method}
-\alias{locateVariants,GRanges,TranscriptDb,FiveUTRVariants-method}
+\alias{locateVariants,GRanges,TxDb,FiveUTRVariants-method}
 \alias{locateVariants,GRanges,GRangesList,FiveUTRVariants-method}
-\alias{locateVariants,GRanges,TranscriptDb,ThreeUTRVariants-method}
+\alias{locateVariants,GRanges,TxDb,ThreeUTRVariants-method}
 \alias{locateVariants,GRanges,GRangesList,ThreeUTRVariants-method}
-\alias{locateVariants,GRanges,TranscriptDb,IntergenicVariants-method}
+\alias{locateVariants,GRanges,TxDb,IntergenicVariants-method}
 \alias{locateVariants,GRanges,GRangesList,IntergenicVariants-method}
-\alias{locateVariants,GRanges,TranscriptDb,SpliceSiteVariants-method}
+\alias{locateVariants,GRanges,TxDb,SpliceSiteVariants-method}
 \alias{locateVariants,GRanges,GRangesList,SpliceSiteVariants-method}
-\alias{locateVariants,GRanges,TranscriptDb,PromoterVariants-method}
+\alias{locateVariants,GRanges,TxDb,PromoterVariants-method}
 \alias{locateVariants,GRanges,GRangesList,PromoterVariants-method}
-\alias{locateVariants,GRanges,TranscriptDb,AllVariants-method}
+\alias{locateVariants,GRanges,TxDb,AllVariants-method}
 \alias{locateVariants,GRanges,GRangesList,AllVariants-method}
 
 \title{Locate variants}
@@ -31,9 +31,9 @@
 
 \usage{
 locateVariants(query, subject, region, ...)
-\S4method{locateVariants}{VCF,TranscriptDb,VariantType}(query, subject, region, ..., 
+\S4method{locateVariants}{VCF,TxDb,VariantType}(query, subject, region, ..., 
     cache=new.env(parent=emptyenv()), ignore.strand=FALSE, asHits=FALSE)
-\S4method{locateVariants}{GRanges,TranscriptDb,VariantType}(query, subject, region, ..., 
+\S4method{locateVariants}{GRanges,TxDb,VariantType}(query, subject, region, ..., 
     cache=new.env(parent=emptyenv()), ignore.strand=FALSE, asHits=FALSE)
 }
 
@@ -44,9 +44,9 @@ locateVariants(query, subject, region, ...)
 
     NOTE: Circular chromosomes are not currently supported. 
   }
-  \item{subject}{A \link[GenomicFeatures]{TranscriptDb} or \code{GRangesList}
+  \item{subject}{A \link[GenomicFeatures]{TxDb} or \code{GRangesList}
     object that serves as the annotation. GFF files can be converted to
-    \link[GenomicFeatures]{TranscriptDb} objects with 
+    \link[GenomicFeatures]{TxDb} objects with 
     \code{makeTranscriptDbFromGFF()} in the \code{GenomicFeatures} package.
   }
   \item{region}{An instance of one of the 8 VariantType classes :
@@ -121,7 +121,7 @@ locateVariants(query, subject, region, ...)
       the \code{PromoterVariants()} or \code{AllVariants()} classes.
     }
     \item{Subject as GRangesList :}{
-      The \code{subject} can be a \code{TranscriptDb} or \code{GRangesList}
+      The \code{subject} can be a \code{TxDb} or \code{GRangesList}
       object. When using a \code{GRangesList} the type of data required
       is driven by the \code{VariantType} class. Below is a description of 
       the appropriate \code{GRangesList} for each \code{VariantType}. 
@@ -195,13 +195,13 @@ locateVariants(query, subject, region, ...)
       slot. 
     }
     \item{\code{TXID}}{
-      The transcript id taken from the \code{TranscriptDb} object.
+      The transcript id taken from the \code{TxDb} object.
     }
     \item{\code{CDSID}}{
-      The coding sequence id taken from the \code{TranscriptDb} object.
+      The coding sequence id taken from the \code{TxDb} object.
     }
     \item{\code{GENEID}}{
-      The gene id taken from the \code{TranscriptDb} object.
+      The gene id taken from the \code{TxDb} object.
     }
     \item{\code{PRECEDEID}}{
       IDs for all genes the query precedes within the defined
@@ -308,7 +308,7 @@ locateVariants(query, subject, region, ...)
   ## Using the cache 
   ## ---------------------------------------------------------------------
   ## When processing multiple VCF files, the 'cache' can be used
-  ## to store the extracted components of the TranscriptDb
+  ## to store the extracted components of the TxDb
   ## (i.e., cds by tx, introns by tx etc.). This avoids having to 
   ## re-extract these GRangesLists during each loop.
   \dontrun{
@@ -329,9 +329,9 @@ locateVariants(query, subject, region, ...)
   \dontrun{
   library(BiocParallel)
 
-  ## A connection to a TranscriptDb object is established when
+  ## A connection to a TxDb object is established when
   ## the package is loaded. Because each process reading from an 
-  ## sqlite db must have a unique connection the TranscriptDb
+  ## sqlite db must have a unique connection the TxDb
   ## object cannot be passed as an argument when running in 
   ## parallel. Instead the package must be loaded on each worker.
 
@@ -352,10 +352,10 @@ locateVariants(query, subject, region, ...)
   mclapply(c(vcf, vcf), fun, subject=grl)
 
 
-  ## B. Passing a TranscriptDb:
+  ## B. Passing a TxDb:
  
   ## Forking:
-  ## In the case of forking, the TranscriptDb cannot be loaded
+  ## In the case of forking, the TxDb cannot be loaded
   ## in the current workspace.
   ## To detach the NAMESPACE:
   ##     unloadNamespace("TxDb.Hsapiens.UCSC.hg19.knownGene")

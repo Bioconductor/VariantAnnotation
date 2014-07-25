@@ -2,14 +2,14 @@
 ### predictCoding methods 
 ### =========================================================================
 
-setMethod("predictCoding", c("Ranges", "TranscriptDb", "ANY", "DNAStringSet"),
+setMethod("predictCoding", c("Ranges", "TxDb", "ANY", "DNAStringSet"),
     function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 {
     callGeneric(as(query, "GRanges"), subject, seqSource, varAllele, ...,
                 ignore.strand=ignore.strand) 
 })
 
-setMethod("predictCoding", c("CollapsedVCF", "TranscriptDb", "ANY", "missing"),
+setMethod("predictCoding", c("CollapsedVCF", "TxDb", "ANY", "missing"),
     function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 {
     rd <- rowData(query)
@@ -29,7 +29,7 @@ setMethod("predictCoding", c("CollapsedVCF", "TranscriptDb", "ANY", "missing"),
     res 
 })
 
-setMethod("predictCoding", c("ExpandedVCF", "TranscriptDb", "ANY", "missing"),
+setMethod("predictCoding", c("ExpandedVCF", "TxDb", "ANY", "missing"),
     function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 {
     if (is(alt(query), "CharacterList")) {
@@ -39,14 +39,14 @@ setMethod("predictCoding", c("ExpandedVCF", "TranscriptDb", "ANY", "missing"),
                 ignore.strand=ignore.strand) 
 })
 
-setMethod("predictCoding", c("GRanges", "TranscriptDb", "ANY", "DNAStringSet"),
+setMethod("predictCoding", c("GRanges", "TxDb", "ANY", "DNAStringSet"),
     function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 {
     .predictCoding(query, subject, seqSource, varAllele, ...,
                    ignore.strand=ignore.strand)
 })
 
-setMethod("predictCoding", c("VRanges", "TranscriptDb", "ANY", "missing"),
+setMethod("predictCoding", c("VRanges", "TxDb", "ANY", "missing"),
 function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 {
   .predictCoding(query, subject, seqSource, alt(query), ...,

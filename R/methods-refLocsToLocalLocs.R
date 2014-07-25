@@ -3,7 +3,7 @@
 ### =========================================================================
 
 setMethod("refLocsToLocalLocs", 
-    signature("GRanges", "TranscriptDb", "missing"),
+    signature("GRanges", "TxDb", "missing"),
     function(ranges, txdb, cdsbytx, ...)
 {
     cdsbytx <- cdsBy(txdb, "tx")

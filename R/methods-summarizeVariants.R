@@ -2,42 +2,42 @@
 ### summarizeVariants methods 
 ### =========================================================================
 
-setMethod("summarizeVariants", c("TranscriptDb", "VCF", "CodingVariants"),
+setMethod("summarizeVariants", c("TxDb", "VCF", "CodingVariants"),
     function(query, subject, mode, ...)
 {
     grl <- cdsBy(query, "tx")
     callGeneric(grl, subject, mode, ...)
 })
 
-setMethod("summarizeVariants", c("TranscriptDb", "VCF", "FiveUTRVariants"),
+setMethod("summarizeVariants", c("TxDb", "VCF", "FiveUTRVariants"),
     function(query, subject, mode, ...)
 {
     grl <- fiveUTRsByTranscript(query) 
     callGeneric(grl, subject, mode, ...)
 })
 
-setMethod("summarizeVariants", c("TranscriptDb", "VCF", "ThreeUTRVariants"),
+setMethod("summarizeVariants", c("TxDb", "VCF", "ThreeUTRVariants"),
     function(query, subject, mode, ...)
 {
     grl <- threeUTRsByTranscript(query) 
     callGeneric(grl, subject, mode, ...)
 })
 
-setMethod("summarizeVariants", c("TranscriptDb", "VCF", "SpliceSiteVariants"),
+setMethod("summarizeVariants", c("TxDb", "VCF", "SpliceSiteVariants"),
     function(query, subject, mode, ...)
 {
     grl <- intronsByTranscript(query) 
     callGeneric(grl, subject, mode, ...)
 })
 
-setMethod("summarizeVariants", c("TranscriptDb", "VCF", "IntronVariants"),
+setMethod("summarizeVariants", c("TxDb", "VCF", "IntronVariants"),
     function(query, subject, mode, ...)
 {
     grl <- intronsByTranscript(query) 
     callGeneric(grl, subject, mode, ...)
 })
 
-setMethod("summarizeVariants", c("TranscriptDb", "VCF", "PromoterVariants"),
+setMethod("summarizeVariants", c("TxDb", "VCF", "PromoterVariants"),
     function(query, subject, mode, ...)
 {
     gr <- transcripts(query, columns="tx_id")
