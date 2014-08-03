@@ -1,5 +1,5 @@
 ### =========================================================================
-### writeVcf methods 
+### writeVcf methods
 ### =========================================================================
 
 setMethod(writeVcf, c("VCF", "character"),
@@ -67,7 +67,7 @@ setMethod(writeVcf, c("VCF", "connection"),
     ALT[nchar(ALT) == 0L | is.na(ALT)] <- "."
     if (is.null(QUAL <- qual(obj)))
         QUAL <- "."
-    else 
+    else
         QUAL[is.na(QUAL)] <- "."
     if (is.null(FILTER <- filt(obj)))
         FILTER <- "."
@@ -82,30 +82,30 @@ setMethod(writeVcf, c("VCF", "connection"),
           GENO <- GENO[,-1,drop=FALSE]
           genoPasted <- do.call(paste, c(split(GENO, col(GENO)), sep = "\t"))
           ans <- paste(ans, FORMAT, genoPasted, sep = "\t")
-      } 
+      }
     }
     ans
 }
 
-.makeVcfFormatMatrix <- function(geno, cls, idx) 
+.makeVcfFormatMatrix <- function(geno, cls, idx)
 {
     if (length(geno) == 1L)
         return(matrix(rep(names(geno), nrow(geno[[1]]))))
 
     if (length(idx) > 0) {
-        geno[idx] <- as(lapply(geno[idx], 
+        geno[idx] <- as(lapply(geno[idx],
             function(x) {
                 matrix(unlist(x, use.names=FALSE), nrow(x), prod(tail(dim(x), -1)))
             }), "List")
     }
- 
+
     do.call(cbind, Map(function(elt, nms) {
 ### Should be discussed, but it seems like if we have a list matrix,
 ### we should look for elements that are empty, not a single NA.
 ### VO: If readVcf() was used, all empty fields were converted to NA.
         if (is.list(elt))
           haveData <- rowSums(matrix(elementLengths(elt), nrow(elt))) > 0
-        else 
+        else
           haveData <- rowSums(!is.na(elt)) > 0
         ifelse(haveData, as.character(nms), NA_character_)
         }, as.list(geno), names(geno))
@@ -114,34 +114,27 @@ setMethod(writeVcf, c("VCF", "connection"),
 
 .makeVcfFormat <- function(formatMat)
 {
-    if (ncol(formatMat) == 1L) {
-        formatMat[is.na(formatMat)] <- ""
-        unstrsplit(CharacterList(split(formatMat, row(formatMat))), ":")
-    } else {
-        keep <- !is.na(formatMat)
-        unstrsplit(CharacterList(split(formatMat[keep], row(formatMat)[keep])),
-                   ":")
-    }
+    .pasteCollapseRows(formatMat, ":")
 }
 
 .makeVcfGeno <- function(geno, ...)
 {
-    cls <- lapply(geno, class) 
+    cls <- lapply(geno, class)
     idx <- which(cls == "array")
     formatMat <- .makeVcfFormatMatrix(geno, cls, idx)
     FORMAT <- .makeVcfFormat(formatMat)
     if (sum(nchar(FORMAT)) == 0L) {
         warning("all geno(<VCF>) fields are NA")
-        return(NULL) 
+        return(NULL)
     }
 
     nsub <- ncol(geno[[1]])
     nrec <- nrow(geno[[1]])
-    arylst <- lapply(geno[idx], 
-                  function(elt, nsub) 
+    arylst <- lapply(geno[idx],
+                  function(elt, nsub)
                   {
-                      m <- matrix(c(elt), ncol=nsub)
-                      matrix(split(m, seq_len(nrec*nsub)), ncol=nsub)
+                      elt[is.na(elt)] <- "."
+                      apply(elt, 2, .pasteCollapseRows, ",")
                   }, nsub)
     geno[idx] <- SimpleList(arylst)
 
@@ -151,7 +144,7 @@ setMethod(writeVcf, c("VCF", "connection"),
 
     ## handle Rle
     rle <- sapply(geno, function(x) is(x[[1]], "Rle"))
-    if (any(rle)) 
+    if (any(rle))
         genoMat[,rle] <- lapply(genoMat[,rle], as.vector)
 
     ## convert NA values to '.'
@@ -171,13 +164,10 @@ setMethod(writeVcf, c("VCF", "connection"),
     } else {
         formatMatPerSub <- matrix(rep(t(formatMat), nsub), nsub*nrec,
                                   length(geno), byrow=TRUE)
-        keep <- !is.na(formatMatPerSub)
-        genoListBySub <- CharacterList(split(
-                           genoMat[keep], row(genoMat)[keep]))
-        genoMatCollapsed <- matrix(unstrsplit(genoListBySub, ":"), nrec, nsub)
+        genoMatCollapsed <- matrix(.pasteCollapseRows(genoMat, ":"), nrec, nsub)
         cbind(FORMAT, genoMatCollapsed)
     }
- 
+
 }
 
 .makeVcfInfo <- function(info, nrecords, ...)
@@ -187,8 +177,8 @@ setMethod(writeVcf, c("VCF", "connection"),
     }
 
     ## Replace NA with '.' in columns with data.
-    ## Columns with no data are set to NA. 
-    lists <- sapply(info, function(elt) 
+    ## Columns with no data are set to NA.
+    lists <- sapply(info, function(elt)
         is.list(elt) || is(elt, "List"))
     info[lists] <- lapply(info[lists], function(l) {
       charList <- as(l, "CharacterList")
@@ -198,7 +188,7 @@ setMethod(writeVcf, c("VCF", "connection"),
     })
 
     ## Add names to non-NA data.
-    infoMat <- matrix(".", nrow(info), ncol(info)) 
+    infoMat <- matrix(".", nrow(info), ncol(info))
     logicals <- sapply(info, is.logical)
     infoMat[,logicals] <- unlist(Map(function(l, nm) {
       ifelse(l, nm, NA_character_)
@@ -208,11 +198,9 @@ setMethod(writeVcf, c("VCF", "connection"),
       ifelse(!is.na(i), paste0(nm, "=", i), NA_character_)
     }, info[!logicals], as(names(info)[!logicals], "List")))
 
-    keep <- !is.na(infoMat)
-    infoRows <- factor(row(infoMat), seq_len(nrow(infoMat)))
-    infoList <- CharacterList(split(infoMat[keep], infoRows[keep]))
-    infoList[elementLengths(infoList) == 0L] <- "."
-    unstrsplit(infoList, ";")
+    infoVector <- .pasteCollapseRows(infoMat, ";")
+    infoVector[!nzchar(infoVector)] <- "."
+    infoVector
 }
 
 .makeVcfHeader <- function(obj, ...)
@@ -221,13 +209,13 @@ setMethod(writeVcf, c("VCF", "connection"),
     header <- Map(.formatHeader, as.list(header(hdr)),
                   as.list(names(header(hdr))))
     header <- c(header, .contigsFromSeqinfo(seqinfo(obj)))
-    samples <- colnames(obj) 
+    samples <- colnames(obj)
     colnms <- c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO")
     if (length(geno(obj)) > 0L) {
       colnms <- c(colnms, "FORMAT", samples[!is.null(samples)])
     }
     colnms <- paste(colnms, collapse="\t")
-    unlist(c(header, colnms), use.names=FALSE) 
+    unlist(c(header, colnms), use.names=FALSE)
 }
 
 .formatHeader <- function(df, nms)
@@ -237,7 +225,7 @@ setMethod(writeVcf, c("VCF", "connection"),
         if ("fileDate" %in% rownames(df))
             df[rownames(df) == "fileDate", ] <- fd
         else
-            df <- rbind(df, DataFrame(Value=fd, row.names="fileDate")) 
+            df <- rbind(df, DataFrame(Value=fd, row.names="fileDate"))
         paste("##", rownames(df), "=", df[,1], sep="")
     } else {
         if ("Description" %in% colnames(df)) {
@@ -251,7 +239,7 @@ setMethod(writeVcf, c("VCF", "connection"),
                          unlist(lapply(df, as.character), use.names=FALSE),
                          sep="")
             lst <- split(prs, row(df))
-            lns <- unstrsplit(CharacterList(lst), ",") 
+            lns <- unstrsplit(lst, ",")
             paste("##", nms, "=<", lns, ">", sep="")
         }
     }
