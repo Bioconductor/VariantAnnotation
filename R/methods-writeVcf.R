@@ -164,6 +164,7 @@ setMethod(writeVcf, c("VCF", "connection"),
     } else {
         formatMatPerSub <- matrix(rep(t(formatMat), nsub), nsub*nrec,
                                   length(geno), byrow=TRUE)
+        genoMat[is.na(formatMatPerSub)] <- NA_character_
         genoMatCollapsed <- matrix(.pasteCollapseRows(genoMat, ":"), nrec, nsub)
         cbind(FORMAT, genoMatCollapsed)
     }
