@@ -1,5 +1,5 @@
 ### =========================================================================
-### Helper functions not exported 
+### Helper functions not exported
 ### =========================================================================
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -32,46 +32,46 @@
         names(lst) <- names(vcf[[1]])
         len <- unlist(lapply(vcf, function(elt) length(elt$rowData)),
                       use.names=FALSE)
-        paramRangeID <- as.factor(rep(paramRangeID, len)) 
+        paramRangeID <- as.factor(rep(paramRangeID, len))
 
         ## collapse info and geno
         info <- lst$INFO
         sp <- split(unname(info), unique(names(info)))
-        sp <- sp[unique(names(info))] 
-        lst$INFO <- 
+        sp <- sp[unique(names(info))]
+        lst$INFO <-
             lapply(sp, function(elt) {
                 d <- dim(elt[[1]])
                 if (is(elt[[1]], "list")) {
                     as.matrix(elt)
                 } else if (is(elt[[1]], "array") && !is.na(d[3])) {
                     pc <- lapply(seq_len(d[2]), function(i) {
-                              do.call(rbind, lapply(elt, "[", ,i,)) 
+                              do.call(rbind, lapply(elt, "[", ,i,))
                           })
-                    array(do.call(c, pc), 
+                    array(do.call(c, pc),
                         c(length(lst$rowData), d[2], d[3]))
                 } else {
                     do.call(c, elt)
                 }
-            }) 
+            })
         geno <- lst$GENO
         sp <- split(geno, unique(names(geno)))
-        lst$GENO <- 
+        lst$GENO <-
             lapply(sp, function(elt) {
                 d <- dim(elt[[1]])
                 if (!is.na(d[3])) {
                     pc <- lapply(seq_len(d[3]), function(i) {
-                              do.call(rbind, lapply(elt, "[", ,,i)) 
+                              do.call(rbind, lapply(elt, "[", ,,i))
                           })
-                    cmb <- array(do.call(c, pc), 
+                    cmb <- array(do.call(c, pc),
                                  c(length(lst$rowData), d[2], d[3]))
                     cmb
                 } else {
                     trans <- lapply(elt, t)
-                    cmb <- matrix(do.call(c, trans), length(lst$rowData), 
+                    cmb <- matrix(do.call(c, trans), length(lst$rowData),
                                   d[2], byrow=TRUE)
                     cmb
                 }
-            }) 
+            })
         lst$paramRangeID <- paramRangeID
     }
     lst
@@ -79,7 +79,7 @@
 
 .formatList <- function(data, type)
 {
-    switch(type, 
+    switch(type,
         Integer = IntegerList(data),
         Float = NumericList(data),
         String = CharacterList(data),
@@ -88,10 +88,10 @@
 
 .toDNAStringSetList <- function(x)
 {
-    ### also used in predictCoding(), genotypeToSnpMatrix() 
+    ### also used in predictCoding(), genotypeToSnpMatrix()
     pbw <- PartitioningByWidth(elementLengths(x))
     x <- unlist(x, use.names=FALSE)
-    x[.isStructural(x)] <- "" 
+    x[.isStructural(x)] <- ""
     xx <- sub(".", "", x, fixed=TRUE)
     relist(DNAStringSet(xx), pbw)
 }
@@ -126,7 +126,7 @@
     }
     ## matrices and arrays
     type <- hdr$Type[match(names(x), rownames(hdr))]
-    idx <- which(lapply(x, is.array) == TRUE) 
+    idx <- which(lapply(x, is.array) == TRUE)
     if (0L != length(idx)) {
         for (i in idx) {
             dat <- x[[i]]
@@ -138,7 +138,7 @@
             x[[i]] <- .formatList(dat, type[i])
         }
     }
-    ## ragged lists 
+    ## ragged lists
     lx <- which(lapply(x, is.list) == TRUE)
     if (0L != length(lx)) {
         for (i in lx) {
@@ -174,6 +174,16 @@
   else S4Vectors:::recycleVector(x, len)
 }
 
+.pasteCollapseRows <- function(x, sep = ",") {
+  if (!is.matrix(x) || mode(x) != "character") {
+    stop("'x' must be a matrix of mode character")
+  }
+  if (!isSingleString(sep) || nchar(sep) == 0L) {
+    stop("'sep' must be a single, non-NA, non-empty string")
+  }
+  .Call(matrix_pasteCollapseRows, x, sep)
+}
+
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### PolyPhen, SIFT and PROVEAN
 ###
@@ -189,7 +199,7 @@
     if (0L == length(vals))
         return("")
     sql <-
-      lapply(seq_len(length(vals)), 
+      lapply(seq_len(length(vals)),
         function(i) {
             v <- vals[[i]]
             if (!is.numeric(v))
@@ -207,7 +217,7 @@
         msg <- paste(BiocGenerics:::selectSome(keys[mkeys]), collapse=" ")
         warning(sum(mkeys), " keys not found in ", db, " database: ", msg,
                 call.=FALSE)
-    } 
+    }
     all(mkeys)
 }
 
@@ -222,11 +232,11 @@
         return(TRUE)
     } else {
         return(FALSE)
-    } 
+    }
 }
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-### isSNV helpers 
+### isSNV helpers
 ###
 
 .isSNV <- function(ref, alt) {
@@ -234,14 +244,14 @@
 }
 
 .isDeletion <- function(ref, alt) {
-    nchar(alt) == 1L & 
-    nchar(ref) > 1L & 
+    nchar(alt) == 1L &
+    nchar(ref) > 1L &
     substring(ref, 1, 1) == alt
 }
 
 .isInsertion <- function(ref, alt) {
-    nchar(ref) == 1L & 
-    nchar(alt) > 1L & 
+    nchar(ref) == 1L &
+    nchar(alt) > 1L &
     substring(alt, 1, 1) == ref
 }
 
