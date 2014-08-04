@@ -133,6 +133,8 @@ setMethod(writeVcf, c("VCF", "connection"),
     arylst <- lapply(geno[idx],
                   function(elt, nsub)
                   {
+### FIXME: a bit inefficient, because we will generate elements like ".,."
+###        for rows that are all NA, only to exclude them later.
                       elt[is.na(elt)] <- "."
                       apply(elt, 2, .pasteCollapseRows, ",")
                   }, nsub)
