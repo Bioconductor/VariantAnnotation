@@ -23,7 +23,7 @@ setMethod("refLocsToLocalLocs",
 .localCoordinates <- function(from, to, ...)
 {
     ## cds-centric 
-    map <- mapCoords(from, to, eltHits=TRUE, ...)
+    map <- mapCoords(from, to, elt.hits=TRUE, ...)
     if (length(map) == 0) {
         gr <- GRanges()
         mcols(gr) <- DataFrame(REF=DNAStringSet(), ALT=DNAStringSetList(),

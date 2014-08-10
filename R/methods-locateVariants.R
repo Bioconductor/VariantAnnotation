@@ -539,7 +539,7 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
     } else {
         usub <- unlist(subject, use.names=FALSE)
         map <- mapCoords(query, subject, ignore.strand=ignore.strand,
-                         eltHits=TRUE) 
+                         elt.hits=TRUE) 
     }
     if (length(map) > 0) {
         queryid <- map$queryHits 
