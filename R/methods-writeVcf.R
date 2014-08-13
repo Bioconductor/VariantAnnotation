@@ -119,6 +119,9 @@ setMethod(writeVcf, c("VCF", "connection"),
 
 .makeVcfGeno <- function(geno, ...)
 {
+    if ("GT" %in% names(geno)) {
+        geno <- geno[c("GT", setdiff(names(geno), "GT"))]
+    }
     cls <- lapply(geno, class)
     idx <- which(cls == "array")
     formatMat <- .makeVcfFormatMatrix(geno, cls, idx)

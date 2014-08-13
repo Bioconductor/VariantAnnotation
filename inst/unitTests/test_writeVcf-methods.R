@@ -87,6 +87,12 @@ test_writeVcf_geno <- function()
     checkIdentical(geno(vcf1)$GT, geno(vcf2)$GT)
     checkIdentical(geno(vcf1)$HQ, geno(vcf2)$HQ)
     checkTrue(samples(header(vcf2)) == "NA00002")
+
+    vcf3 <- vcf1
+    geno(vcf3) <- geno(vcf3)[c("HQ", "GT")]
+    writeVcf(vcf3, dest)
+    vcf2 <- readVcf(dest, "hg19", param=param)
+    checkIdentical(geno(vcf1), geno(vcf2))
 }
 
 
