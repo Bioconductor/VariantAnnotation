@@ -1,5 +1,6 @@
 \name{getTranscriptSeqs}
 \alias{getTranscriptSeqs}
+\alias{getTranscriptSeqs,GRangesList,ANY-method}
 \alias{getTranscriptSeqs,GRangesList,BSgenome-method}
 \alias{getTranscriptSeqs,GRangesList,FaFile-method}
 \alias{getTranscriptSeqs,GRanges,FaFile-method}

@@ -61,7 +61,7 @@
 \alias{geno<-,VCF,missing,matrix-method}
 \alias{geno<-,VCF,missing,SimpleList-method}
 \alias{strand,VCF-method}
-\alias{strand<-,VCF-method}
+\alias{strand<-,VCF,ANY-method}
 \alias{header,VCF-method}
 \alias{header<-}
 \alias{header<-,VCF,VCFHeader-method}

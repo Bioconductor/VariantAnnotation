@@ -4,6 +4,7 @@
 \alias{predictCoding,GRanges,TxDb,ANY,DNAStringSet-method}
 \alias{predictCoding,CollapsedVCF,TxDb,ANY,missing-method}
 \alias{predictCoding,ExpandedVCF,TxDb,ANY,missing-method}
+\alias{predictCoding,VRanges,TxDb,ANY,missing-method}
 
 \title{Predict amino acid coding changes for variants}
 
