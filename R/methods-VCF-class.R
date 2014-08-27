@@ -372,11 +372,21 @@ setMethod("rbind", "VCF",
     args <- unname(list(...))
     if (!.compare(lapply(args, class)))
         stop("'...' objects must be of the same VCF class")
-    args <- .renameSamples(args) 
-    se <- GenomicRanges:::.rbind.SummarizedExperiment(args)
+    args <- .renameSamples(args)
+    if (!.compare(lapply(args, colnames)))
+            stop("'...' objects must have the same colnames")
+    if (!.compare(lapply(args, ncol)))
+            stop("'...' objects must have the same number of samples")
+
+    rowData <- do.call(c, lapply(args,
+        function(i) slot(i, "rowData")))
+    colData <- GenomicRanges:::.cbind.DataFrame(args, colData, "colData")
+    assays <- GenomicRanges:::.bind.arrays(args, rbind, "assays")
+    exptData <- do.call(c, lapply(args, exptData))
     info <- do.call(rbind, lapply(args, info))
     fixed <- do.call(rbind, lapply(args, fixed))
-    new(class(args[[1]]), se, fixed=fixed, info=info)
+    new(class(args[[1]]), assays=assays, rowData=rowData,
+        colData=colData, exptData=exptData, fixed=fixed, info=info)
 })
 
 .renameSamples <- function(args)
@@ -395,13 +405,24 @@ setMethod("cbind", "VCF",
     args <- unname(list(...))
     if (!.compare(lapply(args, class)))
         stop("'...' objects must be of the same VCF class")
-    se <- GenomicRanges:::.cbind.SummarizedExperiment(args)
+
+
+    if (!.compare(lapply(args, rowData), TRUE))
+        stop("'...' object ranges (rows) are not compatible")
+    rowData <- rowData(args[[1]])
+    mcols(rowData) <- GenomicRanges:::.cbind.DataFrame(args, mcols, "mcols")
     info <- GenomicRanges:::.cbind.DataFrame(args, info, "info") 
+    colData <- do.call(rbind, lapply(args, colData))
+    assays <- GenomicRanges:::.bind.arrays(args, cbind, "assays")
+    exptData <- do.call(c, lapply(args, exptData))
     if (!.compare(lapply(args, "fixed")))
         stop("data in 'fixed(VCF)' must match.")
     else
         fixed <- fixed(args[[1]]) 
-    new(class(args[[1]]), se, fixed=fixed, info=info)
+    new(class(args[[1]]), assays=assays, rowData=rowData,
+        colData=colData, exptData=exptData, fixed=fixed, info=info)
+
+
 })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

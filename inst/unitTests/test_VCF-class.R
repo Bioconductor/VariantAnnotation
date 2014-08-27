@@ -249,8 +249,8 @@ test_VCF_rbind <- function()
 ## requires matching samples 
 {
     ## empty
-    vcf <- VCF()
-    empty <- rbind(vcf, vcf)
+    vcf0 <- VCF()
+    empty <- rbind(vcf0, vcf0)
     checkEquals(dim(empty), c(0, 0))
 
     ## different sample 
@@ -262,7 +262,6 @@ test_VCF_rbind <- function()
 
     ## same samples 
     vcf2 <- vcf1[1:3,]
-    #colnames(vcf2) <- month.name[seq_len(ncol(vcf2))]
     res <- rbind(vcf1, vcf2)
     checkTrue(nrow(res) == 8)
     checkTrue(ncol(res) == 3)
