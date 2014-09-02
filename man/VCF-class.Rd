@@ -171,8 +171,9 @@
        \code{rowData<-} but it is more efficient to do so with \code{fixed<-}. 
     }
     \item{}{
-      \code{info(x)}, \code{info(x) <- value}:
-       Gets or sets a DataFrame of INFO variables. 
+      \code{info(x, ..., row.names = TRUE)}, \code{info(x) <- value}:
+       Gets or sets a DataFrame of INFO variables. Row names are added
+       if unique and \code{row.names=TRUE}.
     }
     \item{}{
       \code{geno(x)}, \code{geno(x) <- value}:

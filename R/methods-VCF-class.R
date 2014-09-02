@@ -179,12 +179,14 @@ setReplaceMethod("dimnames", c("VCF", "list"),
  
 ### info 
 setMethod("info", "VCF", 
-    function(x) 
+    function(x, ..., row.names = TRUE) 
 {
     info <- slot(x, "info")
-    if (length(info) != 0L)
-        if (!sum(duplicated(rownames(x))))
-            rownames(info) <- rownames(x)
+    if (row.names) {
+        if (length(info) != 0L)
+            if (!sum(duplicated(rownames(x))))
+                rownames(info) <- rownames(x)
+    }
     info
 })
 

@@ -168,7 +168,7 @@ setGeneric("filt<-", signature=c("x", "value"),
 )
 
 setGeneric("info", signature="x", 
-    function(x) standardGeneric("info")
+    function(x, ..., row.names = TRUE) standardGeneric("info")
 )
 
 setGeneric("info<-", signature=c("x", "value"),
