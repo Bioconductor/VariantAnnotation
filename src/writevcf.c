@@ -1,18 +1,10 @@
 #include "writevcf.h"
-
-static const double BUFFER_GROW = 1.6;
-
-void buf_grow(char *buf0, char *buf)
-{
-    if (strlen(buf) == strlen(buf0) + 1)
-        buf0 = Realloc(buf0, BUFFER_GROW * strlen(buf), char);
-}
+#include "samtools/kstring.h"
 
 /* write all genotype fields for a single sample */
 void write_geno_sample(int i, int j, int k_last, SEXP k_valid, SEXP geno_zdim,
                        int n_rows, int n_samples, int n_fields, SEXP geno, 
-                       const char *f_sep, const char *mv_sep, char **buf0, 
-                       char **buf)
+                       const char *f_sep, const char *mv_sep, kstring_t *bufp)
 {
     SEXP field, c_elt;
     SEXPTYPE type;
@@ -35,39 +27,36 @@ void write_geno_sample(int i, int j, int k_last, SEXP k_valid, SEXP geno_zdim,
                         break;
                     case INTSXP:
                         i_elt = INTEGER(field)[index];
-                        buf_grow(*buf0, *buf);
                         if (NA_INTEGER != i_elt) 
-                            *buf += sprintf(*buf, "%d", i_elt);
+                            ksprintf(bufp, "%d", i_elt);
                         else
-                            *buf += sprintf(*buf, "%s", ".");
+                            ksprintf(bufp, "%s", ".");
                         break;
                     case REALSXP:
                         d_elt = REAL(field)[index];
-                        buf_grow(*buf0, *buf);
                         if (NA_REAL != d_elt)
-                            *buf += sprintf(*buf, "%f", d_elt);
+                            ksprintf(bufp, "%f", d_elt);
                         else
-                            *buf += sprintf(*buf, "%s", ".");
+                            ksprintf(bufp, "%s", ".");
                         break;
                     case STRSXP:
                         c_elt = STRING_ELT(field, index);
-                        buf_grow(*buf0, *buf);
                         if (NA_STRING != c_elt)
-                            *buf += sprintf(*buf, "%s", CHAR(c_elt));
+                            ksprintf(bufp, "%s", CHAR(c_elt));
                         else
-                            *buf += sprintf(*buf, "%s", ".");
+                            ksprintf(bufp, "%s", ".");
                         break;
                 }
                 /* multi-value separator */
                 if (z < z_max - 1 && LOGICAL(k_valid)[k])
-                    *buf += sprintf(*buf, "%s", mv_sep);
+                    ksprintf(bufp, "%s", mv_sep);
             }
             /* field separator */
             if (k < n_fields - 1 && k < k_last)
-                *buf += sprintf(*buf, "%s", f_sep);
+                ksprintf(bufp, "%s", f_sep);
         }
     }
-} 
+}
 
 /* return TRUE if genotype element is NA */
 Rboolean valid_geno_elt(SEXP field, SEXPTYPE type, int index)
@@ -115,11 +104,11 @@ SEXP make_vcf_geno(SEXP format, SEXP geno, SEXP separators,
     int n_samples = INTEGER(vcf_dim)[1];
     int n_fields = length(format);
     int i, j, k, k_last, z, z_dim, z_max;
-    int index, search;
+    int index;
+    Rboolean search;
 
-    char *buf0, *buf;
-    const int BUFLEN = 5000;
-    buf0 = Calloc(BUFLEN, char);
+    kstring_t buf;
+    buf.l = buf.m = 0; buf.s = NULL;
 
     SEXP k_valid, field, result; 
     SEXPTYPE type; 
@@ -130,17 +119,17 @@ SEXP make_vcf_geno(SEXP format, SEXP geno, SEXP separators,
       Rf_error("length(geno_zdim) must equal length(geno)");
 
     PROTECT(k_valid = NEW_LOGICAL(n_fields));
-
-    result = allocVector(STRSXP, n_rows);
-    PROTECT(result);
+    PROTECT(result = allocVector(STRSXP, n_rows));
 
     for (i = 0; i < n_rows; ++i) {
-        buf = buf0;
-        *buf0 = '\0';
+        /* reset buffer */
+        buf.l = 0;
+        if (NULL != buf.s) *buf.s = '\0';
+
         k_last = 0;
         /* write format names */
         for (k = 0; k < n_fields; ++k) {
-            search = 1;
+            search = TRUE;
             field = VECTOR_ELT(geno, k);
             type = TYPEOF(field);
             z_dim = INTEGER(geno_zdim)[k];
@@ -149,21 +138,16 @@ SEXP make_vcf_geno(SEXP format, SEXP geno, SEXP separators,
                 for (z = 0; z < z_max; ++z) {
                     index = i + j*n_rows + z*n_rows*n_samples; 
                     if (valid_geno_elt(field, type, index)) {
-                        buf_grow(buf0, buf);
-                        buf += sprintf(buf, "%s", CHAR(STRING_ELT(format, k)));
+                        ksprintf(&buf, "%s%s", CHAR(STRING_ELT(format, k)),
+                                 (k < n_fields - 1) ? f_sep : "\t");
                         LOGICAL(k_valid)[k] = TRUE;
-                        if (k < n_fields - 1)
-                            buf += sprintf(buf, "%s", f_sep);
-                        else
-                            buf += sprintf(buf, "%s", "\t");
                         k_last = k;
-                        search = 0;
+                        search = FALSE;
                         break;
                     } else if (k == n_fields - 1 && z == z_max - 1) {
-                        buf -= strlen(f_sep);
-                        buf += sprintf(buf, "%s", "\t");
+                        ksprintf(&buf, "%s", "\t");
                         LOGICAL(k_valid)[k] = FALSE;
-                        search = 0;
+                        search = FALSE;
                         break;
                     } else {
                         LOGICAL(k_valid)[k] = FALSE;
@@ -175,18 +159,18 @@ SEXP make_vcf_geno(SEXP format, SEXP geno, SEXP separators,
         for (j = 0; j < n_samples; ++j) {
             write_geno_sample(i, j, k_last, k_valid, geno_zdim, n_rows, 
                               n_samples, n_fields, geno, f_sep, mv_sep, 
-                              &buf0, &buf);
+                              &buf);
             if (j < n_samples - 1) {
-                if (0 != strlen(buf0))
+                if (0 != buf.l)
                     /* sample separator */
-                    buf += sprintf(buf, "%s", "\t");
+                    ksprintf(&buf, "%s", "\t");
             } else {
-                SET_STRING_ELT(result, i, mkChar(buf0));
+                SET_STRING_ELT(result, i, mkChar(buf.s));
             }
         }
     }
 
-    Free(buf0);
+    free(buf.s);
     UNPROTECT(2);
     return result;
 }
