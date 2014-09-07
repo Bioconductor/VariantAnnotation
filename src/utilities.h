@@ -17,5 +17,4 @@ char *it_init(struct it_t *it, char *str, char delim);
 char *it_next(struct it_t *it);
 int it_nfld(const struct it_t *it);
 
-SEXP matrix_pasteCollapseRows(SEXP x, SEXP sep);
 #endif

@@ -480,6 +480,7 @@ static void _parse_grow(struct parse_t *parse, int size)
     parse->vcf_n = size;
 }
 
+/* --- .Call ENTRY POINT --- */
 SEXP scan_vcf_connection(SEXP txt, SEXP smap, SEXP fmap, SEXP imap,
                          SEXP gmap, SEXP rownames)
 {
@@ -504,6 +505,7 @@ SEXP scan_vcf_connection(SEXP txt, SEXP smap, SEXP fmap, SEXP imap,
     return result;
 }
 
+/* --- .Call ENTRY POINT --- */
 SEXP scan_vcf_character(SEXP file, SEXP yield, SEXP smap, SEXP fmap, 
                         SEXP imap, SEXP gmap, SEXP rownames)
 {
@@ -575,6 +577,7 @@ SEXP scan_vcf_character(SEXP file, SEXP yield, SEXP smap, SEXP fmap,
     return result;
 }
 
+/* --- .Call ENTRY POINT --- */
 SEXP tabix_as_vcf(tabix_t *tabix, ti_iter_t iter, const int yield,
                   SEXP state, SEXP rownames)
 {

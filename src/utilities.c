@@ -1,7 +1,6 @@
 #include "utilities.h"
 
 /* get_namespace */
-
 SEXP get_namespace(const char *pkg)
 {
     SEXP fun = PROTECT(findFun(install("getNamespace"), R_GlobalEnv));
@@ -12,7 +11,6 @@ SEXP get_namespace(const char *pkg)
 }
 
 /* iterator to return null-terminated delimited fields */
-
 char *it_init(struct it_t *it, char *str, char delim)
 {
     it->str = str;
@@ -41,37 +39,4 @@ inline char *it_next(struct it_t *it)
 inline int it_nfld(const struct it_t *it)
 {
     return it->n_fld;
-}
-
-/* paste-collapse character matrix by row, ignoring NAs */
-
-SEXP matrix_pasteCollapseRows(SEXP x, SEXP sep) {
-  int nc = ncols(x), nr = nrows(x);
-  char c_sep = CHAR(STRING_ELT(sep, 0))[0];
-
-  SEXP ans = allocVector(STRSXP, nr);
-  PROTECT(ans);
-
-  for (int r = 0; r < nr; r++) {
-    int len = 0;
-    for (int i = r; i < length(x); i += nr) {
-      SEXP str = STRING_ELT(x, i);
-      if (str != NA_STRING)
-        len += length(str) + 1;
-    }
-    char *collapsed = R_alloc(sizeof(char), len);
-    char *dest = collapsed;
-    for (int i = r; i < length(x); i += nr) {
-      SEXP str = STRING_ELT(x, i);
-      if (str != NA_STRING) {
-        strcpy(dest, CHAR(str));
-        dest[length(str)] = c_sep;
-        dest += length(str) + 1;
-      }
-    }
-    SET_STRING_ELT(ans, r, mkCharLen(collapsed, len - 1 * (len > 0)));
-  }
-
-  UNPROTECT(1);
-  return ans;
 }

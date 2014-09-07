@@ -47,6 +47,13 @@ test_writeVcf_geno <- function()
     vcf2 <- readVcf(dest, "hg19")
     checkTrue(length(geno(vcf2)$GT) == 0L)
 
+    ## Rle 
+    vcf1 <- readVcf(fl, "hg19", param=ScanVcfParam(geno="GT"))
+    writeVcf(vcf1, dest)
+    vcf2 <- readVcf(dest, "hg19")
+    checkIdentical(geno(vcf1)$GT, geno(vcf2)$GT)
+    checkIdentical(geno(header(vcf1)), geno(header(vcf2)))
+
     ## matrix 
     vcf1 <- readVcf(fl, "hg19", param=ScanVcfParam(geno="GT"))
     writeVcf(vcf1, dest)
