@@ -48,13 +48,13 @@ importMethodsFrom(GenomicFeatures,
 importFrom(IRanges, 
     CharacterList, DataFrame, DataFrameList, FilterRules, IntegerList, 
     IRanges, LogicalList, NumericList, PartitioningByEnd, PartitioningByWidth,
-    seqsplit, SimpleList, splitAsList, successiveViews, FilterMatrix, expand,
+    seqsplit, splitAsList, successiveViews, FilterMatrix, expand,
     endoapply, filterRules, subsetByFilter
 )
 
 importClassesFrom(IRanges, 
     CharacterList, DataFrame, Ranges, RangesList, RangedData,
-    SimpleDataFrameList, SimpleList, FilterRules, FilterMatrix
+    SimpleDataFrameList, FilterRules, FilterMatrix
 )
 
 importMethodsFrom(IRanges, 

@@ -372,7 +372,7 @@
 \seealso{
   \link{GRanges},
   \link[IRanges]{DataFrame},
-  \link[IRanges]{SimpleList},
+  \link[S4Vectors]{SimpleList},
   \link[GenomicRanges]{SummarizedExperiment},
   \code{\link{readVcf}},
   \code{\link{writeVcf}}
