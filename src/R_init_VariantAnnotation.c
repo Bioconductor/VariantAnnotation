@@ -9,7 +9,7 @@ static const R_CallMethodDef callMethods[] = {
     {".scan_vcf_connection", (DL_FUNC) & scan_vcf_connection, 6},
     {".tabix_as_vcf", (DL_FUNC) & tabix_as_vcf, 5},
     {"matrix_pasteCollapseRows", (DL_FUNC) & matrix_pasteCollapseRows, 2},
-    {".make_vcf_geno", (DL_FUNC) & make_vcf_geno, 5},
+    {".make_vcf_geno", (DL_FUNC) & make_vcf_geno, 6},
     {NULL, NULL, 0}
 };
 

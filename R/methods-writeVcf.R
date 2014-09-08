@@ -75,24 +75,21 @@ setMethod(writeVcf, c("VCF", "connection"),
         FILTER[is.na(FILTER)] <- "."
     INFO <- .makeVcfInfo(info(obj), length(rd))
     FIXED <- paste(CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, sep = "\t")
-    if (!is.null(GENO <- .makeVcfGeno(geno(obj), dim(obj))))
-        paste(FIXED, GENO, sep="\t")
-    else
-        FIXED 
+    .makeVcfGeno(FIXED, geno(obj, withDimnames=FALSE), dim(obj))
 }
 
-.makeVcfGeno <- function(geno, dvcf, ...)
+.makeVcfGeno <- function(fixed, geno, dvcf, ...)
 {
     if (dvcf[2] == 0L)
-        return(NULL)
+        return(fixed)
     if (any(is.null(names(geno)))) {
         warning("all 'geno(<VCF>)' fields must be named")
-        return(NULL)
+        return(fixed)
     }
     if ("GT" %in% names(geno)) {
         geno <- geno[c("GT", setdiff(names(geno), "GT"))]
     }
-    .Call(.make_vcf_geno, names(geno), as.list(geno), c(":", ","), 
+    .Call(.make_vcf_geno, fixed, names(geno), as.list(geno), c(":", ","), 
           dvcf, sapply(geno, function(x) dim(x)[3])) 
 }
 
@@ -137,7 +134,7 @@ setMethod(writeVcf, c("VCF", "connection"),
     header <- c(header, .contigsFromSeqinfo(seqinfo(obj)))
     samples <- colnames(obj)
     colnms <- c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO")
-    if (length(geno(obj)) > 0L) {
+    if (length(geno(obj, withDimnames=FALSE)) > 0L) {
       colnms <- c(colnms, "FORMAT", samples[!is.null(samples)])
     }
     colnms <- paste(colnms, collapse="\t")
