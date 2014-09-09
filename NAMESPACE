@@ -46,7 +46,7 @@ importMethodsFrom(GenomicFeatures,
 )
 
 importFrom(IRanges, 
-    CharacterList, DataFrameList, FilterRules, IntegerList, 
+    CharacterList, FilterRules, IntegerList, 
     IRanges, LogicalList, NumericList, PartitioningByEnd, PartitioningByWidth,
     seqsplit, splitAsList, successiveViews, FilterMatrix, expand,
     endoapply, filterRules, subsetByFilter
@@ -54,7 +54,7 @@ importFrom(IRanges,
 
 importClassesFrom(IRanges, 
     CharacterList, Ranges, RangesList, RangedData,
-    SimpleDataFrameList, FilterRules, FilterMatrix
+    FilterRules, FilterMatrix
 )
 
 importMethodsFrom(IRanges, 
