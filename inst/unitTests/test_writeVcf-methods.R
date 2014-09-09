@@ -100,6 +100,13 @@ test_writeVcf_geno <- function()
     writeVcf(vcf3, dest)
     vcf2 <- readVcf(dest, "hg19", param=param)
     checkIdentical(geno(vcf1), geno(vcf2))
+
+    ## list
+    fl <- system.file("extdata", "gl_chr1.vcf", package="VariantAnnotation")
+    hdr <- scanVcfHeader(fl)
+    param <- ScanVcfParam(samples=samples(hdr)[1:2])
+    vcf1 <- readVcf(fl, "", param=param)
+    writeVcf(vcf1, dest) 
+    vcf2 <- readVcf(dest, "") 
+    checkIdentical(geno(vcf1)$GL, geno(vcf2)$GL)
 }
-
-
