@@ -46,14 +46,14 @@ importMethodsFrom(GenomicFeatures,
 )
 
 importFrom(IRanges, 
-    CharacterList, DataFrame, DataFrameList, FilterRules, IntegerList, 
+    CharacterList, DataFrameList, FilterRules, IntegerList, 
     IRanges, LogicalList, NumericList, PartitioningByEnd, PartitioningByWidth,
     seqsplit, splitAsList, successiveViews, FilterMatrix, expand,
     endoapply, filterRules, subsetByFilter
 )
 
 importClassesFrom(IRanges, 
-    CharacterList, DataFrame, Ranges, RangesList, RangedData,
+    CharacterList, Ranges, RangesList, RangedData,
     SimpleDataFrameList, FilterRules, FilterMatrix
 )
 
@@ -61,7 +61,7 @@ importMethodsFrom(IRanges,
     as.matrix, as.vector,
     countOverlaps, elementLengths, end, eval, findOverlaps, 
     follow, gsub, lapply, narrow, order, 
-    precede, rev, sapply, shift,
+    precede, rev, shift,
     split, start, "start<-",
     unlist, which, width, 
     expand, subsetByFilter
