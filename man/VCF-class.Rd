@@ -176,7 +176,7 @@
        if unique and \code{row.names=TRUE}.
     }
     \item{}{
-      \code{geno(x)}, \code{geno(x) <- value}:
+      \code{geno(x, withDimnames=TRUE)}, \code{geno(x) <- value}:
        Gets a SimpleList of genotype data.
        \code{value} is a SimpleList. To replace a single variable in
        the SimpleList use \code{geno(x)$variable <- value}; in this 

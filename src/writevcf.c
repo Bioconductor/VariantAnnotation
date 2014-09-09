@@ -2,7 +2,7 @@
 #include "samtools/kstring.h"
 
 /* write all elements of 'list' genotype field */
-static void write_list_elements(SEXP v_elt, const char *mv_sep, kstring_t *bufp) 
+static void write_list_elt(SEXP v_elt, const char *mv_sep, kstring_t *bufp) 
 {
     SEXPTYPE v_type;
     int v, v_len;
@@ -28,7 +28,7 @@ static void write_list_elements(SEXP v_elt, const char *mv_sep, kstring_t *bufp)
         case REALSXP:
             for (v = 0; v < v_len; v++) {
                 if (NA_REAL !=  REAL(v_elt)[v])
-                    ksprintf(bufp, "%0.4f", REAL(v_elt)[v]);
+                    ksprintf(bufp, "%g", REAL(v_elt)[v]);
                 else
                     ksprintf(bufp, "%s", ".");
                 if (v < v_len - 1)
@@ -87,7 +87,7 @@ static void write_geno_sample(int i, int j, int k_last, Rboolean *k_valid,
             case REALSXP:
                 d_elt = REAL(field)[index];
                 if (NA_REAL != d_elt)
-                    ksprintf(bufp, "%0.4f", d_elt);
+                    ksprintf(bufp, "%g", d_elt);
                 else
                     ksprintf(bufp, "%s", ".");
                 break;
@@ -100,7 +100,7 @@ static void write_geno_sample(int i, int j, int k_last, Rboolean *k_valid,
                 break;
             case VECSXP:
                 v_elt = VECTOR_ELT(field, index);
-                write_list_elements(v_elt, mv_sep, bufp);
+                write_list_elt(v_elt, mv_sep, bufp);
                 break;
             default:
                 Rf_error("unsupported 'geno' type: %s", type2char(type));
@@ -120,7 +120,10 @@ static void write_geno_sample(int i, int j, int k_last, Rboolean *k_valid,
 static Rboolean valid_geno_elt(SEXP field, int index)
 {
     Rboolean valid = FALSE;
+    Rboolean v_valid = FALSE;
     const SEXPTYPE type = TYPEOF(field);
+    SEXP elt;
+    int v;
 
     switch (type) {
         case NILSXP:
@@ -138,8 +141,15 @@ static Rboolean valid_geno_elt(SEXP field, int index)
             valid = NA_STRING != STRING_ELT(field, index);
             break;
         case VECSXP:
-            /* FIXME: appropriate test for 'not present'?*/
-            valid = !Rf_isNull(VECTOR_ELT(field, index));
+            //valid = valid_list_elt(VECTOR_ELT(field, index));
+            elt = VECTOR_ELT(field, index);
+            for (v = 0; v < length(elt); v++) {
+                if (valid_geno_elt(elt, v)) {
+                    v_valid = TRUE;
+                    break;
+                }
+            }
+            valid = v_valid;
             break;
         default:
             Rf_error("unsupported 'geno' type: %s", type2char(type));
@@ -168,7 +178,7 @@ SEXP make_vcf_geno(SEXP fixed, SEXP format, SEXP geno, SEXP separators,
     int n_fields = length(format);
     int i, j, k, k_last, z, z_dim, z_max;
     int index;
-    Rboolean search, *k_valid;
+    Rboolean fmt_search, fmt_found, *k_valid;
 
     kstring_t buf;
     buf.l = buf.m = 0; buf.s = NULL;
@@ -189,31 +199,37 @@ SEXP make_vcf_geno(SEXP fixed, SEXP format, SEXP geno, SEXP separators,
         if (NULL != buf.s) *buf.s = '\0';
         ksprintf(&buf, "%s\t", CHAR(STRING_ELT(fixed, i)));
 
+        fmt_found = FALSE;
         k_last = 0;
         /* write format names */
         for (k = 0; k < n_fields; ++k) {
-            search = TRUE;
+            fmt_search = TRUE;
             field = VECTOR_ELT(geno, k);
             z_dim = INTEGER(geno_zdim)[k];
             z_max = (NA_INTEGER != z_dim) ? z_dim : 1;
-            for (j = 0; j < n_samples && search; ++j) {
+            for (j = 0; j < n_samples && fmt_search; ++j) {
                 for (z = 0; z < z_max; ++z) {
                     index = i + j*n_rows + z*n_rows*n_samples; 
                     if (valid_geno_elt(field, index)) {
-                        ksprintf(&buf, "%s%s", CHAR(STRING_ELT(format, k)),
-                                 (k < n_fields - 1) ? f_sep : "\t");
+                        /* avoid trailing f_sep */
+                        if (fmt_found)
+                            ksprintf(&buf, "%s%s", f_sep,
+                                     CHAR(STRING_ELT(format,k))); 
+                        else
+                            ksprintf(&buf, "%s", CHAR(STRING_ELT(format,k))); 
+                        if (k == n_fields - 1)
+                            ksprintf(&buf, "%s", "\t"); 
                         k_valid[k] = TRUE;
                         k_last = k;
-                        search = FALSE;
+                        fmt_search = FALSE;
+                        fmt_found = TRUE;
                         break;
-                    } else if (k == n_fields - 1 && z == z_max - 1) {
+                    } else if (k == n_fields - 1 && 
+                               z == z_max - 1 &&
+                               j == n_samples - 1) {
                         ksprintf(&buf, "%s", "\t");
                         k_valid[k] = FALSE;
-                        search = FALSE;
-                        break;
-                    } else {
-                        k_valid[k] = FALSE;
-                    }
+                    } else k_valid[k] = FALSE;
                 }
             }
         }
