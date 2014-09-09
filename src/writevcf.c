@@ -1,13 +1,63 @@
 #include "writevcf.h"
 #include "samtools/kstring.h"
 
+/* write all elements of 'list' genotype field */
+static void write_list_elements(SEXP v_elt, const char *mv_sep, kstring_t *bufp) 
+{
+    SEXPTYPE v_type;
+    int v, v_len;
+
+    v_type = TYPEOF(v_elt);
+    v_len = length(v_elt);
+    switch (v_type) {
+        case NILSXP:
+            break;
+        case LGLSXP:
+            Rf_warning("'logical' is not a valid FORMAT data type");
+            break;
+        case INTSXP:
+            for (v = 0; v < v_len; v++) {
+                if (NA_INTEGER != INTEGER(v_elt)[v]) 
+                    ksprintf(bufp, "%d", INTEGER(v_elt)[v]);
+                else
+                    ksprintf(bufp, "%s", ".");
+                if (v < v_len - 1)
+                    ksprintf(bufp, "%s", mv_sep);
+            }
+            break;
+        case REALSXP:
+            for (v = 0; v < v_len; v++) {
+                if (NA_REAL !=  REAL(v_elt)[v])
+                    ksprintf(bufp, "%0.4f", REAL(v_elt)[v]);
+                else
+                    ksprintf(bufp, "%s", ".");
+                if (v < v_len - 1)
+                    ksprintf(bufp, "%s", mv_sep);
+            }
+            break;
+        case STRSXP:
+            for (v = 0; v < v_len; v++) {
+                if (NA_STRING != STRING_ELT(v_elt, v))
+                    ksprintf(bufp, "%s", CHAR(STRING_ELT(v_elt, v)));
+                else
+                    ksprintf(bufp, "%s", ".");
+                if (v < v_len - 1)
+                    ksprintf(bufp, "%s", mv_sep);
+            }
+            break;
+        default:
+            Rf_error("unsupported 'geno' type: %s", type2char(v_type));
+            break;
+    }
+}
+
 /* write all genotype fields for a single sample */
 static void write_geno_sample(int i, int j, int k_last, Rboolean *k_valid,
                               SEXP geno_zdim, int n_rows, int n_samples,
                               int n_fields, SEXP geno, const char *f_sep,
                               const char *mv_sep, kstring_t *bufp)
 {
-    SEXP field, c_elt;
+    SEXP field, c_elt, v_elt;
     SEXPTYPE type;
     double d_elt;
     int k, z, z_dim, z_max, index, i_elt;
@@ -37,7 +87,7 @@ static void write_geno_sample(int i, int j, int k_last, Rboolean *k_valid,
             case REALSXP:
                 d_elt = REAL(field)[index];
                 if (NA_REAL != d_elt)
-                    ksprintf(bufp, "%f", d_elt);
+                    ksprintf(bufp, "%0.4f", d_elt);
                 else
                     ksprintf(bufp, "%s", ".");
                 break;
@@ -47,6 +97,10 @@ static void write_geno_sample(int i, int j, int k_last, Rboolean *k_valid,
                     ksprintf(bufp, "%s", CHAR(c_elt));
                 else
                     ksprintf(bufp, "%s", ".");
+                break;
+            case VECSXP:
+                v_elt = VECTOR_ELT(field, index);
+                write_list_elements(v_elt, mv_sep, bufp);
                 break;
             default:
                 Rf_error("unsupported 'geno' type: %s", type2char(type));
