@@ -2,7 +2,7 @@
 #include "samtools/kstring.h"
 
 /* write all elements of 'list' genotype field */
-static void write_list_elt(SEXP v_elt, const char *mv_sep, kstring_t *bufp) 
+static void write_list_elt(SEXP v_elt, const char mv_sep, kstring_t *bufp) 
 {
     SEXPTYPE v_type;
     int v, v_len;
@@ -18,11 +18,11 @@ static void write_list_elt(SEXP v_elt, const char *mv_sep, kstring_t *bufp)
         case INTSXP:
             for (v = 0; v < v_len; v++) {
                 if (NA_INTEGER != INTEGER(v_elt)[v]) 
-                    ksprintf(bufp, "%d", INTEGER(v_elt)[v]);
+                    kputw(INTEGER(v_elt)[v], bufp);
                 else
-                    ksprintf(bufp, "%s", ".");
+                    kputc('.', bufp);
                 if (v < v_len - 1)
-                    ksprintf(bufp, "%s", mv_sep);
+                    kputc(mv_sep, bufp);
             }
             break;
         case REALSXP:
@@ -30,19 +30,19 @@ static void write_list_elt(SEXP v_elt, const char *mv_sep, kstring_t *bufp)
                 if (NA_REAL !=  REAL(v_elt)[v])
                     ksprintf(bufp, "%g", REAL(v_elt)[v]);
                 else
-                    ksprintf(bufp, "%s", ".");
+                    kputc('.', bufp);
                 if (v < v_len - 1)
-                    ksprintf(bufp, "%s", mv_sep);
+                    kputc(mv_sep, bufp);
             }
             break;
         case STRSXP:
             for (v = 0; v < v_len; v++) {
                 if (NA_STRING != STRING_ELT(v_elt, v))
-                    ksprintf(bufp, "%s", CHAR(STRING_ELT(v_elt, v)));
+                    kputs(CHAR(STRING_ELT(v_elt, v)), bufp);
                 else
-                    ksprintf(bufp, "%s", ".");
+                    kputc('.', bufp);
                 if (v < v_len - 1)
-                    ksprintf(bufp, "%s", mv_sep);
+                    kputc(mv_sep, bufp);
             }
             break;
         default:
@@ -54,8 +54,8 @@ static void write_list_elt(SEXP v_elt, const char *mv_sep, kstring_t *bufp)
 /* write all genotype fields for a single sample */
 static void write_geno_sample(int i, int j, int k_last, Rboolean *k_valid,
                               SEXP geno_zdim, int n_rows, int n_samples,
-                              int n_fields, SEXP geno, const char *f_sep,
-                              const char *mv_sep, kstring_t *bufp)
+                              int n_fields, SEXP geno, const char f_sep,
+                              const char mv_sep, kstring_t *bufp)
 {
     SEXP field, c_elt, v_elt;
     SEXPTYPE type;
@@ -80,23 +80,23 @@ static void write_geno_sample(int i, int j, int k_last, Rboolean *k_valid,
             case INTSXP:
                 i_elt = INTEGER(field)[index];
                 if (NA_INTEGER != i_elt) 
-                    ksprintf(bufp, "%d", i_elt);
+                    kputw(i_elt, bufp);
                 else
-                    ksprintf(bufp, "%s", ".");
+                    kputc('.', bufp);
                 break;
             case REALSXP:
                 d_elt = REAL(field)[index];
                 if (NA_REAL != d_elt)
                     ksprintf(bufp, "%g", d_elt);
                 else
-                    ksprintf(bufp, "%s", ".");
+                    kputc('.', bufp);
                 break;
             case STRSXP:
                 c_elt = STRING_ELT(field, index);
                 if (NA_STRING != c_elt)
-                    ksprintf(bufp, "%s", CHAR(c_elt));
+                    kputs(CHAR(c_elt), bufp);
                 else
-                    ksprintf(bufp, "%s", ".");
+                    kputc('.', bufp);
                 break;
             case VECSXP:
                 v_elt = VECTOR_ELT(field, index);
@@ -108,11 +108,11 @@ static void write_geno_sample(int i, int j, int k_last, Rboolean *k_valid,
             }
             /* multi-value separator */
             if (z < z_max - 1 && k_valid[k])
-                ksprintf(bufp, "%s", mv_sep);
+                kputc(mv_sep, bufp);
         }
         /* field separator */
         if (k < n_fields - 1 && k < k_last)
-            ksprintf(bufp, "%s", f_sep);
+            kputc(f_sep, bufp);
     }
 }
 
@@ -171,8 +171,8 @@ static Rboolean valid_geno_elt(SEXP field, int index)
 SEXP make_vcf_geno(SEXP fixed, SEXP format, SEXP geno, SEXP separators,
                    SEXP vcf_dim, SEXP geno_zdim)
 {
-    const char *f_sep = CHAR(STRING_ELT(separators, 0));
-    const char *mv_sep = CHAR(STRING_ELT(separators, 1));
+    const char f_sep = *CHAR(STRING_ELT(separators, 0));
+    const char mv_sep = *CHAR(STRING_ELT(separators, 1));
     int n_rows = INTEGER(vcf_dim)[0];
     int n_samples = INTEGER(vcf_dim)[1];
     int n_fields = length(format);
@@ -183,7 +183,7 @@ SEXP make_vcf_geno(SEXP fixed, SEXP format, SEXP geno, SEXP separators,
     kstring_t buf;
     buf.l = buf.m = 0; buf.s = NULL;
 
-    SEXP field, result; 
+    SEXP field, result;
 
     if (n_fields != length(geno))
       Rf_error("length(format) must equal length(geno)");
@@ -197,7 +197,8 @@ SEXP make_vcf_geno(SEXP fixed, SEXP format, SEXP geno, SEXP separators,
         /* reset buffer */
         buf.l = 0;
         if (NULL != buf.s) *buf.s = '\0';
-        ksprintf(&buf, "%s\t", CHAR(STRING_ELT(fixed, i)));
+        kputs(CHAR(STRING_ELT(fixed, i)), &buf);
+        kputc('\t', &buf);
 
         fmt_found = FALSE;
         k_last = 0;
@@ -213,12 +214,10 @@ SEXP make_vcf_geno(SEXP fixed, SEXP format, SEXP geno, SEXP separators,
                     if (valid_geno_elt(field, index)) {
                         /* avoid trailing f_sep */
                         if (fmt_found)
-                            ksprintf(&buf, "%s%s", f_sep,
-                                     CHAR(STRING_ELT(format,k))); 
-                        else
-                            ksprintf(&buf, "%s", CHAR(STRING_ELT(format,k))); 
+                            kputc(f_sep, &buf);
+                        kputs(CHAR(STRING_ELT(format, k)), &buf);
                         if (k == n_fields - 1)
-                            ksprintf(&buf, "%s", "\t"); 
+                            kputc('\t', &buf);
                         k_valid[k] = TRUE;
                         k_last = k;
                         fmt_search = FALSE;
@@ -227,7 +226,7 @@ SEXP make_vcf_geno(SEXP fixed, SEXP format, SEXP geno, SEXP separators,
                     } else if (k == n_fields - 1 && 
                                z == z_max - 1 &&
                                j == n_samples - 1) {
-                        ksprintf(&buf, "%s", "\t");
+                            kputc('\t', &buf);
                         k_valid[k] = FALSE;
                     } else k_valid[k] = FALSE;
                 }
@@ -236,13 +235,14 @@ SEXP make_vcf_geno(SEXP fixed, SEXP format, SEXP geno, SEXP separators,
         /* write genotype fields */
         for (j = 0; j < n_samples; ++j) {
             write_geno_sample(i, j, k_last, k_valid, geno_zdim, n_rows, 
-                              n_samples, n_fields, geno, f_sep, mv_sep, 
+                              n_samples, n_fields, geno, f_sep, mv_sep,
                               &buf);
             if (j < n_samples - 1) {
                 if (0 != buf.l)
                     /* sample separator */
-                    ksprintf(&buf, "%s", "\t");
+                    kputc('\t', &buf);
             } else {
+                kputc('\0', &buf);
                 SET_STRING_ELT(result, i, mkChar(buf.s));
             }
         }
