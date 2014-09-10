@@ -128,7 +128,7 @@
 
 \seealso{
   \code{\link{scanVcfHeader}},
-  \link[S4Vectors]{DataFrameList}
+  \code{\link{DataFrameList}}
 }
 
 \examples{
