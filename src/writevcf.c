@@ -141,7 +141,6 @@ static Rboolean valid_geno_elt(SEXP field, int index)
             valid = NA_STRING != STRING_ELT(field, index);
             break;
         case VECSXP:
-            //valid = valid_list_elt(VECTOR_ELT(field, index));
             elt = VECTOR_ELT(field, index);
             for (v = 0; v < length(elt); v++) {
                 if (valid_geno_elt(elt, v)) {
