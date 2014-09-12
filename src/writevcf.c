@@ -1,5 +1,8 @@
 #include "writevcf.h"
 #include "samtools/kstring.h"
+#include <R_ext/Connections.h>
+
+Rconnection getConnection(int n);
 
 /* write all elements of 'list' genotype field */
 static void write_list_elt(SEXP v_elt, const char mv_sep, kstring_t *bufp) 
@@ -158,6 +161,7 @@ static Rboolean valid_geno_elt(SEXP field, int index)
 } 
 
 /* --- .Call ENTRY POINT --- 
+ * 'conn'       : connection 
  * 'fixed'      : character vector of FIXED fields
  * 'format'     : character vector of FORMAT names
  * 'geno'       : list of genotype data
@@ -167,8 +171,8 @@ static Rboolean valid_geno_elt(SEXP field, int index)
  * 'vcf_dim'    : integer vector of length 2 (n rows, n cols)
  * 'geno_zdim'  : integer vector of z dimension of genotype data 
 */
-SEXP make_vcf_geno(SEXP fixed, SEXP format, SEXP geno, SEXP separators,
-                   SEXP vcf_dim, SEXP geno_zdim)
+void make_vcf_geno(SEXP conn, SEXP fixed, SEXP format, SEXP geno, 
+                   SEXP separators, SEXP vcf_dim, SEXP geno_zdim)
 {
     const char f_sep = *CHAR(STRING_ELT(separators, 0));
     const char mv_sep = *CHAR(STRING_ELT(separators, 1));
@@ -178,19 +182,19 @@ SEXP make_vcf_geno(SEXP fixed, SEXP format, SEXP geno, SEXP separators,
     int i, j, k, k_last, z, z_dim, z_max;
     int index;
     Rboolean fmt_search, fmt_found, *k_valid;
+    Rconnection con = getConnection(INTEGER(conn)[0]);
 
     kstring_t buf;
     buf.l = buf.m = 0; buf.s = NULL;
 
-    SEXP field, result;
+    SEXP field;
 
     if (n_fields != length(geno))
-      Rf_error("length(format) must equal length(geno)");
+        Rf_error("length(format) must equal length(geno)");
     if (length(geno_zdim) != length(geno))
-      Rf_error("length(geno_zdim) must equal length(geno)");
+        Rf_error("length(geno_zdim) must equal length(geno)");
 
     k_valid = (Rboolean *) R_alloc(sizeof(Rboolean), n_fields);
-    PROTECT(result = allocVector(STRSXP, n_rows));
 
     for (i = 0; i < n_rows; ++i) {
         /* reset buffer */
@@ -242,15 +246,14 @@ SEXP make_vcf_geno(SEXP fixed, SEXP format, SEXP geno, SEXP separators,
                     kputc('\t', &buf);
             } else {
                 kputc('\n', &buf);
-                SET_STRING_ELT(result, i, mkChar(buf.s));
+                if (R_WriteConnection(con, buf.s, buf.l) != buf.l)
+                    Rf_error("error writing to connection");
             }
         }
     }
 
     free(buf.s);
-    UNPROTECT(1);
-    return result;
-}
+ }
 
 /* paste-collapse character matrix by row, ignoring NAs */
 SEXP matrix_pasteCollapseRows(SEXP x, SEXP sep) {

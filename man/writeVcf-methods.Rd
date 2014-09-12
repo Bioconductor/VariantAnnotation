@@ -68,9 +68,6 @@
   in3 <- readVcf(out2.vcf, "hg19")
   stopifnot(all(in2 == in3))
 
-  ## write to console
-  writeVcf(in1, stdout())
-
   ## write incrementally
   out3.vcf <- tempfile()
   con <- file(out3.vcf, open="a")

@@ -33,8 +33,7 @@ setMethod(writeVcf, c("VCF", "connection"),
 
     if (index)
         obj <- sort(obj)
-    mat <- .makeVcfMatrix(obj)
-    writeLines(mat, filename)
+    .makeVcfMatrix(filename, obj)
     flush(filename)
 
     if (index) {
@@ -47,7 +46,7 @@ setMethod(writeVcf, c("VCF", "connection"),
     }
 })
 
-.makeVcfMatrix <- function(obj)
+.makeVcfMatrix <- function(filename, obj)
 {
     ## empty
     if (length(rd <- rowData(obj)) == 0)
@@ -75,10 +74,10 @@ setMethod(writeVcf, c("VCF", "connection"),
         FILTER[is.na(FILTER)] <- "."
     INFO <- .makeVcfInfo(info(obj), length(rd))
     FIXED <- paste(CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, sep = "\t")
-    .makeVcfGeno(FIXED, geno(obj, withDimnames=FALSE), dim(obj))
+    .makeVcfGeno(filename, FIXED, geno(obj, withDimnames=FALSE), dim(obj))
 }
 
-.makeVcfGeno <- function(fixed, geno, dvcf, ...)
+.makeVcfGeno <- function(filename, fixed, geno, dvcf, ...)
 {
     if (dvcf[2] == 0L)
         return(fixed)
@@ -89,8 +88,9 @@ setMethod(writeVcf, c("VCF", "connection"),
     if ("GT" %in% names(geno)) {
         geno <- geno[c("GT", setdiff(names(geno), "GT"))]
     }
-    .Call(.make_vcf_geno, fixed, names(geno), as.list(geno), c(":", ","), 
-          dvcf, sapply(geno, function(x) dim(x)[3])) 
+    .Call(.make_vcf_geno, filename, fixed, names(geno), 
+        as.list(geno), c(":", ","), dvcf, 
+        sapply(geno, function(x) dim(x)[3])) 
 }
 
 .makeVcfInfo <- function(info, nrecords, ...)
