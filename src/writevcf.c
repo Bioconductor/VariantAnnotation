@@ -241,7 +241,7 @@ SEXP make_vcf_geno(SEXP fixed, SEXP format, SEXP geno, SEXP separators,
                     /* sample separator */
                     kputc('\t', &buf);
             } else {
-                kputc('\0', &buf);
+                kputc('\n', &buf);
                 SET_STRING_ELT(result, i, mkChar(buf.s));
             }
         }
