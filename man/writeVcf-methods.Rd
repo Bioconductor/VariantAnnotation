@@ -25,6 +25,12 @@
   \item{index}{Whether to bgzip the output file and generate a tabix index.
   }
   \item{\dots}{Additional arguments, passed to methods.
+      \itemize{
+        \item{nchunk:} Integer or NA. When provided this argument
+        overrides the default chunking behavior of \code{writeVcf}, 
+        see Details section. An integer value specifies the number
+        of records in each chunk; NA disables chunking.
+      }
   }
 }
 
@@ -33,6 +39,18 @@
 
   \code{writeVcf} conforms to the VCF standards on the 1000 Genomes Project
   web site (see references).
+
+  ** Under development  - interface may change: **
+  Large VCF files (i.e., > 1e5 records) are written out in chunks; VCF
+  files with < 1e5 records are not chunked. The number of records per chunk
+  is based on the total number of records. To override the default behavior 
+  use \code{nchunk} as an integer (number of records per chunk reguardless 
+  of total number of records) or NA (disable chunking).
+  \itemize{
+    \item writeVcf(vcf, tempfile())                ## default chunking
+    \item writeVcf(vcf, tempfile(), nchunk = 1e6)  ## chunk by 1e6
+    \item writeVcf(vcf, tempfile(), nchunk = NA)   ## no chunking
+  } 
 }
 
 \value{VCF file

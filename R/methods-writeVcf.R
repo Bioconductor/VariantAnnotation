@@ -2,49 +2,25 @@
 ### writeVcf methods
 ### =========================================================================
 
-setMethod(writeVcf, c("VCF", "character"),
-    function(obj, filename, index = FALSE, ...)
+.chunkIndex <- function(rows, nchunk, ...) 
 {
-    con <- file(filename, open="w")
-    on.exit(close(con))
+    if (!missing("nchunk"))
+        if (is.na(nchunk))
+            return(NA_integer_)
+        else
+            n <- nchunk
 
-    writeVcf(obj, con, index=index, ...)
-})
+    if (rows > 1e8) 
+        n <- ceiling(rows / 3)
+    else if (rows > 1e6) 
+        n <- ceiling(rows / 2)
+    else if (rows > 1e5) 
+        n <- 1e5 
+    else 
+        return(NA_integer_)
 
-setMethod(writeVcf, c("VCF", "connection"),
-    function(obj, filename, index = FALSE, ...)
-{
-    if (!isTRUEorFALSE(index))
-        stop("'index' must be TRUE or FALSE")
-
-    if (!isOpen(filename)) {
-        open(filename)
-        on.exit(close(filename))
-    }
-
-    scon <- summary(filename)
-    headerNeeded <- !((scon$mode == "a") &&
-                     file.exists(scon$description) &&
-                     (file.info(scon$description)$size !=0))
-    if (headerNeeded) {
-        hdr <- .makeVcfHeader(obj)
-        writeLines(hdr, filename)
-    }
-
-    if (index)
-        obj <- sort(obj)
-    .makeVcfMatrix(filename, obj)
-    flush(filename)
-
-    if (index) {
-        filenameGZ <- bgzip(scon$description, overwrite = TRUE)
-        indexTabix(filenameGZ, format = "vcf")
-        unlink(scon$description)
-        invisible(filenameGZ)
-    } else {
-        invisible(scon$description)
-    }
-})
+    split(seq_len(rows), ceiling(seq_len(rows)/n))
+}
 
 .makeVcfMatrix <- function(filename, obj)
 {
@@ -126,6 +102,16 @@ setMethod(writeVcf, c("VCF", "connection"),
     infoVector
 }
 
+.contigsFromSeqinfo <- function(si) 
+{
+    contig <- paste0("##contig=<ID=", seqnames(si))
+    contig[!is.na(seqlengths(si))] <-
+      paste0(contig, ",length=", seqlengths(si))[!is.na(seqlengths(si))]
+    contig[!is.na(genome(si))] <-
+      paste0(contig, ",assembly=\"", genome(si), "\"")[!is.na(genome(si))]
+    paste0(contig, ">")
+}
+
 .makeVcfHeader <- function(obj, ...)
 {
     hdr <- header(obj)
@@ -168,21 +154,64 @@ setMethod(writeVcf, c("VCF", "connection"),
     }
 }
 
-.contigsFromSeqinfo <- function(si) {
-  contig <- paste0("##contig=<ID=", seqnames(si))
-  contig[!is.na(seqlengths(si))] <-
-    paste0(contig, ",length=", seqlengths(si))[!is.na(seqlengths(si))]
-  contig[!is.na(genome(si))] <-
-    paste0(contig, ",assembly=\"", genome(si), "\"")[!is.na(genome(si))]
-  paste0(contig, ">")
-}
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### VCF methods
+###
+
+setMethod(writeVcf, c("VCF", "character"),
+    function(obj, filename, index = FALSE, ...)
+{
+    con <- file(filename, open="w")
+    on.exit(close(con))
+
+    writeVcf(obj, con, index=index, ...)
+})
+
+setMethod(writeVcf, c("VCF", "connection"),
+    function(obj, filename, index = FALSE, ...)
+{
+    if (!isTRUEorFALSE(index))
+        stop("'index' must be TRUE or FALSE")
+
+    if (!isOpen(filename)) {
+        open(filename)
+        on.exit(close(filename))
+    }
+
+    scon <- summary(filename)
+    headerNeeded <- !((scon$mode == "a") &&
+                     file.exists(scon$description) &&
+                     (file.info(scon$description)$size !=0))
+    if (headerNeeded) {
+        hdr <- .makeVcfHeader(obj)
+        writeLines(hdr, filename)
+    }
+
+    if (index)
+        obj <- sort(obj)
+
+    if (is.na(idx <- .chunkIndex(dim(obj)[1L], ...)))
+        .makeVcfMatrix(filename, obj)
+    else
+        for (i in idx)
+            .makeVcfMatrix(filename, obj[i])
+    flush(filename)
+
+    if (index) {
+        filenameGZ <- bgzip(scon$description, overwrite = TRUE)
+        indexTabix(filenameGZ, format = "vcf")
+        unlink(scon$description)
+        invisible(filenameGZ)
+    } else {
+        invisible(scon$description)
+    }
+})
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### VRanges methods
 ###
 
-setMethod(writeVcf, "VRanges",
-          function(obj, filename, ...)
-          {
-            writeVcf(as(obj, "VCF"), filename, ...)
-          })
+setMethod(writeVcf, "VRanges", function(obj, filename, ...)
+{
+    writeVcf(as(obj, "VCF"), filename, ...)
+})
