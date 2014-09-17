@@ -42,10 +42,13 @@
 
   ** Under development  - interface may change: **
   Large VCF files (i.e., > 1e5 records) are written out in chunks; VCF
-  files with < 1e5 records are not chunked. The number of records per chunk
-  is based on the total number of records. To override the default behavior 
-  use \code{nchunk} as an integer (number of records per chunk reguardless 
-  of total number of records) or NA (disable chunking).
+  files with < 1e5 records are not chunked. The optimal number of records
+  per chunk depends on both the number of records and complexity of the
+  data. Currently \code{writeVcf} determines records per chunk based on the 
+  total number of records only. To override this behavior or experiment with 
+  other values use \code{nchunk} as an integer or NA. An integer value 
+  represents the number of records per chunk reguardless of the size of the VCF; 
+  NA disables all chunking.
   \itemize{
     \item writeVcf(vcf, tempfile())                ## default chunking
     \item writeVcf(vcf, tempfile(), nchunk = 1e6)  ## chunk by 1e6

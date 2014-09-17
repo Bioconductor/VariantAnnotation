@@ -190,7 +190,7 @@ setMethod(writeVcf, c("VCF", "connection"),
     if (index)
         obj <- sort(obj)
 
-    if (is.na(idx <- .chunkIndex(dim(obj)[1L], ...)))
+    if (all(is.na(idx <- .chunkIndex(dim(obj)[1L], ...))))
         .makeVcfMatrix(filename, obj)
     else
         for (i in idx)
