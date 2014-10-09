@@ -30,7 +30,7 @@ static void write_list_elt(SEXP v_elt, const char mv_sep, kstring_t *bufp)
             break;
         case REALSXP:
             for (v = 0; v < v_len; v++) {
-                if (NA_REAL !=  REAL(v_elt)[v])
+                if (!ISNAN(REAL(v_elt)[v]))
                     ksprintf(bufp, "%g", REAL(v_elt)[v]);
                 else
                     kputc('.', bufp);
@@ -89,7 +89,7 @@ static void write_geno_sample(int i, int j, int k_last, Rboolean *k_valid,
                 break;
             case REALSXP:
                 d_elt = REAL(field)[index];
-                if (NA_REAL != d_elt)
+                if (!ISNAN(d_elt))
                     ksprintf(bufp, "%g", d_elt);
                 else
                     kputc('.', bufp);
@@ -138,7 +138,7 @@ static Rboolean valid_geno_elt(SEXP field, int index)
             valid = NA_INTEGER != INTEGER(field)[index];
             break;
         case REALSXP:
-            valid = NA_REAL != REAL(field)[index];
+            valid = !ISNAN(REAL(field)[index]);
             break;
         case STRSXP:
             valid = NA_STRING != STRING_ELT(field, index);
