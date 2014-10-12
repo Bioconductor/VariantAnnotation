@@ -1,3 +1,58 @@
+CHANGES IN VERSION 1.12.0
+------------------------
+
+NEW FEATURES
+
+    o allow GRanges in 'rowData' to hold user-defined metadata cols
+      (i.e., cols other than paramRangeID, REF, ALT, etc.)
+
+    o add isSNV() family of functions 
+
+    o add faster method for converting a list matrix to an array
+
+    o add 'c' method for typed Rle classes so class is preserved
+
+    o add CITATION file 
+
+    o rework writeVCF():
+      - FORMAT and genotype fields are parsed in C
+      - output file is written from C
+      - chunking added for large VCFs
+
+MODIFICATIONS
+
+    o add 'row.names' to readVcf() 
+
+    o deprecate restrictToSNV(); replaced by isSNV() family 
+
+    o remove use of seqapply()
+
+    o show info / geno headers without splitting across blocks
+
+    o use mapCoords() in predictCoding() and locateVariants()
+
+    o deprecate refLocsToLocalLocs()
+
+    o propagate strand in predictCoding()
+
+    o replace deprecated seqsplit() with splitAsList()
+
+    o ensure GT field, if present, comes first in VCF output
+
+    o modify DESCRIPTION Author and Maintainer fileds with @R
+
+    o add 'row.names' to info,VCF-method
+
+BUG FIXES
+
+    o modify expand() to work with no 'info' fields are imported 
+
+    o remove duplicate rows from .splicesites()
+
+    o fix handling of real-valued NAs in geno omatrix construction
+      in writeVcf()
+
+
 CHANGES IN VERSION 1.10.0
 ------------------------
 
