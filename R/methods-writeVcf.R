@@ -4,20 +4,21 @@
 
 .chunkIndex <- function(rows, nchunk, ...) 
 {
-    if (!missing("nchunk"))
+    if (missing("nchunk")) {
+        if (rows > 1e8) 
+            n <- ceiling(rows / 3)
+        else if (rows > 1e6) 
+            n <- ceiling(rows / 2)
+        else if (rows > 1e5) 
+            n <- 1e5 
+        else 
+            return(NA_integer_)
+    } else {
         if (is.na(nchunk))
             return(NA_integer_)
         else
             n <- nchunk
-
-    if (rows > 1e8) 
-        n <- ceiling(rows / 3)
-    else if (rows > 1e6) 
-        n <- ceiling(rows / 2)
-    else if (rows > 1e5) 
-        n <- 1e5 
-    else 
-        return(NA_integer_)
+    }
 
     split(seq_len(rows), ceiling(seq_len(rows)/n))
 }
