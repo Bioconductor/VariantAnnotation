@@ -221,6 +221,7 @@ setAs("VCF", "VRanges", function(from) {
   }
   if (!is.null(meta$END)) {
     end(ranges)[!is.na(meta$END)] <- meta$END[!is.na(meta$END)]
+    meta$END <- NULL
   }
   rownames(meta) <- NULL
   if (!is.null(rd$FILTER))
@@ -255,7 +256,8 @@ optionalDescriptions <- c(
   GT = "Genotype",
   GQ = "Genotype quality",
   PL = "Normalized, Phred-scaled likelihoods for genotypes",
-  MIN_DP = "Minimum DP observed within the GVCF block"
+  MIN_DP = "Minimum DP observed within the gVCF block",
+  END = "End position of the gVCF WT run"
   )
   
 makeFORMATheader <- function(x) {
@@ -377,6 +379,15 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
     xUniq <- x
   }
 
+  END <- gVCFRunEnds(xUniq)
+  if (!all(is.na(END))) {
+    if (!is.null(xUniq$END)) {
+      warning("Replacing 'END' metadata/info column with computed gVCF END")
+    }
+    xUniq$END <- END
+    info <- union(info, "END")
+  }
+  
   rowData <- xUniq
   mcols(rowData) <- NULL
   rowData <- as(rowData, "GRanges", strict=TRUE)
@@ -394,7 +405,7 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
   header <- VCFHeader(reference = seqlevels(x), samples = sampleLevels,
                       header = DataFrameList(META = meta_header,
                         FORMAT = makeFORMATheader(mcols(x)[genoMCols]),
-                        INFO = makeINFOheader(mcols(x)[info]),
+                        INFO = makeINFOheader(mcols(xUniq)[info]),
                         FILTER = makeFILTERheader(x)))
   exptData <- SimpleList(header = header)
 
@@ -461,12 +472,6 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
     geno <- c(geno, SimpleList(lapply(mcols(x)[genoMCols], genoArray)))
 
   info <- mcols(xUniq)[info]
-  if (is.null(xUniq$END)) {
-    END <- gVCFRunEnds(xUniq)
-    if (!all(is.na(END))) {
-      info$END <- END
-    }
-  }
   
   VCF(rowData = rowData, colData = colData, exptData = exptData, fixed = fixed,
       geno = geno, info = info, collapsed = FALSE)
