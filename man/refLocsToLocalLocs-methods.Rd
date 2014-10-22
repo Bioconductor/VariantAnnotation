@@ -86,7 +86,7 @@ refLocsToLocalLocs(ranges, txdb, cdsbytx, ...)
 \author{Michael Lawrence and Valerie Obenchain <vobencha@fhcrc.org>}
 
 \seealso{
-  \link[IRanges]{map}
+  \link[IRanges]{mapCoords}
   \code{predictCoding}
   \code{getTranscriptSeqs}
   \link[GenomicFeatures]{transcriptLocs2refLocs}
