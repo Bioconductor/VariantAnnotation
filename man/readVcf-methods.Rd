@@ -58,15 +58,24 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
   }
   \item{genome}{A \code{character} or \code{Seqinfo} object.
 
-    \code{character}: Genome identifier supplied as single string or named 
-    character vector (names correspond to seqnames in the VCF file). This
-    identifier will relpace the genome information in the VCF \code{Seqinfo} 
-    (i.e., \code{seqinfo(vcf)}).
+    \code{character}: Genome identifier as a single string or named character
+    vector. Names of the character vector correspond to the seqnames in the VCF
+    file. This identifier replaces the genome information in the VCF
+    \code{Seqinfo} (i.e., \code{seqinfo(vcf)}).
 
-    \code{Seqinfo}: When a \code{Seqinfo} is provided it is merged with
-    the existing \code{Seqinfo}. It can have greater than or equal to the
-    number of \code{seqlevels} in the current \code{Seqinfo} and the
-    \code{seqlevels} must match.
+    \code{Seqinfo}: When \code{genome} is a \code{Seqinfo} object the following
+    checks are performed:
+    \itemize{
+      \item{if a param is provided with ranges, seqlevels in
+            the param must also be in the \code{genome} object
+      }
+      \item{if the seqlevels in \code{genome} are a subset of the 
+            VCF file \code{Seqinfo}, the VCF file \code{Seqinfo} is used
+      }
+      \item{if the seqlevels in \code{genome} are a superset of the 
+            VCF file \code{Seqinfo}, the two \code{Seqinfo} objects are merged 
+      }
+    }
   }
   \item{param}{A instance of \code{\linkS4class{ScanVcfParam}}, \code{GRanges},
     \code{GRangesList}, \code{RangedData} or \code{RangesList}. VCF files can be 
