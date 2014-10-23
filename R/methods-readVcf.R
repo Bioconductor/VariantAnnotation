@@ -121,18 +121,20 @@ setMethod(readVcf, c(file="character", genome="missing",
     rowData <- vcf$rowData
     if (length(rowData)) {
         if (is(genome, "character")) { 
+           if (length(seqinfo(hdr))) {
+               merged <- merge(seqinfo(hdr), seqinfo(rowData))
+               map <- match(names(merged), names(seqinfo(rowData)))
+               seqinfo(rowData, map) <- merged
+           }
            genome(rowData) <- genome
         } else if (is(genome, "Seqinfo")) {
-            ## genome equal to or superset of file Seqinfo
-            if (all(names(genome) %in% names(seqinfo(hdr)))) {
-                merged <- merge(seqinfo(hdr), genome)
-                new2old <- match(names(merged), names(seqinfo(rowData)))
-                seqinfo(rowData, new2old) <- merged 
-            } else {
-            ## genome is a subset of file Seqinfo
-                new2old <- match(names(seqinfo(hdr)), names(seqinfo(rowData)))
-                seqinfo(rowData, new2old) <- seqinfo(hdr) 
-            }
+            if (length(seqinfo(hdr)))
+                reference <- merge(seqinfo(hdr), genome)
+            else 
+                reference <- genome
+            merged <- merge(reference, seqinfo(rowData))
+            map <- match(names(merged), names(seqinfo(rowData)))
+            seqinfo(rowData, map) <- merged 
         }
     }
     values(rowData) <- DataFrame(vcf["paramRangeID"])

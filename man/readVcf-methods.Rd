@@ -57,23 +57,20 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
     ?\code{indexTabix} for help creating a \code{\link{TabixFile}}.
   }
   \item{genome}{A \code{character} or \code{Seqinfo} object.
-
-    \code{character}: Genome identifier as a single string or named character
-    vector. Names of the character vector correspond to the seqnames in the VCF
-    file. This identifier replaces the genome information in the VCF
-    \code{Seqinfo} (i.e., \code{seqinfo(vcf)}).
-
-    \code{Seqinfo}: When \code{genome} is a \code{Seqinfo} object the following
-    checks are performed:
     \itemize{
-      \item{if a param is provided with ranges, seqlevels in
-            the param must also be in the \code{genome} object
+      \item{\code{character}:}{ Genome identifier as a single string or named 
+        character vector. Names of the character vector correspond to 
+        chromosome names in the file. This identifier replaces the genome 
+        information in the VCF \code{Seqinfo} (i.e., \code{seqinfo(vcf)}).
       }
-      \item{if the seqlevels in \code{genome} are a subset of the 
-            VCF file \code{Seqinfo}, the VCF file \code{Seqinfo} is used
-      }
-      \item{if the seqlevels in \code{genome} are a superset of the 
-            VCF file \code{Seqinfo}, the two \code{Seqinfo} objects are merged 
+      \item{\code{Seqinfo}:}{ When \code{genome} is provided as a \code{Seqinfo}
+        it is propagated to the VCF output. If seqinfo information can be 
+        obtained from the file, 
+        (i.e., seqinfo(scanVcfHeader(fl)) is not empty), the output
+        \code{Seqinfo} is a product of merging the two.
+
+        If a param (i.e., ScanVcfParam) is used in the call to \code{readVcf}, 
+        the seqlevels  of the param ranges must be present in \code{genome}.
       }
     }
   }
