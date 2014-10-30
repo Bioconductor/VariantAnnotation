@@ -63,18 +63,20 @@
       \code{meta}, \code{info} and \code{geno} if present.
     }
     \item{}{
-      \code{meta(x)}, \code{meta(x)<- value}:
-      Gets or sets a \code{DataFrameList} of meta information. This includes any
-      information represented as simple key-value pairs in the header or SAMPLE
-      and PEDIGREE entries.  Replacement value can be a \code{DataFrame} or
+      \code{meta(x)}, \code{meta(x)<- value}: The getter returns a
+      \code{DataFrameList} with possible names of META, SAMPLE and PEDIGREE. The
+      META \code{DataFrame} is a catch-all for non-standard header fields. This
+      includes any information represented as simple key-value pairs. The
+      replacement \code{value} can be a \code{DataFrame} or
       \code{DataFrameList}.
     }
     \item{}{
       \code{fixed(x), fixed(x)<- value}:
       Returns a \code{DataFrameList} of information pertaining to any of
       \sQuote{REF}, \sQuote{ALT}, \sQuote{FILTER} and \sQuote{QUAL}. 
-      Replacement value must be a \code{DataFrameList} with names 
-      \sQuote{QUAL} or \sQuote{FILTER}. 
+      Replacement value must be a \code{DataFrameList} with one or more of
+      the following names, \sQuote{QUAL}, \sQuote{FILTER}, \sQuote{REF} 
+      and \sQuote{ALT}. 
     }
     \item{}{
       \code{info(x)}, \code{info(x)<- value}:

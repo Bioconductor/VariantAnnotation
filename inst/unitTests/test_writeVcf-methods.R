@@ -22,7 +22,7 @@ test_writeVcf_tags <- function()
     writeVcf(vcf1, dest)
     vcf2 <- readVcf(dest, "hg19")
     hd2 <- exptData(vcf2)$header
-    checkTrue(rownames(meta(hd1)) %in% rownames(meta(hd2))) 
+    checkTrue(names(meta(hd1)) %in% names(meta(hd2))) 
     checkIdentical(names(geno(vcf1)), names(geno(vcf2))) 
     checkIdentical(colnames(mcols(info(vcf1))), colnames(mcols(info(vcf2))))
 }
