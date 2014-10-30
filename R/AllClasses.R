@@ -182,15 +182,12 @@ setClass("VCFHeader",
 
 .valid.VCFHeader.meta <- function(object)
 {
-    value <- meta(object)
-    if (length(value)) {
-        if (ncol(value) != 1 || names(value) != "Value")
-            return(paste0("'meta(VCFHeader)' must be a single ",
-                   "column DataFrame with name 'Value'"))
-        else
-            return(NULL)
-    }
-    NULL
+    msg <- NULL
+    len <- sapply(names(meta(object)), nchar)
+    if (any(len == 0))
+        msg <- "all elements of 'meta(VCFHeader)' must be named"
+
+    msg
 }
 
 ## Test VCFHeader only 

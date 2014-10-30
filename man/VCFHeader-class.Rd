@@ -21,6 +21,7 @@
 \alias{meta,VCFHeader-method}
 \alias{meta<-}
 \alias{meta<-,VCFHeader,DataFrame-method}
+\alias{meta<-,VCFHeader,DataFrameList-method}
 \alias{fixed,VCFHeader-method}
 \alias{fixed<-,VCFHeader,DataFrameList-method}
 \alias{info,VCFHeader-method}
@@ -63,10 +64,10 @@
     }
     \item{}{
       \code{meta(x)}, \code{meta(x)<- value}:
-      Gets or sets a \code{DataFrame} of meta information. This includes 
-      any information represented as simple key-value pairs in the
-      VCF file header. Replacement value must be a \code{DataFrame}
-      with a single column named \sQuote{Value}.
+      Gets or sets a \code{DataFrameList} of meta information. This includes any
+      information represented as simple key-value pairs in the header or SAMPLE
+      and PEDIGREE entries.  Replacement value can be a \code{DataFrame} or
+      \code{DataFrameList}.
     }
     \item{}{
       \code{fixed(x), fixed(x)<- value}:

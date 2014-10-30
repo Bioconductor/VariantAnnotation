@@ -40,13 +40,19 @@ setMethod("header", "VCFHeader",
 setMethod("meta", "VCFHeader", 
     function(x) 
 {
-    slot(x, "header")$META
+    dat <- slot(x, "header")
+    dat[!names(dat) %in% c("INFO", "FORMAT")] 
 })
 
 setReplaceMethod("meta", c("VCFHeader", "DataFrame"), 
+    function(x, value)  meta(x) <- as(value, "DataFrameList")
+)
+
+setReplaceMethod("meta", c("VCFHeader", "DataFrameList"), 
     function(x, value) 
 {
-    slot(x, "header")$META <- value
+    dat <- slot(x, "header")
+    slot(x, "header") <- c(dat[!names(dat) %in% names(value)], value) 
     validObject(x)
     x
 })
@@ -139,7 +145,7 @@ setMethod(show, "VCFHeader",
     samples <- samples(object) 
     scat("samples(%d): %s\n", samples)
 
-    meta <- rownames(meta(object)) 
+    meta <- names(meta(object)) 
     scat("meta(%d): %s\n", meta)
 
     fixed <- names(fixed(object)) 
