@@ -53,12 +53,13 @@
 {
     numberOk <- grepl("^[AG\\.[:digit:]+]$", fmt$Number)
     fmt$Number[!numberOk] <- "."
-    map <- Map(function(n, t) {
+    mapType <- function(n, t) {
         if (t == "Flag") n <- "1"
-        t <- switch(t, String=character(), Integer=integer(),
-               Float=numeric(), Flag=logical() )
+        t <- switch(t, String=character(), Character=character(),
+            Integer=integer(), Float=numeric(), Flag=logical())
         list(n, t)
-    }, fmt$Number, fmt$Type)
+    }
+    map <- Map(mapType, fmt$Number, fmt$Type)
     names(map) <- rownames(fmt)
 
     ## user selected
