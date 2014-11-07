@@ -17,13 +17,13 @@ setMethod("refLocsToLocalLocs",
     .Deprecated(msg=paste0("refLocsToLocalLocs is deprecated. See ",
                           "?mapCoords methods in GenomicRanges and ",
                           "GenomicAlignments packages.")) 
-    .localCoordinates(ranges, cdsbytx, ...)
+    .localCoordinates(ranges, cdsbytx, ignore.strand=FALSE, ...)
 })
 
-.localCoordinates <- function(from, to, ...)
+.localCoordinates <- function(from, to, ignore.strand, ...)
 {
     ## cds-centric 
-    map <- mapCoords(from, to, elt.hits=TRUE, ...)
+    map <- mapCoords(from, to, elt.hits=TRUE, ignore.strand=ignore.strand, ...)
     if (length(map) == 0) {
         gr <- GRanges()
         mcols(gr) <- DataFrame(REF=DNAStringSet(), ALT=DNAStringSetList(),

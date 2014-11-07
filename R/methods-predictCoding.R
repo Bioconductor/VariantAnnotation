@@ -92,7 +92,7 @@ function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 
     ## retrieve local coordinates
     mcols(query) <- append(mcols(query), DataFrame(varAllele=varAllele))
-    txlocal <- .localCoordinates(query, cdsbytx, ...)
+    txlocal <- .localCoordinates(query, cdsbytx, ignore.strand, ...)
     if (length(txlocal) == 0)
         return(txlocal)
 
