@@ -114,13 +114,6 @@
       Creates CollapsedVCF when \code{collapsed = TRUE} and an
       ExpandedVCF when \code{collapsed = FALSE}.
     }
-    \item{}{
-      \code{expand(rowData = GRanges(), colData = DataFrame(), 
-                exptData = SimpleList(), fixed = DataFrame(), 
-                info = DataFrame(), geno = SimpleList(), 
-                ..., collapsed=TRUE, verbose = FALSE)}
-      Creates an ExpandedVCF from a CollapsedVCF.
-    }
   }
 }
 
@@ -129,12 +122,12 @@
   object.
   \describe{
     \item{}{
-      \code{rowData(x)}, \code{rowData(x) <- value}:
+      \code{rowData(x, ..., fixed = TRUE)}, \code{rowData(x) <- value}:
       Gets or sets a \code{GRanges} constructed from the CHROM, POS and ID 
-      fields of the VCF file with REF, ALT, QUAL and FILT as metadata columns. 
-      The ID's serve as the \code{rownames}; if they are NULL, \code{rownames} 
-      are constructed from  CHROM:POS. \code{value} must be a \code{GRanges} 
-      with metadata columns.
+      fields of the VCF file. When \code{fixed = TRUE}, REF, ALT, QUAL and 
+      FILT metadata columns are included. File ID's serve as the 
+      \code{rownames}; if they are NULL, \code{rownames} are constructed from 
+      CHROM:POS. Replacement \code{value} must be a \code{GRanges}.
 
       The \code{paramRangeID} metadata column groups ranges as
       specified with \code{ScanVcfParam}. If \code{ScanVcfParam} was
@@ -235,29 +228,27 @@
   of VCF objects.
   \describe{
     \item{}{
-      \code{x[i, j]}, \code{x[i, j] <- value}:
-      Gets or sets rows and columns. \code{i} and \code{j} can be integer
-      or logical vectors. \code{value} is a replacement \code{VCF} object.
+      \code{x[i, j]}, \code{x[i, j] <- value}: Gets or sets rows and columns.
+      \code{i} and \code{j} can be integer or logical vectors. \code{value} is a
+      replacement \code{VCF} object.
     }
     \item{}{
-      \code{cbind(...)}, \code{rbind(...)}:
-      \code{cbind} combines objects with identical ranges (\code{rowData}) 
-      but different samples (columns in \code{assays}). The colnames in
-      \code{colData} must match or an error is thrown. Columns with
-      duplicate names in \code{fixed}, \code{info} and \code{mcols(rowData(VCF))} 
-      must contain the same data.
+      \code{cbind(...)}, \code{rbind(...)}: \code{cbind} combines objects with
+      identical ranges (\code{rowData}) but different samples (columns in
+      \code{assays}). The colnames in \code{colData} must match or an error is
+      thrown. Columns with duplicate names in \code{fixed}, \code{info} and
+      \code{mcols(rowData(VCF))} must contain the same data.
 
-      \code{rbind} combines objects with different ranges (\code{rowData}) 
-      and the same subjects (columns in \code{assays}). Columns with
-      duplicate names in \code{colData} must contain the same data. 
-      The \sQuote{Samples} columns in \code{colData} (created by \code{readVcf}) 
-      are renamed with a numeric extension ordered as they were input to \code{rbind}
-      e.g., \dQuote{Samples.1, Samples.2, ...} etc. 
+      \code{rbind} combines objects with different ranges (\code{rowData}) and
+      the same subjects (columns in \code{assays}). Columns with duplicate names
+      in \code{colData} must contain the same data.  The \sQuote{Samples}
+      columns in \code{colData} (created by \code{readVcf}) are renamed with a
+      numeric extension ordered as they were input to \code{rbind} e.g.,
+      \dQuote{Samples.1, Samples.2, ...} etc. 
 
       \code{exptData} from all objects are combined into a
       \code{SimpleList} with no name checking.
 
-      ## TODO: header information not yet combined
     }
   }
 }
@@ -266,15 +257,17 @@
   In the following code snippets \code{x} is a CollapsedVCF object.
   \describe{
     \item{}{
-      \code{expand(x)}:
+      \code{expand(x, ..., row.names = FALSE)}:
       Expand (unlist) the ALT column of a CollapsedVCF object to one row 
       per ALT value. Variables with Number='A' have one value per alternate
       allele and are expanded accordingly. The 'AD' genotype field
       is expanded into REF/ALT pairs. For all other fields, the rows
       are replicated to match the elementLengths of ALT.
 
-      The output is an ExpandedVCF object with ALT as a \code{DNAStringSet} 
-      or \code{character} (structural variants). 
+      The output is an ExpandedVCF with ALT as a \code{DNAStringSet} 
+      or \code{character} (structural variants). By default rownames
+      are NULL. When \code{row.names=TRUE} the expanded output has 
+      duplicated rownames corresponding to the original \code{x}.
     }
   }
 }

@@ -3,38 +3,39 @@
 ### =========================================================================
 
 setMethod("expand", "CollapsedVCF",
-    function(x, ...)
+    function(x, ..., row.names = FALSE)
     {
+        rd <- rowData(x, fixed=FALSE)
+        if (!row.names)
+            names(rd) <- NULL
+
         elt <- elementLengths(alt(x))
         if (all(elt == 1L)) {
             fxd <- fixed(x)
             fxd$ALT <- unlist(alt(x), use.names=FALSE)
-            if (!is.null(geno(x)$AD))
+            AD <- "AD" %in% names(geno(x))
+            if (AD)
               geno(x)$AD <- .expandAD(geno(x)$AD, nrow(x), ncol(x))
-            return(VCF(rowData=rowData(x), colData=colData(x), 
-                       exptData=exptData(x), fixed=fxd, 
-                       info=.unlistAltInfo(x), geno=geno(x), 
-                       ..., collapsed=FALSE))
+            return(VCF(rd, colData(x), exptData(x), fxd, .unlistAltInfo(x), 
+                       geno(x), ..., collapsed=FALSE))
         }
-        idx <- rep.int(seq_len(nrow(x)), elt)
+
+        ## info, fixed, geno
         hdr <- exptData(x)$header
-        ## info
+        idx <- rep.int(seq_len(nrow(x)), elt)
         iexp <- .expandInfo(x, hdr, elt, idx)
-        ## fixed
         fexp <- fixed(x)[idx, ]
         fexp$ALT <- unlist(alt(x), use.names=FALSE)
-        ## geno 
         gexp <- .expandGeno(x, hdr, elt, idx)
+
         ## rowData
-        if (is.null(rowData(x)$paramRangeID)) {
-            rdexp <- rowData(x)[idx, ]
+        if (is.null(rd$paramRangeID)) {
+            rdexp <- rd[idx, ]
             mcols(rdexp) <- NULL
-        } else {
-            rdexp <- rowData(x)[idx, "paramRangeID"]
-        }
-        ## exptData, colData untouched
-        VCF(rowData=rdexp, colData=colData(x), exptData=exptData(x),
-            fixed=fexp, info=iexp, geno=gexp, ..., collapsed=FALSE)
+        } else rdexp <- rd[idx, "paramRangeID"]
+
+        VCF(rdexp, colData(x), exptData(x), fexp, iexp, gexp,
+            ..., collapsed=FALSE)
     }
 )
 
@@ -72,7 +73,8 @@ setMethod("expand", "CollapsedVCF",
         if (!is.list(AD)) {
             ## 'Number' is integer
             if (is(AD, "array")) {
-                if ((length(unique(elt)) != 1L) && (dim(AD)[3] != unique(elt))) {
+                if ((length(unique(elt)) != 1L) && 
+                    (dim(AD)[3] != unique(elt))) {
                     warning("'AD' was ignored: number of 'AD' values ",
                             "do not match REF + ALT")
                     isAD[isAD] <- FALSE 
@@ -160,9 +162,6 @@ setMethod("expand", "CollapsedVCF",
 }
 
 setMethod("expand", "ExpandedVCF",
-    function(x, ...)
-    {
-        x
-    }
+    function(x, ...) x
 )
 

@@ -135,11 +135,12 @@ setReplaceMethod("fixed", c("VCF", "DataFrame"),
 
 ### rowData
 setMethod("rowData", "VCF", 
-    function(x) 
+    function(x, ..., fixed = TRUE) 
 {
-    gr <- slot(x, "rowData") 
-    if (length(slot(x, "fixed")) != 0L)
-        mcols(gr) <- append(mcols(gr), slot(x, "fixed"))
+    gr <- slot(x, "rowData")
+    if (fixed)
+        if (length(slot(x, "fixed")) != 0L)
+            mcols(gr) <- append(mcols(gr), slot(x, "fixed"))
     gr
 })
 
@@ -400,6 +401,7 @@ setMethod("rbind", "VCF",
     }, x=args, i=seq_along(args)) 
 }
 
+## FIXME: combine header info
 ## Appropriate for objects with same ranges and different samples.
 setMethod("cbind", "VCF",
     function(..., deparse.level=1)
