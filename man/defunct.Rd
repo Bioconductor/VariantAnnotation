@@ -25,25 +25,29 @@
 
 \section{usage}{
   ## Defunct in 1.13.z
-  \code{refLocsToLocalLocs} has been replaced by \code{mapCoords}.
-
+  \itemize{
+    \item refLocsToLocalLocs().
+  } 
   ## Removed
-  readVcfLongForm()
-  dbSNPFilter()
-  regionFilter()
-  MatrixToSnpMatrix(callMatrix, ref, alt, ...)
+  \itemize{
+    \item readVcfLongForm()
+    \item dbSNPFilter()
+    \item regionFilter()
+    \item MatrixToSnpMatrix()
+  }
 }
 
 \details{
   ## Defunct in 1.13.z
-  \code{refLocsToLocalLocs} has been replaced by \code{mapCoords}.
-
-  ## Removed 
-  \code{readVcfLongForm} has been replaced by \code{expand}.
-  \code{dbSNPFilter} and \code{regionFilter} have been replaced by
-  \code{filterVcf}.
-
-  \code{MatrixToSnpMatrix} has been replaced by \code{genotypeToSnpMatrix}.
+  \itemize{
+    \item \code{refLocsToLocalLocs} has been replaced by \code{mapCoords}.
+  }
+  ## Removed
+  \itemize{
+    \item readVcfLongForm() has been replaced by expand().
+    \item dbSNPFilter() and regionFilter() have been replaced by filterVcf().
+    \item MatrixToSnpMatrix() has been replaced by genotypeToSnpMatrix().
+  }
 }
 
 \author{
@@ -51,5 +55,10 @@
 }
 
 \seealso{
-  \code{\link{filterVcf}}, \code{\link{genotypeToSnpMatrix}}.
+  \itemize{
+    \item \code{\link{expand}}
+    \item \code{\link{filterVcf}}
+    \item \code{\link{genotypeToSnpMatrix}}
+    \item \code{\link{mapCoords}}
+  }
 }
