@@ -127,7 +127,7 @@ DEPRECATED and DEFUNCT
 
     o remove defunct dbSNPFilter(), regionfilter() and MatrixToSnpMatrix() 
 
-    o deprecate defunct readVcfLongForm() 
+    o defunct readVcfLongForm() 
 
 BUG FIXES
 

@@ -1,5 +1,8 @@
 \name{VariantAnnotation-defunct}
 \alias{VariantAnnotation-defunct}
+\alias{refLocsToLocalLocs}
+\alias{refLocsToLocalLocs,GRanges,TxDb,missing-method}
+\alias{refLocsToLocalLocs,GRanges,missing,GRangesList-method}
 \alias{readVcfLongForm}
 \alias{readVcfLongForm,TabixFile,character,GRanges-method}
 \alias{readVcfLongForm,TabixFile,character,missing-method}
@@ -21,20 +24,22 @@
 }
 
 \section{usage}{
-  ## Defunct in 1.9.z
-  readVcfLongForm()
+  ## Defunct in 1.13.z
+  \code{refLocsToLocalLocs} has been replaced by \code{mapCoords}.
 
-  ## Removed in 1.9.z
+  ## Removed
+  readVcfLongForm()
   dbSNPFilter()
   regionFilter()
   MatrixToSnpMatrix(callMatrix, ref, alt, ...)
 }
 
 \details{
-  ## Defunct in 1.9.z:
-  \code{readVcfLongForm} has been replaced by \code{expand}.
+  ## Defunct in 1.13.z
+  \code{refLocsToLocalLocs} has been replaced by \code{mapCoords}.
 
-  ## Removed in 1.9.z:
+  ## Removed 
+  \code{readVcfLongForm} has been replaced by \code{expand}.
   \code{dbSNPFilter} and \code{regionFilter} have been replaced by
   \code{filterVcf}.
 

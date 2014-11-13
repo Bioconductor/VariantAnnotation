@@ -43,38 +43,31 @@ test_predictCoding_varAllele <- function()
     ## TODO : add test for codon width based on 1,2,3 position
 }
 
-test_refLocsToLocalLocs <- function()
+test_mapCoords <- function()
 {
-    quiet <- suppressWarnings
     ## both in 'first' cds
     query <- GRanges(seqnames="chr1",
               ranges=IRanges(rep(c(10002, 10005), 2), width=1),
               strand=c("+", "+", "-", "-"))
-    current <- quiet(refLocsToLocalLocs(query, cdsbytx=cdsbytx[c(1,3)]))
+    current <- mapCoords(query, cdsbytx[c(1,3)], ignore.strand=FALSE)
     expected <- IRanges(c(2, 5, 9, 6), width=1) 
-    checkIdentical(values(current)[["CDSLOC"]], expected)
-    expected <- c(1L, 2L, 3L, 2L) 
-    checkIdentical(unlist(current$PROTEINLOC, use.names=FALSE), expected)
+    checkIdentical(ranges(current), expected)
 
     ## one in each cds
     query <- GRanges(seqnames="chr1",
                      ranges=IRanges(rep(c(10002, 10011), 2), width=1),
                      strand=c("+", "+", "-", "-"))
-    current <- quiet(refLocsToLocalLocs(query, cdsbytx=cdsbytx[c(1,3)]))
+    current <- mapCoords(query, cdsbytx[c(1,3)], ignore.strand=FALSE)
     expected <- IRanges(c(2, 7, 9, 4), width=1) 
-    checkIdentical(values(current)[["CDSLOC"]], expected)
-    expected <- c(1L, 3L, 3L, 2L) 
-    checkIdentical(unlist(current$PROTEINLOC, use.names=FALSE), expected)
+    checkIdentical(ranges(current), expected)
 
     ## both in 'last' cds
     query <- GRanges(seqnames="chr1",
                      ranges=IRanges(rep(c(10010, 10013), 2), width=1),
                      strand=c("+", "+", "-", "-"))
-    current <- quiet(refLocsToLocalLocs(query, cdsbytx=cdsbytx[c(1,3)]))
+    current <- mapCoords(query, cdsbytx[c(1,3)], ignore.strand=FALSE)
     expected <- IRanges(c(6, 9, 5, 2), width=1) 
-    checkIdentical(values(current)[["CDSLOC"]], expected)
-    expected <- c(2L, 3L, 2L, 1L) 
-    checkIdentical(unlist(current$PROTEINLOC, use.names=FALSE), expected)
+    checkIdentical(ranges(current), expected)
 } 
 
 test_predictCoding_strand <- function()

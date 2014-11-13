@@ -6,18 +6,18 @@ setMethod("refLocsToLocalLocs",
     signature("GRanges", "TxDb", "missing"),
     function(ranges, txdb, cdsbytx, ...)
 {
-    cdsbytx <- cdsBy(txdb, "tx")
-    callGeneric(ranges=ranges, cdsbytx=cdsbytx)
+    .Defunct(msg=paste0("refLocsToLocalLocs is deprecated. See ",
+                        "?mapCoords methods in GenomicRanges and ",
+                        "GenomicAlignments packages.")) 
 })
 
 setMethod("refLocsToLocalLocs", 
     signature("GRanges", "missing", "GRangesList"),
     function(ranges, txdb, cdsbytx, ...)
 {
-    .Deprecated(msg=paste0("refLocsToLocalLocs is deprecated. See ",
-                          "?mapCoords methods in GenomicRanges and ",
-                          "GenomicAlignments packages.")) 
-    .localCoordinates(ranges, cdsbytx, ignore.strand=FALSE, ...)
+    .Defunct(msg=paste0("refLocsToLocalLocs is deprecated. See ",
+                        "?mapCoords methods in GenomicRanges and ",
+                        "GenomicAlignments packages.")) 
 })
 
 .localCoordinates <- function(from, to, ignore.strand, ...)
