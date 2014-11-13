@@ -270,3 +270,47 @@
 .isSubstitution <- function(ref, alt) {
     nchar(ref) == nchar(alt)
 }
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### predictCoding()
+###
+
+.localCoordinates <- function(from, to, ignore.strand, ...)
+{
+    ## cds-centric 
+    map <- mapCoords(from, to, elt.hits=TRUE, ignore.strand=ignore.strand, ...)
+    if (length(map) == 0) {
+        res <- GRanges()
+        mcols(res) <- DataFrame(REF=DNAStringSet(), ALT=DNAStringSetList(),
+                                varAllele=DNAStringSet(), CDSLOC=IRanges(),
+                                PROTEINLOC=IntegerList(), QUERYID=integer(),
+                                TXID=character(), CDSID=integer())
+        return(res)
+    }
+
+    ## convert eltHits to linear index
+    cs <- cumsum(unname(elementLengths(to)))
+    shifted <- c(0L, head(cs, -1))
+    eolap <- shifted[mcols(map)$subjectHits] + mcols(map)$eltHits
+    qolap <- map$queryHits
+    cdsid <- 
+        values(unlist(to, use.names=FALSE))[["cds_id"]][eolap]
+    if (is.null(cdsid))
+        cdsid <- NA_character_
+    txid <- rep(names(to), elementLengths(to))[eolap]
+    if (is.null(txid))
+        txid <- NA_integer_
+
+    ## protein-centric
+    pends <- c(ceiling(start(map)/3), ceiling(end(map)/3))
+    plocs <- unique(IntegerList(split(pends, rep(seq_len(length(pends)/2)), 2)))
+
+    res <- from[qolap]
+    strand(res) <- strand(map)
+    mcols(res) <- append(values(res), 
+        DataFrame(CDSLOC=ranges(map), 
+                  PROTEINLOC=plocs, 
+                  QUERYID=qolap, 
+                  TXID=txid, CDSID=cdsid))
+    res 
+}

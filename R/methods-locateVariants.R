@@ -543,7 +543,10 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
     }
     if (length(map) > 0) {
         queryid <- map$queryHits 
-        solap <- map$eltHits 
+        ## convert eltHits to linear index
+        cs <- cumsum(unname(elementLengths(subject)))
+        shifted <- c(0L, head(cs, -1))
+        solap <- shifted[mcols(map)$subjectHits] + mcols(map)$eltHits
         txid <- NA_integer_
         cdsid <- NA_integer_
         if (!is.null(tx <- rep(names(subject), elementLengths(subject))))
@@ -566,12 +569,12 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
                 FOLLOWID=CharacterList(character(0)))
     } else {
         res <- GRanges()
-        values(res) <- DataFrame(LOCATION=.location(),
-                                 LOCSTART=integer(), LOCEND=integer(),
-                                 QUERYID=integer(), TXID=integer(), 
-                                 CDSID=integer(), GENEID=character(), 
-                                 PRECEDEID=CharacterList(),
-                                 FOLLOWID=CharacterList())
+        mcols(res) <- DataFrame(LOCATION=.location(),
+                                LOCSTART=integer(), LOCEND=integer(),
+                                QUERYID=integer(), TXID=integer(), 
+                                CDSID=integer(), GENEID=character(), 
+                                PRECEDEID=CharacterList(),
+                                FOLLOWID=CharacterList())
         res
     }
 }
