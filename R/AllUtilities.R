@@ -115,11 +115,10 @@
 .formatInfo <- function(x, hdr, nrecords)
 {
     ## no data
-    if (0L == length(x) ||
-       (1L == length(x) && all(names(x) == "INFO")))
+    if (!length(x) || (1L == length(x) && all(names(x) %in% "INFO")))
         return(DataFrame(row.names=seq_len(nrecords)))
     ## data in file but not in header
-    if (0L == length(hdr)) {
+    if (!length(hdr) && length(x[[1]])) {
         DF <- DataFrame(x)
         names(DF) <- names(x)
         return(DF)

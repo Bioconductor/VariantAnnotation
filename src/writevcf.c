@@ -235,20 +235,26 @@ void make_vcf_geno(SEXP conn, SEXP fixed, SEXP format, SEXP geno,
                 }
             }
         }
-        /* write genotype fields */
-        for (j = 0; j < n_samples; ++j) {
-            write_geno_sample(i, j, k_last, k_valid, geno_zdim, n_rows, 
-                              n_samples, n_fields, geno, f_sep, mv_sep,
-                              &buf);
-            if (j < n_samples - 1) {
-                if (0 != buf.l)
-                    /* sample separator */
-                    kputc('\t', &buf);
-            } else {
-                kputc('\n', &buf);
-                if (R_WriteConnection(con, buf.s, buf.l) != buf.l)
-                    Rf_error("error writing to connection");
+        /* write genotype fields if present */
+        if (n_samples > 0) {
+            for (j = 0; j < n_samples; ++j) {
+                write_geno_sample(i, j, k_last, k_valid, geno_zdim, n_rows, 
+                                  n_samples, n_fields, geno, f_sep, mv_sep,
+                                  &buf);
+                if (j < n_samples - 1) {
+                    if (0 != buf.l)
+                        /* sample separator */
+                        kputc('\t', &buf);
+                } else {
+                    kputc('\n', &buf);
+                    if (R_WriteConnection(con, buf.s, buf.l) != buf.l)
+                        Rf_error("error writing to connection");
+                }
             }
+        } else {
+            kputc('\n', &buf);
+            if (R_WriteConnection(con, buf.s, buf.l) != buf.l)
+                Rf_error("error writing to connection");
         }
     }
 
