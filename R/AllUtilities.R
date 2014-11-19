@@ -149,22 +149,6 @@
     DF
 }
 
-
-.listCumsum <- function(x) {
-  x_unlisted <- unlist(x, use.names=FALSE)
-  x_cumsum <- cumsum(x_unlisted)
-  x_part <- PartitioningByWidth(elementLengths(x))
-  x_cumsum - rep(x_cumsum[start(x_part)] - x_unlisted[start(x_part)],
-                 width(x_part))
-}
-
-.listCumsumShifted <- function(x) {
-  cs <- .listCumsum(x)
-  shifted <- c(0L, head(cs, -1))
-  shifted[start(PartitioningByWidth(elementLengths(x)))] <- 0L
-  shifted
-}
-
 .rleRecycleVector <- function(x, len) {
   if (is(x, "Rle"))
     rep(x, length.out = len)
