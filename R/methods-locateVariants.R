@@ -542,11 +542,11 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
                          elt.hits=TRUE) 
     }
     if (length(map) > 0) {
-        queryid <- map$queryHits 
+        queryid <- map$fromHits 
         ## convert eltHits to linear index
         cs <- cumsum(unname(elementLengths(subject)))
         shifted <- c(0L, head(cs, -1))
-        solap <- shifted[mcols(map)$subjectHits] + mcols(map)$eltHits
+        solap <- shifted[mcols(map)$toHits] + mcols(map)$eltHits
         txid <- NA_integer_
         cdsid <- NA_integer_
         if (!is.null(tx <- rep(names(subject), elementLengths(subject))))

@@ -274,8 +274,8 @@
     ## convert eltHits to linear index
     cs <- cumsum(unname(elementLengths(to)))
     shifted <- c(0L, head(cs, -1))
-    eolap <- shifted[mcols(map)$subjectHits] + mcols(map)$eltHits
-    qolap <- map$queryHits
+    eolap <- shifted[mcols(map)$toHits] + mcols(map)$eltHits
+    qolap <- map$fromHits
     cdsid <- 
         values(unlist(to, use.names=FALSE))[["cds_id"]][eolap]
     if (is.null(cdsid))
