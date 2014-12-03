@@ -157,6 +157,19 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
       class. If the element was missing or was not collected for a particular 
       variant the value will be \code{NA}.
     }
+    \item{Efficient Usage: }{
+      Subsets of data (i.e., specific variables, positions or samples) can 
+      be read from a VCF file by providing a \code{ScanVcfParam} object in
+      the call to \code{readVcf}. Other lightweight options are the
+      \code{readGT}, \code{readInfo} and \code{readGeno} functions which 
+      return data as a matrix instead of the \code{VCF} class.
+ 
+      Another option for handling large files is to iterate through the
+      data in chunks by setting the \code{yieldSize} parameter in a 
+      \code{TabixFile} object. Iteration can be through all data fields or
+      a subset defined by a \code{ScanVcfParam}. See example below, 
+      `Iterating through VCF with yieldSize`.
+    }
   }
 }
 
