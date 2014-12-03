@@ -49,8 +49,8 @@ setMethod("expand", "CollapsedVCF",
     isA <- ghdr$Number == "A"
     if (any(isA)) {
         gnms <- rownames(ghdr)[isA]
-        gelt <- sapply(gnms, function(i) 
-                    elt - elementLengths(gvar[[i]]))
+        gelt <- do.call(cbind, lapply(gnms, function(i) 
+                                      elt - elementLengths(gvar[[i]])))
         ## elementLengths same as ALT
         csums <- colSums(gelt) == 0L
         if (any(csums))
@@ -123,10 +123,10 @@ setMethod("expand", "CollapsedVCF",
     ## no data 
     if (ncol(ivar) == 0L)
         return(DataFrame(row.names=seq_along(idx)))
-    inms <- rownames(info(hdr))[info(hdr)$Number == "A"]
+    inms <- names(ivar)[info(hdr)[names(ivar), "Number"] == "A"]
     if (length(inms) > 0L) {
-        ielt <- sapply(inms, function(i) 
-                    elt - elementLengths(ivar[[i]]))
+        ielt <- do.call(cbind, lapply(inms, function(i) 
+                                      elt - elementLengths(ivar[[i]])))
         ## elementLengths same as ALT
         csums <- colSums(ielt) == 0L
         if (any(csums))
