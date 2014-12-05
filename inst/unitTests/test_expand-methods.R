@@ -33,3 +33,12 @@ test_expand_structural <- function()
     exp <- expand(vcf)
     checkTrue(nrow(exp) == 8L)
 }
+
+test_expand_multiple_info <- function()
+{
+    fl <- system.file("unitTests", "cases", "multiple_INFO_fields.vcf", 
+                      package="VariantAnnotation")
+    vcf <- readVcf(fl, "GRCh37")
+    exp <- expand(vcf)
+    checkTrue(nrow(exp) == 3L)
+}

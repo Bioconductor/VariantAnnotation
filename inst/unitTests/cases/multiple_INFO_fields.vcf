@@ -1,0 +1,8 @@
+##fileformat=VCFv4.1
+##fileDate=20141205
+##INFO=<ID=AF,Number=A,Type=Float,Description="Estimated allele frequency in the range (0,1)">
+##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of samples with data">
+##contig=<ID=17,length=81195210,assembly="GRCh37">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+17	10001541	rs12451372	C	G,T	100	PASS	AF=0.139776,0.0595048;NS=2504	
+17	10001547	17:10001547_G/A	G	A	100	PASS	AF=0.000199681;NS=2504	
