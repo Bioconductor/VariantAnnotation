@@ -126,7 +126,7 @@
             stop("scanVcf: ", conditionMessage(err), call. = FALSE)
     }, error = function(err) {
             stop("scanVcf: ", conditionMessage(err), "\n  path: ", 
-                 path(file), call. = FALSE)
+                 file, call. = FALSE)
     })
 }
 
@@ -147,7 +147,7 @@
             stop("scanVcf: ", conditionMessage(err), call. = FALSE)
     }, error = function(err) {
             stop("scanVcf: ", conditionMessage(err), "\n  path: ", 
-                 path(file), call. = FALSE)
+                 summary(file)$description, call. = FALSE)
     })
 }
 
