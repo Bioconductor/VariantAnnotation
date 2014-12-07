@@ -41,4 +41,13 @@ test_expand_multiple_info <- function()
     vcf <- readVcf(fl, "GRCh37")
     exp <- expand(vcf)
     checkTrue(nrow(exp) == 3L)
+
+    ## single row, subset of INFO fields selected 
+    exp <- expand(vcf[1,])
+    checkTrue(nrow(exp) == 2L)
+
+    ## single row, single (only) INFO field selected
+    vcf <- readVcf(fl, "GRCh37", param=ScanVcfParam(info="AF"))
+    exp <- expand(vcf[1,])
+    checkTrue(nrow(exp) == 2L)
 }
