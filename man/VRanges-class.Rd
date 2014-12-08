@@ -128,6 +128,16 @@
   be A/AGCGT. Since the range always matches the \code{ref} sequence,
   this means a deletion will be the width of the deletion + 1, and an
   insertion is always of width 1.
+
+  VRanges and the VCF class:
+  The VRanges and VCF classes encode different types of information and
+  are semantically incompatible. While methods exist for converting
+  a VCF object to a VRanges and vice versa, information is lost in the
+  transformation. There is no way to collapse multiple rows of a VRanges
+  at the same genomic position and accurately represent missing data.
+  For this reason, it is not reasonable to assume that an object resulting
+  from multiple conversions (VRanges -> VCF -> VRanges) will be equivalent to 
+  the original.
 }
 
 \section{Constructor}{
