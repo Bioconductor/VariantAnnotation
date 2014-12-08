@@ -484,10 +484,11 @@ setMethod("asVCF", "VRanges", vranges2Vcf)
 ###
 
 VRangesScanVcfParam <- function(fixed="ALT", info=NA, geno="AD", ...) {
+  .Deprecated("ScanVcfParam")
   ScanVcfParam(fixed=fixed, info=info, geno=geno, ...)
 }
 
-readVcfAsVRanges <- function(x, genome, param=VRangesScanVcfParam(),
+readVcfAsVRanges <- function(x, genome, param=ScanVcfParam(),
                              use.names=FALSE, ...)
 {
   if (!isTRUEorFALSE(use.names)) {

@@ -293,12 +293,16 @@
       writes it to a file; see \code{\link{writeVcf}}.
     }
     \item{}{
-      \code{readVcfAsVRanges(x, genome, param = VRangesScanVcfParam(), ...)}:
+      \code{readVcfAsVRanges(x, genome, param = ScanVcfParam(), ...)}:
       Reads a VCF \code{x} directly into a \code{VRanges};
       see \code{\link{readVcf}} for details on the arguments.
+      \code{readVcfAsVRanges} is an alternative syntax to
+
+      \preformatted{  as(readVcf(), "VRanges") }
     }
     \item{}{
       \code{VRangesScanVcfParam(fixed = "ALT", info = NA, geno = "AD", ...)}:
+      (Deprecated. Use ScanVcfParam() instead.)
       Convenience constructor for a \code{\linkS4class{ScanVcfParam}}
       object that is well suited for import to a \code{VRanges}. The
       \code{fixed}, \code{info} and \code{geno} parameters, and anything
