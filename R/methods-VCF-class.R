@@ -183,11 +183,8 @@ setMethod("info", "VCF",
     function(x, ..., row.names = TRUE) 
 {
     info <- slot(x, "info")
-    if (row.names) {
-        if (length(info) != 0L)
-            if (!sum(duplicated(rownames(x))))
-                rownames(info) <- rownames(x)
-    }
+    if (row.names && !anyDuplicated(rownames(x)))
+        rownames(info) <- rownames(x)
     info
 })
 
@@ -489,11 +486,13 @@ setMethod(show, "VCF",
     cat("rowData(vcf):\n")
     printSmallGRanges(rowData(object), margin=margin)
     cat("info(vcf):\n")
-    printSmallDataTable(info(object), margin=margin) 
+    printSmallDataTable(info(object, row.names=FALSE), margin=margin) 
     if (length(header(object))) {
         if (length(hdr <- info(header(object)))) {
-            nms <- intersect(colnames(info(object)), rownames(hdr))
-            diff <- setdiff(colnames(info(object)), rownames(hdr))
+            nms <- intersect(colnames(info(object, row.names=FALSE)),
+                             rownames(hdr))
+            diff <- setdiff(colnames(info(object, row.names=FALSE)),
+                            rownames(hdr))
             if (length(nms)) {
                 cat("info(header(vcf)):\n")
                 headerrec(as.data.frame(hdr[nms,]))
