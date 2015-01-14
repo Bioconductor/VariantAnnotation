@@ -232,9 +232,17 @@ test_readGT <- function()
     checkIdentical(unname(GT[1,]), c("G|G", "A|G", "A/A")) 
     checkIdentical(unname(GT[2,]), c("T|T", "T|A", "T/T"))
     checkIdentical(unname(GT[5,]), c("GTC/G", "GTC/GTCT", "G/G"))
+    ## genotypeCodesToNucleotides
+    vcf0 <- readVcf(fl, "")
+    vcf1 <- genotypeCodesToNucleotides(vcf0)
+    checkIdentical(GT, geno(vcf1)$GT)
 
     fl <- system.file("unitTests", "cases", "no_INFO_header.vcf", 
                       package="VariantAnnotation")
     GT <- readGT(fl, nucleotides=TRUE)
-    checkIdentical(unname(GT[,1]), rep(".", 5)) 
+    checkIdentical(unname(GT[,1]), rep(".", 5))
+    ## genotypeCodesToNucleotides
+    vcf0 <- readVcf(fl, "")
+    vcf1 <- genotypeCodesToNucleotides(vcf0)
+    checkIdentical(GT, geno(vcf1)$GT)
 }

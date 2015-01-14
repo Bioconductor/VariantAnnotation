@@ -118,7 +118,7 @@ export(
     softFilterMatrix, "softFilterMatrix<-", hardFilters, "hardFilters<-",
     called, stackSamples, "altDepth<-", "refDepth<-", "totalDepth<-",
     probabilityToSnpMatrix, GLtoGP,
-    readInfo, readGeno, readGT,
+    readInfo, readGeno, readGT, genotypeCodesToNucleotides,
     tabulate, VRangesScanVcfParam, readVcfAsVRanges,
     isSNV, isInsertion, isDeletion, isIndel, isTransition,
     isSubstitution

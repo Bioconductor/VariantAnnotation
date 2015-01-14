@@ -160,12 +160,15 @@ setMethod(readVcf, c(file="character", genome="missing",
 
 ## lightweight read functions retrieve a single variable
 
-.geno2geno <- function(lst)
+.geno2geno <- function(lst, ALT=NULL, REF=NULL, GT=NULL)
 {
+    if (is.null(ALT) && is.null(REF) && is.null(GT)) {
+        ALT <- lst$ALT
+        REF <- as.character(lst$REF, use.names=FALSE)
+        GT <- lst$GENO$GT
+    }
+    res <- GT
     ## ignore records with GT ".|." 
-    ALT <- lst$ALT
-    REF <- as.character(lst$REF, use.names=FALSE)
-    GT <- res <- lst$GENO$GT
     if (any(missing <- grepl(".", GT, fixed=TRUE))) 
         GT[missing] <- ".|."
     phasing <- rep("|", length(GT))

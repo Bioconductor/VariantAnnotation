@@ -545,3 +545,22 @@ restrictToSNV <- function(x, ...)
 {
     .Deprecated("isSNV")
 }
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### genotypeCodesToNucleotides
+###
+
+genotypeCodesToNucleotides <- function(vcf, ...) 
+{
+    GT <- geno(vcf, withDimnames=FALSE)$GT
+    if (is.null(GT <- geno(vcf, withDimnames=FALSE)$GT))
+        stop("no 'GT' data found in geno(vcf)")
+
+    if (is(alt(vcf), "CharacterList"))
+        stop("'ALT' must be a DNAStringSetList")
+    ALT <- split(as.character(alt(vcf)@unlistData), togroup(alt(vcf))) 
+    REF <- as.character(ref(vcf))
+    geno(vcf)$GT <- .geno2geno(NULL, ALT, REF, GT)
+    vcf
+}
+

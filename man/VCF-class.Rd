@@ -81,6 +81,7 @@
 \alias{expand,CollapsedVCF-method}
 \alias{expand,ExpandedVCF-method}
 \alias{restrictToSNV}
+\alias{genotypeCodesToNucleotides}
 
 % show method:
 \alias{show,VCF-method}
@@ -270,6 +271,12 @@
       duplicated rownames corresponding to the original \code{x}.
     }
   }
+}
+
+\section{genotypeCodesToNucleotides(vcf, ...)}{
+  This function converts the `GT` genotype codes in a \code{VCF} object
+  to nucleotides. See also ?\code{readGT} to read in only `GT` data as 
+  codes or nucleotides.
 }
 
 \section{Variant Type}{
