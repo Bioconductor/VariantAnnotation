@@ -51,3 +51,14 @@ test_expand_multiple_info <- function()
     exp <- expand(vcf[1,])
     checkTrue(nrow(exp) == 2L)
 }
+
+test_expand_gvcf <- function()
+{
+    fl <- system.file("unitTests", "cases", "banded_gvcf.vcf",
+                      package="VariantAnnotation")
+    vcf <- suppressWarnings(readVcf(fl, ""))
+    exp <- expand(vcf)
+    checkIdentical(dim(exp), c(7L, 1L))
+    checkIdentical(dim(geno(exp)$AD), c(7L, 1L, 3L))
+    checkIdentical(geno(exp)$AD[,,1], as.integer(c(NA, 17, 17, NA, 20, 20, NA)))
+}

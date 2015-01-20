@@ -15,7 +15,7 @@ setMethod("expand", "CollapsedVCF",
             fxd$ALT <- unlist(alt(x), use.names=FALSE)
             AD <- "AD" %in% names(geno(x))
             if (AD)
-              geno(x)$AD <- .expandAD(geno(x)$AD, nrow(x), ncol(x))
+              geno(x)$AD <- .expandAD(geno(x)$AD, seq_len(nrow(x)), ncol(x))
             return(VCF(rd, colData(x), exptData(x), fxd, .unlistAltInfo(x), 
                        geno(x), ..., collapsed=FALSE))
         }
@@ -84,7 +84,7 @@ setMethod("expand", "CollapsedVCF",
             }
         } else {
             ## 'Number' is '.'
-            gvar$AD <- .expandAD(AD, length(idx), ncol(x))
+            gvar$AD <- .expandAD(AD, idx, ncol(x))
         }
     }
     isA <- names(gvar) %in% rownames(ghdr)[isA]
@@ -99,19 +99,16 @@ setMethod("expand", "CollapsedVCF",
     gvar
 }
 
-## returns an array of REF,ALT pairs
-.expandAD <- function(AD, idxlen, xcols)
+## returns an array of REF,ALT,<NON_REF> pairs
+.expandAD <- function(AD, idx, xcols)
 {
     if (is.list(AD)) {
-        adpart <- PartitioningByWidth(AD)
-        nalt <- width(adpart) - 1L
-        if (sum(nalt) != idxlen*xcols)
-          stop("length of AD does not match expanded index")
-        AD <- as.integer(unlist(AD, use.names=FALSE))
-        ref <- logical(length(AD))
-        ref[start(adpart)] <- TRUE
-        vec <- c(rep(AD[ref], nalt), AD[!ref])
-        array(vec, c(idxlen, xcols, 2L))
+        part <- PartitioningByWidth(AD)
+        maxelt <- max(width(part))
+        if (any(zeros <- width(part) == 0L)) 
+            AD[zeros] <- list(rep(NA_integer_, maxelt))
+        AD <- AD[idx]
+        array(t(do.call(cbind, AD)), c(length(idx), xcols, maxelt))
     } else {
         AD
     }
