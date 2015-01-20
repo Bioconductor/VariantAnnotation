@@ -59,6 +59,6 @@ test_expand_gvcf <- function()
     vcf <- suppressWarnings(readVcf(fl, ""))
     exp <- expand(vcf)
     checkIdentical(dim(exp), c(7L, 1L))
-    checkIdentical(dim(geno(exp)$AD), c(7L, 1L, 3L))
+    checkIdentical(dim(geno(exp)$AD), c(7L, 1L, 2L))
     checkIdentical(geno(exp)$AD[,,1], as.integer(c(NA, 17, 17, NA, 20, 20, NA)))
 }

@@ -15,7 +15,7 @@ setMethod("expand", "CollapsedVCF",
             fxd$ALT <- unlist(alt(x), use.names=FALSE)
             AD <- "AD" %in% names(geno(x))
             if (AD)
-              geno(x)$AD <- .expandAD(geno(x)$AD, seq_len(nrow(x)), ncol(x))
+              geno(x)$AD <- .expandAD(geno(x)$AD, nrow(x), ncol(x))
             return(VCF(rd, colData(x), exptData(x), fxd, .unlistAltInfo(x), 
                        geno(x), ..., collapsed=FALSE))
         }
@@ -84,7 +84,7 @@ setMethod("expand", "CollapsedVCF",
             }
         } else {
             ## 'Number' is '.'
-            gvar$AD <- .expandAD(AD, idx, ncol(x))
+            gvar$AD <- .expandAD(AD, length(idx), ncol(x))
         }
     }
     isA <- names(gvar) %in% rownames(ghdr)[isA]
@@ -99,16 +99,23 @@ setMethod("expand", "CollapsedVCF",
     gvar
 }
 
-## returns an array of REF,ALT,<NON_REF> pairs
-.expandAD <- function(AD, idx, xcols)
+## returns an array of REF,ALT and REF,<NON_REF> pairs
+## 'z' dimension of result is always 2
+.expandAD <- function(AD, idxlen, xcols)
 {
     if (is.list(AD)) {
-        part <- PartitioningByWidth(AD)
-        maxelt <- max(width(part))
-        if (any(zeros <- width(part) == 0L)) 
-            AD[zeros] <- list(rep(NA_integer_, maxelt))
-        AD <- AD[idx]
-        array(t(do.call(cbind, AD)), c(length(idx), xcols, maxelt))
+        adpart <- PartitioningByWidth(AD)
+        if (any(zeros <- width(adpart) == 0L)) { 
+            AD[zeros] <- list(rep(NA_integer_, 2L))
+            adpart <- PartitioningByWidth(AD)
+        }
+
+        nalt <- width(adpart) - 1L
+        AD <- unlist(AD, use.names=FALSE)
+        ref <- logical(length(AD))
+        ref[start(adpart)] <- TRUE
+        vec <- c(rep(AD[ref], nalt), AD[!ref])
+        array(vec, c(idxlen, xcols, 2L))
     } else {
         AD
     }
