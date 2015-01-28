@@ -66,35 +66,31 @@ setMethod("altFraction", "VRanges", function(x) {
 })
 
 setMethod("refFraction", "VRanges", function(x) {
-  refDepth(x) / totalDepth(x)
+    refDepth(x) / totalDepth(x)
 })
 
 setMethod("isDeletion", "VRanges", function(x, ...) 
-  .isDeletion(ref(x), alt(x))
+    .dispatchSNV_ExpandedVCF(.isDeletion, x)
 )
-  #nchar(alt(x)) == 1L & nchar(ref(x)) > 1L & substring(ref(x), 1, 1) == alt(x)
 
 setMethod("isInsertion", "VRanges", function(x, ...) 
-    .isInsertion(ref(x), alt(x)) 
+    .dispatchSNV_ExpandedVCF(.isInsertion, x)
 )
- # nchar(ref(x)) == 1L & nchar(alt(x)) > 1L & substring(alt(x), 1, 1) == ref(x)
 
 setMethod("isIndel", "VRanges", function(x, ...)
-    .isIndel(ref(x), alt(x)) 
+    .dispatchSNV_ExpandedVCF(.isIndel, x)
 )
- # isDeletion(x) | isInsertion(x)
 
 setMethod("isSNV", "VRanges", function(x, ...)
-    .isSNV(ref(x), alt(x)) 
+    .dispatchSNV_ExpandedVCF(.isSNV, x)
 )
- # nchar(alt(x)) == 1L & nchar(ref(x)) == 1L
 
 setMethod("isSubstitution", "VRanges", function(x, ...)
-    .isSubstitution(ref(x), alt(x)) 
+    .dispatchSNV_ExpandedVCF(.isSubstitution, x)
 )
 
 setMethod("isTransition", "VRanges", function(x, ...)
-    .isTransition(ref(x), alt(x)) 
+    .dispatchSNV_ExpandedVCF(.isTransition, x)
 )
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

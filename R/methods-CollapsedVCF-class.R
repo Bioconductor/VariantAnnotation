@@ -24,9 +24,9 @@ setReplaceMethod("alt", c("CollapsedVCF", "DNAStringSetList"),
 ### isSNV family 
 ###
 
-.logicalListToVector <- function(res, alt, singleAltOnly) { 
+.logicalListToVector <- function(res, alt, singleAltOnly, ignore) { 
     lst <- relist(res, alt)
-    if (singleAltOnly)
+    if (singleAltOnly && !any(ignore))
         all(lst) & elementLengths(lst) == 1
     else
         any(lst)
@@ -34,11 +34,16 @@ setReplaceMethod("alt", c("CollapsedVCF", "DNAStringSetList"),
 
 .dispatchSNV_CollapsedVCF <- function(FUN, x, singleAltOnly)
 {
-    if (is(alt <- alt(x), "CharacterList"))
-        stop("'alt' must be non-structural nucleotide values")
-    res <- FUN(rep(ref(x), elementLengths(alt)),
-               unlist(alt, use.names=FALSE))
-    .logicalListToVector(res, alt, singleAltOnly)
+    flat <- unlist(alt(x), use.names=FALSE)
+    ignore <- logical(length(flat))
+    if (is(alt(x), "CharacterList")) {
+        ## handle gvcf, not structural
+        ignore <- grepl("NON_REF", flat, fixed=TRUE)
+        if (!any(ignore) && any(.isStructural(flat)))
+            stop("'alt' values must be nucleotides")
+    } 
+    res <- FUN(rep(ref(x), elementLengths(alt(x))), flat, ignore)
+    .logicalListToVector(res, alt(x), singleAltOnly, ignore)
 }
  
 setMethod("isSNV", "CollapsedVCF", 

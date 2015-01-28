@@ -84,3 +84,15 @@ test_isSNV_VRanges <- function() {
     res <- isTransition(vr)
     checkIdentical(sum(res), 5L)
 }
+
+test_isSNV_gvcf_format <- function() 
+{
+    ## ignore <NON_REF>
+    fl <- system.file("unitTests", "cases", "banded_gvcf.vcf",
+                      package="VariantAnnotation")
+
+    vcf <- suppressMessages(readVcf(fl, ""))
+    checkIdentical(isSNV(vcf), rep(TRUE, nrow(vcf)))
+    vr <- as(vcf, "VRanges")
+    checkIdentical(isSNV(expand(vcf)), rep(TRUE, length(vr)))
+}

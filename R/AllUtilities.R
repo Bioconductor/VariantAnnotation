@@ -222,36 +222,45 @@
 ### isSNV helpers
 ###
 
-.isSNV <- function(ref, alt) {
-    nchar(ref) == 1L & nchar(alt) == 1L
+.isSNV <- function(ref, alt, ignore) {
+    res <- nchar(ref) == 1L & nchar(alt) == 1L
+    res[ignore] <- TRUE
+    res
 }
 
-.isDeletion <- function(ref, alt) {
-    nchar(alt) == 1L &
-    nchar(ref) > 1L &
-    substring(ref, 1, 1) == alt
+.isDeletion <- function(ref, alt, ignore) {
+    res <- nchar(alt) == 1L &
+           nchar(ref) > 1L &
+           substring(ref, 1, 1) == alt
+    res[ignore] <- TRUE
+    res
 }
 
-.isInsertion <- function(ref, alt) {
-    nchar(ref) == 1L &
-    nchar(alt) > 1L &
-    substring(alt, 1, 1) == ref
+.isInsertion <- function(ref, alt, ignore) {
+    res <- nchar(ref) == 1L &
+           nchar(alt) > 1L &
+           substring(alt, 1, 1) == ref
+    res[ignore] <- TRUE
+    res
 }
 
-.isIndel <- function(ref, alt) {
-    .isDeletion(ref, alt) | .isInsertion(ref, alt)
+.isIndel <- function(ref, alt, ignore) {
+    .isDeletion(ref, alt, ignore) | .isInsertion(ref, alt, ignore)
 }
 
-.isTransition <- function(ref, alt) {
+.isTransition <- function(ref, alt, ignore) {
     m1 <- match(as.character(ref), c("A", "G", "T", "C"))
     m2 <- match(as.character(alt), c("G", "A", "C", "T"))
     res <- (m1 - m2) == 0
     res[is.na(res)] <- FALSE
+    res[ignore] <- TRUE
     res
 }
 
-.isSubstitution <- function(ref, alt) {
-    nchar(ref) == nchar(alt)
+.isSubstitution <- function(ref, alt, ignore) {
+    res <- nchar(ref) == nchar(alt)
+    res[ignore] <- TRUE
+    res
 }
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
