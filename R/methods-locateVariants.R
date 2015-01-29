@@ -529,36 +529,40 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
 
 .makeResult <- function(query, subject, vtype, ignore.strand, asHits)
 {
-    if (asHits) {
+    if (asHits)
         return(findOverlaps(query, subject, type="within", 
-            ignore.strand=ignore.strand))
-    } else {
-        usub <- unlist(subject, use.names=FALSE)
-        map <- mapCoords(query, subject, ignore.strand=ignore.strand,
-                         elt.hits=TRUE) 
-    }
-    if (length(map) > 0) {
-        queryid <- map$fromHits 
-        ## convert eltHits to linear index
-        cs <- cumsum(unname(elementLengths(subject)))
-        shifted <- c(0L, head(cs, -1))
-        solap <- shifted[mcols(map)$toHits] + mcols(map)$eltHits
-        txid <- NA_integer_
-        cdsid <- NA_integer_
-        if (!is.null(tx <- rep(names(subject), elementLengths(subject))))
-            txid <- tx 
-        if (vtype == "coding")
-            if(!is.null(cds <- values(usub)[["cds_id"]][solap]))
-                cdsid <- cds
+                            ignore.strand=ignore.strand))
 
-        GRanges(seqnames=seqnames(query)[queryid],
-                ranges=IRanges(ranges(query)[queryid]),
-                strand=strand(usub)[solap],
-                LOCATION=.location(length(queryid), vtype),
+    usub <- unlist(subject, use.names=FALSE)
+    map <- mapToTranscripts(unname(query), subject, 
+                            ignore.strand=ignore.strand)
+    if (length(map) > 0) {
+        xHits <- map$xHits
+        if (!is.null(tx <- names(subject)[map$transcriptsHits]))
+            txid <- tx
+        else
+            txid <- NA_integer_
+        ## FIXME: cdsid is expensive
+        cdsid <- NA_integer_
+        if (vtype == "coding") {
+            names(usub) <- seq_along(usub)
+            map2 <- mapToTranscripts(unname(query)[xHits], usub,
+                                     ignore.strand=ignore.strand)
+            cds <- mcols(usub)$cds_id[map2$transcriptsHits]
+            if (length(cds)) {
+                cdslst <- unique(splitAsList(cds, map2$xHits))
+                cdsid <- cdslst
+            }
+        }
+
+        GRanges(seqnames=seqnames(query)[xHits],
+                ranges=IRanges(ranges(query)[xHits]),
+                strand=strand(query)[xHits],
+                LOCATION=.location(length(xHits), vtype),
                 LOCSTART=start(map),
                 LOCEND=end(map),
-                QUERYID=queryid,
-                TXID=as.integer(txid[solap]),
+                QUERYID=xHits,
+                TXID=txid,
                 CDSID=cdsid,
                 GENEID=NA_character_,
                 PRECEDEID=CharacterList(character(0)),

@@ -1,3 +1,4 @@
+quiet <- suppressWarnings
 library(BSgenome.Hsapiens.UCSC.hg19)
 fun <- VariantAnnotation:::.predictCodingGRangesList
 cdsbytx <- GRangesList(tx1=GRanges(seqnames="chr1", 
@@ -27,7 +28,7 @@ test_predictCoding_varAllele <- function()
               strand=c("+", "-", "*", "*", "*"),
               variant=variant)
     names(query) <- LETTERS[1:5]
-    current <- suppressWarnings(fun(query, cdsbytx[1:2], Hsapiens, variant))
+    current <- quiet(fun(query, cdsbytx[1:2], Hsapiens, variant))
 
     current_varaa <- values(current[names(current) == "B"])[["VARAA"]]
     checkTrue(as.character(current_varaa) == "")
@@ -37,19 +38,19 @@ test_predictCoding_varAllele <- function()
 
     variant=DNAStringSet(c("GGA", "GGA"))
     query <- GRanges("chr1", IRanges(rep(10101, 2), width=c(2,3)), variant=variant)
-    current <- suppressWarnings(fun(query, cdsbytx[1:2], Hsapiens, variant))
+    current <- quiet(fun(query, cdsbytx[1:2], Hsapiens, variant))
     checkIdentical(as.character(mcols(current)$VARCODON), c("TAGGGG", "TTCCGG"))
  
     ## TODO : add test for codon width based on 1,2,3 position
 }
 
-test_mapCoords <- function()
+test_mapToTranscripts <- function()
 {
     ## both in 'first' cds
     query <- GRanges(seqnames="chr1",
               ranges=IRanges(rep(c(10002, 10005), 2), width=1),
               strand=c("+", "+", "-", "-"))
-    current <- mapCoords(query, cdsbytx[c(1,3)], ignore.strand=FALSE)
+    current <- mapToTranscripts(query, cdsbytx[c(1,3)], ignore.strand=FALSE)
     expected <- IRanges(c(2, 5, 9, 6), width=1) 
     checkIdentical(ranges(current), expected)
 
@@ -57,7 +58,7 @@ test_mapCoords <- function()
     query <- GRanges(seqnames="chr1",
                      ranges=IRanges(rep(c(10002, 10011), 2), width=1),
                      strand=c("+", "+", "-", "-"))
-    current <- mapCoords(query, cdsbytx[c(1,3)], ignore.strand=FALSE)
+    current <- mapToTranscripts(query, cdsbytx[c(1,3)], ignore.strand=FALSE)
     expected <- IRanges(c(2, 7, 9, 4), width=1) 
     checkIdentical(ranges(current), expected)
 
@@ -65,7 +66,7 @@ test_mapCoords <- function()
     query <- GRanges(seqnames="chr1",
                      ranges=IRanges(rep(c(10010, 10013), 2), width=1),
                      strand=c("+", "+", "-", "-"))
-    current <- mapCoords(query, cdsbytx[c(1,3)], ignore.strand=FALSE)
+    current <- mapToTranscripts(query, cdsbytx[c(1,3)], ignore.strand=FALSE)
     expected <- IRanges(c(6, 9, 5, 2), width=1) 
     checkIdentical(ranges(current), expected)
 } 
@@ -78,17 +79,17 @@ test_predictCoding_strand <- function()
               strand=c("+", "-", "*", "*", "*"),
               variant=variant)
     names(query) <- LETTERS[1:5]
-    current <- suppressWarnings(fun(query, cdsbytx, Hsapiens, variant))
+    current <- quiet(fun(query, cdsbytx, Hsapiens, variant))
 
     expected <- c("G", "C", "C", "C", "G", "G", "T", "A", "C")
     checkIdentical(as.character(mcols(current)$varAllele), expected)
 
     ## ignore.strand
     strand(query) <- "+"
-    p1 <- suppressWarnings(fun(query, cdsbytx, Hsapiens, variant,
+    p1 <- quiet(fun(query, cdsbytx, Hsapiens, variant,
         ignore.strand=TRUE))
     checkIdentical(12L, length(p1))
-    p2 <- suppressWarnings(fun(query, cdsbytx, Hsapiens, variant,
+    p2 <- quiet(fun(query, cdsbytx, Hsapiens, variant,
         ignore.strand=FALSE))
     checkIdentical(4L, length(p2))
 }

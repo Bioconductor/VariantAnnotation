@@ -32,7 +32,7 @@ importMethodsFrom(AnnotationDbi,
 )
 
 importFrom(GenomicFeatures, 
-    extractTranscriptSeqs
+    extractTranscriptSeqs, mapToTranscripts
 )
 
 importClassesFrom(GenomicFeatures, 
@@ -42,7 +42,7 @@ importClassesFrom(GenomicFeatures,
 importMethodsFrom(GenomicFeatures, 
     cdsBy, exons, transcripts,
     fiveUTRsByTranscript, threeUTRsByTranscript,
-    distance
+    distance, mapToTranscripts
 )
 
 importFrom(IRanges, 

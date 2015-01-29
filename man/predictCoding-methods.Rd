@@ -183,7 +183,7 @@
 
   ## Exon-centric or cDNA locations:
   exonsbytx <- exonsBy(txdb, "tx")
-  cDNA <- mapCoords(coding1[!duplicated(ranges(coding1))], exonsbytx)
+  cDNA <- mapToTranscripts(coding1[!duplicated(ranges(coding1))], exonsbytx)
   coding1$cDNA <- ranges(cDNA)[togroup(coding1$QUERYID)]
 
   ## ----------------------------
@@ -203,8 +203,6 @@
   ## Call predictCoding() with the expanded GRanges as the 'query'
   ## and the unlisted alternate allele as the 'varAllele'.
   coding2 <- predictCoding(rd_exp, txdb, Hsapiens, unlist(altallele)) 
-
-  identical(coding1, coding2)
 }
 
 \keyword{methods}

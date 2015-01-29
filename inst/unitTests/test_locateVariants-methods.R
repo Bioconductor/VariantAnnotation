@@ -24,10 +24,6 @@ test_locateVariants_subject <- function()
     loc1 <- locateVariants(gr, txdb, SpliceSiteVariants())
     loc2 <- locateVariants(gr, intbytx, SpliceSiteVariants())
     checkIdentical(mcols(loc1)[ ,cols], mcols(loc2)[ ,cols])
- 
-    loc1 <- locateVariants(gr, txdb, IntergenicVariants())
-    loc2 <- locateVariants(gr, txbygene, IntergenicVariants())
-    checkIdentical(mcols(loc1)[ ,cols], mcols(loc2)[ ,cols])
 }
 
 test_locateVariants_upstream_downstream <- function()
@@ -59,6 +55,7 @@ test_locateVariants_queryAsVCF <- function()
 
 test_locateVariants_ignore.strand <- function()
 {
+    cdsbytx <- cdsbytx[1:5]
     gr <- GRanges("chr1", IRanges(c(12190, 12595, 13403), width=1), "-")
     loc1 <- locateVariants(gr, cdsbytx, CodingVariants(), 
                            ignore.strand=TRUE)

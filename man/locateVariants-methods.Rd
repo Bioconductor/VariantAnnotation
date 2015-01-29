@@ -185,8 +185,8 @@ locateVariants(query, subject, region, ...)
       relative to the start of the transcript. SpliceSiteVariants,
       IntergenicVariants and PromoterVariants have no formal
       extraction `by transcript` so for these variants LOCSTART and
-      LOCEND are NA. Coordinates are computed with \code{mapCoords}; 
-      see ?\code{mapCoords} in the GenomicRanges package for details.
+      LOCEND are NA. Coordinates are computed with \code{mapToTranscripts}; 
+      see ?\code{mapToTranscripts} in the GenomicFeatures package for details.
     }
     \item{\code{QUERYID}}{
       The \code{QUERYID} column provides a map back to the row in the

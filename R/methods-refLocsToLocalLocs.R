@@ -7,8 +7,8 @@ setMethod("refLocsToLocalLocs",
     function(ranges, txdb, cdsbytx, ...)
 {
     .Defunct(msg=paste0("refLocsToLocalLocs is deprecated. See ",
-                        "?mapCoords methods in GenomicRanges and ",
-                        "GenomicAlignments packages.")) 
+                        "?mapToTranscripts in GenomicFeatures and ",
+                        "?mapToAlignments in GenomicAlignments packages.")) 
 })
 
 setMethod("refLocsToLocalLocs", 
@@ -16,7 +16,7 @@ setMethod("refLocsToLocalLocs",
     function(ranges, txdb, cdsbytx, ...)
 {
     .Defunct(msg=paste0("refLocsToLocalLocs is deprecated. See ",
-                        "?mapCoords methods in GenomicRanges and ",
-                        "GenomicAlignments packages.")) 
+                        "?mapToTranscripts in GenomicFeatures and ",
+                        "?mapToAlignments in GenomicAlignments packages.")) 
 })
 

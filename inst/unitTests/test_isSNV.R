@@ -91,7 +91,7 @@ test_isSNV_gvcf_format <- function()
     fl <- system.file("unitTests", "cases", "banded_gvcf.vcf",
                       package="VariantAnnotation")
 
-    vcf <- suppressMessages(readVcf(fl, ""))
+    vcf <- suppressWarnings(readVcf(fl, ""))
     checkIdentical(isSNV(vcf), rep(TRUE, nrow(vcf)))
     vr <- as(vcf, "VRanges")
     checkIdentical(isSNV(expand(vcf)), rep(TRUE, length(vr)))

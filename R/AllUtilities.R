@@ -269,8 +269,9 @@
 
 .localCoordinates <- function(from, to, ignore.strand, ...)
 {
-    ## cds-centric 
-    map <- mapCoords(from, to, elt.hits=TRUE, ignore.strand=ignore.strand, ...)
+    ## 'to' is a GRangesList of cds by transcript
+    ## cds coordinates 
+    map <- mapToTranscripts(unname(from), to, ignore.strand=ignore.strand, ...)
     if (length(map) == 0) {
         res <- GRanges()
         mcols(res) <- DataFrame(REF=DNAStringSet(), ALT=DNAStringSetList(),
@@ -280,29 +281,34 @@
         return(res)
     }
 
-    ## convert eltHits to linear index
-    cs <- cumsum(unname(elementLengths(to)))
-    shifted <- c(0L, head(cs, -1))
-    eolap <- shifted[mcols(map)$toHits] + mcols(map)$eltHits
-    qolap <- map$fromHits
-    cdsid <- 
-        values(unlist(to, use.names=FALSE))[["cds_id"]][eolap]
-    if (is.null(cdsid))
-        cdsid <- NA_character_
-    txid <- rep(names(to), elementLengths(to))[eolap]
-    if (is.null(txid))
+    xHits <- map$xHits
+    txHits <- map$transcriptsHits
+    fo <- findOverlaps(ranges(from)[xHits], 
+                       unlist(ranges(to), use.names=FALSE),
+                       type="within")
+    ## FIXME: cdsid is expensive
+    map2 <- mapToTranscripts(unname(from)[xHits], to,
+                             ignore.strand=ignore.strand)
+    cdsid <- NA_character_
+    cds <- mcols(unlist(to, use.names=FALSE))$cds_id[map2$trancriptsHits]
+    if (length(cds)) {
+        cdslst <- unique(splitAsList(cds, map2$xHits))
+        cdsid <- cdslst
+    }
+    if (is.null(txid <- names(to)[txHits]))
         txid <- NA_integer_
 
-    ## protein-centric
+    ## protein coordinates
     pends <- c(ceiling(start(map)/3), ceiling(end(map)/3))
     plocs <- unique(IntegerList(split(pends, rep(seq_len(length(pends)/2)), 2)))
 
-    res <- from[qolap]
+    res <- from[xHits]
     strand(res) <- strand(map)
     mcols(res) <- append(values(res), 
         DataFrame(CDSLOC=ranges(map), 
                   PROTEINLOC=plocs, 
-                  QUERYID=qolap, 
+                  QUERYID=xHits, 
                   TXID=txid, CDSID=cdsid))
     res 
 }
+
