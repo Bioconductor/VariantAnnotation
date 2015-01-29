@@ -10,22 +10,6 @@ gr <- GRanges("chr22",
             width=c(1,1,1,1,3,3,2,2)),
     strand=c("-", "-", "-", "+", "+", "+", "+", "+"))
  
-test_locateVariants_subject <- function()
-{
-    cols <- c("LOCATION", "QUERYID", "TXID", "CDSID")
-    loc1 <- locateVariants(gr, txdb, CodingVariants())
-    loc2 <- locateVariants(gr, cdsbytx, CodingVariants())
-    checkIdentical(mcols(loc1)[ ,cols], mcols(loc2)[ ,cols])
- 
-    loc1 <- locateVariants(gr, txdb, IntronVariants())
-    loc2 <- locateVariants(gr, intbytx, IntronVariants())
-    checkIdentical(mcols(loc1)[ ,cols], mcols(loc2)[ ,cols])
-
-    loc1 <- locateVariants(gr, txdb, SpliceSiteVariants())
-    loc2 <- locateVariants(gr, intbytx, SpliceSiteVariants())
-    checkIdentical(mcols(loc1)[ ,cols], mcols(loc2)[ ,cols])
-}
-
 test_locateVariants_upstream_downstream <- function()
 {
     loc <- locateVariants(gr, txdb, IntergenicVariants(1, 1))

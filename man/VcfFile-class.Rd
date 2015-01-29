@@ -20,7 +20,7 @@
 
 }
 
-\usage{
+\section{usage}{
 
 ## Constructors
 
@@ -42,24 +42,24 @@ close(con, ...)
 
 }
 
-\arguments{
+\section{arguments}{
+  \itemize{
+    \item{con}{An instance of \code{VcfFile}.}
 
-  \item{con}{An instance of \code{VcfFile}.}
+    \item{file}{A character(1) vector to the Vcf file
+      path; can be remote (http://, ftp://).}
 
-  \item{file}{A character(1) vector to the Vcf file
-    path; can be remote (http://, ftp://).}
+    \item{index}{A character(1) vector of the Vcf file index (.tbi file).}
 
-  \item{index}{A character(1) vector of the Vcf file index (.tbi file).}
+    \item{yieldSize}{Number of records to yield each time the file is read
+      from using \code{scanVcf} or \code{readVcf}.}
 
-  \item{yieldSize}{Number of records to yield each time the file is read
-    from using \code{scanVcf} or \code{readVcf}.}
+    \item{...}{Additional arguments. For \code{VcfFileList}, this can
+      either be a single character vector of paths to Vcf files, or
+      several instances of \code{VcfFile} objects.}
 
-  \item{...}{Additional arguments. For \code{VcfFileList}, this can
-    either be a single character vector of paths to Vcf files, or
-    several instances of \code{VcfFile} objects.}
-
-  \item{rw}{character() indicating mode of file.}
-
+    \item{rw}{character() indicating mode of file.}
+  }
 }
 
 \section{Objects from the Class}{
