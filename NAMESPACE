@@ -121,7 +121,8 @@ export(
     readInfo, readGeno, readGT, genotypeCodesToNucleotides,
     tabulate, VRangesScanVcfParam, readVcfAsVRanges,
     isSNV, isInsertion, isDeletion, isIndel, isTransition,
-    isSubstitution
+    isSubstitution,
+    VcfFile, VcfFileList
 )
 
 exportMethods(

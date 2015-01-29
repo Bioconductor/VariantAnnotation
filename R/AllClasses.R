@@ -220,6 +220,16 @@ setValidity("VCFHeader", .valid.VCFHeader, where=asNamespace("VariantAnnotation"
 } 
 
 ### -------------------------------------------------------------------------
+### VcfFile, VcfFileList
+###
+
+.VcfFile = setRefClass("VcfFile", contains="TabixFile") 
+
+
+setClass("VcfFileList", contains="TabixFileList",
+         prototype=prototype(elementType="VcfFile"))
+
+### -------------------------------------------------------------------------
 ### ScanVcfParam
 ###
 
