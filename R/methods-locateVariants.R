@@ -306,7 +306,7 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "PromoterVariants"),
                     LOCEND=NA_integer_,
                     QUERYID=queryid,
                     TXID=as.integer(txid[subjectHits(fo)]),
-                    CDSID=NA_integer_,
+                    CDSID=IntegerList(integer(0)),
                     GENEID=NA_character_,
                     PRECEDEID=CharacterList(character(0)),
                     FOLLOWID=CharacterList(character(0)))
@@ -315,7 +315,7 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "PromoterVariants"),
             values(res) <- DataFrame(LOCATION=.location(), 
                                      LOCSTART=integer(), LOCEND=integer(),
                                      QUERYID=integer(), TXID=integer(), 
-                                     CDSID=integer(), GENEID=character(),
+                                     CDSID=IntegerList(), GENEID=character(),
                                      PRECEDEID=CharacterList(),
                                      FOLLOWID=CharacterList())
             res
@@ -390,7 +390,7 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
     values(res) <- DataFrame(LOCATION=.location(),
                              LOCSTART=integer(), LOCEND=integer(),
                              QUERYID=integer(), TXID=integer(), 
-                             CDSID=integer(), GENEID=character(), 
+                             CDSID=IntegerList(), GENEID=character(), 
                              PRECEDEID=CharacterList(), 
                              FOLLOWID=CharacterList())
     res
@@ -431,7 +431,7 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
                 LOCSTART=NA_integer_, LOCEND=NA_integer_,
                 QUERYID=df$queryid,
                 TXID=as.integer(names(subject)[df$subjectid]),
-                CDSID=NA_integer_,
+                CDSID=IntegerList(integer(0)),
                 GENEID=NA_character_,
                 PRECEDEID=CharacterList(character(0)),
                 FOLLOWID=CharacterList(character(0)))
@@ -440,7 +440,7 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
         values(res) <- DataFrame(LOCATION=.location(), 
                                  LOCSTART=integer(), LOCEND=integer(),
                                  QUERYID=integer(), TXID=integer(), 
-                                 CDSID=integer(), GENEID=character(), 
+                                 CDSID=IntegerList(), GENEID=character(), 
                                  PRECEDEID=CharacterList(),
                                  FOLLOWID=CharacterList())
         res
@@ -466,7 +466,7 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
         values(res) <- DataFrame(LOCATION=.location(), 
                                  LOCSTART=integer(), LOCEND=integer(),
                                  QUERYID=integer(), TXID=integer(), 
-                                 CDSID=integer(), GENEID=character(), 
+                                 CDSID=IntegerList(), GENEID=character(), 
                                  PRECEDEID=CharacterList(), 
                                  FOLLOWID=CharacterList())
         res
@@ -494,7 +494,7 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
             DataFrame(LOCATION=.location(length(q_range), "intergenic"),
                       LOCSTART=NA_integer_, LOCEND=NA_integer_,
                       QUERYID=which(intergenic), TXID=NA_integer_, 
-                      CDSID=NA_integer_, GENEID=NA_character_, 
+                      CDSID=IntegerList(integer(0)), GENEID=NA_character_, 
                       PRECEDEID=p_genes, FOLLOWID=f_genes)
         q_range 
     }
@@ -543,7 +543,7 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
         else
             txid <- NA_integer_
         ## FIXME: cdsid is expensive
-        cdsid <- NA_integer_
+        cdsid <- IntegerList(integer(0))
         if (vtype == "coding") {
             names(usub) <- seq_along(usub)
             map2 <- mapToTranscripts(unname(query)[xHits], usub,
@@ -572,7 +572,7 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
         mcols(res) <- DataFrame(LOCATION=.location(),
                                 LOCSTART=integer(), LOCEND=integer(),
                                 QUERYID=integer(), TXID=integer(), 
-                                CDSID=integer(), GENEID=character(), 
+                                CDSID=IntegerList(), GENEID=character(), 
                                 PRECEDEID=CharacterList(),
                                 FOLLOWID=CharacterList())
         res
