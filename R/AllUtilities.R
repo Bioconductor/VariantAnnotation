@@ -83,6 +83,7 @@
         Integer = IntegerList(data),
         Float = NumericList(data),
         String = CharacterList(data),
+        Character = CharacterList(data),
         Logical = LogicalList(data))
 }
 
