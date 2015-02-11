@@ -249,6 +249,12 @@
     .isDeletion(ref, alt, ignore) | .isInsertion(ref, alt, ignore)
 }
 
+.isDelins <- function(ref, alt, ignore) {
+    res <- !.isIndel(ref, alt, ignore) & !.isSubstitution(ref, alt, ignore)
+    res[ignore] <- TRUE
+    res
+}
+
 .isTransition <- function(ref, alt, ignore) {
     m1 <- match(as.character(ref), c("A", "G", "T", "C"))
     m2 <- match(as.character(alt), c("G", "A", "C", "T"))

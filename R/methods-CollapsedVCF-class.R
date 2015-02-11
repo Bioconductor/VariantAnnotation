@@ -66,6 +66,11 @@ setMethod("isIndel", "CollapsedVCF",
         .dispatchSNV_CollapsedVCF(.isIndel, x, singleAltOnly) 
 )
 
+setMethod("isDelins", "CollapsedVCF", 
+    function(x, ..., singleAltOnly=TRUE) 
+        .dispatchSNV_CollapsedVCF(.isDelins, x, singleAltOnly) 
+)
+
 setMethod("isTransition", "CollapsedVCF", 
     function(x, ..., singleAltOnly=TRUE) 
         .dispatchSNV_CollapsedVCF(.isTransition, x, singleAltOnly) 

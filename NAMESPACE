@@ -120,7 +120,7 @@ export(
     probabilityToSnpMatrix, GLtoGP,
     readInfo, readGeno, readGT, genotypeCodesToNucleotides,
     tabulate, VRangesScanVcfParam, readVcfAsVRanges,
-    isSNV, isInsertion, isDeletion, isIndel, isTransition,
+    isSNV, isInsertion, isDeletion, isIndel, isDelins, isTransition,
     isSubstitution,
     VcfFile, VcfFileList
 )
@@ -132,7 +132,7 @@ exportMethods(
     predictCoding, getTranscriptSeqs, refLocsToLocalLocs, 
     genotypeToSnpMatrix, snpSummary,
     locateVariants, summarizeVariants,
-    isSNV, isInsertion, isDeletion, isIndel, isTransition,
+    isSNV, isInsertion, isDeletion, isIndel, isDelins, isTransition,
     isSubstitution,
 
     fixed, "fixed<-", ref, "ref<-", alt, "alt<-", qual, "qual<-",

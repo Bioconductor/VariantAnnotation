@@ -94,6 +94,11 @@ setMethod("isIndel", "ExpandedVCF",
         .dispatchSNV_ExpandedVCF(.isIndel, x) 
 )
 
+setMethod("isDelins", "ExpandedVCF", 
+    function(x, ...) 
+        .dispatchSNV_ExpandedVCF(.isDelins, x) 
+)
+
 setMethod("isTransition", "ExpandedVCF",
     function(x, ...) 
         .dispatchSNV_ExpandedVCF(.isTransition, x) 

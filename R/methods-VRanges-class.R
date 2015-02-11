@@ -81,6 +81,10 @@ setMethod("isIndel", "VRanges", function(x, ...)
     .dispatchSNV_ExpandedVCF(.isIndel, x)
 )
 
+setMethod("isDelins", "VRanges", function(x, ...)
+    .dispatchSNV_ExpandedVCF(.isDelins, x)
+)
+
 setMethod("isSNV", "VRanges", function(x, ...)
     .dispatchSNV_ExpandedVCF(.isSNV, x)
 )

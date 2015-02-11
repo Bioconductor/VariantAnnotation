@@ -248,6 +248,11 @@ setGeneric("isIndel", signature="x",
     standardGeneric("isIndel")
 )
 
+setGeneric("isDelins", signature="x",
+    function(x, ...)
+    standardGeneric("isDelins")
+)
+
 setGeneric("isTransition", signature="x",
     function(x, ...)
     standardGeneric("isTransition")

@@ -4,6 +4,7 @@
 \alias{isInsertion}
 \alias{isDeletion}
 \alias{isIndel}
+\alias{isDelins}
 \alias{isTransition}
 \alias{isSubstitution}
 
@@ -16,6 +17,8 @@
 \alias{isDeletion,CollapsedVCF-method}
 \alias{isIndel,ExpandedVCF-method}
 \alias{isIndel,CollapsedVCF-method}
+\alias{isDelins,ExpandedVCF-method}
+\alias{isDelins,CollapsedVCF-method}
 \alias{isSubstitution,ExpandedVCF-method}
 \alias{isSubstitution,CollapsedVCF-method}
 \alias{isTransition,ExpandedVCF-method}
@@ -26,6 +29,7 @@
 \alias{isInsertion,VRanges-method}
 \alias{isDeletion,VRanges-method}
 \alias{isIndel,VRanges-method}
+\alias{isDelins,VRanges-method}
 \alias{isSubstitution,VRanges-method}
 \alias{isTransition,VRanges-method}
 
@@ -54,6 +58,10 @@
 \S4method{isIndel}{VRanges}(x, ...)
 \S4method{isIndel}{ExpandedVCF}(x, ...)
 \S4method{isIndel}{CollapsedVCF}(x, ..., singleAltOnly = TRUE)
+
+\S4method{isDelins}{VRanges}(x, ...)
+\S4method{isDelins}{ExpandedVCF}(x, ...)
+\S4method{isDelins}{CollapsedVCF}(x, ..., singleAltOnly = TRUE)
 
 \S4method{isTransition}{VRanges}(x, ...)
 \S4method{isTransition}{ExpandedVCF}(x, ...)
@@ -102,6 +110,10 @@
     \item{isIndel: }{
       The variant is either a deletion or insertion as determined
       by \code{isDeletion} and \code{isInsertion}.
+    }
+    \item{isDelins: }{
+      The variant is a deletion followed by an insertion, either of them
+      involving two or more nucleotides.
     }
     \item{isSubstition: }{
       Reference and alternate alleles are the same length (1 or
