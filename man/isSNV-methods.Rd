@@ -131,8 +131,7 @@
   A \code{logical} vector the same length as \code{x}.
 }
 
-\author{Michael Lawrence <mlawrence@gene.com> and 
-        Valerie Obenchain <vobencha@fhcrc.org>}
+\author{Michael Lawrence, Valerie Obenchain and Robert Castelo}
 
 \examples{
   fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
