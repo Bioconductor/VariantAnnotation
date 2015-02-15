@@ -1,6 +1,6 @@
 \name{readVcf}
 \alias{readVcf}
-\alias{readVcf,character,ANY,ScanVcfParam-method}
+\alias{readVcf,character,ANY,ANY-method}
 \alias{readVcf,character,ANY,missing-method}
 \alias{readVcf,character,missing,missing-method}
 \alias{readVcf,TabixFile,ANY,ScanVcfParam-method}

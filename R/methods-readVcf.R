@@ -54,11 +54,11 @@ setMethod(readVcf, c(file="TabixFile", genome="ANY",
 ## character
 
 setMethod(readVcf, c(file="character", genome="ANY",
-          param="ScanVcfParam"),
+          param="ANY"),
     function(file, genome, param, ..., row.names=TRUE)
 {
     file <- .checkFile(file)
-    .readVcf(file, genome, param, row.names=row.names, ...)
+    readVcf(TabixFile(file), genome, param, row.names=row.names, ...)
 })
 
 setMethod(readVcf, c(file="character", genome="ANY",
