@@ -159,7 +159,8 @@ locateVariants(query, subject, region, ...)
 
   Metadata columns are \code{LOCATION}, \code{QUERYID}, 
   \code{TXID}, \code{GENEID}, \code{PRECEDEID}, \code{FOLLOWID} and 
-  \code{CDSID}. Each column is described in detail below. 
+  \code{CDSID}. Results are ordered by \code{QUERYID}, \code{TXID} and
+  \code{GENEID}. Columns are described in detail below. 
 
  \describe{
     \item{\code{LOCATION}}{
@@ -198,7 +199,7 @@ locateVariants(query, subject, region, ...)
       The transcript id taken from the \code{TxDb} object.
     }
     \item{\code{CDSID}}{
-      The coding sequence id taken from the \code{TxDb} object.
+      The coding sequence id(s) taken from the \code{TxDb} object.
     }
     \item{\code{GENEID}}{
       The gene id taken from the \code{TxDb} object.

@@ -375,7 +375,7 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
 
         ans <- c(coding, intron, fiveUTR, threeUTR, splice, promoter, intergenic)
         meta <- values(ans)
-        ans[order(meta$QUERYID, meta$TXID, meta$CDSID, meta$GENEID), ]
+        ans[order(meta$QUERYID, meta$TXID, meta$GENEID), ]
     }
 )
 
