@@ -284,7 +284,7 @@
         mcols(res) <- DataFrame(REF=DNAStringSet(), ALT=DNAStringSetList(),
                                 varAllele=DNAStringSet(), CDSLOC=IRanges(),
                                 PROTEINLOC=IntegerList(), QUERYID=integer(),
-                                TXID=character(), CDSID=integer())
+                                TXID=character(), CDSID=IntegerList())
         return(res)
     }
 
@@ -294,9 +294,9 @@
                        unlist(ranges(to), use.names=FALSE),
                        type="within")
     ## FIXME: cdsid is expensive
+    cdsid <- IntegerList(integer(0))
     map2 <- mapToTranscripts(unname(from)[xHits], to,
                              ignore.strand=ignore.strand)
-    cdsid <- NA_character_
     cds <- mcols(unlist(to, use.names=FALSE))$cds_id[map2$trancriptsHits]
     if (length(cds)) {
         cdslst <- unique(splitAsList(cds, map2$xHits))
