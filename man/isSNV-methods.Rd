@@ -79,7 +79,8 @@
     is a \link{CollapsedVCF} class.
 
     When \code{TRUE} (default) only variants with a single alternate 
-    allele are evaluated. When \code{FALSE} all ref / alt pairs for 
+    allele are evaluated; all multi-alt variants evaluate to \code{FALSE}. 
+    When \code{singleAltOnly=FALSE} all ref / alt pairs for 
     each variant are evaluated. If any ref / alt pairs meet the 
     test criteria a value of TRUE is returned for the variant; this
     may result in a value of TRUE for a variant with a mixture of
@@ -93,6 +94,8 @@
 
 \details{
   All functions return a logical vector the length of \code{x}.
+  Variants in gvcf files with NON_REF alt alleles return TRUE;
+  structural variants return FALSE.
   \itemize{
     \item{isSNV: }{
       Reference and alternate alleles are both a single nucleotide long.

@@ -34,7 +34,7 @@
       ..., row.names=TRUE)
   \S4method{readVcf}{TabixFile,ANY,missing}(file, genome, param, 
       ..., row.names=TRUE)
-  \S4method{readVcf}{character,ANY,ScanVcfParam}(file, genome, param, 
+  \S4method{readVcf}{character,ANY,ANY}(file, genome, param, 
       ..., row.names=TRUE)
   \S4method{readVcf}{character,ANY,missing}(file, genome, param, 
       ..., row.names=TRUE)

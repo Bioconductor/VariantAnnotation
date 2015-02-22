@@ -1,19 +1,21 @@
 vcf0 <- VCF(rowData=GRanges("chr1", IRanges(1:9, width=c(rep(1, 6), 2, 2, 3))), 
             fixed=DataFrame(
-              REF=DNAStringSet(c("A", "G", "C", "T", "T", "G", "GG", "TCT", "AC")),
+              REF=DNAStringSet(c("A", "G", "C", "T", "T", "G", "GG", 
+                "TCT", "AC")),
               ALT=DNAStringSetList("G", "A", "T", "C", c("C", "TT"), "GG", 
-                                   "G", "GCG", "ACC")))
+                "G", "GCG", "ACC")))
 str <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
 vcf <- readVcf(str, "")
 
 test_isSNV_CollapsedVCF <- function() {
-    checkException(isSNV(vcf), silent=TRUE)
-    checkException(isInsertion(vcf), silent=TRUE)
-    checkException(isDeletion(vcf), silent=TRUE)
-    checkException(isIndel(vcf), silent=TRUE)
-    checkException(isDelins(vcf), silent=TRUE)
-    checkException(isTransition(vcf), silent=TRUE)
-    checkException(isSubstitution(vcf), silent=TRUE)
+    checkIdentical(isSNV(vcf), logical(nrow(vcf)))
+    checkIdentical(isInsertion(vcf), logical(nrow(vcf)))
+    target <- c(FALSE, TRUE, rep(FALSE, 5))
+    checkIdentical(isDeletion(vcf), target)
+    checkIdentical(isIndel(vcf), target)
+    checkIdentical(isDelins(vcf), logical(nrow(vcf)))
+    checkIdentical(isTransition(vcf), logical(nrow(vcf)))
+    checkIdentical(isSubstitution(vcf), logical(nrow(vcf)))
 
     res1 <- isSNV(vcf0, singleAltOnly=TRUE)
     checkIdentical(res1, c(rep(TRUE, 4), rep(FALSE, 5)))
@@ -43,13 +45,14 @@ test_isSNV_CollapsedVCF <- function() {
 expand <- VariantAnnotation::expand 
 test_isSNV_ExpandedVCF <- function() {
     evcf <- expand(vcf)
-    checkException(isSNV(evcf), silent=TRUE)
-    checkException(isInsertion(evcf), silent=TRUE)
-    checkException(isDeletion(evcf), silent=TRUE)
-    checkException(isIndel(evcf), silent=TRUE)
-    checkException(isDelins(evcf), silent=TRUE)
-    checkException(isTransition(evcf), silent=TRUE)
-    checkException(isSubstitution(evcf), silent=TRUE)
+    checkIdentical(isSNV(evcf), logical(nrow(evcf)))
+    checkIdentical(isInsertion(evcf), logical(nrow(evcf)))
+    target <- c(FALSE, TRUE, rep(FALSE, 5))
+    checkIdentical(isDeletion(evcf), target)
+    checkIdentical(isIndel(evcf), target)
+    checkIdentical(isDelins(evcf), logical(nrow(evcf)))
+    checkIdentical(isTransition(evcf), logical(nrow(evcf)))
+    checkIdentical(isSubstitution(evcf), logical(nrow(evcf)))
 
     evcf0 <- expand(vcf0)
     res <- isSNV(evcf0)
@@ -100,7 +103,8 @@ test_isSNV_gvcf_format <- function()
                       package="VariantAnnotation")
 
     vcf <- suppressWarnings(readVcf(fl, ""))
-    checkIdentical(isSNV(vcf), rep(TRUE, nrow(vcf)))
+    checkIdentical(isSNV(vcf), c(TRUE, FALSE, TRUE, FALSE, TRUE))
+    checkIdentical(isSNV(vcf, singleAltOnly=FALSE), rep(TRUE, nrow(vcf)))
     vr <- as(vcf, "VRanges")
-    checkIdentical(isSNV(expand(vcf)), rep(TRUE, length(vr)))
+    checkIdentical(isSNV(expand(vcf)), isSNV(vr))
 }

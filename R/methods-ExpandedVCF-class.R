@@ -61,17 +61,19 @@ setMethod("match", c("VRanges", "ExpandedVCF"),
 .dispatchSNV_ExpandedVCF <- function(FUN, x)
 {
     alt <- alt(x)
-    ignore <- logical(length(alt))
-    if (is(alt, "character")) {
-        ## handle gvcf, not structural
-        ignore <- grepl("NON_REF", unlist(alt, use.names=FALSE), fixed=TRUE)
-        if (!any(ignore))
-            if (any(.isStructural(alt)))
-                stop("'alt' values must be nucleotides")
-        if (any(elementLengths(alt) > 1L))
-            stop("all elementLengths(alt) must be 1")
+    flat <- unlist(alt, use.names=FALSE)
+    gvcf <- structural <- NULL
+    if (is(flat, "character")) {
+        gvcf <- grepl("NON_REF", flat, fixed=TRUE)
+        structural <- .isStructural(flat)
     }
-    FUN(ref(x), alt, ignore)
+    res <- FUN(ref(x), alt)
+    if (any(structural))
+        res[structural] <- FALSE
+    if (any(gvcf))
+        res[gvcf] <- TRUE
+
+    res
 }
 
 setMethod("isSNV", "ExpandedVCF", 
