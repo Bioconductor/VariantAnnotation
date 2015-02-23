@@ -8,12 +8,14 @@
 
 % Constructors:
 \alias{VRanges}
+\alias{makeVRangesFromGRanges}
 
 % Coercion:
 \alias{asVCF}
 \alias{asVCF,VRanges-method}
 \alias{coerce,VRanges,VCF-method}
 \alias{coerce,VCF,VRanges-method}
+\alias{coerce,GRanges,VRanges-method}
 
 % Accessors:
 \alias{alt,VRanges-method}
@@ -140,7 +142,7 @@
   the original.
 }
 
-\section{Constructor}{
+\section{Constructors}{
   \describe{
     \item{}{
       \code{VRanges(seqnames = Rle(), ranges = IRanges(), ref = character(), 
@@ -175,12 +177,58 @@
           subset the object to its current state.}
       }
     }
+    \item{}{
+      \code{makeVRangesFromGRanges(gr, 
+                                   ref.field="ref",
+                                   alt.field="alt",
+                                   totalDepth.field="totalDepth", 
+                                   refDepth.field="refDepth", 
+                                   altDepth.field="altDepth", 
+                                   sampleNames.field="sampleNames",
+                                   keep.extra.columns=TRUE)}:
+      Creates a VRanges object from a GRanges.
+      \describe{
+        \item{gr}{
+          A \link[GenomicRanges]{GenomicRanges} object.
+        }
+        \item{ref.field}{
+          The \code{character(1)} name of the GRanges metadata column to be 
+          used as the VRanges \code{ref} field.
+        }
+        \item{alt.field}{
+          The \code{character(1)} name of the GRanges metadata column to be 
+          used as the VRanges \code{alt} field.
+        }
+        \item{totalDepth.field}{
+          The \code{character(1)} name of the GRanges metadata column to be 
+          used as the VRanges \code{totalDepth} field.
+        }
+        \item{refDepth.field}{
+          The \code{character(1)} name of the GRanges metadata column to be 
+          used as the VRanges \code{refDepth} field.
+        }
+        \item{altDepth.field}{
+          The \code{character(1)} name of the GRanges metadata column to be 
+          used as the VRanges \code{altDepth} field.
+        }
+        \item{sampleNames.field}{
+          The \code{character(1)} name of the GRanges metadata column to be 
+          used as the VRanges \code{sampleNames} field.
+        }
+        \item{keep.extra.columns}{
+          \code{TRUE} (the default) or \code{FALSE}.
+          If \code{TRUE}, then the columns in \code{gr} that are not used to 
+          form the VRanges are retained as metadata columns. Otherwise, they 
+          will be ignored.
+        }
+      }
+    }
   }
 }
 
 \section{Coercion}{
   These functions/methods coerce objects to and from \code{VRanges}:
-  
+ 
   \describe{
     \item{}{
       \code{asVCF(x, info = character(), filter = character(), meta =
@@ -221,9 +269,16 @@
     }
     \item{}{
       \code{as(from, "VRanges")}:
-      Currently supported when \code{from} is a \code{VCF}. Essentially
+      When \code{from} is a \code{VCF} this coercion is essentially
       the inverse of \code{asVCF}. Information missing in the VCF
       is imputed as NA.
+
+      When \code{from} is a \code{GRanges}, metadata columns of
+      \code{ref}, \code{alt}, \code{refDepth}, \code{altDepth},
+      \code{totalDepth} and \code{sampleNames} are transfered to 
+      the \code{VRanges} object. Additional metadata columns in
+      the \code{GRanges} can be retained or dropped with
+      \code{keep.extra.columns}. See also \code{makeVRangesFromGRanges}.
     }
   }
 }

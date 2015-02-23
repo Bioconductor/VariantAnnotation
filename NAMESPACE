@@ -122,7 +122,8 @@ export(
     tabulate, VRangesScanVcfParam, readVcfAsVRanges,
     isSNV, isInsertion, isDeletion, isIndel, isDelins, isTransition,
     isSubstitution,
-    VcfFile, VcfFileList
+    VcfFile, VcfFileList,
+    makeVRangesFromGRanges
 )
 
 exportMethods(
