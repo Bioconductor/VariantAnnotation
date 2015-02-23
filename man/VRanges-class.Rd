@@ -222,6 +222,7 @@
           will be ignored.
         }
       }
+      makeVRangesFromGRanges was contributed by Thomas Sandmann.
     }
   }
 }
