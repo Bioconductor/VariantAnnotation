@@ -222,7 +222,6 @@
           will be ignored.
         }
       }
-      makeVRangesFromGRanges was contributed by Thomas Sandmann.
     }
   }
 }
@@ -384,7 +383,8 @@
   man page for details.
 }
 
-\author{Michael Lawrence}
+\author{Michael Lawrence. \code{makeVRangesFromGRanges} was contributed 
+        by Thomas Sandmann.}
 
 \seealso{
   \link{VRangesList}, a list of \code{VRanges}; \code{bam_tally} in the
