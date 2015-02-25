@@ -152,6 +152,8 @@ VRanges <-
 ### Coercion
 ###
 
+setMethod("relistToClass", "VRanges", function(x) "CompressedVRangesList")
+
 parseFilterStrings <- function(x) {
   x[x == "."] <- NA
   if (all(is.na(x)))
