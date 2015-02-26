@@ -188,34 +188,34 @@
                                    keep.extra.columns=TRUE)}:
       Creates a VRanges object from a GRanges.
       \describe{
-        \item{gr}{
+        \item{\code{gr}}{
           A \link[GenomicRanges]{GenomicRanges} object.
         }
-        \item{ref.field}{
+        \item{\code{ref.field}}{
           The \code{character(1)} name of the GRanges metadata column to be 
           used as the VRanges \code{ref} field.
         }
-        \item{alt.field}{
+        \item{\code{alt.field}}{
           The \code{character(1)} name of the GRanges metadata column to be 
           used as the VRanges \code{alt} field.
         }
-        \item{totalDepth.field}{
+        \item{\code{totalDepth.field}}{
           The \code{character(1)} name of the GRanges metadata column to be 
           used as the VRanges \code{totalDepth} field.
         }
-        \item{refDepth.field}{
+        \item{\code{refDepth.field}}{
           The \code{character(1)} name of the GRanges metadata column to be 
           used as the VRanges \code{refDepth} field.
         }
-        \item{altDepth.field}{
+        \item{\code{altDepth.field}}{
           The \code{character(1)} name of the GRanges metadata column to be 
           used as the VRanges \code{altDepth} field.
         }
-        \item{sampleNames.field}{
+        \item{\code{sampleNames.field}}{
           The \code{character(1)} name of the GRanges metadata column to be 
           used as the VRanges \code{sampleNames} field.
         }
-        \item{keep.extra.columns}{
+        \item{\code{keep.extra.columns}}{
           \code{TRUE} (the default) or \code{FALSE}.
           If \code{TRUE}, then the columns in \code{gr} that are not used to 
           form the VRanges are retained as metadata columns. Otherwise, they 
@@ -364,6 +364,12 @@
       \code{readVcfAsVRanges} is an alternative syntax to
 
       \preformatted{  as(readVcf(), "VRanges") }
+
+      NOTE: By default all INFO and FORMAT fields are read in with
+      \code{ScanVcfParam()}. The minimal information needed to create 
+      the \code{VRanges} can be specified as follows: 
+
+      \preformatted{  ScanVcfParam(fixed = "ALT", info = NA, geno = "AD")) }
     }
     \item{}{
       \code{VRangesScanVcfParam(fixed = "ALT", info = NA, geno = "AD", ...)}:

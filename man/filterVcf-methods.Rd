@@ -5,7 +5,9 @@
 
 \title{Filter VCF files}
 
-\description{Filter Variant Call Format (VCF) files from one file to another}
+\description{
+  Filter Variant Call Format (VCF) files from one file to another
+  }
 
 \usage{
 \S4method{filterVcf}{character}(file, genome, destination, ..., verbose = TRUE,
@@ -18,7 +20,6 @@
 }
 
 \arguments{
-
   \item{file}{A \code{character(1)} file path or \code{\link{TabixFile}}
     specifying the VCF file to be filtered.}
 
@@ -47,11 +48,9 @@
     locations. Applicable when applying a \code{filter} only.
     Prefiltering involves a grep of unparsed lines in the file; 
     indexing is not used.}
-
 }
 
 \details{
-
   This function transfers content of one VCF file to another, removing
   records that fail to satisfy \code{prefilters} and
   \code{filters}. Filtering is done in a memory efficient manner,
@@ -67,6 +66,13 @@
   available for further filtering. One or both of \code{prefilter} and
   \code{filter} can be present.
 
+  Filtering works by removing the rows (variants) that do not meet a 
+  criteria. Because this is a row-based approach and samples are column-based
+  most genotype filters are only meaningful for single-sample files. If
+  a single samples fails the criteria the entire row (all samples) are removed.
+  The case where genotype filtering is effective for multiple samples is when 
+  the criteria is applied across samples and not to the individual (e.g., keep 
+  rows where all samples have DP > 10).
 }
 
 \value{The destination file path as a \code{character(1)}.}
