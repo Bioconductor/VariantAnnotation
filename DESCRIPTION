@@ -3,7 +3,7 @@ Type: Package
 Title: Annotation of Genetic Variants
 Description: Annotate variants, compute amino acid coding changes,
         predict coding outcomes
-Version: 1.13.37
+Version: 1.13.38
 Authors@R: c(person("Valerie", "Obenchain", role=c("aut", "cre"),
         email="vobencha@fhcrc.org"),
     person("Martin", "Morgan", role="aut"),
@@ -12,7 +12,7 @@ Authors@R: c(person("Valerie", "Obenchain", role=c("aut", "cre"),
 License: Artistic-2.0
 Depends: R (>= 2.8.0), methods, BiocGenerics (>= 0.7.7),
         GenomeInfoDb (>= 1.1.3), GenomicRanges (>= 1.19.7),
-        Rsamtools (>= 1.19.36)
+        Rsamtools (>= 1.19.38)
 Imports: utils, DBI, zlibbioc, Biobase, S4Vectors (>= 0.5.14),
         IRanges (>= 2.1.27), XVector (>= 0.5.6), Biostrings (>= 2.33.5),
         AnnotationDbi (>= 1.27.9), BSgenome, rtracklayer (>= 1.25.16),
