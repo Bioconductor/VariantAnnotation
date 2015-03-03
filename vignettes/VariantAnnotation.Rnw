@@ -71,7 +71,7 @@ fields of the VCF file, represented as a \Robject{GRanges}.
 The \Rcode{paramRangeID} column is meaningful when reading
 subsets of data and is discussed further below.
 <<readVcf_rowData>>=
-head(rowData(vcf), 3)
+head(rowRanges(vcf), 3)
 @
 
 Individual fields can be pulled out with named accessors. Here
@@ -151,7 +151,7 @@ membership in dbSNP can be identified by using the appropriate
 SNPlocs package for hg19.
 <<examine_dbSNP>>=
 library(SNPlocs.Hsapiens.dbSNP.20101109)
-rd <- rowData(vcf)
+rd <- rowRanges(vcf)
 seqlevels(rd) <- "ch22"
 ch22snps <- getSNPlocs("ch22")
 dbsnpchr22 <- sub("rs", "", names(rd)) %in% ch22snps$RefSNP_id
@@ -209,7 +209,7 @@ vcf_rng <- readVcf(tab, "hg19", param=rng)
 The \Rcode{paramRangesID} column distinguishes which records came 
 from which param range.
 <<>>=
-head(rowData(vcf_rng), 3)
+head(rowRanges(vcf_rng), 3)
 @
 
 \subsubsection{Select VCF fields}
@@ -281,7 +281,7 @@ be modified with the \Rfunction{seqlevels} function.
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
 seqlevels(vcf) <- "chr22"
-rd <- rowData(vcf)
+rd <- rowRanges(vcf)
 loc <- locateVariants(rd, txdb, CodingVariants())
 head(loc, 3)
 @ 
@@ -483,7 +483,7 @@ in2 <- readVcf(out1.vcf, "hg19")
 writeVcf(in2, out2.vcf)
 in3 <- readVcf(out2.vcf, "hg19")
 
-identical(rowData(in1), rowData(in3))
+identical(rowRanges(in1), rowRanges(in3))
 identical(geno(in1), geno(in2))
 @
 

@@ -26,7 +26,7 @@
 .makeVcfMatrix <- function(filename, obj)
 {
     ## empty
-    if (length(rd <- rowData(obj)) == 0)
+    if (length(rd <- rowRanges(obj)) == 0)
         return(character())
 
     CHROM <- as.vector(seqnames(rd))

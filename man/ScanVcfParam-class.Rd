@@ -171,11 +171,11 @@
   grl <- GRangesList("1"=gr1, "2"=gr2)
   vcf <- readVcf(tab, "hg19", grl)
 
-  ## Names of the ranges are in 'paramRangeID' in the rowData,
-  rowData(vcf)
+  ## Names of the ranges are in 'paramRangeID' in the rowData slot,
+  rowRanges(vcf)
 
   ## which can be used for subsetting the VCF object
-  vcf[rowData(vcf)$paramRangeID == "regionA"]
+  vcf[rowRanges(vcf)$paramRangeID == "regionA"]
  
   ## When using ranges, the seqnames must correspond to valid
   ## chromosome names in the vcf file.

@@ -10,11 +10,11 @@ test_VCF_construction <- function() {
     ## substance
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
     target <- readVcf(fl, genome="hg19")
-    current <- VCF(rowData=rowData(target), colData=colData(target),
+    current <- VCF(rowData=rowRanges(target), colData=colData(target),
                    geno=geno(target), info=info(target),
                    fixed=fixed(target)) 
     checkTrue(validObject(current)) 
-    checkIdentical("hg19", unique(genome(rowData(target)))) 
+    checkIdentical("hg19", unique(genome(rowRanges(target)))) 
 }
 
 test_VCF_fixed <- function() {
@@ -76,7 +76,7 @@ test_VCF_rowData_info_geno <- function() {
     vcf <- readVcf(fl, genome="hg19")
     ## rowData
     v1 <- vcf
-    rowData(v1) <- rowData(v1)[5:1]
+    rowRanges(v1) <- rowRanges(v1)[5:1]
     checkIdentical(rownames(vcf), rev(rownames(v1)))
 
     ## info
@@ -120,8 +120,8 @@ test_VCF_subset <- function()
     ss1 <- vcf 
     dimnames(ss1) <- list(LETTERS[seq_len(nrow(ss1))], letters[seq_len(ncol(ss1))]) 
     ridx <- c("B", "C") 
-    checkIdentical(rowData(ss1[ridx,]), rowData(ss1)[ridx,]) 
-    checkIdentical(rowData(ss1["C",]), rowData(ss1)["C",,drop=FALSE])
+    checkIdentical(rowRanges(ss1[ridx,]), rowRanges(ss1)[ridx,]) 
+    checkIdentical(rowRanges(ss1["C",]), rowRanges(ss1)["C",,drop=FALSE])
     checkException(ss1[LETTERS,], "i-index out of bounds", TRUE)
     cidx <- "b"
     checkIdentical(colData(ss1[,cidx]), colData(ss1)[cidx,,drop=FALSE])
@@ -139,7 +139,7 @@ test_VCF_subset <- function()
     checkIdentical(c(nrow(ss1), 0L), dim(ss1[,FALSE]))
     idx <- c(TRUE, FALSE)               # recycling
     ss2 <- ss1[idx,]
-    checkIdentical(rowData(ss1)[idx,,drop=FALSE], rowData(ss2))
+    checkIdentical(rowRanges(ss1)[idx,,drop=FALSE], rowRanges(ss2))
     ss2 <- ss1[,idx]
     checkIdentical(colData(ss1)[idx,,drop=FALSE], colData(ss2))
 
@@ -172,8 +172,8 @@ test_VCF_subsetassign <- function()
     vcf <- readVcf(fl, genome="hg19")
     ss1 <- vcf 
     ss1[1:2,] <- ss1[2:1,]
-    checkIdentical(rowData(vcf)[2:1,], rowData(ss1)[1:2,])
-    checkIdentical(rowData(vcf[-(1:2),]), rowData(ss1)[-(1:2),])
+    checkIdentical(rowRanges(vcf)[2:1,], rowRanges(ss1)[1:2,])
+    checkIdentical(rowRanges(vcf[-(1:2),]), rowRanges(ss1)[-(1:2),])
     checkIdentical(colData(vcf), colData(ss1))
     checkIdentical(c(exptData(vcf), exptData(vcf)), exptData(ss1))
 
@@ -183,7 +183,7 @@ test_VCF_subsetassign <- function()
                    colData(ss1)[1:2,,drop=FALSE])
     checkIdentical(colData(vcf)[-(1:2),,drop=FALSE],
                    colData(ss1)[-(1:2),,drop=FALSE])
-    checkIdentical(rowData(vcf), rowData(ss1))
+    checkIdentical(rowRanges(vcf), rowRanges(ss1))
     checkIdentical(c(exptData(vcf), exptData(vcf)), exptData(ss1))
 }
 

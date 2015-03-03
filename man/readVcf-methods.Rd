@@ -118,7 +118,7 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
     \item{Data type: }{
       CHROM, POS, ID and REF fields are used to create the \code{GRanges}
       stored in the \code{rowData} slot of the \code{VCF} object. Access
-      with \code{rowData} accessor.
+      with \code{rowRanges} accessor.
 
       REF, ALT, QUAL and FILTER are parsed into the \code{DataFrame} in the 
       \code{fixed} slot. Because ALT can have more than one value per variant 
@@ -278,7 +278,7 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
   head(geno(vcf)$GT)
 
   ## genome
-  unique(genome(rowData(vcf)))
+  unique(genome(rowRanges(vcf)))
 
   ## ---------------------------------------------------------------------
   ## Data subsets with lightweight read* functions 
@@ -310,7 +310,7 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
   ## When data are subset by range ('which' argument in ScanVcfParam),
   ## the 'paramRangeID' column provides a map back to the original 
   ## range in 'param'.
-  rowData(vcf)[,"paramRangeID"]
+  rowRanges(vcf)[,"paramRangeID"]
   vcfWhich(param)
 
   ## Subset on samples:

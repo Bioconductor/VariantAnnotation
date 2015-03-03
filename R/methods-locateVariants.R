@@ -35,7 +35,7 @@ setMethod("locateVariants", c("VCF", "TxDb", "VariantType"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE, asHits=FALSE)
 {
-    callGeneric(rowData(query), subject, region, ..., cache=cache,
+    callGeneric(rowRanges(query), subject, region, ..., cache=cache,
         ignore.strand=ignore.strand, asHits=asHits)
 })
 
@@ -43,7 +43,7 @@ setMethod("locateVariants", c("VCF", "GRangesList", "VariantType"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE, asHits=FALSE)
 {
-    callGeneric(rowData(query), subject, region, ..., cache=cache,
+    callGeneric(rowRanges(query), subject, region, ..., cache=cache,
         ignore.strand=ignore.strand, asHits=asHits)
 })
 

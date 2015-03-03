@@ -89,7 +89,7 @@
   df
 
   ## Compare to ranges in the VCF object:
-  rowData(vcf)
+  rowRanges(vcf)
 
   ## No statistics were computed for the variants in rows 3, 4 
   ## and 5. They were omitted because row 3 has two alternate 

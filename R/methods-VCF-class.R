@@ -47,7 +47,7 @@ VCF <-
 .checkLength <- function (x, len) 
 {
     if (len != length(slot(x, "rowData"))) 
-        stop("length(value) must equal length(rowData(x))")
+        stop("length(value) must equal length(rowRanges(x))")
 }
 
 ### ref 
@@ -133,8 +133,8 @@ setReplaceMethod("fixed", c("VCF", "DataFrame"),
     x
 })
 
-### rowData
-setMethod("rowData", "VCF", 
+### rowRanges
+setMethod("rowRanges", "VCF", 
     function(x, ..., fixed = TRUE) 
 {
     gr <- slot(x, "rowData")
@@ -144,7 +144,7 @@ setMethod("rowData", "VCF",
     gr
 })
 
-setReplaceMethod("rowData", c("VCF", "GRanges"),
+setReplaceMethod("rowRanges", c("VCF", "GRanges"),
     function(x, value)
 {
     fixed_idx <- names(mcols(value)) %in% c("REF", "ALT", "QUAL", "FILTER")
@@ -154,10 +154,9 @@ setReplaceMethod("rowData", c("VCF", "GRanges"),
     x
 })
 
-### Must define VCF methods for 'mcols<-' and 'dimnames<-'
-### instead of inheriting from SummarizedExperiment.
-### The 'fixed' fields are stored in a separtate slot
-### and not as metadata columns of 'rowData'.
+### Must define VCF methods for 'mcols<-' and 'dimnames<-' instead of 
+### inheriting from SummarizedExperiment. 'fixed' fields are stored in 
+### a separate slot and not as metadata columns of 'rowData'.
 
 setReplaceMethod("mcols", c("VCF", "DataFrame"),
     function(x, ..., value)
@@ -256,13 +255,13 @@ setReplaceMethod("geno", c("VCF", "missing", "matrix"),
 setMethod("strand", "VCF",
     function(x, ...)
 {
-    strand(rowData(x))
+    strand(rowRanges(x))
 })
 
 setReplaceMethod("strand", "VCF",
     function(x, ..., value)
 {
-    strand(rowData(x)) <- value
+    strand(rowRanges(x)) <- value
     x
 })
 
@@ -410,7 +409,7 @@ setMethod("cbind", "VCF",
 
     if (!.compare(lapply(args, rowData), TRUE))
         stop("'...' object ranges (rows) are not compatible")
-    rowData <- rowData(args[[1]])
+    rowData <- rowRanges(args[[1]])
     mcols(rowData) <- GenomicRanges:::.cbind.DataFrame(args, mcols, "mcols")
     info <- GenomicRanges:::.cbind.DataFrame(args, info, "info") 
     colData <- do.call(rbind, lapply(args, colData))
@@ -483,8 +482,8 @@ setMethod(show, "VCF",
     margin <- "  "
     cat("class:", class(object), "\n")
     cat("dim:", dim(object), "\n")
-    cat("rowData(vcf):\n")
-    printSmallGRanges(rowData(object), margin=margin)
+    cat("rowRanges(vcf):\n")
+    printSmallGRanges(rowRanges(object), margin=margin)
     cat("info(vcf):\n")
     printSmallDataTable(info(object, row.names=FALSE), margin=margin) 
     if (length(header(object))) {

@@ -188,7 +188,7 @@ genoToMCol <- function(x) {
 
 setAs("VCF", "VRanges", function(from) {
   from <- expand(from)
-  rd <- rowData(from)
+  rd <- rowRanges(from)
   seqnames <- seqnames(rd)
   ranges <- ranges(rd)
   ref <- rd$REF

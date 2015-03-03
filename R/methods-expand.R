@@ -5,7 +5,7 @@
 setMethod("expand", "CollapsedVCF",
     function(x, ..., row.names = FALSE)
     {
-        rd <- rowData(x, fixed=FALSE)
+        rd <- rowRanges(x, fixed=FALSE)
         if (!row.names)
             names(rd) <- NULL
 

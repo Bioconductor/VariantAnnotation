@@ -61,7 +61,7 @@ setMethod("summarizeVariants", c("GRangesList", "VCF", "function"),
         return(.baseSE(query, subject))
     }
     ## count
-    hits <- mode(rowData(subject), query, ...)
+    hits <- mode(rowRanges(subject), query, ...)
         if (length(hits) == 0L)
             return(.baseSE(query, subject))
 

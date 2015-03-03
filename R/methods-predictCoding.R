@@ -12,7 +12,7 @@ setMethod("predictCoding", c("Ranges", "TxDb", "ANY", "DNAStringSet"),
 setMethod("predictCoding", c("CollapsedVCF", "TxDb", "ANY", "missing"),
     function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 {
-    rd <- rowData(query)
+    rd <- rowRanges(query)
     alt <- alt(query) 
     if (is(alt, "CharacterList")) {
         alt <- .toDNAStringSetList(alt)
@@ -20,7 +20,7 @@ setMethod("predictCoding", c("CollapsedVCF", "TxDb", "ANY", "missing"),
             stop("No nucleotide ALT values were detected.")
         }
     }
-    rd <- rep(rowData(query), elementLengths(alt))
+    rd <- rep(rowRanges(query), elementLengths(alt))
     res <- callGeneric(rd, subject, seqSource, unlist(alt, use.names=FALSE), 
                 ..., ignore.strand=ignore.strand)
     ## adjust QUERYID for expansion of rowData
@@ -35,7 +35,7 @@ setMethod("predictCoding", c("ExpandedVCF", "TxDb", "ANY", "missing"),
     if (is(alt(query), "CharacterList")) {
       stop("alt(query) must be a DNAStringSet (not a CharacterList)")
     }
-    callGeneric(rowData(query), subject, seqSource, alt(query), ..., 
+    callGeneric(rowRanges(query), subject, seqSource, alt(query), ..., 
                 ignore.strand=ignore.strand) 
 })
 

@@ -15,8 +15,8 @@
 setReplaceMethod("alt", c("ExpandedVCF", "DNAStringSet"),
     function(x, value)
 {
-    if (length(value) != length(rowData(x)))
-        stop("length(value) must equal length(rowData(x))")
+    if (length(value) != length(rowRanges(x)))
+        stop("length(value) must equal length(rowRanges(x))")
     slot(x, "fixed")$ALT <- value
     x
 })
@@ -26,7 +26,7 @@ setReplaceMethod("alt", c("ExpandedVCF", "DNAStringSet"),
 ###
 
 VRangesForMatching <- function(x) {
-    with(rowData(x), VRanges(seqnames, IRanges(start, end), ref=REF, alt=ALT))
+    with(rowRanges(x), VRanges(seqnames, IRanges(start, end), ref=REF, alt=ALT))
 }
 
 setMethod("match", c("ExpandedVCF", "ExpandedVCF"),

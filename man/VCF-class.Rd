@@ -45,8 +45,8 @@
 \alias{info,VCF-method}
 \alias{info<-}
 \alias{info<-,VCF,DataFrame-method}
-\alias{rowData,VCF-method}
-\alias{rowData<-,VCF-method}
+\alias{rowRanges,VCF-method}
+\alias{rowRanges<-,VCF-method}
 \alias{mcols<-,VCF,DataFrame-method}
 \alias{dimnames<-,VCF,list-method}
 \alias{geno}
@@ -123,7 +123,7 @@
   object.
   \describe{
     \item{}{
-      \code{rowData(x, ..., fixed = TRUE)}, \code{rowData(x) <- value}:
+      \code{rowRanges(x, ..., fixed = TRUE)}, \code{rowRanges(x) <- value}:
       Gets or sets a \code{GRanges} constructed from the CHROM, POS and ID 
       fields of the VCF file. When \code{fixed = TRUE}, REF, ALT, QUAL and 
       FILT metadata columns are included. File ID's serve as the 
@@ -161,8 +161,8 @@
       \code{fixed(x)}, \code{fixed(x) <- value}:
        Gets or sets a DataFrame of REF, ALT, QUAL and FILTER only. 
        Note these fields are displayed as metadata columns when
-       \code{rowData(VCF)} is invoked. The fields can be replaced using 
-       \code{rowData<-} but it is more efficient to do so with \code{fixed<-}. 
+       \code{rowRanges(VCF)} is invoked. The fields can be replaced using 
+       \code{rowRanges<-} but it is more efficient to do so with \code{fixed<-}. 
     }
     \item{}{
       \code{info(x, ..., row.names = TRUE)}, \code{info(x) <- value}:
@@ -238,7 +238,7 @@
       identical ranges (\code{rowData}) but different samples (columns in
       \code{assays}). The colnames in \code{colData} must match or an error is
       thrown. Columns with duplicate names in \code{fixed}, \code{info} and
-      \code{mcols(rowData(VCF))} must contain the same data.
+      \code{mcols(rowRanges(VCF))} must contain the same data.
 
       \code{rbind} combines objects with different ranges (\code{rowData}) and
       the same subjects (columns in \code{assays}). Columns with duplicate names
@@ -387,7 +387,7 @@ vcf <- readVcf(fl, genome="hg19")
 ## Accessors 
 ## ----------------------------------------------------------------
 ## Variant locations are stored in a GRanges in the rowData slot.
-rowData(vcf)
+rowRanges(vcf)
 
 ## Individual fields can be extracted with ref(), alt(), qual() 
 ## and filt().

@@ -191,8 +191,8 @@
   ## ----------------------------
   ## Alternatively, a GRanges can be the 'query' to predictCoding().
   ## The seqlevels were previously adjusted in the VCF object so the GRanges
-  ## extracted from rowData() has the correct seqlevels.
-  rd <- rowData(vcf)
+  ## extracted with rowRanges() has the correct seqlevels.
+  rd <- rowRanges(vcf)
  
   ## The GRanges must be expanded to have one row per alternate allele. 
   ## Variants 1, 2 and 10 have two alternate alleles.
