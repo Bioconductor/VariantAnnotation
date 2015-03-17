@@ -277,14 +277,13 @@
 
     xHits <- map$xHits
     txHits <- map$transcriptsHits
-    fo <- findOverlaps(ranges(from)[xHits], 
-                       unlist(ranges(to), use.names=FALSE),
-                       type="within")
+    flat_to <- unlist(to) ## names needed for mapping
+    fo <- findOverlaps(ranges(from)[xHits], ranges(flat_to), type="within") 
     ## FIXME: cdsid is expensive
     cdsid <- IntegerList(integer(0))
-    map2 <- mapToTranscripts(unname(from)[xHits], to,
+    map2 <- mapToTranscripts(unname(from)[xHits], flat_to,
                              ignore.strand=ignore.strand)
-    cds <- mcols(unlist(to, use.names=FALSE))$cds_id[map2$trancriptsHits]
+    cds <- mcols(flat_to)$cds_id[map2$transcriptsHits]
     if (length(cds)) {
         cdslst <- unique(splitAsList(cds, map2$xHits))
         cdsid <- cdslst

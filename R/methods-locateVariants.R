@@ -533,7 +533,7 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
         return(findOverlaps(query, subject, type="within", 
                             ignore.strand=ignore.strand))
 
-    usub <- unlist(subject, use.names=FALSE)
+    usub <- unlist(subject) ## names needed for mapping
     map <- mapToTranscripts(unname(query), subject, 
                             ignore.strand=ignore.strand)
     if (length(map) > 0) {
@@ -545,7 +545,6 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
         ## FIXME: cdsid is expensive
         cdsid <- IntegerList(integer(0))
         if (vtype == "coding") {
-            names(usub) <- seq_along(usub)
             map2 <- mapToTranscripts(unname(query)[xHits], usub,
                                      ignore.strand=ignore.strand)
             cds <- mcols(usub)$cds_id[map2$transcriptsHits]
