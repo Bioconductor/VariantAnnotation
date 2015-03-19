@@ -181,7 +181,7 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
   \describe{
     \item{rowData: }{
       The CHROM, POS, ID and REF fields are used to create a \code{GRanges}
-      object. The ranges are created using POS as the start value and width of 
+      object. Ranges are created using POS as the start value and width of 
       the reference allele (REF). The IDs become the rownames. If they are 
       missing (i.e., \sQuote{.}) a string of CHROM:POS_REF/ALT is used instead. 
       The \code{genome} argument is stored in the seqinfo of the \code{GRanges} 

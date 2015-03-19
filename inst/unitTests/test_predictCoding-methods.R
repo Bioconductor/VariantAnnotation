@@ -14,8 +14,7 @@ cdsbytx <- GRangesList(tx1=GRanges(seqnames="chr1",
 test_predictCoding_empty <- function()
 {
     query <- GRanges("chr1", IRanges(start=c(1, 10, 20), width=1))
-    alt <- DNAStringSet(c("G", "T", "A"))
-    current <- fun(query, cdsbytx, Hsapiens, alt)
+    current <- fun(query, cdsbytx, Hsapiens, DNAStringSet(c("G", "T", "A")))
     checkIdentical(dim(mcols(current)), c(0L, 8L))
 }
 
@@ -33,15 +32,15 @@ test_predictCoding_varAllele <- function()
     current_varaa <- values(current[names(current) == "B"])[["VARAA"]]
     checkTrue(as.character(current_varaa) == "")
 
-    current_consequence <- values(current[names(current) == "B"])[["CONSEQUENCE"]]
+    current_consequence <- 
+      values(current[names(current) == "B"])[["CONSEQUENCE"]]
     checkTrue(current_consequence == "not translated")
 
     variant=DNAStringSet(c("GGA", "GGA"))
-    query <- GRanges("chr1", IRanges(rep(10101, 2), width=c(2,3)), variant=variant)
+    query <- GRanges("chr1", IRanges(rep(10101, 2), width=c(2,3)), 
+                     variant=variant)
     current <- quiet(fun(query, cdsbytx[1:2], Hsapiens, variant))
-    checkIdentical(as.character(mcols(current)$VARCODON), c("TAGGGG", "TTCCGG"))
- 
-    ## TODO : add test for codon width based on 1,2,3 position
+    checkIdentical(as.character(mcols(current)$VARCODON), c("", "TTCCGG"))
 }
 
 test_mapToTranscripts <- function()

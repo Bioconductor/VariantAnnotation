@@ -124,15 +124,21 @@
   \describe{
     \item{}{
       \code{rowRanges(x, ..., fixed = TRUE)}, \code{rowRanges(x) <- value}:
-      Gets or sets a \code{GRanges} constructed from the CHROM, POS and ID 
-      fields of the VCF file. When \code{fixed = TRUE}, REF, ALT, QUAL and 
-      FILT metadata columns are included. File ID's serve as the 
-      \code{rownames}; if they are NULL, \code{rownames} are constructed from 
-      CHROM:POS. Replacement \code{value} must be a \code{GRanges}.
-
-      The \code{paramRangeID} metadata column groups ranges as
-      specified with \code{ScanVcfParam}. If \code{ScanVcfParam} was
-      not used with \code{readVcf} these values will be \code{NA}. 
+      Gets or sets the rowRanges. The CHROM, POS, ID and REF fields are used to
+      create a \code{GRanges} object.  Ranges are created using POS as the start
+      value and width of the reference allele (REF). The IDs become the
+      rownames. If they are missing (i.e., \sQuote{.}) a string of
+      CHROM:POS_REF/ALT is used instead.  The \code{genome} argument is stored
+      in the seqinfo of the \code{GRanges} and can be accessed with
+      \code{genome(<VCF>)}.
+      
+      When \code{fixed = TRUE}, REF, ALT, QUAL and FILT metadata columns are 
+      included. 
+      
+      One elementMetadata column, \code{paramRangeID}, is included with the
+      \code{rowData}. This ID is meaningful when multiple ranges are specified 
+      in the \code{ScanVcfParam} and distinguishes which records match
+      each range.
 
       The metadata columns can be accessed with \code{mcols(x)$<variable>} or 
       the following accessors:

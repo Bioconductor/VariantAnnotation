@@ -58,7 +58,7 @@ setMethod("locateVariants", c("GRanges", "TxDb", "CodingVariants"),
         if (!any(seqlevels(query) %in% seqlevels(subject)))
             return(.returnEmpty())
 
-        ## for width(ranges) == 0 : de-increment start to equal end value 
+       ## for width(ranges) == 0 : de-increment start to equal end value 
         if (any(insertion <- width(query) == 0))
             start(query)[insertion] <- start(query)[insertion] - 1
         if (!exists("cdsbytx", cache, inherits=FALSE))
@@ -129,7 +129,6 @@ setMethod("locateVariants", c("GRanges", "TxDb", "ThreeUTRVariants"),
         ## for width(ranges) == 0 : de-increment start to equal end value 
         if (any(insertion <- width(query) == 0)) 
             start(query)[insertion] <- start(query)[insertion] - 1 
-
         if (!exists("threeUTRbytx", cache, inherits=FALSE))
             cache[["threeUTRbytx"]] <- threeUTRsByTranscript(subject)
         res <- callGeneric(query, cache[["threeUTRbytx"]], region, ...,
@@ -164,7 +163,6 @@ setMethod("locateVariants", c("GRanges", "TxDb", "FiveUTRVariants"),
         ## for width(ranges) == 0 : de-increment start to equal end value 
         if (any(insertion <- width(query) == 0))
             start(query)[insertion] <- start(query)[insertion] - 1
-
         if (!exists("fiveUTRbytx", cache, inherits=FALSE))
             cache[["fiveUTRbytx"]] <- fiveUTRsByTranscript(subject)
         res <- callGeneric(query, cache[["fiveUTRbytx"]], region, ...,
@@ -200,7 +198,6 @@ setMethod("locateVariants", c("GRanges", "TxDb",
         ## for width(ranges) == 0 : de-increment start to equal end value 
         if (any(insertion <- width(query) == 0))
             start(query)[insertion] <- start(query)[insertion] - 1
-
         if (!exists("txbygene", cache, inherits=FALSE))
             cache[["txbygene"]] <- transcriptsBy(subject, "gene")
 
@@ -230,7 +227,6 @@ setMethod("locateVariants", c("GRanges", "TxDb", "SpliceSiteVariants"),
         ## for width(ranges) == 0 : de-increment start to equal end value 
         if (any(insertion <- width(query) == 0))
             start(query)[insertion] <- start(query)[insertion] - 1
-
         if (!exists("intbytx", cache, inherits=FALSE))
             cache[["intbytx"]] <- intronsByTranscript(subject)
         res <- callGeneric(query, cache[["intbytx"]], region, ...,
@@ -264,7 +260,6 @@ setMethod("locateVariants", c("GRanges", "TxDb", "PromoterVariants"),
         ## for width(ranges) == 0 : de-increment start to equal end value 
         if (any(insertion <- width(query) == 0)) 
             start(query)[insertion] <- start(query)[insertion] - 1 
-
         if (!exists("tx", cache, inherits=FALSE)) {
             tx <- transcripts(subject) 
             cache[["tx"]] <- splitAsList(tx, seq_len(length(tx))) 
@@ -460,7 +455,11 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
     s_range <- range(subject) ## avoid duplicates 
     co <- unname(countOverlaps(query, s_range, type="any", 
                                ignore.strand=ignore.strand))
-    intergenic <- co == 0
+
+    ## variants that don't hit a gene feature AND
+    ## zero-width ranges return '0'
+    has_width <- width(query) != 0L
+    intergenic <- co == 0 & has_width
     if (all(!intergenic | (length(subject) == 0L))) {
         res <- GRanges()
         values(res) <- DataFrame(LOCATION=.location(), 

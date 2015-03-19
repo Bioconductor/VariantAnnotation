@@ -21,16 +21,20 @@
 
 \arguments{
   \item{query}{A \linkS4class{VCF}, \link{Ranges} or \link{GRanges} 
-    instance containing the variants to be annotated. If a \link[IRanges]{Ranges} 
-    is provided it will be coerced to a \link{GRanges}. If a \linkS4class{VCF}
-    is provided the \code{GRanges} from the \code{rowData} slot will be used. All 
-    elementMetadata columns are ignored.
+    instance containing the variants to be annotated. If \code{query} is a 
+    \link[IRanges]{Ranges} it will be coerced to a \link{GRanges}.
+    If a \linkS4class{VCF} is provided the \code{GRanges} from the
+    \code{rowData} slot will be used. All elementMetadata columns are ignored.
 
-    When the \code{query} is not a \code{VCF} object a \code{varAllele} must be 
+    When \code{query} is not a \code{VCF} object a \code{varAllele} must be
     provided. The \code{varAllele} must be a \code{DNAStringSet} the same length
-    as the \code{query}. If there are multiple alternate alleles per variant
-    the \code{query} must be expanded to one row per each alternate allele.
-    See examples.
+    as the \code{query}. If there are multiple alternate alleles per variant the
+    \code{query} must be expanded to one row per each alternate allele.  See
+    examples.
+
+    NOTE: Variants are expected to conform to the VCF specs as described
+    on the 1000 Genomes page (see references). Indels must include
+    the reference allele; zero-width ranges are not valid and return no matches.
   }
   \item{subject}{A \link[GenomicFeatures]{TxDb} object that serves 
     as the annotation. GFF files can be converted to 
@@ -63,7 +67,7 @@
   This function returns the amino acid coding for variants that fall 
   completely `within' a coding region. The reference sequences are 
   taken from a fasta file or \link[BSgenome]{BSgenome}. The width of 
-  the reference is determined from the start postion and width of the 
+  the reference is determined from the start position and width of the 
   range in the \code{query}. For guidance on how to represent an insertion, 
   deletion or substitution see the 1000 Genomes VCF format (references). 
 
@@ -120,8 +124,8 @@
       Possible values are `synonymous', `nonsynonymous', `frameshift', 
       `nonsense' and `not translated'. Variant sequences are translated only 
       when the codon sequence is a multiple of 3. The value will be `frameshift' 
-      when a sequence is of incompatible length and it will be `not translated' 
-      when the \code{varAllele} is missing or there is an \sQuote{N} in the 
+      when a sequence is of incompatible length. `not translated' is used
+      when \code{varAllele} is missing or there is an \sQuote{N} in the 
       sequence. `nonsense' is used for premature stop codons.
     }
     \item{\code{REFCODON}}{
@@ -137,7 +141,7 @@
       of this modifiction is not a multiple of 3 no translation is performed 
       and the \code{VARAA} value will be missing.
     }
-    \item{\code{REEFAA}}{
+    \item{\code{REFAA}}{
       The reference amino acid column contains the translated \code{REFSEQ}.
     }
     \item{\code{VARAA}}{
@@ -148,6 +152,7 @@
 }
 
 \references{
+  \url{http://www.1000genomes.org/wiki/analysis/variant-call-format/}
   \url{http://vcftools.sourceforge.net/specs.html}
 }
 

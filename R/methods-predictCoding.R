@@ -85,62 +85,63 @@ function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
                                       if.fuzzy.codon="error", 
                                       ignore.strand=FALSE)
 {
-    if (any(insertion <- width(query) == 0))
-        start(query)[insertion] <- start(query)[insertion] - 1
     if (ignore.strand)
         strand(query) <- "*"
 
-    ## retrieve local coordinates
+    ## variant location in cds region
     mcols(query) <- append(mcols(query), DataFrame(varAllele=varAllele))
     txlocal <- .localCoordinates(query, cdsbytx, ignore.strand, ...)
     if (length(txlocal) == 0)
         return(txlocal)
 
-    rwidth <- width(txlocal)
-    translateidx <- rep(TRUE, length(txlocal)) 
-    ## reverse complement variant alleles for "-" strand
+    ## reverse complement "-" strand
+    valid <- rep(TRUE, length(txlocal))
     nstrand <- as.vector(strand(txlocal) == "-")
     if (any(nstrand)) {
         va <- mcols(txlocal)$varAllele
-        va[nstrand] <- reverseComplement(va[translateidx & nstrand])
+        va[nstrand] <- reverseComplement(va[valid & nstrand])
         mcols(txlocal)$varAllele <- va
     }
+
+    ## frameshift
+    refwidth <- width(txlocal)
     altallele <- mcols(txlocal)$varAllele
-    fmshift <- abs(width(altallele) - rwidth) %% 3 != 0 
+    fmshift <- abs(width(altallele) - refwidth) %% 3 != 0 
     if (any(fmshift))
-        translateidx[fmshift] <- FALSE
+        valid[fmshift] <- FALSE
+
+    ## zero-width
     zwidth <- width(altallele) == 0
     if (any(zwidth)) {
         warning("records with missing 'varAllele' were ignored")
-        translateidx[zwidth] <- FALSE 
+        valid[zwidth] <- FALSE 
         fmshift[zwidth] <- FALSE
     }
+
+    ## N elements in sequence
     codeN <- rep(FALSE, length(txlocal)) 
     codeN[grep("N", as.character(altallele, use.names=FALSE), 
         fixed=TRUE)] <-TRUE
     if (any(codeN)) {
         warning("varAllele values containing 'N' were not translated")
-        translateidx[codeN] <- FALSE
+        valid[codeN] <- FALSE
     }
 
-    ## reference and variant codon sequences
+    ## reference codon sequences
     altpos <- (start(mcols(txlocal)$CDSLOC) - 1L) %% 3L + 1L
-    refCodon <- varCodon <- .constructRefSequences(txlocal, altpos, seqSource, 
-                                                   cdsbytx)
-    if (any(translateidx)) {
-        subseq(varCodon, altpos, width=rwidth)[translateidx]  <-
-            altallele[translateidx]
+    refCodon <- varCodon <- .getRefCodons(txlocal, altpos, seqSource, cdsbytx)
 
-        ## translation
+    ## substitute and translate
+    refAA <- varAA <- AAStringSet(rep("", length(txlocal))) 
+    if (any(valid)) {
+        subseq(varCodon, altpos, width=refwidth)[valid] <- altallele[valid]
         refAA <- translate(refCodon, genetic.code=genetic.code,
                            if.fuzzy.codon=if.fuzzy.codon)
         varAA <- AAStringSet(rep("", length(txlocal))) 
-        varAA[translateidx] <- translate(varCodon[translateidx],
-                                         genetic.code=genetic.code, 
-                                         if.fuzzy.codon=if.fuzzy.codon)
-    } else {
-        refAA <- varAA <- AAStringSet(rep("", length(txlocal))) 
+        varAA[valid] <- translate(varCodon[valid], genetic.code=genetic.code, 
+                                  if.fuzzy.codon=if.fuzzy.codon)
     }
+    varCodon[!valid] <- ""
 
     ## results
     nonsynonymous <- as.character(refAA) != as.character(varAA) 
@@ -160,7 +161,7 @@ function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
     txlocal 
 }
 
-.constructRefSequences <- function(txlocal, altpos, seqSource, cdsbytx)
+.getRefCodons <- function(txlocal, altpos, seqSource, cdsbytx)
 { 
     ## adjust codon end for 
     ## - width of the reference sequence

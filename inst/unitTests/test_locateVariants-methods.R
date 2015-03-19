@@ -1,6 +1,6 @@
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene 
-cdsbytx <- cdsBy(txdb)
+cdsbytx <- cdsBy(txdb, use.names=TRUE)
 intbytx <- intronsByTranscript(txdb)
 txbygene <- transcriptsBy(txdb, "gene")
 
@@ -9,7 +9,7 @@ gr <- GRanges("chr22",
               18209442, 18121652, 24314750, 25508661), 
             width=c(1,1,1,1,3,3,2,2)),
     strand=c("-", "-", "-", "+", "+", "+", "+", "+"))
- 
+
 test_locateVariants_upstream_downstream <- function()
 {
     loc <- locateVariants(gr, txdb, IntergenicVariants(1, 1))
@@ -33,7 +33,7 @@ test_locateVariants_queryAsVCF <- function()
     vcf <- readVcf(fl, "hg19")
     vcf <- renameSeqlevels(vcf, c("1" = "chr1"))
     loc1 <- locateVariants(vcf, txdb, IntergenicVariants())
-    loc2 <- locateVariants(rowData(vcf), txdb, IntergenicVariants())
+    loc2 <- locateVariants(rowRanges(vcf), txdb, IntergenicVariants())
     checkIdentical(loc1, loc2) 
 }
 
@@ -110,4 +110,27 @@ test_locateVariants_PromoterVariants <- function()
     q <- GRanges("chr22", IRanges(50310410, 50310420))
     current <- locateVariants(q, txdb, PromoterVariants())
     checkIdentical(unique(current$GENEID), "79174")
+}
+
+test_locateVariants_match_predictCoding <- function()
+{
+    library(BSgenome.Hsapiens.UCSC.hg19)
+    gr <- GRanges("chr20", IRanges(
+        start=c(77055, 77054, 77054, 77058, 77057, 77057, 77055), 
+        end=c(77055, 77055, 77055, 77058, 77058, 77058, 77054)),
+        paramRangeID=rep(NA, 7))
+    fixed <- DataFrame(
+        REF=DNAStringSet(c('T', 'AT', 'AT', 'A', 'AA', 'AA', 'T')), 
+        ALT=DNAStringSetList('G', 'A', 'ATT', 'G', 'A', 'AAT', 'G'), 
+        QUAL=70, FILTER="PASS")
+    vcf <- VCF(rowData=gr, fixed=fixed)
+
+    ## coding regions match, zero-width
+    loc <- locateVariants(vcf, txdb, CodingVariants())
+    coding <- predictCoding(vcf, txdb, Hsapiens)
+    checkIdentical(loc$QUERYID, as.integer(1:7))
+    checkIdentical(length(coding) , 6L)
+    checkIdentical(loc$CDSID[1:6], coding$CDSID)
+    checkIdentical(as.character(coding$VARCODON[c(1,4)]), 
+                   as.character(DNAStringSet(c("AAG", "TAG"))))
 }

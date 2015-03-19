@@ -84,5 +84,5 @@ test_ScanVcfParam_GRangesList <- function()
   vcf_grl <- readVcf(tab, "hg19", grl)
   gr <- unlist(grl, use.names=FALSE)
   vcf_gr <- readVcf(tab, "hg19", gr)
-  checkIdentical(rowData(vcf_grl), rowData(vcf_gr))
+  checkIdentical(rowRanges(vcf_grl), rowRanges(vcf_gr))
 }

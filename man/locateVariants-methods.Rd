@@ -40,9 +40,10 @@ locateVariants(query, subject, region, ...)
 \arguments{
   \item{query}{A \link[IRanges]{Ranges}, \link[GenomicRanges]{GRanges} or 
     \linkS4class{VCF} object containing the variants. Metadata columns are 
-    allowed but are ignored.
+    allowed but ignored.
 
-    NOTE: Circular chromosomes are not currently supported. 
+    NOTE: Zero-width ranges are treated as width-1 ranges; start values
+    are decremented to equal the end value.
   }
   \item{subject}{A \link[GenomicFeatures]{TxDb} or \code{GRangesList}
     object that serves as the annotation. GFF files can be converted to

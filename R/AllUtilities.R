@@ -264,7 +264,6 @@
 .localCoordinates <- function(from, to, ignore.strand, ...)
 {
     ## 'to' is a GRangesList of cds by transcript
-    ## cds coordinates 
     map <- mapToTranscripts(unname(from), to, ignore.strand=ignore.strand, ...)
     if (length(map) == 0) {
         res <- GRanges()
@@ -278,7 +277,7 @@
     xHits <- map$xHits
     txHits <- map$transcriptsHits
     flat_to <- unlist(to) ## names needed for mapping
-    fo <- findOverlaps(ranges(from)[xHits], ranges(flat_to), type="within") 
+
     ## FIXME: cdsid is expensive
     cdsid <- IntegerList(integer(0))
     map2 <- mapToTranscripts(unname(from)[xHits], flat_to,
