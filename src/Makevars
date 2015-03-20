@@ -1,5 +1,6 @@
 SAMTOOLS_PATH=\
-    `echo 'cat(system.file("usrlib", package="Rsamtools", mustWork=TRUE))' |\
+    `echo 'cat(system.file("usrlib", .Platform[["r_arch"]], \
+        package="Rsamtools", mustWork=TRUE))' |\
         "${R_HOME}/bin/R" --vanilla --slave`
 SAMTOOLS_LIBS="$(SAMTOOLS_PATH)/libbam.a" "$(SAMTOOLS_PATH)/libbcf.a"\
     "$(SAMTOOLS_PATH)/libtabix.a" -lz -pthread
