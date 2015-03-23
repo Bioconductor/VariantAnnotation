@@ -66,11 +66,11 @@ geno(header(vcf))
 @
 
 \subsubsection{Genomic positions}
-\Rcode{rowData} contains information from the CHROM, POS, and ID
+\Rcode{rowRanges} contains information from the CHROM, POS, and ID
 fields of the VCF file, represented as a \Robject{GRanges}.
 The \Rcode{paramRangeID} column is meaningful when reading
 subsets of data and is discussed further below.
-<<readVcf_rowData>>=
+<<readVcf_rowRanges>>=
 head(rowRanges(vcf), 3)
 @
 

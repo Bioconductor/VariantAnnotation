@@ -25,7 +25,7 @@
 {
     map <- list(ALT=list("A", character()), QUAL=list("1", numeric()),
                 FILTER=list("1", character()))
-    c(list(rowData=NULL, REF=NULL), .vcf_usertag(map, tag, "fixed"))
+    c(list(rowRanges=NULL, REF=NULL), .vcf_usertag(map, tag, "fixed"))
 }
 
 .vcf_map_samples <-

@@ -23,7 +23,7 @@ setMethod("predictCoding", c("CollapsedVCF", "TxDb", "ANY", "missing"),
     rd <- rep(rowRanges(query), elementLengths(alt))
     res <- callGeneric(rd, subject, seqSource, unlist(alt, use.names=FALSE), 
                 ..., ignore.strand=ignore.strand)
-    ## adjust QUERYID for expansion of rowData
+    ## adjust QUERYID for expansion of rowRanges
     res$QUERYID <- rep(seq_len(length(alt)),
                        elementLengths(alt))[res$QUERYID]
     res 

@@ -102,7 +102,7 @@ scanVcf(file, ..., param)
   \code{scanVcf} returns a list, with one element per range. Each list
   has 7 elements, obtained from the columns of the VCF specification:
     \describe{
-      \item{rowData}{
+      \item{rowRanges}{
         \code{GRanges} instance derived from \code{CHROM}, \code{POS}, 
         \code{ID}, and the width of \code{REF}
       }

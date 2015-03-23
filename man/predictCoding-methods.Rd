@@ -23,8 +23,9 @@
   \item{query}{A \linkS4class{VCF}, \link{Ranges} or \link{GRanges} 
     instance containing the variants to be annotated. If \code{query} is a 
     \link[IRanges]{Ranges} it will be coerced to a \link{GRanges}.
-    If a \linkS4class{VCF} is provided the \code{GRanges} from the
-    \code{rowData} slot will be used. All elementMetadata columns are ignored.
+    If a \linkS4class{VCF} is provided the \code{GRanges} returned by
+    the \code{rowRanges()} accessor will be used. All elementMetadata columns
+    are ignored.
 
     When \code{query} is not a \code{VCF} object a \code{varAllele} must be
     provided. The \code{varAllele} must be a \code{DNAStringSet} the same length

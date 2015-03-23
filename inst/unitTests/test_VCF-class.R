@@ -10,7 +10,7 @@ test_VCF_construction <- function() {
     ## substance
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
     target <- readVcf(fl, genome="hg19")
-    current <- VCF(rowData=rowRanges(target), colData=colData(target),
+    current <- VCF(rowRanges=rowRanges(target), colData=colData(target),
                    geno=geno(target), info=info(target),
                    fixed=fixed(target)) 
     checkTrue(validObject(current)) 
@@ -71,10 +71,10 @@ test_VCF_fixed <- function() {
     checkException(fixed(vcf) <- df, silent=TRUE)
 }
 
-test_VCF_rowData_info_geno <- function() {
+test_VCF_rowRanges_info_geno <- function() {
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
     vcf <- readVcf(fl, genome="hg19")
-    ## rowData
+    ## rowRanges
     v1 <- vcf
     rowRanges(v1) <- rowRanges(v1)[5:1]
     checkIdentical(rownames(vcf), rev(rownames(v1)))
@@ -144,7 +144,7 @@ test_VCF_subset <- function()
     checkIdentical(colData(ss1)[idx,,drop=FALSE], colData(ss2))
 
     ## 0 columns
-    vcf <- VCF(rowData=GRanges("chr1", IRanges(1:10, width=1)))
+    vcf <- VCF(rowRanges=GRanges("chr1", IRanges(1:10, width=1)))
     checkIdentical(dim(vcf[1:5, ]), c(5L, 0L))
     ## 0 rows 
     vcf <- VCF(colData=DataFrame(samples=1:10))

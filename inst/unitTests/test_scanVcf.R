@@ -4,7 +4,7 @@ scn <- scanVcf(fl)
 test_FixedTypes <- function()
 {
     .vcf_map_fixed <- VariantAnnotation:::.vcf_map_fixed
-    exp <- exp0 <- list(rowData=NULL, REF=NULL,
+    exp <- exp0 <- list(rowRanges=NULL, REF=NULL,
                         ALT=list("A", character()),
                         QUAL=list("1", numeric()),
                         FILTER=list("1", character()))
@@ -115,10 +115,10 @@ test_scan_row.names <- function()
 {
     fl <- system.file("extdata", "chr7-sub.vcf.gz", package="VariantAnnotation")
     scn <- scanVcf(fl)[[1]]
-    checkTrue(!is.null(names(scn$rowData)))
+    checkTrue(!is.null(names(scn$rowRanges)))
     scn <- scanVcf(fl, row.names=FALSE)
-    checkTrue(is.null(names(scn$rowData)))
+    checkTrue(is.null(names(scn$rowRanges)))
     param <- ScanVcfParam(which=GRanges("7", IRanges(55000723, 55000789)))
     scn <- scanVcf(fl, param=param, row.names=FALSE) 
-    checkTrue(is.null(names(scn$rowData)))
+    checkTrue(is.null(names(scn$rowRanges)))
 }

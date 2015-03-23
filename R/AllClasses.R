@@ -45,7 +45,7 @@ setClass("VCF",
     xlen <- nrow(object)
     i <- slot(object, "info")
     if (nrow(i) != xlen)
-        return("'info' must have the same number of rows as 'rowData'")
+        return("'info' must have the same number of rows as 'rowRanges'")
     NULL
 }
 

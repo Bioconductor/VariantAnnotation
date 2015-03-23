@@ -117,27 +117,27 @@ setMethod(readVcf, c(file="character", genome="missing",
         colnms <- NULL
     vcf <- .collapseLists(vcf, param)
 
-    ## rowData
-    rowData <- vcf$rowData
-    if (length(rowData)) {
+    ## rowRanges
+    rowRanges <- vcf$rowRanges
+    if (length(rowRanges)) {
         if (is(genome, "character")) { 
            if (length(seqinfo(hdr))) {
-               merged <- merge(seqinfo(hdr), seqinfo(rowData))
-               map <- match(names(merged), names(seqinfo(rowData)))
-               seqinfo(rowData, map) <- merged
+               merged <- merge(seqinfo(hdr), seqinfo(rowRanges))
+               map <- match(names(merged), names(seqinfo(rowRanges)))
+               seqinfo(rowRanges, map) <- merged
            }
-           genome(rowData) <- genome
+           genome(rowRanges) <- genome
         } else if (is(genome, "Seqinfo")) {
             if (length(seqinfo(hdr)))
                 reference <- merge(seqinfo(hdr), genome)
             else 
                 reference <- genome
-            merged <- merge(reference, seqinfo(rowData))
-            map <- match(names(merged), names(seqinfo(rowData)))
-            seqinfo(rowData, map) <- merged 
+            merged <- merge(reference, seqinfo(rowRanges))
+            map <- match(names(merged), names(seqinfo(rowRanges)))
+            seqinfo(rowRanges, map) <- merged 
         }
     }
-    values(rowData) <- DataFrame(vcf["paramRangeID"])
+    values(rowRanges) <- DataFrame(vcf["paramRangeID"])
 
     ## fixed fields
     fx <- vcf[c("REF", "ALT", "QUAL", "FILTER")]
@@ -145,7 +145,7 @@ setMethod(readVcf, c(file="character", genome="missing",
     fixed <- DataFrame(fx[!sapply(fx, is.null)]) 
 
     ## info 
-    info <- .formatInfo(vcf$INFO, info(hdr), length(rowData))
+    info <- .formatInfo(vcf$INFO, info(hdr), length(rowRanges))
 
     ## colData
     colData <- DataFrame(Samples=seq_along(colnms), row.names=colnms)
@@ -154,7 +154,7 @@ setMethod(readVcf, c(file="character", genome="missing",
     geno <- SimpleList(lapply(vcf$GENO, `dimnames<-`, NULL))
 
     vcf <- NULL
-    VCF(rowData=rowData, colData=colData, exptData=SimpleList(header=hdr),
+    VCF(rowRanges=rowRanges, colData=colData, exptData=SimpleList(header=hdr),
         fixed=fixed, info=info, geno=geno)
 }
 
@@ -231,21 +231,21 @@ setMethod(readVcf, c(file="character", genome="missing",
 readInfo <- function(file, x, param=ScanVcfParam(), ..., row.names=TRUE)
 {
     lst <- .readLite(file, x, param, "info", row.names=row.names)
-    rowData <- lst$rowData
+    rowRanges <- lst$rowRanges
     res <- .formatInfo(lst$INFO, info(scanVcfHeader(file)), 
-                       length(rowData))[[1]]
+                       length(rowRanges))[[1]]
     if (row.names)
-        names(res) <- names(rowData)
+        names(res) <- names(rowRanges)
     res 
 } 
 
 readGeno <- function(file, x, param=ScanVcfParam(), ..., row.names=TRUE)
 {
     lst <- .readLite(file, x, param, "geno", row.names=row.names)
-    rowData <- lst$rowData
+    rowRanges <- lst$rowRanges
     res <- lst$GENO[[1]]
     if (row.names)
-        dimnames(res)[[1]] <- names(rowData)
+        dimnames(res)[[1]] <- names(rowRanges)
     res 
 } 
 
@@ -257,9 +257,9 @@ readGT <- function(file, nucleotides=FALSE, param=ScanVcfParam(), ...,
         res <- .geno2geno(lst)
     else
         res <- lst$GENO$GT
-    rowData <- lst$rowData
+    rowRanges <- lst$rowRanges
     if (row.names)
-        dimnames(res)[[1]] <- names(rowData)
+        dimnames(res)[[1]] <- names(rowRanges)
     res 
 } 
 

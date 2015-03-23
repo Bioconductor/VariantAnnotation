@@ -94,14 +94,14 @@ setMethod(readVcfLongForm, c(file="character", genome="missing",
     hdr <- scanVcfHeader(file)
     vcf <- .collapseLists(vcf, param)
 
-    ## rowData
-    rowData <- vcf[["rowData"]]
-    genome(seqinfo(rowData)) <- genome
-    values(rowData) <- DataFrame(paramRangeID=vcf[["paramRangeID"]])
+    ## rowRanges
+    rowRanges <- vcf[["rowRanges"]]
+    genome(seqinfo(rowRanges)) <- genome
+    values(rowRanges) <- DataFrame(paramRangeID=vcf[["paramRangeID"]])
 
     ## fixed fields
     ALT <- .formatALT(vcf[["ALT"]])
-    fx <- list(ID=names(rowData), REF=vcf[["REF"]], ALT=ALT, 
+    fx <- list(ID=names(rowRanges), REF=vcf[["REF"]], ALT=ALT, 
                QUAL=vcf[["QUAL"]], FILTER=vcf[["FILTER"]])
     fixed <- DataFrame(fx[lapply(fx, is.null) == FALSE])
 
@@ -109,11 +109,11 @@ setMethod(readVcfLongForm, c(file="character", genome="missing",
     info <- .formatInfo(vcf[["INFO"]], info(hdr))
 
     ## expand to match ALT
-    names(rowData) <-  NULL
-    values(rowData) <- append(values(rowData), c(fixed, info))
-    rowData <- rep(rowData, elementLengths(ALT))
-    values(rowData)[["ALT"]] <- unlist(ALT, use.names=FALSE)
-    rowData 
+    names(rowRanges) <-  NULL
+    values(rowRanges) <- append(values(rowRanges), c(fixed, info))
+    rowRanges <- rep(rowRanges, elementLengths(ALT))
+    values(rowRanges)[["ALT"]] <- unlist(ALT, use.names=FALSE)
+    rowRanges
 }
 
 .formatGeno <- function(x)

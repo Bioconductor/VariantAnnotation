@@ -171,7 +171,8 @@
   grl <- GRangesList("1"=gr1, "2"=gr2)
   vcf <- readVcf(tab, "hg19", grl)
 
-  ## Names of the ranges are in 'paramRangeID' in the rowData slot,
+  ## Names of the ranges are in the 'paramRangeID' metadata column of the
+  ## GRanges object returned by the rowRanges() accessor.
   rowRanges(vcf)
 
   ## which can be used for subsetting the VCF object

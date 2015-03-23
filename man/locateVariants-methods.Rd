@@ -193,8 +193,8 @@ locateVariants(query, subject, region, ...)
     \item{\code{QUERYID}}{
       The \code{QUERYID} column provides a map back to the row in the
       original \code{query}. If the \code{query} was a \code{VCF} object this
-      index corresponds to the row in the \code{GRanges} in the \code{rowData}
-      slot. 
+      index corresponds to the row in the \code{GRanges} object returned by
+      the \code{rowRanges} accessor.
     }
     \item{\code{TXID}}{
       The transcript id taken from the \code{TxDb} object.

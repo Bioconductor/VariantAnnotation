@@ -84,8 +84,8 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
     import. Applicable to \code{readInfo} and \code{readGeno} only.
   }
   \item{row.names}{A \code{logical} specifying if rownames should be returned. 
-    In the case of \code{readVcf}, rownames appear on the \code{GRanges} in the
-    \code{rowData} slot.
+    In the case of \code{readVcf}, rownames appear on the \code{GRanges}
+    returned by the \code{rowRanges} accessor.
   }
   \item{nucleotides}{A \code{logical} indicating if genotypes should be returned
     as nucleotides instead of the numeric representation.
@@ -117,8 +117,8 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
     }
     \item{Data type: }{
       CHROM, POS, ID and REF fields are used to create the \code{GRanges}
-      stored in the \code{rowData} slot of the \code{VCF} object. Access
-      with \code{rowRanges} accessor.
+      stored in the \code{VCF} object and accessible with the \code{rowRanges}
+      accessor.
 
       REF, ALT, QUAL and FILTER are parsed into the \code{DataFrame} in the 
       \code{fixed} slot. Because ALT can have more than one value per variant 
@@ -179,7 +179,7 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
   \code{readGeno} return a \code{matrix}.
 
   \describe{
-    \item{rowData: }{
+    \item{rowRanges: }{
       The CHROM, POS, ID and REF fields are used to create a \code{GRanges}
       object. Ranges are created using POS as the start value and width of 
       the reference allele (REF). The IDs become the rownames. If they are 
@@ -188,9 +188,9 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
       and can be accessed with \code{genome(<VCF>)}.
 
       One elementMetadata column, \code{paramRangeID}, is included with the
-      \code{rowData}. This ID is meaningful when multiple ranges are specified 
-      in the \code{ScanVcfParam} and distinguishes which records match
-      each range.
+      \code{rowRanges}. This ID is meaningful when multiple ranges are
+      specified in the \code{ScanVcfParam} and distinguishes which records
+      match each range.
     }
     \item{fixed: }{
       REF, ALT, QUAL and FILTER fields of the VCF are parsed into a 

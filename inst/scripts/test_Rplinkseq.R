@@ -162,7 +162,7 @@ metafetch_2 <- function()
     meta.fetch(c(info_var, geno_var, other_var), mask=mask) 
 
 ### scanVcf:  NOTE: Fields in 'other_var' are imported and parsed by
-###           scanVcf() under names of 'rowData' and 'fixed'.
+###           scanVcf() under names of 'rowRanges' and 'fixed'.
 tfile <- TabixFile(fl)
 which <- GRanges("22", IRanges(2e7, 2.5e7))
 param <- ScanVcfParam(which=which, info=info_var, geno=geno_var)
@@ -203,7 +203,7 @@ scanvcf_3 <- function()
 {
     ct2 <<- 0
     open(tfile)
-    while((len <- length(scanVcf(tfile, param=param)[[1]]$rowData)) > 0) 
+    while((len <- length(scanVcf(tfile, param=param)[[1]]$rowRanges)) > 0) 
         ct2 <<- ct2 + len 
     close(tfile)
 }

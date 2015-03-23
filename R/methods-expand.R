@@ -28,7 +28,7 @@ setMethod("expand", "CollapsedVCF",
         fexp$ALT <- unlist(alt(x), use.names=FALSE)
         gexp <- .expandGeno(x, hdr, elt, idx)
 
-        ## rowData
+        ## rowRanges
         if (is.null(rd$paramRangeID)) {
             rdexp <- rd[idx, ]
             mcols(rdexp) <- NULL

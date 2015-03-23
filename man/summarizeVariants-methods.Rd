@@ -106,7 +106,7 @@
 
 \value{
   A \code{SummarizedExperiment} object with count summaries in the 
-  \code{assays} slot. The \code{rowData} contains the annotation
+  \code{assays} slot. The \code{rowRanges} contains the annotation
   used for counting. Information in \code{colData} and \code{exptData} 
   are taken from the VCF file.
 }

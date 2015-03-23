@@ -390,9 +390,9 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
     info <- union(info, "END")
   }
   
-  rowData <- xUniq
-  mcols(rowData) <- NULL
-  rowData <- as(rowData, "GRanges", strict=TRUE)
+  rowRanges <- xUniq
+  mcols(rowRanges) <- NULL
+  rowRanges <- as(rowRanges, "GRanges", strict=TRUE)
 
   colData <- DataFrame(Samples = seq_along(sampleLevels),
                        row.names = sampleLevels)
@@ -475,8 +475,8 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
 
   info <- mcols(xUniq)[info]
   
-  VCF(rowData = rowData, colData = colData, exptData = exptData, fixed = fixed,
-      geno = geno, info = info, collapsed = FALSE)
+  VCF(rowRanges = rowRanges, colData = colData, exptData = exptData,
+      fixed = fixed, geno = geno, info = info, collapsed = FALSE)
 }
 
 setMethod("asVCF", "VRanges", vranges2Vcf)

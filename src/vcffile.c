@@ -10,7 +10,7 @@
 #include "samtools/khash.h"
 #include "strhash.h"
 
-enum { ROWDATA_IDX = 0, REF_IDX, ALT_IDX, QUAL_IDX, FILTER_IDX,
+enum { ROWRANGES_IDX = 0, REF_IDX, ALT_IDX, QUAL_IDX, FILTER_IDX,
        INFO_IDX, GENO_IDX };
 enum { POS_IDX = 0, ID_IDX };
 
@@ -139,17 +139,17 @@ static struct vcftype_t *_vcf_alloc(const int vcf_n, SEXP smap,
     SEXP elt;
     SEXPTYPE type;
     const char *n;
-    struct vcftype_t *vcf, *rowData;
+    struct vcftype_t *vcf, *rowRanges;
 
     vcf = _vcftype_new(VECSXP, NILSXP, '\0', NULL, N_FLDS, 1, 1, 0);
 
     /* FIXED fields */
-    rowData = _vcftype_new(VECSXP, VECSXP, '\0', NULL, 2, 1, 1, 0);
-    rowData->u.list[POS_IDX] =
+    rowRanges = _vcftype_new(VECSXP, VECSXP, '\0', NULL, 2, 1, 1, 0);
+    rowRanges->u.list[POS_IDX] =
         _vcftype_new(INTSXP, NILSXP, '\0', NULL, vcf_n, 1, 1, 0);
-    rowData->u.list[ID_IDX] =
+    rowRanges->u.list[ID_IDX] =
         _vcftype_new(STRSXP, NILSXP, '\0', NULL, vcf_n, 1, 1, 0);
-    vcf->u.list[ROWDATA_IDX] = rowData;
+    vcf->u.list[ROWRANGES_IDX] = rowRanges;
 
     const char *blank = _strhash_put(str, ""), *dot = _strhash_put(str, ".");
     for (int i = 2; i < Rf_length(fmap); ++i) {
@@ -185,7 +185,7 @@ static void _vcf_grow(struct vcftype_t * vcf, int vcf_n)
 {
     struct vcftype_t *elt;
 
-    elt = vcf->u.list[ROWDATA_IDX];
+    elt = vcf->u.list[ROWRANGES_IDX];
     for (int i = POS_IDX; i <= ID_IDX; ++i)
         elt->u.list[i] = _vcftype_grow(elt->u.list[i], vcf_n);
 
@@ -200,7 +200,7 @@ static void _parse(char *line, const int irec,
                    const struct parse_t *parse, Rboolean row_names)
 {
     khash_t(strhash) *str = parse->str;
-    struct vcftype_t *vcf = parse->vcf, *rowData, *elt, *info;
+    struct vcftype_t *vcf = parse->vcf, *rowRanges, *elt, *info;
     const int imap_n = parse->imap_n, gmap_n = parse->gmap_n;
     const int smap_n = parse->smap_n;
     const char **inms = parse->inms, **gnms = parse->gnms;
@@ -218,10 +218,10 @@ static void _parse(char *line, const int irec,
 
     chrom = it_init(&it0, line, '\t'); /* CHROM */
     rle_append(parse->chrom, chrom);
-    rowData = vcf->u.list[ROWDATA_IDX];
+    rowRanges = vcf->u.list[ROWRANGES_IDX];
 
     pos = it_next(&it0);      /* POS */
-    rowData->u.list[POS_IDX]->u.integer[irec] = atoi(pos);
+    rowRanges->u.list[POS_IDX]->u.integer[irec] = atoi(pos);
 
     id = it_next(&it0);       /* ID */
 
@@ -248,7 +248,7 @@ static void _parse(char *line, const int irec,
             *id = '\0';
             id = chrom;
         }
-        rowData->u.list[ID_IDX]->u.character[irec] = _strhash_put(str, id);
+        rowRanges->u.list[ID_IDX]->u.character[irec] = _strhash_put(str, id);
     }
 
     /* INFO */
@@ -329,15 +329,15 @@ static SEXP _vcf_as_SEXP(struct parse_t *parse, SEXP fmap, SEXP smap,
     SEXP dna = dna_hash_as_DNAStringSet(parse->ref);
     SET_VECTOR_ELT(result, REF_IDX, dna);
 
-    /* rowData: GRanges */
-    SEXP rowData, seqnames, start, width, names;
+    /* rowRanges: GRanges */
+    SEXP rowRanges, seqnames, start, width, names;
     PROTECT(seqnames = rle_as_Rle(parse->chrom));
-    rowData = VECTOR_ELT(result, ROWDATA_IDX);
-    start = VECTOR_ELT(rowData, POS_IDX);
+    rowRanges = VECTOR_ELT(result, ROWRANGES_IDX);
+    start = VECTOR_ELT(rowRanges, POS_IDX);
     if (!row_names)
         names = R_NilValue;
     else
-        names = VECTOR_ELT(rowData, ID_IDX);
+        names = VECTOR_ELT(rowRanges, ID_IDX);
     width = get_XVectorList_width(dna);
 
     SEXP ranges, nmspc, fun, expr;
@@ -346,13 +346,13 @@ static SEXP _vcf_as_SEXP(struct parse_t *parse, SEXP fmap, SEXP smap,
     PROTECT(fun = findFun(install("GRanges"), nmspc));
     PROTECT(expr = lang3(fun, seqnames, ranges));
 
-    SET_VECTOR_ELT(result, ROWDATA_IDX, eval(expr, R_GlobalEnv));
+    SET_VECTOR_ELT(result, ROWRANGES_IDX, eval(expr, R_GlobalEnv));
     UNPROTECT(5);
 
     /* names */
     SEXP nms, sxp = Rf_getAttrib(fmap, R_NamesSymbol), elt;
     PROTECT(nms = Rf_allocVector(STRSXP, Rf_length(result)));
-    SET_STRING_ELT(nms, ROWDATA_IDX, mkChar("rowData"));
+    SET_STRING_ELT(nms, ROWRANGES_IDX, mkChar("rowRanges"));
     SET_STRING_ELT(nms, REF_IDX, mkChar("REF"));
     SET_STRING_ELT(nms, ALT_IDX, mkChar("ALT"));
     SET_STRING_ELT(nms, QUAL_IDX, mkChar("QUAL"));

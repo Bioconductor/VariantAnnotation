@@ -75,7 +75,7 @@ setMethod("summarizeVariants", c("GRangesList", "VCF", "function"),
     var_x_smp <- matrix(gtype, ncol=ncol(subject))
     fac_x_smp <- fac_x_var %*% var_x_smp
 
-    SummarizedExperiment(rowData=query[unique(subjectHits(hits))], 
+    SummarizedExperiment(rowRanges=query[unique(subjectHits(hits))], 
                          colData=colData(subject), 
                          exptData=exptData(subject),
                          assays=SimpleList(counts=fac_x_smp))
@@ -83,7 +83,7 @@ setMethod("summarizeVariants", c("GRangesList", "VCF", "function"),
 
 .baseSE <- function(query, subject, ...)
 {
-    SummarizedExperiment(rowData=query, colData=colData(subject),
+    SummarizedExperiment(rowRanges=query, colData=colData(subject),
                          exptData=exptData(subject),
                          assays=SimpleList(counts=matrix(NA_integer_, 
                              nrow=length(query), ncol=ncol(subject))))

@@ -1,4 +1,4 @@
-vcf0 <- VCF(rowData=GRanges("chr1", IRanges(1:9, width=c(rep(1, 6), 2, 2, 3))), 
+vcf0 <- VCF(rowRanges=GRanges("chr1", IRanges(1:9, width=c(rep(1, 6), 2, 2, 3))), 
             fixed=DataFrame(
               REF=DNAStringSet(c("A", "G", "C", "T", "T", "G", "GG", 
                 "TCT", "AC")),

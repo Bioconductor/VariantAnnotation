@@ -99,7 +99,7 @@
 \section{Constructors}{
   \describe{
     \item{}{
-      \code{readVcf(rowData = GRanges(), colData = DataFrame(), 
+      \code{readVcf(rowRanges = GRanges(), colData = DataFrame(), 
                 exptData = SimpleList(), fixed = DataFrame(), 
                 info = DataFrame(), geno = SimpleList(), 
                 ..., collapsed=TRUE, verbose = FALSE)}
@@ -107,7 +107,7 @@
       Format file on disk. 
     }
     \item{}{
-      \code{VCF(rowData = GRanges(), colData = DataFrame(), 
+      \code{VCF(rowRanges = GRanges(), colData = DataFrame(), 
                 exptData = SimpleList(header = VCFHeader()), 
                 fixed = DataFrame(), info = DataFrame(), 
                 geno = SimpleList(), ..., collapsed=TRUE, 
@@ -136,9 +136,9 @@
       included. 
       
       One elementMetadata column, \code{paramRangeID}, is included with the
-      \code{rowData}. This ID is meaningful when multiple ranges are specified 
-      in the \code{ScanVcfParam} and distinguishes which records match
-      each range.
+      \code{rowRanges}. This ID is meaningful when multiple ranges are
+      specified in the \code{ScanVcfParam} and distinguishes which records
+      match each range.
 
       The metadata columns can be accessed with \code{mcols(x)$<variable>} or 
       the following accessors:
@@ -200,18 +200,18 @@
     }
     \item{}{
       \code{genome(x)}:
-      Extract the \code{genome} information from the \code{GRanges} in 
-      the \code{rowData} slot.
+      Extract the \code{genome} information from the \code{GRanges} object
+      returned by the \code{rowRanges} accessor.
     }
     \item{}{
       \code{seqlevels(x)}:
-      Extract the \code{seqlevels} from the \code{GRanges} in the 
-      \code{rowData} slot.
+      Extract the \code{seqlevels} from the \code{GRanges} object
+      returned by the \code{rowRanges} accessor.
     }
     \item{}{
       \code{strand(x)}:
-      Extract the \code{strand} from the \code{GRanges} in the 
-      \code{rowData} slot.
+      Extract the \code{strand} from the \code{GRanges} object
+      returned by the \code{rowRanges} accessor.
     }
     \item{}{
       \code{header(x)}, \code{header(x)<- value}:
@@ -241,12 +241,12 @@
     }
     \item{}{
       \code{cbind(...)}, \code{rbind(...)}: \code{cbind} combines objects with
-      identical ranges (\code{rowData}) but different samples (columns in
+      identical ranges (\code{rowRanges}) but different samples (columns in
       \code{assays}). The colnames in \code{colData} must match or an error is
       thrown. Columns with duplicate names in \code{fixed}, \code{info} and
       \code{mcols(rowRanges(VCF))} must contain the same data.
 
-      \code{rbind} combines objects with different ranges (\code{rowData}) and
+      \code{rbind} combines objects with different ranges (\code{rowRanges}) and
       the same subjects (columns in \code{assays}). Columns with duplicate names
       in \code{colData} must contain the same data.  The \sQuote{Samples}
       columns in \code{colData} (created by \code{readVcf}) are renamed with a
@@ -301,16 +301,17 @@
 
       Each element of the list must have the same dimensions, and dimension 
       names (if present) must be consistent across elements and with the row 
-      names of \code{rowData}, \code{colData}. 
+      names of \code{rowRanges}, \code{colData}. 
     }
     \item{info}{A \code{DataFrame} of data from the INFO field of a VCF file. 
-      The number of rows must match that in the \code{rowData} object.
+      The number of rows must match that in the \code{rowRanges} object.
     }
     \item{fixed}{A \code{DataFrame} of REF, ALT, QUAL and FILTER 
       fields from a VCF file. The number of rows must match that
-      of the \code{rowData} object.
+      of the \code{rowRanges} object.
     }
-    \item{rowData}{A \code{GRanges} instance describing the ranges of interest. 
+    \item{rowRanges}{A \code{GRanges} instance describing the ranges of
+      interest. 
       Row names, if present, become the row names of the \code{VCF}. The length 
       of the \code{GRanges} must equal the number of rows of the matrices in 
       \code{geno}.
@@ -351,7 +352,7 @@
   \itemize{
     \item \code{exptData}: A \link{SimpleList}-class instance containing the 
           file header or other information about the overall experiment.
-    \item \code{rowData}: A \link{GRanges}-class instance defining the
+    \item \code{rowRanges}: A \link{GRanges}-class instance defining the
            variant ranges and associated metadata columns of REF, ALT, QUAL 
            and FILTER.
     \item \code{colData}: A \link{DataFrame}-class instance describing the 
@@ -392,7 +393,8 @@ vcf <- readVcf(fl, genome="hg19")
 ## ----------------------------------------------------------------
 ## Accessors 
 ## ----------------------------------------------------------------
-## Variant locations are stored in a GRanges in the rowData slot.
+## Variant locations are stored in the GRanges object returned by
+## the rowRanges() accessor.
 rowRanges(vcf)
 
 ## Individual fields can be extracted with ref(), alt(), qual() 
@@ -480,7 +482,7 @@ alt(vcfLong)
 ## NOTE: isSNV() and family have replaced restrictToSNV().
 ## isSNV() returns a subset VCF containing SNVs only.
 
-vcf <- VCF(rowData = GRanges("chr1", IRanges(1:4*3, width=c(1, 2, 1, 1))))
+vcf <- VCF(rowRanges = GRanges("chr1", IRanges(1:4*3, width=c(1, 2, 1, 1))))
 alt(vcf) <- DNAStringSetList("A", c("TT"), c("G", "A"), c("TT", "C"))
 ref(vcf) <- DNAStringSet(c("G", c("AA"), "T", "G"))
 fixed(vcf)[c("REF", "ALT")]

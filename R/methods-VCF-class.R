@@ -8,10 +8,10 @@
 ###
 
 VCF <-
-    function(rowData=GRanges(), colData=DataFrame(), 
+    function(rowRanges=GRanges(), colData=DataFrame(), 
              exptData=SimpleList(header=VCFHeader()), 
              fixed=DataFrame(),
-             info=DataFrame(row.names=seq_along(rowData)), 
+             info=DataFrame(row.names=seq_along(rowRanges)), 
              geno=SimpleList(),
              ..., collapsed=TRUE, verbose=FALSE)
 {
@@ -20,23 +20,23 @@ VCF <-
         class <- "CollapsedVCF"
         if (!length(fixed)) {
             fixed=DataFrame(
-                REF=DNAStringSet(rep(".", length(rowData))), 
-                ALT=DNAStringSetList(as.list(rep(".", length(rowData)))),
-                QUAL=rep(NA_real_, length(rowData)), 
-                FILTER=rep(NA_character_, length(rowData)))
+                REF=DNAStringSet(rep(".", length(rowRanges))), 
+                ALT=DNAStringSetList(as.list(rep(".", length(rowRanges)))),
+                QUAL=rep(NA_real_, length(rowRanges)), 
+                FILTER=rep(NA_character_, length(rowRanges)))
         }
     } else {
         class <- "ExpandedVCF"
         if (!length(fixed)) {
             fixed=DataFrame(
-                REF=DNAStringSet(rep("", length(rowData))), 
-                ALT=DNAStringSet(rep("", length(rowData))),
-                QUAL=rep(NA_real_, length(rowData)), 
-                FILTER=rep(NA_character_, length(rowData)))
+                REF=DNAStringSet(rep("", length(rowRanges))), 
+                ALT=DNAStringSet(rep("", length(rowRanges))),
+                QUAL=rep(NA_real_, length(rowRanges)),
+                FILTER=rep(NA_character_, length(rowRanges)))
         }
     }
 
-    new(class, SummarizedExperiment(assays=geno, rowData=rowData,
+    new(class, SummarizedExperiment(assays=geno, rowRanges=rowRanges,
         colData=colData, exptData=exptData), fixed=fixed, info=info, ...)
 }
 
@@ -156,7 +156,7 @@ setReplaceMethod("rowRanges", c("VCF", "GRanges"),
 
 ### Must define VCF methods for 'mcols<-' and 'dimnames<-' instead of 
 ### inheriting from SummarizedExperiment. 'fixed' fields are stored in 
-### a separate slot and not as metadata columns of 'rowData'.
+### a separate slot and not as metadata columns of 'rowRanges'.
 
 setReplaceMethod("mcols", c("VCF", "DataFrame"),
     function(x, ..., value)
@@ -170,11 +170,11 @@ setReplaceMethod("mcols", c("VCF", "DataFrame"),
 setReplaceMethod("dimnames", c("VCF", "list"),
     function(x, value)
 {
-    rowData <- slot(x,"rowData")
-    names(rowData) <- value[[1]]
+    rowRanges <- slot(x,"rowData")
+    names(rowRanges) <- value[[1]]
     colData <- colData(x)
     rownames(colData) <- value[[2]]
-    GenomicRanges:::clone(x, rowData=rowData, colData=colData)
+    GenomicRanges:::clone(x, rowData=rowRanges, colData=colData)
 })
  
 ### info 
@@ -377,14 +377,14 @@ setMethod("rbind", "VCF",
     if (!.compare(lapply(args, ncol)))
             stop("'...' objects must have the same number of samples")
 
-    rowData <- do.call(c, lapply(args,
+    rowRanges <- do.call(c, lapply(args,
         function(i) slot(i, "rowData")))
     colData <- GenomicRanges:::.cbind.DataFrame(args, colData, "colData")
     assays <- GenomicRanges:::.bind.arrays(args, rbind, "assays")
     exptData <- do.call(c, lapply(args, exptData))
     info <- do.call(rbind, lapply(args, info))
     fixed <- do.call(rbind, lapply(args, fixed))
-    new(class(args[[1]]), assays=assays, rowData=rowData,
+    new(class(args[[1]]), assays=assays, rowData=rowRanges,
         colData=colData, exptData=exptData, fixed=fixed, info=info)
 })
 
@@ -407,10 +407,10 @@ setMethod("cbind", "VCF",
         stop("'...' objects must be of the same VCF class")
 
 
-    if (!.compare(lapply(args, rowData), TRUE))
+    if (!.compare(lapply(args, rowRanges), TRUE))
         stop("'...' object ranges (rows) are not compatible")
-    rowData <- rowRanges(args[[1]])
-    mcols(rowData) <- GenomicRanges:::.cbind.DataFrame(args, mcols, "mcols")
+    rowRanges <- rowRanges(args[[1]])
+    mcols(rowRanges) <- GenomicRanges:::.cbind.DataFrame(args, mcols, "mcols")
     info <- GenomicRanges:::.cbind.DataFrame(args, info, "info") 
     colData <- do.call(rbind, lapply(args, colData))
     assays <- GenomicRanges:::.bind.arrays(args, cbind, "assays")
@@ -419,7 +419,7 @@ setMethod("cbind", "VCF",
         stop("data in 'fixed(VCF)' must match.")
     else
         fixed <- fixed(args[[1]]) 
-    new(class(args[[1]]), assays=assays, rowData=rowData,
+    new(class(args[[1]]), assays=assays, rowData=rowRanges,
         colData=colData, exptData=exptData, fixed=fixed, info=info)
 
 
@@ -529,7 +529,7 @@ setMethod("updateObject", "VCF",
     {
         if (verbose) 
             message("updateObject(object = 'VCF')") 
-        VCF(rowData=rowData(object), colData=colData(object), exptData=exptData(object), 
+        VCF(rowRanges=rowRanges(object), colData=colData(object), exptData=exptData(object), 
             info=mcols(info(object))[-1], fixed=mcols(fixed(object))[-1], geno=geno(object))
     }
 )

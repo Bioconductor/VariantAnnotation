@@ -8,7 +8,7 @@
 
 .collapseLists <- function(vcf, param)
 {
-    idx <- sapply(vcf, function(elt) length(elt$rowData) > 0L)
+    idx <- sapply(vcf, function(elt) length(elt$rowRanges) > 0L)
     if (!sum(idx))
         return(vcf[[1]])
     if (length(vcf) > 1L)
@@ -23,14 +23,14 @@
     ## single range in 'which'
     if (1L == length(vcf)) {
         lst <- vcf[[1]]
-        lst$paramRangeID <- as.factor(rep(paramRangeID, length(lst$rowData)))
+        lst$paramRangeID <- as.factor(rep(paramRangeID, length(lst$rowRanges)))
     } else {
     ## multiple ranges in 'which'
         lst <- lapply(names(vcf[[1]]), function(elt) {
                    suppressWarnings(do.call(c, unname(lapply(vcf, "[[", elt))))
                })
         names(lst) <- names(vcf[[1]])
-        len <- unlist(lapply(vcf, function(elt) length(elt$rowData)),
+        len <- unlist(lapply(vcf, function(elt) length(elt$rowRanges)),
                       use.names=FALSE)
         paramRangeID <- as.factor(rep(paramRangeID, len))
 
@@ -48,7 +48,7 @@
                               do.call(rbind, lapply(elt, "[", ,i,))
                           })
                     array(do.call(c, pc),
-                        c(length(lst$rowData), d[2], d[3]))
+                        c(length(lst$rowRanges), d[2], d[3]))
                 } else {
                     do.call(c, elt)
                 }
@@ -63,11 +63,11 @@
                               do.call(rbind, lapply(elt, "[", ,,i))
                           })
                     cmb <- array(do.call(c, pc),
-                                 c(length(lst$rowData), d[2], d[3]))
+                                 c(length(lst$rowRanges), d[2], d[3]))
                     cmb
                 } else {
                     trans <- lapply(elt, t)
-                    cmb <- matrix(do.call(c, trans), length(lst$rowData),
+                    cmb <- matrix(do.call(c, trans), length(lst$rowRanges),
                                   d[2], byrow=TRUE)
                     cmb
                 }

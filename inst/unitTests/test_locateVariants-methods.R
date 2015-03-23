@@ -123,7 +123,7 @@ test_locateVariants_match_predictCoding <- function()
         REF=DNAStringSet(c('T', 'AT', 'AT', 'A', 'AA', 'AA', 'T')), 
         ALT=DNAStringSetList('G', 'A', 'ATT', 'G', 'A', 'AAT', 'G'), 
         QUAL=70, FILTER="PASS")
-    vcf <- VCF(rowData=gr, fixed=fixed)
+    vcf <- VCF(rowRanges=gr, fixed=fixed)
 
     ## coding regions match, zero-width
     loc <- locateVariants(vcf, txdb, CodingVariants())
