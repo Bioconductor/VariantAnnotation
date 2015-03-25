@@ -118,18 +118,20 @@ function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
         fmshift[zwidth] <- FALSE
     }
 
-    ## N elements in sequence
-    codeN <- rep(FALSE, length(txlocal)) 
-    codeN[grep("N", as.character(altallele, use.names=FALSE), 
-        fixed=TRUE)] <-TRUE
-    if (any(codeN)) {
-        warning("varAllele values containing 'N' were not translated")
-        valid[codeN] <- FALSE
-    }
-
     ## reference codon sequences
     altpos <- (start(mcols(txlocal)$CDSLOC) - 1L) %% 3L + 1L
     refCodon <- varCodon <- .getRefCodons(txlocal, altpos, seqSource, cdsbytx)
+
+    ## N elements
+    codeN <- rep(FALSE, length(txlocal)) 
+    altN <- grepl("N", as.character(altallele, use.names=FALSE), fixed=TRUE)
+    refN <- grepl("N", as.character(refCodon, use.names=FALSE), fixed=TRUE)
+    codeN[altN | refN] <-TRUE
+    valid[codeN] <- FALSE
+    if (any(altN))
+        warning("varAllele values containing 'N' were not translated")
+    if (any(refN))
+        warning("reference codons containing 'N' were not translated")
 
     ## substitute and translate
     refAA <- varAA <- AAStringSet(rep("", length(txlocal))) 
@@ -169,6 +171,6 @@ function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
     cstart <- ((start(mcols(txlocal)$CDSLOC) - 1L) %/% 3L) * 3L + 1L
     cend <- cstart + (((altpos + width(txlocal) - 2L) %/% 3L) * 3L + 2L)
     txord <- match(mcols(txlocal)$TXID, names(cdsbytx))
-    txseqs <- getTranscriptSeqs(cdsbytx[txord], seqSource)
+    txseqs <- extractTranscriptSeqs(seqSource, cdsbytx[txord])
     DNAStringSet(substring(txseqs, cstart, cend))
 }
