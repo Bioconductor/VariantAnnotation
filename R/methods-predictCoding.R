@@ -137,8 +137,8 @@ function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
     refAA <- varAA <- AAStringSet(rep("", length(txlocal))) 
     if (any(valid)) {
         subseq(varCodon, altpos, width=refwidth)[valid] <- altallele[valid]
-        refAA <- translate(refCodon, genetic.code=genetic.code,
-                           if.fuzzy.codon=if.fuzzy.codon)
+        refAA[valid] <- translate(refCodon[valid], genetic.code=genetic.code,
+                                  if.fuzzy.codon=if.fuzzy.codon)
         varAA <- AAStringSet(rep("", length(txlocal))) 
         varAA[valid] <- translate(varCodon[valid], genetic.code=genetic.code, 
                                   if.fuzzy.codon=if.fuzzy.codon)
