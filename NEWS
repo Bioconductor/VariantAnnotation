@@ -1,3 +1,87 @@
+CHANGES IN VERSION 1.14.0
+------------------------
+
+NEW FEATURES
+
+    o gVCF support:
+      - missing END header written out with writeVcf()
+      - expand() handles <NON_REF> 'REF' value
+
+    o support 'Type=Character' in INFO header fields
+
+    o add 'row.names' argument to expand()
+
+    o add 'Efficient Usage' section to readVcf() man page 
+
+    o efficiency improvements to info(..., row.names=)
+      - anyDuplicated() less expensive than any(duplicated())
+      - use row.names=FALSE when not needed, e.g., show()
+
+    o add genotypeCodesToNucleotides()
+
+    o add support for gvcf in isSNP family of functions
+
+    o add VcfFile and VcfFileList classes
+
+    o support 'Type=Character' of unspecified length (.)
+
+    o add isDelins() from Robert Castelo
+
+    o add makeVRangesFromGRanges() from Thomas Sandmann 
+
+
+MODIFICATIONS
+
+    o VCFHeader support:
+      - SAMPLE and PEDIGREE header fields are now parsed
+      - meta(VCFHeader) returns DataFrameList instead of DataFrame
+      - show(VCFHeader) displays the outer list names in meta
+      - fixed(VCFHeader) returns 'ALT' and 'REF' if present
+
+    o 'ALT' in expandedVCF output is DNAStringSet, not *List
+
+    o remove .listCumsum() and .listCumsumShifted() helpers
+
+    o add multiple INFO field unit test from Julian Gehring
+
+    o add additional expand() unit tests
+
+    o modify readVccfAsVRanges() to use ScanVcfParam() as the
+      'param'; deprecate VRangesScanVcfParam
+
+    o replace mapCoords() with mapToTranscripts()
+
+    o change 'CDSID' output from integer to IntegerList in 
+      locateVariants() and predictCoding()
+
+    o add readVcf,character,ANY,ANY; remove readVcf,character,ANY,ScanVcfParam
+
+    o replace rowData() accessor with rowRanges()
+
+    o replace 'rowData' argument with 'rowRanges' (construct SE, VCF classes)
+
+    o replace getTranscriptSeqs() with extractTranscripts()
+
+BUG FIXES
+
+    o readVcf() properly handles Seqinfo class as 'genome'
+
+    o allow 'ignore.strand' to pass through mapCoords()
+
+    o writeVcf() no longer ignores rows with no genotype field
+
+    o expand() properly handles 
+      - less than all INFO fields are selected
+      - VCF has only one row
+      - only one INFO column
+
+    o don't call path() on non-*File objects
+
+    o split (relist) of VRanges now yields a CompressedVRangesList
+
+    o predictCoding() now ignores zero-width ranges
+
+
 CHANGES IN VERSION 1.12.0
 ------------------------
 
