@@ -107,8 +107,8 @@ test_scanVcfHeader_VarScan <- function()
     fl <- system.file("extdata", "ex2.vcf",
                       package="VariantAnnotation")
     hd <- scanVcfHeader(fl)
-    checkIdentical(length(names(header(hd))), 6L)
-    checkIdentical(names(meta(hd)), c("META", "contig", "PEDIGREE"))
+    checkIdentical(length(names(header(hd))), 7L)
+    checkIdentical(names(meta(hd)), c("META", "contig", "SAMPLE", "PEDIGREE"))
     checkIdentical(header(hd)$contig[["assembly"]], "B36")
 } 
 
