@@ -48,7 +48,7 @@ importMethodsFrom(GenomicFeatures,
 importFrom(IRanges, 
     CharacterList, FilterRules, IntegerList, 
     IRanges, LogicalList, NumericList, PartitioningByEnd, PartitioningByWidth,
-    seqsplit, splitAsList, successiveViews, FilterMatrix, expand,
+    splitAsList, successiveViews, FilterMatrix, expand,
     endoapply, filterRules, subsetByFilter
 )
 
