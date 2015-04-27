@@ -24,12 +24,9 @@
 }
 
 \section{usage}{
-  ## Defunct in 1.13.z
-  \itemize{
-    \item refLocsToLocalLocs().
-  } 
   ## Removed
   \itemize{
+    \item refLocsToLocalLocs().
     \item readVcfLongForm()
     \item dbSNPFilter()
     \item regionFilter()
@@ -38,15 +35,22 @@
 }
 
 \details{
-  ## Defunct in 1.13.z
-  \itemize{
-    \item \code{refLocsToLocalLocs} has been replaced by \code{mapCoords}.
-  }
   ## Removed
   \itemize{
-    \item readVcfLongForm() has been replaced by expand().
-    \item dbSNPFilter() and regionFilter() have been replaced by filterVcf().
-    \item MatrixToSnpMatrix() has been replaced by genotypeToSnpMatrix().
+    \item{
+      \code{refLocsToLocalLocs} has been replaced by \code{mapToTranscripts}
+      and \code{pmapToTranscripts}.
+    }
+    \item{
+      \code{readVcfLongForm} has been replaced by \code{expand}.
+    }
+    \item{
+      \code{dbSNPFilter} and \code{regionFilter} have been replaced by 
+      \code{filterVcf}.
+    }
+    \item{
+      \code{MatrixToSnpMatrix} has been replaced by \code{genotypeToSnpMatrix}.
+    }
   }
 }
 
@@ -59,6 +63,6 @@
     \item \code{\link{expand}}
     \item \code{\link{filterVcf}}
     \item \code{\link{genotypeToSnpMatrix}}
-    \item \code{\link{mapCoords}}
+    \item \code{\link[GenomicFeatures]{mapToTranscripts}}
   }
 }
