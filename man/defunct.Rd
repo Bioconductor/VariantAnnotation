@@ -24,9 +24,14 @@
 }
 
 \section{usage}{
+  ## Defunct in > 1.15.0
+  \itemize{
+    \item getTranscriptSeqs()
+  }
+
   ## Removed
   \itemize{
-    \item refLocsToLocalLocs().
+    \item refLocsToLocalLocs()
     \item readVcfLongForm()
     \item dbSNPFilter()
     \item regionFilter()
@@ -35,6 +40,12 @@
 }
 
 \details{
+  ## Defunct in > 1.15.0
+  \itemize{
+    \item \code{getTranscriptSeqs} has been replaced by
+          \code{extractTranscriptSeqs} in the GenomicFeatures package.
+  }
+
   ## Removed
   \itemize{
     \item{
@@ -64,5 +75,6 @@
     \item \code{\link{filterVcf}}
     \item \code{\link{genotypeToSnpMatrix}}
     \item \code{\link[GenomicFeatures]{mapToTranscripts}}
+    \item \code{\link[GenomicFeatures]{extractTranscriptSeqs}}
   }
 }

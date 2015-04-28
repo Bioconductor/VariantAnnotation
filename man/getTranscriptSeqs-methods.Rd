@@ -8,6 +8,9 @@
 \title{Get transcript sequences}
 
 \description{
+  This function is defunct. Use GenomicFeatures::extractTranscriptSeqs()
+  instead.
+ 
   Extract transcript sequences from a \link[BSgenome]{BSgenome} object or 
   an \link[Rsamtools]{FaFile}.
 }
@@ -52,24 +55,7 @@
 }
 
 \examples{
-  library(TxDb.Hsapiens.UCSC.hg19.knownGene)
-  library(BSgenome.Hsapiens.UCSC.hg19)
- 
-  txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene 
-  cdsByTx <- cdsBy(txdb)
-
-  ## Use only chromosome 20.
-  seqlevels(cdsByTx, force=TRUE) <- "chr20"
-
-  ## Return a DNAStringSet of sequences corresponding to 
-  ## the cds regions.
-  seqs <- getTranscriptSeqs(cdsByTx, Hsapiens)
-
-  ## Sequences for the cds regions were retrieved from the BSgenome.
-  ## Each element of the cdsByTx GRangesList is represented by
-  ## a single DNAString in 'seqs'. 
-  cdsByTx[1]
-  seqs[1]
+## See ?extractTranscriptSeqs in the GenomicFeatures package.
 }
 
 \keyword{methods}
