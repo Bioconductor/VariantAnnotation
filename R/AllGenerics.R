@@ -8,12 +8,6 @@ setGeneric("predictCoding",
         standardGeneric("predictCoding")
 )
 
-setGeneric("refLocsToLocalLocs",
-    signature=c("ranges", "txdb", "cdsbytx"),
-    function(ranges, txdb, cdsbytx, ...)
-        standardGeneric("refLocsToLocalLocs")
-)
-
 setGeneric("getTranscriptSeqs", signature=c("query", "subject"),
     function(query, subject, ...)
         standardGeneric("getTranscriptSeqs")

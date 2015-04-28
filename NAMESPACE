@@ -130,7 +130,7 @@ exportMethods(
     filterVcf, scanVcf, scanVcfHeader, ScanVcfParam,
     readVcf, writeVcf, expand,
     readVcfLongForm, ## Defunct
-    predictCoding, getTranscriptSeqs, refLocsToLocalLocs, 
+    predictCoding, getTranscriptSeqs, 
     genotypeToSnpMatrix, snpSummary,
     locateVariants, summarizeVariants,
     isSNV, isInsertion, isDeletion, isIndel, isDelins, isTransition,
