@@ -17,15 +17,16 @@
 \S4method{predictCoding}{ExpandedVCF,TxDb,ANY,missing}(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 \S4method{predictCoding}{Ranges,TxDb,ANY,DNAStringSet}(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 \S4method{predictCoding}{GRanges,TxDb,ANY,DNAStringSet}(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
+\S4method{predictCoding}{VRanges,TxDb,ANY,missing}(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 }
 
 \arguments{
-  \item{query}{A \linkS4class{VCF}, \link{Ranges} or \link{GRanges} 
-    instance containing the variants to be annotated. If \code{query} is a 
-    \link[IRanges]{Ranges} it will be coerced to a \link{GRanges}.
-    If a \linkS4class{VCF} is provided the \code{GRanges} returned by
-    the \code{rowRanges()} accessor will be used. All elementMetadata columns
-    are ignored.
+  \item{query}{A \linkS4class{VCF}, \link{Ranges}, \link{GRanges} or
+    \code{VRanges} instance containing the variants to be annotated. If
+    \code{query} is a \link[IRanges]{Ranges} or \code{VRanges} it is coerced to
+    a \link{GRanges}.  If a \linkS4class{VCF} is provided the \code{GRanges}
+    returned by the \code{rowRanges()} accessor will be used. All
+    elementMetadata columns are ignored.
 
     When \code{query} is not a \code{VCF} object a \code{varAllele} must be
     provided. The \code{varAllele} must be a \code{DNAStringSet} the same length
@@ -61,6 +62,17 @@
   }
   \item{ignore.strand}{A \code{logical} indicating if strand should be ignored
     when performing overlaps.
+
+    When \code{ignore.strand == TRUE} the \code{query} strand is set to
+    '*' and can overlap with any strand of the \code{subject}. The
+    return \code{GRanges} reflects the strand of the \code{subject} hit,
+    however, the positions and alleles reported are computed as if 
+    both were from the '+' strand.
+
+    \code{ignore.strand == FALSE} requires the \code{query} and \code{subject}
+    to have compatible strand. Again the return \code{GRanges} reports
+    the strand of the \code{subject} hit but in this case positions and
+    alleles are computed according to the strand of the \code{subject}.
   }
 }
 

@@ -47,10 +47,20 @@ setMethod("predictCoding", c("GRanges", "TxDb", "ANY", "DNAStringSet"),
 })
 
 setMethod("predictCoding", c("VRanges", "TxDb", "ANY", "missing"),
-function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
+    function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 {
-  .predictCoding(query, subject, seqSource, alt(query), ...,
-                 ignore.strand=ignore.strand)
+    varAllele <- alt(query)
+    query <- as(query, "GRanges")
+    if (!is(varAllele, "DNAStringSet")) {
+        tryCatch({
+            varAllele <- DNAStringSet(varAllele)
+        }, error=function(e) {
+            stop(paste0("attempt to coerce 'alt' to DNAStringSet failed with ",
+                 "error: ", conditionMessage(e)))
+        })
+    }
+    .predictCoding(query, subject, seqSource, varAllele, ...,
+                   ignore.strand=ignore.strand)
 })
 
 .predictCoding <-
