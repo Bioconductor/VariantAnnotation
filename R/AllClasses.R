@@ -313,8 +313,8 @@ setClass("AllVariants",
 }
 
 .valid.VRanges.strand <- function(object) {
-  if (any(object@strand != "+"))
-    paste("'strand' must always be '+'")
+  if (any(object@strand == "-"))
+    paste("'strand' must always be '+' or '*'")
 }
 
 naToZero <- function(x) ifelse(is.na(x), 0L, x)

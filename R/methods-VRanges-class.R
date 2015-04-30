@@ -111,7 +111,7 @@ VRanges <-
            hardFilters = FilterRules())
 {
   gr <- GRanges(seqnames, ranges,
-                strand = .rleRecycleVector("+", length(ranges)), ...)
+                strand = .rleRecycleVector("*", length(ranges)), ...)
   if (length(gr) == 0L && length(ref) == 0L) {
     maxLen <- 0L
   } else {

@@ -1,6 +1,6 @@
 .TARGET_seqnames <- Rle(factor(c("chr1", "chr2")))
 .TARGET_ranges <- IRanges(c(1, 10), c(5, 20))
-.TARGET_strand <- Rle(strand("+"), 2)
+.TARGET_strand <- Rle(strand("*"), 2)
 .TARGET_gr <- GRanges(.TARGET_seqnames, .TARGET_ranges, .TARGET_strand)
 .TARGET_ref <- c("T", "A")
 .TARGET_alt <- c("C", "T")
@@ -190,7 +190,7 @@ test_VRanges_coerce <- function() {
 
 make_TARGET_VRanges_vcf <- function() {
   gr <- GRanges(c("1", "1", "3", "2", "1", "2"),
-                IRanges(c(1, 20, 15, 5, 20, 5), width = 1L), "+",
+                IRanges(c(1, 20, 15, 5, 20, 5), width = 1L), "*",
                 TS = c(TRUE, FALSE, FALSE, TRUE, TRUE, NA))
   seqinfo(gr) <- Seqinfo(c("1", "3", "2"), c(NA, 22, 25),
                          genome = c(NA, "foo", NA))
