@@ -116,7 +116,7 @@
 .formatInfo <- function(x, hdr, nrecords)
 {
     ## no data
-    if (!length(x) || (1L == length(x) && all(x[[1]] == ".")))
+    if (!length(x) || (1L == length(x) && all(x[[1]] == ".", na.rm=TRUE)))
         return(DataFrame(row.names=seq_len(nrecords)))
     ## data in file but not in header
     if (!length(hdr) && length(x[[1]])) {

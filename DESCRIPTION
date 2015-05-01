@@ -3,7 +3,7 @@ Type: Package
 Title: Annotation of Genetic Variants
 Description: Annotate variants, compute amino acid coding changes,
         predict coding outcomes
-Version: 1.15.6
+Version: 1.15.7
 Authors@R: c(person("Valerie", "Obenchain", role=c("aut", "cre"),
         email="vobencha@fhcrc.org"),
     person("Martin", "Morgan", role="aut"),
