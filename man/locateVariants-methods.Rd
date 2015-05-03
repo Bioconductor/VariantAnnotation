@@ -48,7 +48,7 @@ locateVariants(query, subject, region, ...)
   \item{subject}{A \link[GenomicFeatures]{TxDb} or \code{GRangesList}
     object that serves as the annotation. GFF files can be converted to
     \link[GenomicFeatures]{TxDb} objects with 
-    \code{makeTranscriptDbFromGFF()} in the \code{GenomicFeatures} package.
+    \code{makeTxDbFromGFF()} in the \code{GenomicFeatures} package.
   }
   \item{region}{An instance of one of the 8 VariantType classes :
     \code{CodingVariants}, \code{IntronVariants}, \code{FiveUTRVariants}, 

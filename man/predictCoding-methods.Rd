@@ -41,7 +41,7 @@
   \item{subject}{A \link[GenomicFeatures]{TxDb} object that serves 
     as the annotation. GFF files can be converted to 
     \link[GenomicFeatures]{TxDb} objects with 
-    \code{makeTranscriptDbFromGFF()} in the \code{GenomicFeatures} package.
+    \code{makeTxDbFromGFF()} in the \code{GenomicFeatures} package.
   } 
   \item{seqSource}{A \code{\link[BSgenome]{BSgenome}} instance or an \link{FaFile}
     to be used for sequence extraction.

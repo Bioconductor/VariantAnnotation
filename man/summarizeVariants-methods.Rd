@@ -34,7 +34,7 @@
   \item{query}{A \link[GenomicFeatures]{TxDb} or \code{GRangesList}
     object that serves as the annotation. GFF files can be converted to
     \link[GenomicFeatures]{TxDb} objects with 
-    \code{makeTranscriptDbFromGFF()} in the \code{GenomicFeatures} package.
+    \code{makeTxDbFromGFF()} in the \code{GenomicFeatures} package.
   }
   \item{subject}{A \linkS4class{VCF} object containing the variants.
   }
