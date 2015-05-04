@@ -78,18 +78,33 @@ test_predictCoding_strand <- function()
               strand=c("+", "-", "*", "*", "*"),
               variant=variant)
     names(query) <- LETTERS[1:5]
-    current <- quiet(fun(query, cdsbytx, Hsapiens, variant))
 
+    current <- quiet(fun(query, cdsbytx, Hsapiens, variant))
     expected <- c("G", "C", "C", "C", "G", "G", "T", "A", "C")
     checkIdentical(as.character(mcols(current)$varAllele), expected)
 
-    ## ignore.strand
-    strand(query) <- "+"
-    p1 <- quiet(fun(query, cdsbytx, Hsapiens, variant,
-        ignore.strand=TRUE))
-    checkIdentical(12L, length(p1))
-    p2 <- quiet(fun(query, cdsbytx, Hsapiens, variant,
-        ignore.strand=FALSE))
-    checkIdentical(4L, length(p2))
+    ## query "+", subject "-"
+    v <- variant[2]
+    q <- query[2]
+    strand(q) <- "+"
+    s <- cdsbytx[3]
+    current <- quiet(fun(q, s,  Hsapiens, v, ignore.strand=FALSE))
+    checkIdentical(length(current), 0L)
+
+    current <- quiet(fun(q, s, Hsapiens, v, ignore.strand=TRUE))
+    checkIdentical(as.character(mcols(current)$REFAA), "V")
+    checkIdentical(as.character(mcols(current)$VARAA), "A")
+    checkIdentical(mcols(current)$CDSLOC, IRanges(8, 8))
+
+    ## query "-", subject "+"
+    strand(q) <- "-"
+    s <- cdsbytx[1]
+    current <- quiet(fun(q, s, Hsapiens, v, ignore.strand=FALSE))
+    checkIdentical(length(current), 0L)
+
+    current <- quiet(fun(q, s, Hsapiens, v, ignore.strand=TRUE))
+    checkIdentical(as.character(mcols(current)$REFAA), "*")
+    checkIdentical(as.character(mcols(current)$VARAA), "*")
+    checkIdentical(mcols(current)$CDSLOC, IRanges(3, 3))
 }
 

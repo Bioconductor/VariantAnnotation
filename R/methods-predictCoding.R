@@ -100,7 +100,7 @@ setMethod("predictCoding", c("VRanges", "TxDb", "ANY", "missing"),
 
     ## variant location in cds region
     mcols(query) <- append(mcols(query), DataFrame(varAllele=varAllele))
-    txlocal <- .localCoordinates(query, cdsbytx, ignore.strand, ...)
+    txlocal <- .localCoordinates(query, cdsbytx, ignore.strand=FALSE, ...)
     if (length(txlocal) == 0)
         return(txlocal)
 
