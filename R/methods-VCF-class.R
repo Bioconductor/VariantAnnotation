@@ -9,7 +9,7 @@
 
 VCF <-
     function(rowRanges=GRanges(), colData=DataFrame(), 
-             exptData=SimpleList(header=VCFHeader()), 
+             exptData=list(header=VCFHeader()), 
              fixed=DataFrame(),
              info=DataFrame(row.names=seq_along(rowRanges)), 
              geno=SimpleList(),
@@ -37,7 +37,8 @@ VCF <-
     }
 
     new(class, SummarizedExperiment(assays=geno, rowRanges=rowRanges,
-        colData=colData, exptData=exptData), fixed=fixed, info=info, ...)
+        colData=colData, metadata=as.list(exptData)), fixed=fixed, info=info,
+        ...)
 }
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -46,7 +47,7 @@ VCF <-
 
 .checkLength <- function (x, len) 
 {
-    if (len != length(slot(x, "rowData"))) 
+    if (len != length(slot(x, "rowRanges"))) 
         stop("length(value) must equal length(rowRanges(x))")
 }
 
@@ -137,7 +138,7 @@ setReplaceMethod("fixed", c("VCF", "DataFrame"),
 setMethod("rowRanges", "VCF", 
     function(x, ..., fixed = TRUE) 
 {
-    gr <- slot(x, "rowData")
+    gr <- slot(x, "rowRanges")
     if (fixed)
         if (length(slot(x, "fixed")) != 0L)
             mcols(gr) <- append(mcols(gr), slot(x, "fixed"))
@@ -149,13 +150,13 @@ setReplaceMethod("rowRanges", c("VCF", "GRanges"),
 {
     fixed_idx <- names(mcols(value)) %in% c("REF", "ALT", "QUAL", "FILTER")
     slot(x, "fixed") <- mcols(value)[fixed_idx] 
-    slot(x, "rowData") <- value[,!fixed_idx]
+    slot(x, "rowRanges") <- value[,!fixed_idx]
     validObject(x)
     x
 })
 
 ### Must define VCF methods for 'mcols<-' and 'dimnames<-' instead of 
-### inheriting from SummarizedExperiment. 'fixed' fields are stored in 
+### inheriting from RangedSummarizedExperiment. 'fixed' fields are stored in 
 ### a separate slot and not as metadata columns of 'rowRanges'.
 
 setReplaceMethod("mcols", c("VCF", "DataFrame"),
@@ -163,18 +164,18 @@ setReplaceMethod("mcols", c("VCF", "DataFrame"),
 {
     idx <- names(value) %in% "paramRangeID"
     fixed(x) <- value[!idx] 
-    slot(x, "rowData") <- value[,idx]
+    slot(x, "rowRanges") <- value[,idx]
     x
 })
 
 setReplaceMethod("dimnames", c("VCF", "list"),
     function(x, value)
 {
-    rowRanges <- slot(x,"rowData")
+    rowRanges <- slot(x, "rowRanges")
     names(rowRanges) <- value[[1]]
     colData <- colData(x)
     rownames(colData) <- value[[2]]
-    GenomicRanges:::clone(x, rowData=rowRanges, colData=colData)
+    GenomicRanges:::clone(x, rowRanges=rowRanges, colData=colData)
 })
  
 ### info 
@@ -269,13 +270,13 @@ setReplaceMethod("strand", "VCF",
 setMethod("header", "VCF",
     function(x)
 { 
-    exptData(x)$header
+    metadata(x)$header
 })
 
 setReplaceMethod("header", c("VCF", "VCFHeader"),
     function(x, value)
 {
-    slot(x, "exptData")$header <- value
+    slot(x, "metadata")$header <- value
     .valid.VCFHeadervsVCF(x)
     x
 })
@@ -292,7 +293,7 @@ setMethod("[", c("VCF", "ANY", "ANY"),
 
     if (!missing(i) && is.character(i)) {
         msg <- "<VCF>[i,] index out of bounds: %s"
-        i <- GenomicRanges:::.SummarizedExperiment.charbound(i, rownames(x), msg)
+        i <- SummarizedExperiment:::.SummarizedExperiment.charbound(i, rownames(x), msg)
     }
 
     ii <- ff <- NULL
@@ -307,11 +308,11 @@ setMethod("[", c("VCF", "ANY", "ANY"),
     } else if (missing(i)) {
         callNextMethod(x, , j, ...)
     } else if (missing(j)) {
-        callNextMethod(x, i, , rowData=slot(x, "rowData")[i,,drop=FALSE],
+        callNextMethod(x, i, , rowRanges=slot(x, "rowRanges")[i,,drop=FALSE],
                        info=slot(x, "info")[ii,,drop=FALSE],
                        fixed=slot(x, "fixed")[ff,,drop=FALSE], ...)
     } else {
-        callNextMethod(x, i, j, rowData=slot(x, "rowData")[i,,drop=FALSE],
+        callNextMethod(x, i, j, rowRanges=slot(x, "rowRanges")[i,,drop=FALSE],
                        info=slot(x, "info")[ii,,drop=FALSE],
                        fixed=slot(x, "fixed")[ff,,drop=FALSE], ...)
     }
@@ -323,7 +324,7 @@ setReplaceMethod("[",
 {
     if (!missing(i) && is.character(i)) {
         msg <- "<VCF>[i,]<- index out of bounds: %s"
-        i <- GenomicRanges:::.SummarizedExperiment.charbound(i, rownames(x), msg)
+        i <- SummarizedExperiment:::.SummarizedExperiment.charbound(i, rownames(x), msg)
     }
 
     if (missing(i) && missing(j)) {
@@ -331,10 +332,10 @@ setReplaceMethod("[",
     } else if (missing(i)) {
         callNextMethod(x, , j, ..., value=value)
     } else if (missing(j)) {
-        callNextMethod(x, i, , rowData=local({
-            rd <- slot(x, "rowData")
-            rd[i,] <- slot(value, "rowData")
-            names(rd)[i] <- names(slot(value, "rowData"))
+        callNextMethod(x, i, , rowRanges=local({
+            rd <- slot(x, "rowRanges")
+            rd[i,] <- slot(value, "rowRanges")
+            names(rd)[i] <- names(slot(value, "rowRanges"))
             rd
         }), info=local({
             ii <- slot(x, "info")
@@ -346,10 +347,10 @@ setReplaceMethod("[",
             ff
         }), ..., value=value)
     } else {
-        callNextMethod(x, i, j, rowData=local({
-            rd <- slot(x, "rowData")
-            rd[i,] <- slot(value, "rowData")
-            names(rd)[i] <- names(slot(value, "rowData"))
+        callNextMethod(x, i, j, rowRanges=local({
+            rd <- slot(x, "rowRanges")
+            rd[i,] <- slot(value, "rowRanges")
+            names(rd)[i] <- names(slot(value, "rowRanges"))
             rd
         }), info=local({
             ii <- slot(x, "info")
@@ -378,14 +379,14 @@ setMethod("rbind", "VCF",
             stop("'...' objects must have the same number of samples")
 
     rowRanges <- do.call(c, lapply(args,
-        function(i) slot(i, "rowData")))
+        function(i) slot(i, "rowRanges")))
     colData <- GenomicRanges:::.cbind.DataFrame(args, colData, "colData")
     assays <- GenomicRanges:::.bind.arrays(args, rbind, "assays")
-    exptData <- do.call(c, lapply(args, exptData))
+    metadata <- do.call(c, lapply(args, metadata))
     info <- do.call(rbind, lapply(args, info))
     fixed <- do.call(rbind, lapply(args, fixed))
-    new(class(args[[1]]), assays=assays, rowData=rowRanges,
-        colData=colData, exptData=exptData, fixed=fixed, info=info)
+    new(class(args[[1]]), assays=assays, rowRanges=rowRanges,
+        colData=colData, metadata=metadata, fixed=fixed, info=info)
 })
 
 .renameSamples <- function(args)
@@ -414,13 +415,13 @@ setMethod("cbind", "VCF",
     info <- GenomicRanges:::.cbind.DataFrame(args, info, "info") 
     colData <- do.call(rbind, lapply(args, colData))
     assays <- GenomicRanges:::.bind.arrays(args, cbind, "assays")
-    exptData <- do.call(c, lapply(args, exptData))
+    metadata <- do.call(c, lapply(args, metadata))
     if (!.compare(lapply(args, "fixed")))
         stop("data in 'fixed(VCF)' must match.")
     else
         fixed <- fixed(args[[1]]) 
-    new(class(args[[1]]), assays=assays, rowData=rowRanges,
-        colData=colData, exptData=exptData, fixed=fixed, info=info)
+    new(class(args[[1]]), assays=assays, rowRanges=rowRanges,
+        colData=colData, metadata=metadata, fixed=fixed, info=info)
 
 
 })
@@ -529,7 +530,7 @@ setMethod("updateObject", "VCF",
     {
         if (verbose) 
             message("updateObject(object = 'VCF')") 
-        VCF(rowRanges=rowRanges(object), colData=colData(object), exptData=exptData(object), 
+        VCF(rowRanges=rowRanges(object), colData=colData(object), exptData=metadata(object), 
             info=mcols(info(object))[-1], fixed=mcols(fixed(object))[-1], geno=geno(object))
     }
 )

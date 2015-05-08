@@ -208,9 +208,9 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
       This slot contains a \code{DataFrame} describing the samples. If present, 
       the sample names following FORMAT in the VCF file become the row names.
     }
-    \item{exptData: }{ 
-      Header information present in the file is put into a \code{SimpleList}
-      in \code{exptData}.
+    \item{metadata: }{ 
+      Header information present in the file is put into a \code{list}
+      in \code{metadata}.
     }
   }
   See references for complete details of the VCF file format. 

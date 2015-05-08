@@ -91,16 +91,17 @@
 \title{VCF class objects}
 
 \description{
-  The VCF class is a virtual class extended from \code{SummarizedExperiment}. 
-  The subclasses, \code{CompressedVCF} and \code{ExtendedVCF}, are containers 
-  for holding data from Variant Call Format files.
+  The VCF class is a virtual class extended from
+  \code{RangedSummarizedExperiment}. The subclasses, \code{CompressedVCF}
+  and \code{ExtendedVCF}, are containers for holding data from
+  Variant Call Format files.
 }
 
 \section{Constructors}{
   \describe{
     \item{}{
       \code{readVcf(rowRanges = GRanges(), colData = DataFrame(), 
-                exptData = SimpleList(), fixed = DataFrame(), 
+                exptData = list(), fixed = DataFrame(), 
                 info = DataFrame(), geno = SimpleList(), 
                 ..., collapsed=TRUE, verbose = FALSE)}
       Creates a CollapsedVCF class from data in a Variant Call
@@ -108,7 +109,7 @@
     }
     \item{}{
       \code{VCF(rowRanges = GRanges(), colData = DataFrame(), 
-                exptData = SimpleList(header = VCFHeader()), 
+                exptData = list(header = VCFHeader()), 
                 fixed = DataFrame(), info = DataFrame(), 
                 geno = SimpleList(), ..., collapsed=TRUE, 
                 verbose = FALSE)}
@@ -185,8 +186,8 @@
        \code{geno(vcf, withDimnames=FALSE)}.
     }
     \item{}{
-      \code{exptData(x)}:
-       Gets a SimpleList of experiment-related data. By default this
+      \code{metadata(x)}:
+       Gets a \code{list} of experiment-related data. By default this
        list includes the \sQuote{header} information from the VCF file. 
        See the use of \code{header()} for details in extracting
        header information. 
@@ -253,8 +254,8 @@
       numeric extension ordered as they were input to \code{rbind} e.g.,
       \dQuote{Samples.1, Samples.2, ...} etc. 
 
-      \code{exptData} from all objects are combined into a
-      \code{SimpleList} with no name checking.
+      \code{metadata} from all objects are combined into a
+      \code{list} with no name checking.
 
     }
   }
@@ -319,7 +320,7 @@
     \item{colData}{A \code{DataFrame} describing the samples. Row names, if 
       present, become the column names of the \code{VCF}.
     }
-    \item{exptData}{A \code{SimpleList} describing the header of the VCF file or 
+    \item{metadata}{A \code{list} describing the header of the VCF file or 
       additional information for the overall experiment. 
     }
     \item{...}{For \code{cbind} and \code{rbind} a list of VCF objects.
@@ -348,20 +349,20 @@
       a VCF file.
   }
 
-  Slots inherited from \code{SummarizedExperiment},
+  Slots inherited from \code{RangedSummarizedExperiment},
   \itemize{
-    \item \code{exptData}: A \link{SimpleList}-class instance containing the 
+    \item \code{metadata}: A \code{list} containing the 
           file header or other information about the overall experiment.
     \item \code{rowRanges}: A \link{GRanges}-class instance defining the
            variant ranges and associated metadata columns of REF, ALT, QUAL 
            and FILTER.
     \item \code{colData}: A \link{DataFrame}-class instance describing the 
           samples and associated metadata.
-    \item \code{geno}: The \code{assays} slot from \code{SummarizedExperiment}
-          has been renamed as \code{geno} for the VCF class. This slot contains
-          the genotype information immediately following the FORMAT field in a 
-          VCF file. Each element of the \code{list} or \code{SimpleList} is a 
-          matrix or array. 
+    \item \code{geno}: The \code{assays} slot from
+          \code{RangedSummarizedExperiment} has been renamed as \code{geno}
+          for the VCF class. This slot contains the genotype information
+          immediately following the FORMAT field in a VCF file. Each element
+          of the \code{list} or \code{SimpleList} is a matrix or array. 
   }
 
   It is expected that users will not create instances of the VCF class
@@ -380,7 +381,7 @@
   \link{GRanges},
   \link[S4Vectors]{DataFrame},
   \link[S4Vectors]{SimpleList},
-  \link[GenomicRanges]{SummarizedExperiment},
+  \link[SummarizedExperiment]{RangedSummarizedExperiment},
   \code{\link{readVcf}},
   \code{\link{writeVcf}}
   \code{\link{isSNV}}

@@ -16,12 +16,12 @@ setMethod("expand", "CollapsedVCF",
             AD <- "AD" %in% names(geno(x))
             if (AD)
               geno(x)$AD <- .expandAD(geno(x)$AD, nrow(x), ncol(x))
-            return(VCF(rd, colData(x), exptData(x), fxd, .unlistAltInfo(x), 
+            return(VCF(rd, colData(x), metadata(x), fxd, .unlistAltInfo(x), 
                        geno(x), ..., collapsed=FALSE))
         }
 
         ## info, fixed, geno
-        hdr <- exptData(x)$header
+        hdr <- metadata(x)$header
         idx <- rep.int(seq_len(nrow(x)), elt)
         iexp <- .expandInfo(x, hdr, elt, idx)
         fexp <- fixed(x)[idx, ]
@@ -34,7 +34,7 @@ setMethod("expand", "CollapsedVCF",
             mcols(rdexp) <- NULL
         } else rdexp <- rd[idx, "paramRangeID"]
 
-        VCF(rdexp, colData(x), exptData(x), fexp, iexp, gexp,
+        VCF(rdexp, colData(x), metadata(x), fexp, iexp, gexp,
             ..., collapsed=FALSE)
     }
 )

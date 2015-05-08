@@ -8,7 +8,7 @@
 ###
 
 setClass("VCF",
-    contains=c("VIRTUAL", "SummarizedExperiment"),
+    contains=c("VIRTUAL", "RangedSummarizedExperiment"),
     representation( 
         fixed="DataFrame",
         info="DataFrame")
@@ -83,12 +83,12 @@ setClass("CollapsedVCF",
                       QUAL=numeric(), FILTER=character())),
     validity=.valid.VCF)
 
-setAs("CollapsedVCF", "SummarizedExperiment",
+setAs("CollapsedVCF", "RangedSummarizedExperiment",
     def = function(from)
     {
         if (strict) {
             force(from)
-            class(from) <- "SummarizedExperiment"
+            class(from) <- "RangedSummarizedExperiment"
         }
         from
     },
@@ -121,14 +121,14 @@ setClass("ExpandedVCF",
 
 ### Coercion:
 ### Recursion problem in an automatically generated coerce method requires
-### that we handle coercion from subclasses to SummarizedExperiment.
+### that we handle coercion from subclasses to RangedSummarizedExperiment.
 
-setAs("ExpandedVCF", "SummarizedExperiment",
+setAs("ExpandedVCF", "RangedSummarizedExperiment",
     def = function(from)
     {
         if (strict) {
             force(from)
-            class(from) <- "SummarizedExperiment"
+            class(from) <- "RangedSummarizedExperiment"
         }
         from
     },

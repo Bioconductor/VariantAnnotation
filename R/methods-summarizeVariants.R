@@ -77,14 +77,14 @@ setMethod("summarizeVariants", c("GRangesList", "VCF", "function"),
 
     SummarizedExperiment(rowRanges=query[unique(subjectHits(hits))], 
                          colData=colData(subject), 
-                         exptData=exptData(subject),
+                         metadata=metadata(subject),
                          assays=SimpleList(counts=fac_x_smp))
 })
 
 .baseSE <- function(query, subject, ...)
 {
     SummarizedExperiment(rowRanges=query, colData=colData(subject),
-                         exptData=exptData(subject),
+                         metadata=metadata(subject),
                          assays=SimpleList(counts=matrix(NA_integer_, 
                              nrow=length(query), ncol=ncol(subject))))
 }

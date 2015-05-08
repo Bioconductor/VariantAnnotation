@@ -18,10 +18,10 @@ test_writeVcf_tags <- function()
     fl <- system.file("extdata", "chr22.vcf.gz", package="VariantAnnotation")
     dest <- tempfile()
     vcf1 <- readVcf(fl, "hg19")
-    hd1 <- exptData(vcf1)$header
+    hd1 <- metadata(vcf1)$header
     writeVcf(vcf1, dest)
     vcf2 <- readVcf(dest, "hg19")
-    hd2 <- exptData(vcf2)$header
+    hd2 <- metadata(vcf2)$header
     checkTrue(names(meta(hd1)) %in% names(meta(hd2))) 
     checkIdentical(names(geno(vcf1)), names(geno(vcf2))) 
     checkIdentical(colnames(mcols(info(vcf1))), colnames(mcols(info(vcf2))))

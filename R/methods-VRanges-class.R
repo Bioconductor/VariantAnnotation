@@ -409,7 +409,7 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
                         FORMAT = makeFORMATheader(mcols(x)[genoMCols]),
                         INFO = makeINFOheader(mcols(xUniq)[info]),
                         FILTER = makeFILTERheader(x)))
-  exptData <- SimpleList(header = header)
+  metadata <- list(header = header)
 
   alt <- as.character(alt(xUniq))
   qual <- xUniq$QUAL
@@ -475,7 +475,7 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
 
   info <- mcols(xUniq)[info]
   
-  VCF(rowRanges = rowRanges, colData = colData, exptData = exptData,
+  VCF(rowRanges = rowRanges, colData = colData, metadata = metadata,
       fixed = fixed, geno = geno, info = info, collapsed = FALSE)
 }
 

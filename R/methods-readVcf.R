@@ -154,7 +154,7 @@ setMethod(readVcf, c(file="character", genome="missing",
     geno <- SimpleList(lapply(vcf$GENO, `dimnames<-`, NULL))
 
     vcf <- NULL
-    VCF(rowRanges=rowRanges, colData=colData, exptData=SimpleList(header=hdr),
+    VCF(rowRanges=rowRanges, colData=colData, exptData=list(header=hdr),
         fixed=fixed, info=info, geno=geno)
 }
 

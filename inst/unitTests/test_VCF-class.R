@@ -175,7 +175,7 @@ test_VCF_subsetassign <- function()
     checkIdentical(rowRanges(vcf)[2:1,], rowRanges(ss1)[1:2,])
     checkIdentical(rowRanges(vcf[-(1:2),]), rowRanges(ss1)[-(1:2),])
     checkIdentical(colData(vcf), colData(ss1))
-    checkIdentical(c(exptData(vcf), exptData(vcf)), exptData(ss1))
+    checkIdentical(c(metadata(vcf), metadata(vcf)), metadata(ss1))
 
     ss1 <- vcf 
     ss1[,1:2] <- ss1[,2:1,drop=FALSE]
@@ -184,7 +184,7 @@ test_VCF_subsetassign <- function()
     checkIdentical(colData(vcf)[-(1:2),,drop=FALSE],
                    colData(ss1)[-(1:2),,drop=FALSE])
     checkIdentical(rowRanges(vcf), rowRanges(ss1))
-    checkIdentical(c(exptData(vcf), exptData(vcf)), exptData(ss1))
+    checkIdentical(c(metadata(vcf), metadata(vcf)), metadata(ss1))
 }
 
 test_VCF_seqlevels <- function()

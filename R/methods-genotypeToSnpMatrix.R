@@ -41,7 +41,7 @@ setMethod("genotypeToSnpMatrix", "CollapsedVCF",
     if (!uncertain) {
         gt <- geno(x)$GT
     } else {
-        geno.cols <- row.names(geno(exptData(x)[["header"]]))
+        geno.cols <- row.names(geno(metadata(x)[["header"]]))
         if ("GP" %in% geno.cols) {
             gt <- geno(x)$GP
             if (mode(gt) == "list") {
