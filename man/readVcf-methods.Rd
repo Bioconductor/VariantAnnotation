@@ -187,7 +187,7 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
       The \code{genome} argument is stored in the seqinfo of the \code{GRanges} 
       and can be accessed with \code{genome(<VCF>)}.
 
-      One elementMetadata column, \code{paramRangeID}, is included with the
+      One metadata column, \code{paramRangeID}, is included with the
       \code{rowRanges}. This ID is meaningful when multiple ranges are
       specified in the \code{ScanVcfParam} and distinguishes which records
       match each range.

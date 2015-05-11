@@ -25,8 +25,8 @@
     \code{VRanges} instance containing the variants to be annotated. If
     \code{query} is a \link[IRanges]{Ranges} or \code{VRanges} it is coerced to
     a \link{GRanges}.  If a \linkS4class{VCF} is provided the \code{GRanges}
-    returned by the \code{rowRanges()} accessor will be used. All
-    elementMetadata columns are ignored.
+    returned by the \code{rowRanges()} accessor will be used. All metadata
+    columns are ignored.
 
     When \code{query} is not a \code{VCF} object a \code{varAllele} must be
     provided. The \code{varAllele} must be a \code{DNAStringSet} the same length
@@ -105,7 +105,7 @@
   The strand of the output \code{GRanges} represents the strand of the 
   \code{subject} hit.
 
-  At a minimum, the \code{elementMetadata} columns include,
+  At a minimum, the metadata columns (accessible with \code{mcols}) include,
   \describe{
     \item{\code{varAllele}}{
       Variant allele. This value is reverse complemented for an unstranded 

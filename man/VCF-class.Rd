@@ -136,7 +136,7 @@
       When \code{fixed = TRUE}, REF, ALT, QUAL and FILT metadata columns are 
       included. 
       
-      One elementMetadata column, \code{paramRangeID}, is included with the
+      One metadata column, \code{paramRangeID}, is included with the
       \code{rowRanges}. This ID is meaningful when multiple ranges are
       specified in the \code{ScanVcfParam} and distinguishes which records
       match each range.
