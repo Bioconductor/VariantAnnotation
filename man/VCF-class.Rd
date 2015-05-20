@@ -13,7 +13,6 @@
 
 % Constructors:
 \alias{VCF}
-\alias{updateObject,VCF-method}
 
 % Coercion methods:
 

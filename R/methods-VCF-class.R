@@ -521,21 +521,6 @@ setMethod(show, "VCF",
 }
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-### updateObject 
-###
-
-### Creates a CollapsedVCF from a VCF.
-setMethod("updateObject", "VCF",
-    function(object, ..., verbose=FALSE)
-    {
-        if (verbose) 
-            message("updateObject(object = 'VCF')") 
-        VCF(rowRanges=rowRanges(object), colData=colData(object), exptData=metadata(object), 
-            info=mcols(info(object))[-1], fixed=mcols(fixed(object))[-1], geno=geno(object))
-    }
-)
-
-### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### restrictToSNV 
 ###
 
