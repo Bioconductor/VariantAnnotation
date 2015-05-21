@@ -44,12 +44,12 @@ setMethod("genotypeToSnpMatrix", "CollapsedVCF",
         geno.cols <- row.names(geno(metadata(x)[["header"]]))
         if ("GP" %in% geno.cols) {
             gt <- geno(x)$GP
-            if (mode(gt) == "list") {
+            if (storage.mode(gt) == "list") {
                 gt <- .matrixOfListsToArray(gt)
             }
         } else if ("GL" %in% geno.cols) {
             gt <- geno(x)$GL
-            if (mode(gt) == "list") {
+            if (storage.mode(gt) == "list") {
                 gt <- .matrixOfListsToArray(gt)
             }
             gt <- GLtoGP(gt)
@@ -173,7 +173,7 @@ probabilityToSnpMatrix <- function(probs) {
 }
 
 GLtoGP <- function(gl) {
-    if (is.matrix(gl) & mode(gl) == "list") {
+    if (is.matrix(gl) && storage.mode(gl) == "list") {
         gp <- gl
         for (i in 1:length(gp)) {
             gp[[i]] <- 10^gl[[i]] / sum(10^gl[[i]], na.rm=TRUE)

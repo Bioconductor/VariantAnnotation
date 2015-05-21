@@ -159,7 +159,7 @@
 }
 
 .pasteCollapseRows <- function(x, sep = ",") {
-  if (!is.matrix(x) || mode(x) != "character") {
+  if (!is.matrix(x) || storage.mode(x) != "character") {
     stop("'x' must be a matrix of mode character")
   }
   if (!isSingleString(sep) || nchar(sep) == 0L) {

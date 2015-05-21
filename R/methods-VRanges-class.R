@@ -129,7 +129,7 @@ VRanges <-
   altDepth <- .rleRecycleVector(altDepth, maxLen)
   totalDepth <- .rleRecycleVector(totalDepth, maxLen)
   softFilterMatrix <- as.matrix(softFilterMatrix)
-  mode(softFilterMatrix) <- "logical"
+  storage.mode(softFilterMatrix) <- "logical"
   softFilterMatrix.ind <-
     S4Vectors:::recycleVector(seq_len(nrow(softFilterMatrix)), maxLen)
   softFilterMatrix <- softFilterMatrix[softFilterMatrix.ind,,drop=FALSE]
