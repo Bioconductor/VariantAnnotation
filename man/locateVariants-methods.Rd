@@ -77,7 +77,7 @@ locateVariants(query, subject, region, ...)
     different \code{query} instances.
   }
   \item{ignore.strand}{A \code{logical} indicating if strand should be
-    igored when performing overlaps.
+    ignored when performing overlaps.
   }
   \item{asHits}{A \code{logical} indicating if the results should be 
     returned as a \link[S4Vectors]{Hits} object. Not applicable when
@@ -150,7 +150,7 @@ locateVariants(query, subject, region, ...)
 }
 \value{
   A \code{GRanges} object with a row for each variant-transcript match.
-  The strand of the output matches the strand of the \code{subject} hit 
+  Strand of the output is from the \code{subject} hit 
   except in the case of IntergenicVariants. For intergenic, multiple precede
   and follow gene ids are returned for each variant. When 
   \code{ignore.strand=TRUE} the return strand is \code{*} because

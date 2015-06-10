@@ -477,13 +477,13 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
         ## ID all genes that fall in upstream / downstream range.
         ## upstream == follow:
         f_range <- .shiftRangeUpDown(q_range, upstream(region), TRUE)
-        f_fo <- findOverlaps(f_range, s_unlist)
+        f_fo <- findOverlaps(f_range, s_unlist, ignore.strand=ignore.strand)
         f_factor <- factor(queryHits(f_fo), seq_len(queryLength(f_fo)))
         f_genes <- unname(splitAsList(s_genes[subjectHits(f_fo)], f_factor))
  
         ## downstream == precede:
         p_range <- .shiftRangeUpDown(q_range, downstream(region), FALSE)
-        p_fo <- findOverlaps(p_range, s_unlist)
+        p_fo <- findOverlaps(p_range, s_unlist, ignore.strand=ignore.strand)
         p_factor <- factor(queryHits(p_fo), seq_len(queryLength(p_fo)))
         p_genes <- unname(splitAsList(s_genes[subjectHits(p_fo)], p_factor))
 
@@ -532,18 +532,19 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
         return(findOverlaps(query, subject, type="within", 
                             ignore.strand=ignore.strand))
 
-    usub <- unlist(subject) ## names needed for mapping
     map <- mapToTranscripts(unname(query), subject, 
                             ignore.strand=ignore.strand)
     if (length(map) > 0) {
         xHits <- map$xHits
-        if (!is.null(tx <- names(subject)[map$transcriptsHits]))
+        txHits <- map$transcriptsHits
+        if (!is.null(tx <- names(subject)[txHits]))
             txid <- tx
         else
             txid <- NA_integer_
         ## FIXME: cdsid is expensive
         cdsid <- IntegerList(integer(0))
         if (vtype == "coding") {
+           usub <- unlist(subject) ## names needed for mapping
             map2 <- mapToTranscripts(unname(query)[xHits], usub,
                                      ignore.strand=ignore.strand)
             cds <- mcols(usub)$cds_id[map2$transcriptsHits]
@@ -553,9 +554,11 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
             }
         }
 
+        pbe <- PartitioningByEnd(subject)
+        ss <- strand(subject@unlistData)[start(pbe)[width(pbe) > 0]]
         GRanges(seqnames=seqnames(query)[xHits],
                 ranges=IRanges(ranges(query)[xHits]),
-                strand=strand(query)[xHits],
+                strand=ss[txHits],
                 LOCATION=.location(length(xHits), vtype),
                 LOCSTART=start(map),
                 LOCEND=end(map),
