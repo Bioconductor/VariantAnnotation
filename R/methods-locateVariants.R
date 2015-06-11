@@ -554,11 +554,16 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
             }
         }
 
-        pbe <- PartitioningByEnd(subject)
-        ss <- strand(subject@unlistData)[start(pbe)[width(pbe) > 0]]
+        ss <- runValue(strand(subject)[txHits])
+        if (any(elementLengths(ss) > 1L)) {
+            warning("'subject' has multiple strands per list element; ",
+                    "setting strand to '*'")
+            sstrand <- Rle("*", length(txHits))
+        }
+        sstrand <- unlist(ss, use.names=FALSE)
         GRanges(seqnames=seqnames(query)[xHits],
                 ranges=IRanges(ranges(query)[xHits]),
-                strand=ss[txHits],
+                strand=sstrand,
                 LOCATION=.location(length(xHits), vtype),
                 LOCSTART=start(map),
                 LOCEND=end(map),
