@@ -83,29 +83,10 @@ setClass("CollapsedVCF",
                       QUAL=numeric(), FILTER=character())),
     validity=.valid.VCF)
 
-setAs("CollapsedVCF", "RangedSummarizedExperiment",
-    def = function(from)
-    {
-        if (strict) {
-            force(from)
-            class(from) <- "RangedSummarizedExperiment"
-        }
-        from
-    },
-    replace = function(from, to, value)
-    {
-        firstTime <- TRUE
-        for (nm in slotNames(value)) {
-            v <- slot(value, nm)
-            if (firstTime) {
-                slot(from, nm, FALSE) <- v
-                firstTime <- FALSE
-            } else {
-                `slot<-`(from, nm, FALSE, v)
-            }
-        }
-        from
-    }
+### Automatically generated "coerce<-" method is broken so we fix it.
+### See S4Vectors/R/S4-utils.R in the S4Vectors package for more information.
+S4Vectors:::setReplaceAs("CollapsedVCF", "RangedSummarizedExperiment",
+    S4Vectors:::canonical_replace_as_2
 )
 
 ### -------------------------------------------------------------------------
@@ -119,33 +100,10 @@ setClass("ExpandedVCF",
                       QUAL=numeric(), FILTER=character())),
     validity=.valid.VCF)
 
-### Coercion:
-### Recursion problem in an automatically generated coerce method requires
-### that we handle coercion from subclasses to RangedSummarizedExperiment.
-
-setAs("ExpandedVCF", "RangedSummarizedExperiment",
-    def = function(from)
-    {
-        if (strict) {
-            force(from)
-            class(from) <- "RangedSummarizedExperiment"
-        }
-        from
-    },
-    replace = function(from, to, value)
-    {
-        firstTime <- TRUE
-        for (nm in slotNames(value)) {
-            v <- slot(value, nm)
-            if (firstTime) {
-                slot(from, nm, FALSE) <- v
-                firstTime <- FALSE
-            } else {
-                `slot<-`(from, nm, FALSE, v)
-            }
-        }
-        from
-    }
+### Automatically generated "coerce<-" method is broken so we fix it.
+### See S4Vectors/R/S4-utils.R in the S4Vectors package for more information.
+S4Vectors:::setReplaceAs("ExpandedVCF", "RangedSummarizedExperiment",
+    S4Vectors:::canonical_replace_as2
 )
 
 ### -------------------------------------------------------------------------
