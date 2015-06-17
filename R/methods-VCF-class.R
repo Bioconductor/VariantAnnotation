@@ -378,15 +378,17 @@ setMethod("rbind", "VCF",
     if (!.compare(lapply(args, ncol)))
             stop("'...' objects must have the same number of samples")
 
-    rowRanges <- do.call(c, lapply(args,
-        function(i) slot(i, "rowRanges")))
+    fixed <- do.call(rbind, lapply(args, fixed))
+    info <- do.call(rbind, lapply(args, info))
+    rowRanges <- do.call(c, lapply(args, rowRanges))
     colData <- GenomicRanges:::.cbind.DataFrame(args, colData, "colData")
     assays <- GenomicRanges:::.bind.arrays(args, rbind, "assays")
+    elementMetadata <- do.call(rbind, lapply(args, slot, "elementMetadata"))
     metadata <- do.call(c, lapply(args, metadata))
-    info <- do.call(rbind, lapply(args, info))
-    fixed <- do.call(rbind, lapply(args, fixed))
-    new(class(args[[1]]), assays=assays, rowRanges=rowRanges,
-        colData=colData, metadata=metadata, fixed=fixed, info=info)
+
+    initialize(args[[1L]], fixed=fixed, info=info,
+               rowRanges=rowRanges, colData=colData, assays=assays,
+               elementMetadata=elementMetadata, metadata=metadata)
 })
 
 .renameSamples <- function(args)
@@ -406,24 +408,22 @@ setMethod("cbind", "VCF",
     args <- unname(list(...))
     if (!.compare(lapply(args, class)))
         stop("'...' objects must be of the same VCF class")
-
-
     if (!.compare(lapply(args, rowRanges), TRUE))
         stop("'...' object ranges (rows) are not compatible")
-    rowRanges <- rowRanges(args[[1]])
-    mcols(rowRanges) <- GenomicRanges:::.cbind.DataFrame(args, mcols, "mcols")
+    if (!.compare(lapply(args, "fixed")))
+        stop("data in 'fixed(VCF)' must match.")
+
+    fixed <- fixed(args[[1L]])
     info <- GenomicRanges:::.cbind.DataFrame(args, info, "info") 
+    rowRanges <- rowRanges(args[[1L]])
+    mcols(rowRanges) <- GenomicRanges:::.cbind.DataFrame(args, mcols, "mcols")
     colData <- do.call(rbind, lapply(args, colData))
     assays <- GenomicRanges:::.bind.arrays(args, cbind, "assays")
     metadata <- do.call(c, lapply(args, metadata))
-    if (!.compare(lapply(args, "fixed")))
-        stop("data in 'fixed(VCF)' must match.")
-    else
-        fixed <- fixed(args[[1]]) 
-    new(class(args[[1]]), assays=assays, rowRanges=rowRanges,
-        colData=colData, metadata=metadata, fixed=fixed, info=info)
 
-
+    initialize(args[[1L]], fixed=fixed, info=info,
+               rowRanges=rowRanges, colData=colData, assays=assays,
+               metadata=metadata)
 })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
