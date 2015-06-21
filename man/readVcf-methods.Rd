@@ -132,20 +132,24 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
       types are determined according to the \sQuote{Number} and \sQuote{Type} 
       information in the file header as follows:
 
+      \sQuote{Number} should only be 0  when \sQuote{Type} is 'flag'. These
+      fields are parsed as logical vectors.
+      
       If \sQuote{Number} is 1, \sQuote{info} data are parsed into a 
-      \code{vector}. \sQuote{geno} data are parsed into a \code{matrix} where 
-      the columns are the samples.
+      \code{vector} and \sQuote{geno} into a \code{matrix}.
 
-      If \sQuote{Number} is an integer >1, \sQuote{info} data are parsed into a
-      \code{DataFrame} with the indicated number of columns. \sQuote{geno} are
-      parsed into an \code{array} with the same dimentions as \sQuote{Number}. 
+      If \sQuote{Number} is >1, \sQuote{info} data are parsed into a
+      \code{DataFrame} with the same number of columns. \sQuote{geno} are
+      parsed into an \code{array} with the same dimensions as \sQuote{Number}. 
       Columns of the \sQuote{geno} matrices are the samples.
 
-      If \sQuote{Number} is \sQuote{.}, \sQuote{A} or \sQuote{G}, a \code{matrix} 
-      is used for both \sQuote{info} and \sQuote{geno} data.
+      If \sQuote{Number} is \sQuote{.}, \sQuote{A} or \sQuote{G}, 
+      both \sQuote{info} and \sQuote{geno} data are parsed into a \code{matrix}.
 
-      When the VCF header does not contain data type information, the data are 
-      returned as a single unparsed column named \sQuote{INFO} or \sQuote{GENO}.
+      When the header does not contain any \sQuote{INFO} lines, the data are
+      returned as a single, unparsed column. This is not done for \sQuote{geno}
+      data because 'assays' must have the same number of columns as the number
+      of samples.
     }
     \item{Missing data: }{
       Missing data in VCF files are represented by a dot ("."). \code{readVcf} 

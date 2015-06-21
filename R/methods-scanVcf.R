@@ -3,20 +3,27 @@
 ### =========================================================================
 
 .vcf_usertag <-
-    function(map, tag, nm, ...)
+    function(map, tag, nm)
 {
-    if (!identical(character(), tag))
+    if (!identical(character(), tag)) {
         if (1L == length(tag) && is.na(tag)) {
             map[] <- NULL
         } else {
             ok <- tag %in% names(map)
             if (!all(ok)) {
-                warning("ScanVcfParam ", sQuote(nm), " fields not present: ",
-                        paste(sQuote(tag[!ok]), collapse=" "))
+                warning("ScanVcfParam ", sQuote(nm), " fields not found in ",
+                        " header: ", paste(sQuote(tag[!ok]), collapse=" "))
                 tag <- tag[ok]
             }
-            map <- map[tag]             # user-requested order
+            map <- map[tag]  # user-requested order
         }
+    }
+    msg <- paste0("found header lines for ", length(map), 
+                  " ", sQuote(nm), " fields: ",
+                  paste(names(map), collapse=","))
+    cat(msg, "\n")
+    if (!length(map) && nm == "info")
+        map <- list(list("1", character()))
     map
 }
 
@@ -48,22 +55,27 @@
     }
 }
 
+## used for both INFO and GENO
 .vcf_map <-
-    function(fmt, tag, ...)
+    function(fmt, tag, nm)
 {
     numberOk <- grepl("^[AG\\.[:digit:]+]$", fmt$Number)
     fmt$Number[!numberOk] <- "."
     mapType <- function(n, t) {
         if (t == "Flag") n <- "1"
-        t <- switch(t, String=character(), Character=character(),
-            Integer=integer(), Float=numeric(), Flag=logical())
+        t <- switch(t, 
+                    String=character(), 
+                    Character=character(),
+                    Integer=integer(), 
+                    Float=numeric(), 
+                    Flag=logical())
         list(n, t)
     }
     map <- Map(mapType, fmt$Number, fmt$Type)
     names(map) <- rownames(fmt)
 
     ## user selected
-    .vcf_usertag(map, tag, ...)
+    .vcf_usertag(map, tag, nm)
 }
 
 .vcf_scan_header_maps <-
@@ -73,13 +85,18 @@
        geno <- NA 
     hdr <- suppressWarnings(scanVcfHeader(file))
     fmap <- .vcf_map_fixed(fixed)
-    imap <- if (0L == nrow(info(hdr))) {
-        ## missing INFO lines in header --> 1 column, unparsed 
-        list(list("1", character()))
-    } else {
-        .vcf_map(info(hdr), info, nm="info")
+    imap <- .vcf_map(info(hdr), info, "info") 
+    if (!is.null(names(imap))) {
+        mapply(function(field, fname) {
+                   if (field[[1]] == 0L && !is.logical(field[[2]]))
+                       stop(paste0('only "flag" INFO fields should ',
+                            'have Number = 0 in the header; ', fname, ' is "', 
+                            class(field[[2]]), '"'))
+                   else field 
+               }, imap, names(imap)
+        )
     }
-    gmap <- .vcf_map(geno(hdr), geno, nm="geno")
+    gmap <- .vcf_map(geno(hdr), geno, "geno")
     smap <- .vcf_map_samples(samples(hdr), samples)
     list(hdr=hdr, samples=smap, fmap=fmap, imap=imap, gmap=gmap)
 }
@@ -96,8 +113,7 @@
         }
         maps <- .vcf_scan_header_maps(file, fixed, info, geno, samples)
         tbxstate <- maps[c("samples", "fmap", "imap", "gmap")]
-        tbxsym <- getNativeSymbolInfo(".tabix_as_vcf",
-                                      "VariantAnnotation")
+        tbxsym <- getNativeSymbolInfo(".tabix_as_vcf", "VariantAnnotation")
         scanTabix(file, ..., param=param, tbxsym=tbxsym, 
                   tbxstate=tbxstate, row.names=row.names)
     }, scanTabix_io = function(err) {
