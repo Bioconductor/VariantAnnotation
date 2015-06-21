@@ -134,7 +134,7 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
 
       \sQuote{Number} should only be 0  when \sQuote{Type} is 'flag'. These
       fields are parsed as logical vectors.
-      
+ 
       If \sQuote{Number} is 1, \sQuote{info} data are parsed into a 
       \code{vector} and \sQuote{geno} into a \code{matrix}.
 
@@ -147,9 +147,7 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
       both \sQuote{info} and \sQuote{geno} data are parsed into a \code{matrix}.
 
       When the header does not contain any \sQuote{INFO} lines, the data are
-      returned as a single, unparsed column. This is not done for \sQuote{geno}
-      data because 'assays' must have the same number of columns as the number
-      of samples.
+      returned as a single, unparsed column.
     }
     \item{Missing data: }{
       Missing data in VCF files are represented by a dot ("."). \code{readVcf} 
