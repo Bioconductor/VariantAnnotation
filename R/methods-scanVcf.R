@@ -20,7 +20,7 @@
     }
     msg <- paste0("found header lines for ", length(map), 
                   " ", sQuote(nm), " fields: ",
-                  paste(names(map), collapse=","))
+                  paste(names(map), collapse=", "))
     cat(msg, "\n")
     if (!length(map) && nm == "info")
         map <- list(list("1", character()))
