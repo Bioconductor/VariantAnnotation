@@ -175,7 +175,7 @@ setReplaceMethod("dimnames", c("VCF", "list"),
     names(rowRanges) <- value[[1]]
     colData <- colData(x)
     rownames(colData) <- value[[2]]
-    BiocGenerics:::updateS4(x, rowRanges=rowRanges, colData=colData)
+    BiocGenerics:::replaceSlots(x, rowRanges=rowRanges, colData=colData)
 })
  
 ### info 
@@ -296,25 +296,18 @@ setMethod("[", c("VCF", "ANY", "ANY"),
         i <- SummarizedExperiment:::.SummarizedExperiment.charbound(i, rownames(x), msg)
     }
 
-    ii <- ff <- NULL
-    if (!missing(i)) {
-        if (length(slot(x, "info")) != 0L)
-            ii <- i
-        if (length(slot(x, "fixed")) != 0L)
-            ff <- i
-    }
     if (missing(i) && missing(j)) {
         x
     } else if (missing(i)) {
         callNextMethod(x, , j, ...)
     } else if (missing(j)) {
-        callNextMethod(x, i, , rowRanges=slot(x, "rowRanges")[i,,drop=FALSE],
-                       info=slot(x, "info")[ii,,drop=FALSE],
-                       fixed=slot(x, "fixed")[ff,,drop=FALSE], ...)
+        callNextMethod(x, i, ,
+                       info=slot(x, "info")[i,,drop=FALSE],
+                       fixed=slot(x, "fixed")[i,,drop=FALSE], ...)
     } else {
-        callNextMethod(x, i, j, rowRanges=slot(x, "rowRanges")[i,,drop=FALSE],
-                       info=slot(x, "info")[ii,,drop=FALSE],
-                       fixed=slot(x, "fixed")[ff,,drop=FALSE], ...)
+        callNextMethod(x, i, j,
+                       info=slot(x, "info")[i,,drop=FALSE],
+                       fixed=slot(x, "fixed")[i,,drop=FALSE], ...)
     }
 })
 
@@ -332,12 +325,8 @@ setReplaceMethod("[",
     } else if (missing(i)) {
         callNextMethod(x, , j, ..., value=value)
     } else if (missing(j)) {
-        callNextMethod(x, i, , rowRanges=local({
-            rd <- slot(x, "rowRanges")
-            rd[i,] <- slot(value, "rowRanges")
-            names(rd)[i] <- names(slot(value, "rowRanges"))
-            rd
-        }), info=local({
+        callNextMethod(x, i, ,
+            info=local({
             ii <- slot(x, "info")
             ii[i,] <- slot(value, "info")
             ii 
@@ -347,12 +336,8 @@ setReplaceMethod("[",
             ff
         }), ..., value=value)
     } else {
-        callNextMethod(x, i, j, rowRanges=local({
-            rd <- slot(x, "rowRanges")
-            rd[i,] <- slot(value, "rowRanges")
-            names(rd)[i] <- names(slot(value, "rowRanges"))
-            rd
-        }), info=local({
+        callNextMethod(x, i, j,
+            info=local({
             ii <- slot(x, "info")
             ii[i,] <- slot(value, "info")
             ii 
@@ -386,7 +371,7 @@ setMethod("rbind", "VCF",
     elementMetadata <- do.call(rbind, lapply(args, slot, "elementMetadata"))
     metadata <- do.call(c, lapply(args, metadata))
 
-    BiocGenerics:::updateS4(args[[1L]],
+    BiocGenerics:::replaceSlots(args[[1L]],
         fixed=fixed, info=info,
         rowRanges=rowRanges, colData=colData, assays=assays,
         elementMetadata=elementMetadata, metadata=metadata)
@@ -422,7 +407,7 @@ setMethod("cbind", "VCF",
     assays <- GenomicRanges:::.bind.arrays(args, cbind, "assays")
     metadata <- do.call(c, lapply(args, metadata))
 
-    BiocGenerics:::updateS4(args[[1L]],
+    BiocGenerics:::replaceSlots(args[[1L]],
         fixed=fixed, info=info,
         rowRanges=rowRanges, colData=colData, assays=assays,
         metadata=metadata)
