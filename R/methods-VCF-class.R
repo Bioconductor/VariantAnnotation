@@ -175,7 +175,7 @@ setReplaceMethod("dimnames", c("VCF", "list"),
     names(rowRanges) <- value[[1]]
     colData <- colData(x)
     rownames(colData) <- value[[2]]
-    GenomicRanges:::clone(x, rowRanges=rowRanges, colData=colData)
+    BiocGenerics:::updateS4(x, rowRanges=rowRanges, colData=colData)
 })
  
 ### info 
@@ -386,9 +386,10 @@ setMethod("rbind", "VCF",
     elementMetadata <- do.call(rbind, lapply(args, slot, "elementMetadata"))
     metadata <- do.call(c, lapply(args, metadata))
 
-    initialize(args[[1L]], fixed=fixed, info=info,
-               rowRanges=rowRanges, colData=colData, assays=assays,
-               elementMetadata=elementMetadata, metadata=metadata)
+    BiocGenerics:::updateS4(args[[1L]],
+        fixed=fixed, info=info,
+        rowRanges=rowRanges, colData=colData, assays=assays,
+        elementMetadata=elementMetadata, metadata=metadata)
 })
 
 .renameSamples <- function(args)
@@ -421,9 +422,10 @@ setMethod("cbind", "VCF",
     assays <- GenomicRanges:::.bind.arrays(args, cbind, "assays")
     metadata <- do.call(c, lapply(args, metadata))
 
-    initialize(args[[1L]], fixed=fixed, info=info,
-               rowRanges=rowRanges, colData=colData, assays=assays,
-               metadata=metadata)
+    BiocGenerics:::updateS4(args[[1L]],
+        fixed=fixed, info=info,
+        rowRanges=rowRanges, colData=colData, assays=assays,
+        metadata=metadata)
 })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
