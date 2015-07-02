@@ -111,7 +111,7 @@
       (NA allowed)}
     \item{\code{softFilterMatrix}}{(\code{matrix/FilterMatrix}),
       variant by filter matrix, \code{TRUE} where variant passed the
-      filter; use a \code{\link[IRanges]{FilterMatrix}} to store the
+      filter; use a \code{\link[S4Vectors]{FilterMatrix}} to store the
       actual \code{FilterRules} object that was applied}
     \item{\code{hardFilters}}{(\code{FilterRules}) record of hard
       filters applied, i.e., only the variants that passed the filters
@@ -169,10 +169,10 @@
         \item{\code{sampleNames}}{character/factor vector/Rle, containing the
           sample names (NA allowed).}
         \item{\code{softFilterMatrix}}{a matrix (typically
-          a \code{\link[IRanges]{FilterMatrix}}) of dimension variant by
+          a \code{\link[S4Vectors]{FilterMatrix}}) of dimension variant by
           filter, with logical values indicating whether a variant
           passed the filter.}
-        \item{\code{hardFilters}}{a \code{\link[IRanges]{FilterRules}},
+        \item{\code{hardFilters}}{a \code{\link[S4Vectors]{FilterRules}},
           containing the filters that have already been applied to
           subset the object to its current state.}
       }
