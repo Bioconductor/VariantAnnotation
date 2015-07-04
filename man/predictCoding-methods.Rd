@@ -207,9 +207,9 @@
   ## ----------------------------
   ## GRanges object as query 
   ## ----------------------------
-  ## Alternatively, a GRanges can be the 'query' to predictCoding().
-  ## The seqlevels were previously adjusted in the VCF object so the GRanges
-  ## extracted with rowRanges() has the correct seqlevels.
+  ## A GRanges can also be used as the 'query'. The seqlevels in the VCF
+  ## were adjusted in previous example so the GRanges extracted with
+  ## has the correct seqlevels.
   rd <- rowRanges(vcf)
  
   ## The GRanges must be expanded to have one row per alternate allele. 
@@ -218,8 +218,8 @@
   eltlen <- elementLengths(altallele)
   rd_exp <- rep(rd, eltlen)
  
-  ## Call predictCoding() with the expanded GRanges as the 'query'
-  ## and the unlisted alternate allele as the 'varAllele'.
+  ## Call predictCoding() with the expanded GRanges and the unlisted
+  ## alternate allele as the 'varAllele'.
   coding2 <- predictCoding(rd_exp, txdb, Hsapiens, unlist(altallele)) 
 }
 

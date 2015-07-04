@@ -132,16 +132,20 @@ setMethod("predictCoding", c("VRanges", "TxDb", "ANY", "missing"),
     altpos <- (start(mcols(txlocal)$CDSLOC) - 1L) %% 3L + 1L
     refCodon <- varCodon <- .getRefCodons(txlocal, altpos, seqSource, cdsbytx)
 
-    ## N elements
-    codeN <- rep(FALSE, length(txlocal)) 
-    altN <- grepl("N", as.character(altallele, use.names=FALSE), fixed=TRUE)
-    refN <- grepl("N", as.character(refCodon, use.names=FALSE), fixed=TRUE)
-    codeN[altN | refN] <-TRUE
-    valid[codeN] <- FALSE
-    if (any(altN))
-        warning("varAllele values containing 'N' were not translated")
-    if (any(refN))
-        warning("reference codons containing 'N' were not translated")
+    ## allowed characters that can't be translated
+    ## "N", ".", "+" and "-"
+    pattern <- "N|\\.|\\+|\\-"
+    altCheck <- grepl(pattern, as.character(altallele, use.names=FALSE))
+    refCheck <- grepl(pattern, as.character(refCodon, use.names=FALSE))
+    noTrans <- rep(FALSE, length(txlocal)) 
+    noTrans[altCheck | refCheck] <- TRUE
+    valid[noTrans] <- FALSE
+    if (any(altCheck))
+        warning("'varAllele' values with 'N', '.', '+' or '-'",
+                " were not translated")
+    if (any(refCheck))
+        warning("reference codons with 'N', '.', '+' or '-'",
+                " were not translated")
 
     ## substitute and translate
     refAA <- varAA <- AAStringSet(rep("", length(txlocal))) 
@@ -161,7 +165,7 @@ setMethod("predictCoding", c("VRanges", "TxDb", "ANY", "missing"),
     consequence[nonsynonymous] <- "nonsynonymous" 
     consequence[fmshift] <- "frameshift"
     consequence[nonsynonymous & (as.character(varAA) %in% "*")] <- "nonsense" 
-    consequence[zwidth | codeN] <- "not translated" 
+    consequence[zwidth | noTrans] <- "not translated" 
     consequence <- factor(consequence) 
  
     mcols(txlocal) <- append(mcols(txlocal), 
