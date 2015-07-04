@@ -40,7 +40,8 @@ test_predictCoding_varAllele <- function()
     query <- GRanges("chr1", IRanges(rep(10101, 2), width=c(2,3)), 
                      variant=variant)
     current <- quiet(fun(query, cdsbytx[1:2], Hsapiens, variant))
-    checkIdentical(as.character(mcols(current)$VARCODON), c("", "TTCCGG"))
+    checkIdentical(as.character(mcols(current)$VARCODON), 
+                   c("TATCCGG", "TTCCGG"))
 }
 
 test_mapToTranscripts <- function()
