@@ -150,14 +150,13 @@ setMethod("predictCoding", c("VRanges", "TxDb", "ANY", "missing"),
     ## substitute and translate
     refAA <- varAA <- AAStringSet(rep("", length(txlocal))) 
     if (any(valid)) {
-        subseq(varCodon, altpos, width=refwidth)[valid] <- altallele[valid]
+        subseq(varCodon, altpos, width=refwidth) <- altallele
         refAA[valid] <- translate(refCodon[valid], genetic.code=genetic.code,
                                   if.fuzzy.codon=if.fuzzy.codon)
         varAA <- AAStringSet(rep("", length(txlocal))) 
         varAA[valid] <- translate(varCodon[valid], genetic.code=genetic.code, 
                                   if.fuzzy.codon=if.fuzzy.codon)
     }
-    varCodon[!valid] <- ""
 
     ## results
     nonsynonymous <- as.character(refAA) != as.character(varAA) 
