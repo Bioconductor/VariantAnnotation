@@ -155,6 +155,7 @@
     }
     \item{\code{REFAA}}{
       The reference amino acid column contains the translated \code{REFSEQ}.
+      When translation is not possible this value is missing.
     }
     \item{\code{VARAA}}{
       The variant amino acid column contains the translated \code{VARSEQ}. When
