@@ -151,8 +151,7 @@
     \item{\code{VARCODON}}{
       This sequence is the result of inserting, deleting or replacing the 
       position(s) in the reference sequence alternate allele. If the result 
-      of this modifiction is not a multiple of 3 no translation is performed 
-      and the \code{VARAA} value will be missing.
+      of this substitution is not a multiple of 3 it will not be translated.
     }
     \item{\code{REFAA}}{
       The reference amino acid column contains the translated \code{REFSEQ}.
