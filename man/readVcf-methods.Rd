@@ -115,6 +115,15 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
       \code{readVcf} calls \code{\link{scanVcf}}, the details of which can be 
       found with \code{?scanVcf}.
     }
+    \item{Header lines (aka Meta-information): }{
+      readVcf() reads and parses fields according to the multiplicity and
+      data type specified in the header lines. Fields without header lines are
+      skipped (not read or parsed). To see what fields are present in the
+      header use \code{scanVcfHeader()}. See ?\code{VCFHeader} for more details.
+
+      Passing \code{verbose = TRUE} to \code{readVcf()} prints the fields
+      that were found in the header and will be read by \code{readVcf}.
+    }
     \item{Data type: }{
       CHROM, POS, ID and REF fields are used to create the \code{GRanges}
       stored in the \code{VCF} object and accessible with the \code{rowRanges}

@@ -9,14 +9,14 @@ test_FixedTypes <- function()
                         QUAL=list("1", numeric()),
                         FILTER=list("1", character()))
     named <- names(exp)[-(1:2)]
-    checkIdentical(exp, .vcf_map_fixed(character()))
-    checkIdentical(exp[1:2], .vcf_map_fixed(NA))
+    checkIdentical(exp, .vcf_map_fixed(character(), FALSE))
+    checkIdentical(exp[1:2], .vcf_map_fixed(NA, FALSE))
     exp <- exp0
     exp[1] <- list(NULL)
-    checkIdentical(exp, .vcf_map_fixed(named))
+    checkIdentical(exp, .vcf_map_fixed(named, FALSE))
     warn <- FALSE
     obs <- withCallingHandlers({
-        .vcf_map_fixed("FOO")
+        .vcf_map_fixed("FOO", FALSE)
     }, warning=function(w) {
         warn <<- TRUE
         invokeRestart("muffleWarning")

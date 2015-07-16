@@ -104,7 +104,7 @@ setMethod(readVcf, c(file="character", genome="missing",
         if (any(!chr %in% seqnames(genome)))
             stop("'seqnames' in 'vcfWhich(param)' must be present in 'genome'")
     }
-    .scanVcfToVCF(scanVcf(file, param=param, row.names=row.names), file, 
+    .scanVcfToVCF(scanVcf(file, param=param, row.names=row.names, ...), file, 
                   genome, param)
 }
 

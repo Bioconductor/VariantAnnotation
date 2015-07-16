@@ -4,7 +4,7 @@
 
 selectSome <- BiocGenerics:::selectSome
 .vcf_usertag <-
-    function(map, tag, nm)
+    function(map, tag, nm, verbose)
 {
     if (!identical(character(), tag)) {
         if (1L == length(tag) && is.na(tag)) {
@@ -19,21 +19,23 @@ selectSome <- BiocGenerics:::selectSome
             map <- map[tag]  # user-requested order
         }
     }
-    msg <- paste0("found header lines for ", length(map), 
-                  " ", sQuote(nm), " fields: ",
-                  paste(selectSome(names(map)), collapse=", "))
-    cat(msg, "\n")
+    if (verbose) {
+        msg <- paste0("found header lines for ", length(map), 
+                      " ", sQuote(nm), " fields: ",
+                      paste(selectSome(names(map)), collapse=", "))
+        cat(msg, "\n")
+    }
     if (!length(map) && nm == "info")
         map <- list(list("1", character()))
     map
 }
 
 .vcf_map_fixed <-
-    function(tag, ...)
+    function(tag, verbose)
 {
     map <- list(ALT=list("A", character()), QUAL=list("1", numeric()),
                 FILTER=list("1", character()))
-    c(list(rowRanges=NULL, REF=NULL), .vcf_usertag(map, tag, "fixed"))
+    c(list(rowRanges=NULL, REF=NULL), .vcf_usertag(map, tag, "fixed", verbose))
 }
 
 .vcf_map_samples <-
@@ -58,7 +60,7 @@ selectSome <- BiocGenerics:::selectSome
 
 ## used for both INFO and GENO
 .vcf_map <-
-    function(fmt, tag, nm)
+    function(fmt, tag, nm, verbose)
 {
     numberOk <- grepl("^[AG\\.[:digit:]+]$", fmt$Number)
     fmt$Number[!numberOk] <- "."
@@ -76,17 +78,17 @@ selectSome <- BiocGenerics:::selectSome
     names(map) <- rownames(fmt)
 
     ## user selected
-    .vcf_usertag(map, tag, nm)
+    .vcf_usertag(map, tag, nm, verbose)
 }
 
 .vcf_scan_header_maps <-
-    function(file, fixed, info, geno, samples)
+    function(file, fixed, info, geno, samples, verbose=FALSE)
 {
     if (isTRUE(is.na(samples)))
        geno <- NA 
     hdr <- suppressWarnings(scanVcfHeader(file))
-    fmap <- .vcf_map_fixed(fixed)
-    imap <- .vcf_map(info(hdr), info, "info") 
+    fmap <- .vcf_map_fixed(fixed, verbose)
+    imap <- .vcf_map(info(hdr), info, "info", verbose) 
     if (!is.null(names(imap))) {
         mapply(function(field, fname) {
                    if (field[[1]] == 0L && !is.logical(field[[2]]))
@@ -97,7 +99,7 @@ selectSome <- BiocGenerics:::selectSome
                }, imap, names(imap)
         )
     }
-    gmap <- .vcf_map(geno(hdr), geno, "geno")
+    gmap <- .vcf_map(geno(hdr), geno, "geno", verbose)
     smap <- .vcf_map_samples(samples(hdr), samples)
     list(hdr=hdr, samples=smap, fmap=fmap, imap=imap, gmap=gmap)
 }
@@ -112,7 +114,7 @@ selectSome <- BiocGenerics:::selectSome
             open(file)
             on.exit(close(file))
         }
-        maps <- .vcf_scan_header_maps(file, fixed, info, geno, samples)
+        maps <- .vcf_scan_header_maps(file, fixed, info, geno, samples, ...)
         tbxstate <- maps[c("samples", "fmap", "imap", "gmap")]
         tbxsym <- getNativeSymbolInfo(".tabix_as_vcf", "VariantAnnotation")
         scanTabix(file, ..., param=param, tbxsym=tbxsym, 
@@ -134,7 +136,7 @@ selectSome <- BiocGenerics:::selectSome
         file <- normalizePath(path.expand(file))
         if (!file.exists(file))
             stop("file does not exist")
-        maps <- .vcf_scan_header_maps(file, fixed, info, geno, samples)
+        maps <- .vcf_scan_header_maps(file, fixed, info, geno, samples, ...)
         result <- .Call(.scan_vcf_character, file, as.integer(yieldSize), 
                         maps$samples, maps$fmap, maps$imap, maps$gmap,
                         row.names)
@@ -153,7 +155,7 @@ selectSome <- BiocGenerics:::selectSome
 {
     tryCatch({
         file <- summary(file)$description
-        maps <- .vcf_scan_header_maps(file, fixed, info, geno, samples)
+        maps <- .vcf_scan_header_maps(file, fixed, info, geno, samples, ...)
 
         txt <- readLines(file, ...)
         txt <- txt[!grepl("^#", txt)] # FIXME: handle header lines better
