@@ -176,9 +176,9 @@ setMethod(writeVcf, c("VCF", "connection"),
     }
 
     scon <- summary(filename)
-    headerNeeded <- !((scon$mode == "a") &&
-                     file.exists(scon$description) &&
-                     (file.info(scon$description)$size !=0))
+    headerNeeded <- !(file.exists(scon$description) &&
+                      file.info(scon$description)$size !=0) 
+
     if (headerNeeded) {
         hdr <- .makeVcfHeader(obj)
         writeLines(hdr, filename)
