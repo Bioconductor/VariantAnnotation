@@ -650,7 +650,7 @@ pileupGRanges <- function(x) {
 ###
 
 .showHardFilters <- function(object) {
-  cat(BiocGenerics:::labeledLine("  hardFilters", names(hardFilters(object))))
+  cat(S4Vectors:::labeledLine("  hardFilters", names(hardFilters(object))))
 }
 
 setMethod("show", "VRanges", function(object) {

@@ -2,7 +2,7 @@
 ### scanVcf methods 
 ### =========================================================================
 
-selectSome <- BiocGenerics:::selectSome
+selectSome <- S4Vectors:::selectSome
 .vcf_usertag <-
     function(map, tag, nm, verbose)
 {

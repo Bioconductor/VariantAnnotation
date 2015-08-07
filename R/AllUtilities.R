@@ -198,7 +198,7 @@
     if (missing(keys))
         return(FALSE)
     if (any(mkeys <- !keys %in% keys(x))) {
-        msg <- paste(BiocGenerics:::selectSome(keys[mkeys]), collapse=" ")
+        msg <- paste(S4Vectors:::selectSome(keys[mkeys]), collapse=" ")
         warning(sum(mkeys), " keys not found in ", db, " database: ", msg,
                 call.=FALSE)
     }
@@ -210,7 +210,7 @@
     if (missing(cols))
         return(FALSE)
     if (any(mcols <- !cols %in% columns(x))) {
-        msg <- paste(BiocGenerics:::selectSome(cols[mcols], 5), collapse=" ")
+        msg <- paste(S4Vectors:::selectSome(cols[mcols], 5), collapse=" ")
         warning(sum(mcols), " columns not found in ", db, " database: ", msg,
                 call.=FALSE)
         return(TRUE)

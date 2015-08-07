@@ -132,7 +132,7 @@ function(x)
 setMethod(show, "VCFHeader",
     function(object)
 {
-    selectSome <- BiocGenerics:::selectSome
+    selectSome <- S4Vectors:::selectSome
     scat <- function(fmt, vals=character(), exdent=2, ...)
     {
         vals <- ifelse(nzchar(vals), vals, "''")
