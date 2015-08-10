@@ -115,7 +115,7 @@
     ## compliance with VCFv4.2
     fileformat <- "fileformat" %in% rownames(meta(hdr)$META)
     if (fileformat && grepl(fileformat, "v4.2", fixed=TRUE) || !fileformat) {
-        if (any(idx <- rownames(info(hdr)) == "DP"))
+        if (any(idx <- rownames(info(hdr)) == "AD"))
             info(hdr)[idx,]$Number <- "G"
     }
 
