@@ -38,9 +38,10 @@
   general methods to write out from other objects may be added in the future.
 
   \code{writeVcf} conforms to the VCF standards on the 1000 Genomes Project
-  web site (see references).
+  web site (see references). When 'fileformat' is not present in the header
+  data, format is written out according to the standard at the time of the
+  Bioconductor release, e.g., for Bioconductor 3.1 the format is VCFv4.2.
 
-  ** Under development  - interface may change: **
   Large VCF files (i.e., > 1e5 records) are written out in chunks; VCF
   files with < 1e5 records are not chunked. The optimal number of records
   per chunk depends on both the number of records and complexity of the

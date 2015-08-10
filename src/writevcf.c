@@ -201,7 +201,8 @@ void make_vcf_geno(SEXP conn, SEXP fixed, SEXP format, SEXP geno,
         buf.l = 0;
         if (NULL != buf.s) *buf.s = '\0';
         kputs(CHAR(STRING_ELT(fixed, i)), &buf);
-        kputc('\t', &buf);
+        if (n_fields > 0)
+            kputc('\t', &buf);
 
         fmt_found = FALSE;
         k_last = 0;
@@ -230,7 +231,7 @@ void make_vcf_geno(SEXP conn, SEXP fixed, SEXP format, SEXP geno,
                                z == z_max - 1 &&
                                j == n_samples - 1) {
                             kputc('\t', &buf);
-                        k_valid[k] = FALSE;
+                            k_valid[k] = FALSE;
                     } else k_valid[k] = FALSE;
                 }
             }

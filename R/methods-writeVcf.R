@@ -50,7 +50,7 @@
     else
         FILTER[is.na(FILTER)] <- "."
     INFO <- .makeVcfInfo(info(obj), length(rd))
-    FIXED <- paste(CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, sep = "\t")
+    FIXED <- paste(CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, sep="\t")
     .makeVcfGeno(filename, FIXED, geno(obj, withDimnames=FALSE), dim(obj))
 }
 
@@ -112,8 +112,15 @@
 .makeVcfHeader <- function(obj, ...)
 {
     hdr <- header(obj)
-    header <- Map(.formatHeader, as.list(header(hdr)),
-                  as.list(names(header(hdr))))
+    ## compliance with VCFv4.2
+    fileformat <- "fileformat" %in% rownames(meta(hdr)$META)
+    if (fileformat && grepl(fileformat, "v4.2", fixed=TRUE) || !fileformat) {
+        if (any(idx <- rownames(info(hdr)) == "DP"))
+            info(hdr)[idx,]$Number <- "G"
+    }
+
+    dflist <- header(hdr)
+    header <- Map(.formatHeader, as.list(dflist), as.list(names(dflist)))
     header <- c(header, .contigsFromSeqinfo(seqinfo(obj)))
     samples <- colnames(obj)
     colnms <- c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO")
@@ -124,9 +131,11 @@
     unlist(c(header, colnms), use.names=FALSE)
 }
 
-.formatHeader <- function(df, nms)
+.formatHeader <- function(df, nms, filedate)
 {
     if (nms == "META") {
+        if (!"fileformat" %in% rownames(df))
+            df <- rbind(DataFrame(Value="VCFv4.2", row.names="fileformat"), df)
         fd <- format(Sys.time(), "%Y%m%d")
         if ("fileDate" %in% rownames(df))
             df[rownames(df) == "fileDate", ] <- fd
