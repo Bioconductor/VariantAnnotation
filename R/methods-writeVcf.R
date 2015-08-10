@@ -115,8 +115,8 @@
     ## compliance with VCFv4.2
     fileformat <- "fileformat" %in% rownames(meta(hdr)$META)
     if (fileformat && grepl(fileformat, "v4.2", fixed=TRUE) || !fileformat) {
-        if (any(idx <- rownames(info(hdr)) == "AD"))
-            info(hdr)[idx,]$Number <- "G"
+        if (any(idx <- rownames(geno(hdr)) == "AD"))
+            geno(hdr)[idx,]$Number <- "G"
     }
 
     dflist <- header(hdr)
