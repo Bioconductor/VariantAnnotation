@@ -87,15 +87,53 @@
 }
 
 \examples{
-fl <- system.file(package="VariantAnnotation", "extdata",
-                  "chr22.vcf.gz")
-destination <- tempfile()
-pre <- FilterRules(list(isLowCoverageExomeSnp = function(x) {
-    grepl("LOWCOV,EXOME", x, fixed=TRUE)
-}))
-filt <- FilterRules(list(isSNP = function(x) info(x)$VT == "SNP"))
-filtered <- filterVcf(fl, "hg19", destination, prefilters=pre, filters=filt)
-vcf <- readVcf(filtered, "hg19")
+
+fl <- system.file("extdata", "chr22.vcf.gz", package="VariantAnnotation")
+
+## -----------------------------------------------------------------------
+## Filter for SNVs in a defined set of ranges:
+## -----------------------------------------------------------------------
+
+if (require(TxDb.Hsapiens.UCSC.hg19.knownGene)) {
+
+  txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
+  exons <- exons(txdb)
+  exons22 <- exons[seqnames(exons) == "chr22"]
+  seqlevelsStyle(exons22) <- "NCBI"  ## match chrom names in VCF file
+ 
+  ## Range-based filter:
+  withinRange <- function(rng)
+      function(x) x %within% rng
+
+  ## The first filter identifies SNVs and the second applies the 
+  ## range restriction.
+  filters <- FilterRules(list(
+      isSNV = isSNV, 
+      withinRange = withinRange(exons22)))
+
+  ## Apply
+  \dontrun{
+  filt1 <- filterVcf(fl, "hg19", tempfile(), filters=filters, verbose=TRUE)
+  }
+}
+
+## -----------------------------------------------------------------------
+## Using a pre-filter and filter:
+## -----------------------------------------------------------------------
+
+## Low coverage exome snp filter:
+lowCoverageExomeSNP = function(x) grepl("LOWCOV,EXOME", x, fixed=TRUE)
+
+## The pre-filter identifies low coverage exome snps and the filter
+## identifies variants with INFO variable VT = SNP.
+pre <- FilterRules(list(lowCoverageExomeSNP = lowCoverageExomeSNP))
+filt <- FilterRules(list(VTisSNP = function(x) info(x)$VT == "SNP"))
+
+## Apply
+filt2 <- filterVcf(fl, "hg19", tempfile(), prefilters=pre, filters=filt)
+
+## Filtered results
+vcf <- readVcf(filt2, "hg19")
 }
 
 \keyword{manip}

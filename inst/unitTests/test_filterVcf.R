@@ -1,15 +1,25 @@
+quiet <- suppressMessages
+
 test_filterVcf_TabixFile <- function()
 {
     fl <- system.file("extdata", "chr22.vcf.gz", package="VariantAnnotation")
     tbx <- TabixFile(fl, yieldSize=5000)
     dest <- tempfile()
     filt <- FilterRules(list(fun=function(...) TRUE))
-    ans <- filterVcf(tbx, "hg19", dest, filters=filt, verbose=FALSE)
+    ans <- quiet(filterVcf(tbx, "hg19", dest, filters=filt))
  
     checkIdentical(dest, ans)
     vcf0 <- readVcf(fl, "hg19")
     vcf1 <- readVcf(dest, "hg19")
     checkIdentical(dim(vcf0), dim(vcf1))
+
+    ## with ranges 
+    param <- ScanVcfParam(which=GRanges("22", IRanges(50301340, width=10000)))
+    ans1 <- quiet(filterVcf(tbx, "", tempfile(), filters=filt, param=param))
+    ans2 <- quiet(filterVcf(fl, "", tempfile(), filters=filt, param=param))
+    vcf1 <- readVcf(ans1, "")
+    vcf2 <- readVcf(ans2, "")
+    checkIdentical(rowRanges(vcf1), rowRanges(vcf2))
 }
 
 test_filterVcf_filter <- function()

@@ -62,34 +62,33 @@ setMethod("filterVcf", "character",
 {
     if (verbose)
         message("starting filter")
+    destfile <- file(destination, open="w")
+    on.exit(close(destfile), add=TRUE)
+    
+    ## param with defined ranges -> read all
     if (length(vcfWhich(param))) {
         yieldSize(tbxFile) <- NA_integer_ 
         vcfChunk <- readVcf(tbxFile, genome, ..., param=param)
         if (verbose)
             message("filtering ", nrow(vcfChunk), " records")
         vcfChunk <- subsetByFilter(vcfChunk, filters)
-        writeVcf(vcfChunk, filtered)
+        writeVcf(vcfChunk, destfile)
+    ## param with all ranges -> iterate by yieldSize
     } else {
         if (!isOpen(tbxFile)) {
             open(tbxFile)
             on.exit(close(tbxFile), add=TRUE)
         }
-
-        filtered <- file(destination, open="w")
-        needsClosing <- TRUE
-        on.exit(if (needsClosing) close(filtered), add=TRUE)
-
         nTotal <- 0L
         while (nrow(vcfChunk <- readVcf(tbxFile, genome, ..., param=param))) {
             if (verbose)
                 message("filtering ", nTotal <- nTotal + nrow(vcfChunk),
                         " records")
             vcfChunk <- subsetByFilter(vcfChunk, filters)
-            writeVcf(vcfChunk, filtered)
+            writeVcf(vcfChunk, destfile)
         }
-        close(filtered)
-        needsClosing <- FALSE
     }
+
     if (verbose)
         message("completed filtering")
     destination
