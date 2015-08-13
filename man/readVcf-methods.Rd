@@ -122,7 +122,7 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
       header use \code{scanVcfHeader()}. See ?\code{VCFHeader} for more details.
 
       Passing \code{verbose = TRUE} to \code{readVcf()} prints the fields
-      that were found in the header and will be read by \code{readVcf}.
+      with header lines that will be parsed by \code{readVcf}.
     }
     \item{Data type: }{
       CHROM, POS, ID and REF fields are used to create the \code{GRanges}
