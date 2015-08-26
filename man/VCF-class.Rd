@@ -150,7 +150,7 @@
         \item{\code{alt(x)}, \code{alt(x) <- value}:
           Gets or sets the alternate allele data (ALT). When \code{x} is 
           a CollapsedVCF, \code{value} must be a \code{DNAStringSetList}
-          or \code{CompressedCharacterList}. For ExtendedVCF, \code{value}
+          or \code{CompressedCharacterList}. For ExpandedVCF, \code{value}
           must be a \code{DNAStringSet} or \code{character}.
         }
         \item{\code{qual(x)}, \code{qual(x) <- value}:
