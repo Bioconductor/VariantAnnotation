@@ -110,7 +110,8 @@
 {
     grepl("<", x, fixed=TRUE) |
     grepl("[", x, fixed=TRUE) |
-    grepl("]", x, fixed=TRUE)
+    grepl("]", x, fixed=TRUE) |
+    x == "*"        
 }
 
 .formatInfo <- function(x, hdr, nrecords)
