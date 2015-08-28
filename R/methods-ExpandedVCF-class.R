@@ -68,8 +68,8 @@ setMethod("match", c("VRanges", "ExpandedVCF"),
         structural <- .isStructural(flat)
     }
     res <- FUN(ref(x), alt)
-    if (any(structural))
-        res[structural] <- FALSE
+    if (!is.null(structural))
+        res[structural | is.na(structural)] <- FALSE
     if (any(gvcf))
         res[gvcf] <- TRUE
 

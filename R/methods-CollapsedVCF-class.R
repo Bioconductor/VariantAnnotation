@@ -34,8 +34,8 @@ setReplaceMethod("alt", c("CollapsedVCF", "DNAStringSetList"),
         structural <- .isStructural(flat)
     }
     res <- FUN(rep(ref(x), elementLengths(alt(x))), flat)
-    if (any(structural))
-        res[structural] <- FALSE
+    if (!is.null(structural))
+        res[structural | is.na(structural)] <- FALSE
     if (any(gvcf))
         res[gvcf] <- TRUE
     ## relist

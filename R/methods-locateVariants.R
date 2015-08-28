@@ -58,7 +58,7 @@ setMethod("locateVariants", c("GRanges", "TxDb", "CodingVariants"),
         if (!any(seqlevels(query) %in% seqlevels(subject)))
             return(.returnEmpty())
 
-       ## for width(ranges) == 0 : de-increment start to equal end value 
+       ## for width(ranges) == 0 : decrement start to equal end value 
         if (any(insertion <- width(query) == 0))
             start(query)[insertion] <- start(query)[insertion] - 1
         if (!exists("cdsbytx", cache, inherits=FALSE))
@@ -92,7 +92,7 @@ setMethod("locateVariants", c("GRanges", "TxDb", "IntronVariants"),
         if (!any(seqlevels(query) %in% seqlevels(subject)))
             return(.returnEmpty())
 
-        ## for width(ranges) == 0 : de-increment start to equal end value 
+        ## for width(ranges) == 0 : decrement start to equal end value 
         if (any(insertion <- width(query) == 0))
             start(query)[insertion] <- start(query)[insertion] - 1
         if (!exists("intbytx", cache, inherits=FALSE))
@@ -126,7 +126,7 @@ setMethod("locateVariants", c("GRanges", "TxDb", "ThreeUTRVariants"),
         if (!any(seqlevels(query) %in% seqlevels(subject)))
             return(.returnEmpty())
 
-        ## for width(ranges) == 0 : de-increment start to equal end value 
+        ## for width(ranges) == 0 : decrement start to equal end value 
         if (any(insertion <- width(query) == 0)) 
             start(query)[insertion] <- start(query)[insertion] - 1 
         if (!exists("threeUTRbytx", cache, inherits=FALSE))
@@ -160,7 +160,7 @@ setMethod("locateVariants", c("GRanges", "TxDb", "FiveUTRVariants"),
         if (!any(seqlevels(query) %in% seqlevels(subject)))
             return(.returnEmpty())
 
-        ## for width(ranges) == 0 : de-increment start to equal end value 
+        ## for width(ranges) == 0 : decrement start to equal end value 
         if (any(insertion <- width(query) == 0))
             start(query)[insertion] <- start(query)[insertion] - 1
         if (!exists("fiveUTRbytx", cache, inherits=FALSE))
@@ -195,7 +195,7 @@ setMethod("locateVariants", c("GRanges", "TxDb",
         if (!any(seqlevels(query) %in% seqlevels(subject)))
             return(.returnEmpty())
 
-        ## for width(ranges) == 0 : de-increment start to equal end value 
+        ## for width(ranges) == 0 : decrement start to equal end value 
         if (any(insertion <- width(query) == 0))
             start(query)[insertion] <- start(query)[insertion] - 1
         if (!exists("txbygene", cache, inherits=FALSE))
@@ -224,7 +224,7 @@ setMethod("locateVariants", c("GRanges", "TxDb", "SpliceSiteVariants"),
         if (!any(seqlevels(query) %in% seqlevels(subject)))
             return(.returnEmpty())
 
-        ## for width(ranges) == 0 : de-increment start to equal end value 
+        ## for width(ranges) == 0 : decrement start to equal end value 
         if (any(insertion <- width(query) == 0))
             start(query)[insertion] <- start(query)[insertion] - 1
         if (!exists("intbytx", cache, inherits=FALSE))
@@ -257,7 +257,7 @@ setMethod("locateVariants", c("GRanges", "TxDb", "PromoterVariants"),
         if (!any(seqlevels(query) %in% seqlevels(subject)))
             return(.returnEmpty())
 
-        ## for width(ranges) == 0 : de-increment start to equal end value 
+        ## for width(ranges) == 0 : decrement start to equal end value 
         if (any(insertion <- width(query) == 0)) 
             start(query)[insertion] <- start(query)[insertion] - 1 
         if (!exists("tx", cache, inherits=FALSE)) {

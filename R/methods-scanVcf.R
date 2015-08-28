@@ -25,7 +25,7 @@ selectSome <- S4Vectors:::selectSome
                       paste(selectSome(names(map)), collapse=", "))
         cat(msg, "\n")
     }
-    if (!length(map) && nm == "info")
+    if (!length(map) && nm == "info" && !length(tag))
         map <- list(list("1", character()))
     map
 }
@@ -87,8 +87,8 @@ selectSome <- S4Vectors:::selectSome
     if (isTRUE(is.na(samples)))
        geno <- NA 
     hdr <- suppressWarnings(scanVcfHeader(file))
-    fmap <- .vcf_map_fixed(fixed, verbose)
-    imap <- .vcf_map(info(hdr), info, "info", verbose) 
+    fmap <- .vcf_map_fixed(fixed, verbose=verbose)
+    imap <- .vcf_map(info(hdr), info, "info", verbose=verbose) 
     if (!is.null(names(imap))) {
         mapply(function(field, fname) {
                    if (field[[1]] == 0L && !is.logical(field[[2]]))

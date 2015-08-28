@@ -104,7 +104,7 @@
 }
 
 \author{
-  Stephanie Gogarten, Valerie Obenchain <vobencha@fhcrc.org>
+  Stephanie Gogarten and Valerie Obenchain
 }
 
 \seealso{
