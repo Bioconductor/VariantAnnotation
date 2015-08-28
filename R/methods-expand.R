@@ -127,7 +127,8 @@ setMethod("expand", "CollapsedVCF",
     ## no data 
     if (ncol(ivar) == 0L)
         return(DataFrame(row.names=seq_along(idx)))
-    inms <- names(ivar)[info(hdr)[names(ivar), "Number"] == "A"]
+    hnms <- intersect(names(ivar), rownames(info(hdr)))
+    inms <- hnms[info(hdr)[hnms, "Number"] == "A"]
     if (length(inms) > 0L) {
         ielt <- do.call(cbind, lapply(inms, function(i) 
                                       elt - elementLengths(ivar[[i]])))
