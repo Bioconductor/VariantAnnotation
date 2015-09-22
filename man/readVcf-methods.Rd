@@ -208,11 +208,10 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
       \code{DataFrame}.
 
       REF is returned as a DNAStringSet. ALT will be a character vector for
-      structural variants and a DNAStringSetList otherwise. If there is a 
-      non-DNA character (ie, not defined in DNA_ALPHABET from the Biostrings
-      package) the value will be converted to '.'; this is not the same as 
-      a missing value which is represented as an empty character in the
-      DNAStringSetList.
+      structural variants and a DNAStringSetList otherwise. '*' characters
+      are treated as missings and become an empty character in a
+      DNAStringSetList. 'I' characters are treated as undefined and become
+      a '.' in a DNAStringSetList.
     }
     \item{info: }{
       Data from the INFO field of the VCF is parsed into a \code{DataFrame}.

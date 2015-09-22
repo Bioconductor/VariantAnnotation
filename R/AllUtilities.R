@@ -104,15 +104,11 @@
     flat <- unlist(x, use.names=FALSE)
     if (any(.isStructural(flat))) {
         CharacterList(x)
-    } else if (any(notDNA <- .isNotDNA(flat))) {
-        flat[notDNA] <- "."
+    } else {
+        flat[grepl("I", x, fixed=TRUE)] <- "."
+        flat[grepl("*", x, fixed=TRUE)] <- "" 
         DNAStringSetList(relist(flat, x))
-    } else DNAStringSetList(x)
-}
-
-.isNotDNA <- function(x)
-{
-    grepl("I", x, fixed=TRUE) | grepl("*", x, fixed=TRUE) 
+    }
 }
 
 .isStructural <- function(x)

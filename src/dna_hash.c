@@ -94,8 +94,12 @@ SEXP dna_hash_as_DNAStringSet(struct dna_hash_t *dna)
         int idx = kh_value(dna->hash, key);
         if ('.' == *cstr)
             continue;
-        for (int j = 0; j < iwidth[idx]; ++j)
-            *tagp++ = DNAencode(cstr[j]);
+        for (int j = 0; j < iwidth[idx]; ++j) {
+            if ('I' == cstr[j])
+                *tagp++ = DNAencode('.');
+            else
+                *tagp++ = DNAencode(cstr[j]);
+        }
     }
 
     /* ranges */
