@@ -101,17 +101,25 @@
 {
     if (is.null(x))
         return(NULL)
-    if (any(.isStructural(unlist(x, use.names=FALSE))))
+    flat <- unlist(x, use.names=FALSE)
+    if (any(.isStructural(flat))) {
         CharacterList(x)
-    else DNAStringSetList(x)
+    } else if (any(notDNA <- .isNotDNA(flat))) {
+        flat[notDNA] <- "."
+        DNAStringSetList(relist(flat, x))
+    } else DNAStringSetList(x)
+}
+
+.isNotDNA <- function(x)
+{
+    grepl("I", x, fixed=TRUE) | grepl("*", x, fixed=TRUE) 
 }
 
 .isStructural <- function(x)
 {
     grepl("<", x, fixed=TRUE) |
     grepl("[", x, fixed=TRUE) |
-    grepl("]", x, fixed=TRUE) |
-    x == "*"        
+    grepl("]", x, fixed=TRUE) 
 }
 
 .formatInfo <- function(x, hdr, nrecords)

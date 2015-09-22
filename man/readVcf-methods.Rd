@@ -163,7 +163,7 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
       retains the dot as a character string for data type character and converts 
       it to \code{NA} for data types numeric or double. 
 
-      Because the data are stored in rectangluar data structures there is a
+      Because the data are stored in rectangular data structures there is a
       value for each \code{info} and \code{geno} field element in the \code{VCF} 
       class. If the element was missing or was not collected for a particular 
       variant the value will be \code{NA}.
@@ -206,6 +206,13 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
     \item{fixed: }{
       REF, ALT, QUAL and FILTER fields of the VCF are parsed into a 
       \code{DataFrame}.
+
+      REF is returned as a DNAStringSet. ALT will be a character vector for
+      structural variants and a DNAStringSetList otherwise. If there is a 
+      non-DNA character (ie, not defined in DNA_ALPHABET from the Biostrings
+      package) the value will be converted to '.'; this is not the same as 
+      a missing value which is represented as an empty character in the
+      DNAStringSetList.
     }
     \item{info: }{
       Data from the INFO field of the VCF is parsed into a \code{DataFrame}.
