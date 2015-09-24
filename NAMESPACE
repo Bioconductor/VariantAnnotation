@@ -6,6 +6,8 @@ import(BiocGenerics)
 
 import(S4Vectors)
 
+import(IRanges)
+
 import(GenomeInfoDb)
 
 import(GenomicRanges)
@@ -47,30 +49,10 @@ importMethodsFrom(GenomicFeatures,
     distance, mapToTranscripts
 )
 
-importFrom(IRanges, 
-    CharacterList, IntegerList, 
-    IRanges, LogicalList, NumericList, PartitioningByEnd, PartitioningByWidth,
-    splitAsList, successiveViews, expand, endoapply
-)
-
-importClassesFrom(IRanges, 
-    CharacterList, Ranges, RangesList, RangedData
-)
-
-importMethodsFrom(IRanges, 
-    as.matrix, as.vector,
-    countOverlaps, elementLengths, end, findOverlaps, 
-    follow, gsub, lapply, narrow, order, 
-    precede, rev, shift,
-    split, start, "start<-",
-    unlist, which, width, 
-    expand
-)
-
 importFrom(XVector, "subseq", "subseq<-")
 
 importFrom(Biostrings,
-    AAStringSet, DNAStringSet, DNAStringSetList, DNA_BASES
+    AAStringSet, DNAStringSet, DNAStringSetList, DNA_BASES, getSeq
 )
 
 importMethodsFrom(Biostrings,
@@ -130,7 +112,7 @@ exportMethods(
     filterVcf, scanVcf, scanVcfHeader, ScanVcfParam,
     readVcf, writeVcf, expand,
     readVcfLongForm, ## Defunct
-    predictCoding, getTranscriptSeqs, 
+    predictCoding, getTranscriptSeqs, getSeq,
     genotypeToSnpMatrix, snpSummary,
     locateVariants, summarizeVariants,
     isSNV, isInsertion, isDeletion, isIndel, isDelins, isTransition,
