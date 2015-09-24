@@ -309,3 +309,18 @@
     res 
 }
 
+setMethod("getSeq", "XStringSet", function(x, names) {
+              stopifnot(is.character(names) || is(names, "GRanges"))
+              if (is.character(names)) {
+                  return(x[names])
+              }
+              gr <- names
+              grl <- split(gr, seqnames(gr))
+              ans <- mapply(function(grseq, xseq) {
+                                ans <- as(Views(xseq, ranges(grseq)), class(x))
+                                minus <- strand(grseq) == "-"
+                                ans[minus] <- reverseComplement(ans[minus])
+                                ans
+                            }, grl, x, SIMPLIFY=FALSE)
+              unsplit(List(ans), seqnames(gr))
+          })
