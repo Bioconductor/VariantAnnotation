@@ -312,6 +312,10 @@
 setMethod("getSeq", "XStringSet", function(x, names) {
               stopifnot(is.character(names) || is(names, "GRanges"))
               if (is.character(names)) {
+                  found <- names %in% names(x)
+                  regexNames <- unlist(lapply(names[!found], grep, names(x),
+                                              value=TRUE))
+                  names <- c(names[found], regexNames)
                   return(x[names])
               }
               gr <- names
@@ -321,6 +325,6 @@ setMethod("getSeq", "XStringSet", function(x, names) {
                                 minus <- strand(grseq) == "-"
                                 ans[minus] <- reverseComplement(ans[minus])
                                 ans
-                            }, grl, x, SIMPLIFY=FALSE)
+                            }, grl, x[names(grl)], SIMPLIFY=FALSE)
               unsplit(List(ans), seqnames(gr))
           })
