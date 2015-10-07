@@ -319,12 +319,18 @@ setMethod("getSeq", "XStringSet", function(x, names) {
                   return(x[names])
               }
               gr <- names
-              grl <- split(gr, seqnames(gr))
-              ans <- mapply(function(grseq, xseq) {
-                                ans <- as(Views(xseq, ranges(grseq)), class(x))
-                                minus <- strand(grseq) == "-"
-                                ans[minus] <- reverseComplement(ans[minus])
-                                ans
-                            }, grl, x[names(grl)], SIMPLIFY=FALSE)
-              unsplit(List(ans), seqnames(gr))
+              ignoringStrand <- any(strand(gr) != "*") &&
+                  !hasMethod(reverseComplement, class(x))
+              if (ignoringStrand) {
+                  warning("some strand(x) != '*' but ",
+                          "strand has no meaning for ", class(x))
+              }
+              rl <- as(ranges(gr), "RangesList")
+              names(rl) <- seqnames(gr)
+              ans <- x[rl]
+              if (!ignoringStrand) {
+                  minus <- strand(gr) == "-"
+                  ans[minus] <- reverseComplement(ans[minus])
+              }
+              ans
           })
