@@ -14,7 +14,7 @@ Depends: R (>= 2.8.0), methods, BiocGenerics (>= 0.15.3),
         GenomeInfoDb (>= 1.1.3), GenomicRanges (>= 1.19.47),
         SummarizedExperiment (>= 0.3.1), Rsamtools (>= 1.19.52)
 Imports: utils, DBI, zlibbioc, Biobase, S4Vectors (>= 0.7.11),
-        IRanges (>= 2.3.14), XVector (>= 0.5.6), Biostrings (>= 2.33.5),
+        IRanges (>= 2.3.25), XVector (>= 0.5.6), Biostrings (>= 2.33.5),
         AnnotationDbi (>= 1.27.9), BSgenome, rtracklayer (>= 1.25.16),
         GenomicFeatures (>= 1.19.17)
 Suggests: RUnit, BSgenome.Hsapiens.UCSC.hg19,
