@@ -66,7 +66,7 @@
 }
 
 \author{
-  Valerie Obenchain <vobencha@fhcrc.org>
+  Valerie Obenchain
 }
 
 \seealso{

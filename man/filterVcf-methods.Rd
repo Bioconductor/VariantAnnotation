@@ -78,8 +78,7 @@
 \value{The destination file path as a \code{character(1)}.}
 
 \author{
-  Martin Morgan \url{mailto:mtmorgan@fhcrc.org} and Paul Shannon
-  \url{mailto:pshannon@fhcrc.org}.
+  Martin Morgan and Paul Shannon
 }
 
 \seealso{

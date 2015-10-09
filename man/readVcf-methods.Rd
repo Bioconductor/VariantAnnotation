@@ -246,7 +246,7 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
 }
 
 \author{
-  Valerie Obenchain <vobencha@fhcrc.org>
+  Valerie Obenchain>
 }
 
 \seealso{

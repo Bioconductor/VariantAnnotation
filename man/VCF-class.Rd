@@ -374,7 +374,7 @@
   or \code{character} in the collapsed or expanded forms.
 }
 
-\author{Valerie Obenchain <vobencha@fhcrc.org>}
+\author{Valerie Obenchain}
 
 \seealso{
   \link{GRanges},

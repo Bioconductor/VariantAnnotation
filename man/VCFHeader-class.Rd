@@ -127,7 +127,7 @@
   }
 }
 
-\author{Valerie Obenchain <vobencha@fhcrc.org>}
+\author{Valerie Obenchain}
 
 \seealso{
   \code{\link{scanVcfHeader}},

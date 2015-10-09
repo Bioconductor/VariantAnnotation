@@ -1,5 +1,4 @@
 library(SIFT.Hsapiens.dbSNP132)
-#library(SIFT.Hsapiens.dbSNP137)
 library(PolyPhen.Hsapiens.dbSNP131)
 quiet <- suppressWarnings
 
@@ -21,23 +20,6 @@ test_SIFT_132 <- function()
     checkTrue(all(res$RSID %in% c("rs17970171", "INVALID"))) 
 }
 
-#test_SIFT_137 <- function()
-#{
-#    db <- SIFT.Hsapiens.dbSNP137
-#    scol <- columns(db)
-#    checkIdentical(length(scol), 18L) 
-#
-#    res <- select(db, keys=keys(db)[20:21])
-#    checkIdentical(nrow(res), 3L)
-#    checkIdentical(res$DBSNPID, c(665L, 665L, 666L))
-#
-#    res <- quiet(select(db, keys=c("665", "foo", "666")))
-#    checkIdentical(res$DBSNPID, c("665", "665", "foo", "666"))
-#
-#    res <- quiet(select(db, keys=c(665, 666), columns=c("LENGTH", "foo")))
-#    checkIdentical(res, data.frame())
-#}
-
 test_PolyPhen <- function()
 {
     db <- PolyPhen.Hsapiens.dbSNP131
@@ -55,4 +37,3 @@ test_PolyPhen <- function()
     checkIdentical(nrow(res), 5L)
     checkTrue(all(res$RSID %in% c("rs3026284", "INVALID"))) 
 }
-

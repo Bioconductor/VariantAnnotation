@@ -141,7 +141,7 @@
   }
 }
 \author{
-  Martin Morgan and Valerie Obenchain <vobencha@fhcrc.org>
+  Martin Morgan and Valerie Obenchain
 }
 \seealso{
   \code{\link{readVcf}}

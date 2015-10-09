@@ -3,7 +3,7 @@ Type: Package
 Title: Annotation of Genetic Variants
 Description: Annotate variants, compute amino acid coding changes,
         predict coding outcomes
-Version: 1.15.32
+Version: 1.15.33
 Authors@R: c(person("Valerie", "Obenchain", role=c("aut", "cre"),
         email="maintainer@bioconductor.org"),
     person("Martin", "Morgan", role="aut"),
@@ -21,7 +21,8 @@ Suggests: RUnit, BSgenome.Hsapiens.UCSC.hg19,
         TxDb.Hsapiens.UCSC.hg19.knownGene,
         SNPlocs.Hsapiens.dbSNP.20110815,
         SNPlocs.Hsapiens.dbSNP.20101109, SIFT.Hsapiens.dbSNP132,
-        PolyPhen.Hsapiens.dbSNP131, snpStats, ggplot2, BiocStyle
+        SIFT.Hsapiens.dbSNP137, PolyPhen.Hsapiens.dbSNP131, snpStats, 
+        ggplot2, BiocStyle
 LinkingTo: S4Vectors, IRanges, XVector, Biostrings, Rsamtools
 LazyLoad: yes
 biocViews: DataImport, Sequencing, SNP, Annotation,

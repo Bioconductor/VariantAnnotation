@@ -101,7 +101,7 @@
   Eng 12(5):387-394 (1999).
 }
 
-\author{Valerie Obenchain <vobencha@fhcrc.org>}
+\author{Valerie Obenchain}
 
 \examples{
 library(PolyPhen.Hsapiens.dbSNP131)

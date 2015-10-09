@@ -169,7 +169,7 @@
   \url{http://vcftools.sourceforge.net/specs.html}
 }
 
-\author{Michael Lawrence and Valerie Obenchain <vobencha@fhcrc.org>}
+\author{Michael Lawrence and Valerie Obenchain}
 
 \seealso{
   \link{readVcf},

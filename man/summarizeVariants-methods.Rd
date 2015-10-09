@@ -111,7 +111,7 @@
   are taken from the VCF file.
 }
 
-\author{Valerie Obenchain <vobencha@fhcrc.org>}
+\author{Valerie Obenchain}
 
 \seealso{
   \code{\link{readVcf}},

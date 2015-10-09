@@ -41,7 +41,7 @@
   \code{?SIFTDb}
 }
 
-\author{Valerie Obenchain <vobencha@fhcrc.org>}
+\author{Valerie Obenchain}
 
 \keyword{classes}
 \keyword{methods}

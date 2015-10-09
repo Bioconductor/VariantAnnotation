@@ -84,25 +84,27 @@
   function. Nucleic Acids Res. 2003 Jul 1;31(13):3812-4.
 }
 
-\author{Valerie Obenchain <vobencha@fhcrc.org>}
+\author{Valerie Obenchain}
 
 \examples{
-library(SIFT.Hsapiens.dbSNP132)
-
-## metadata
-metadata(SIFT.Hsapiens.dbSNP132)
-
-## available rsid's 
-head(keys(SIFT.Hsapiens.dbSNP132))
-
-## for column descriptions see ?SIFTDbColumns
-columns(SIFT.Hsapiens.dbSNP132)
-
-## subset on keys and columns 
-rsids <- c("rs2142947", "rs17970171", "rs8692231", "rs3026284") 
-subst <- c("RSID", "PREDICTION", "SCORE")
-select(SIFT.Hsapiens.dbSNP132, keys=rsids, columns=subst)
-select(SIFT.Hsapiens.dbSNP132, keys=rsids[1:2])
+if (interactive()) {
+    library(SIFT.Hsapiens.dbSNP132)
+    
+    ## metadata
+    metadata(SIFT.Hsapiens.dbSNP132)
+    
+    ## available rsid's 
+    head(keys(SIFT.Hsapiens.dbSNP132))
+    
+    ## for column descriptions see ?SIFTDbColumns
+    columns(SIFT.Hsapiens.dbSNP132)
+    
+    ## subset on keys and columns 
+    rsids <- c("rs2142947", "rs17970171", "rs8692231", "rs3026284") 
+    subst <- c("RSID", "PREDICTION", "SCORE")
+    select(SIFT.Hsapiens.dbSNP132, keys=rsids, columns=subst)
+    select(SIFT.Hsapiens.dbSNP132, keys=rsids[1:2])
+}
 }
 
 \keyword{classes}

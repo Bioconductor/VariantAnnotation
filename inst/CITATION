@@ -12,5 +12,18 @@ bibentry(bibtype = "Article",
          pages = "2076-2078",
          year = "2014",
          doi = "10.1093/bioinformatics/btu168",
-         abstract = "Summary: VariantAnnotation is an R / Bioconductor package for the exploration and annotation of genetic variants. Capabilities exist for reading, writing and filtering variant call format (VCF) files. VariantAnnotation allows ready access to additional R / Bioconductor facilities for advanced statistical analysis, data transformation, visualization and integration with diverse genomic resources. Availability and implementation: This package is implemented in R and available for download at the Bioconductor Web site (http://bioconductor.org/packages/2.13/bioc/html/VariantAnnotation.html). The package contains extensive help pages for individual functions and a 'vignette' outlining typical work flows; it is made available under the open source 'Artistic-2.0' license. Version 1.9.38 was used in this article. Contact: vobencha@fhcrc.org",
+         abstract = "Summary: VariantAnnotation is an R / Bioconductor package
+         for the exploration and annotation of genetic variants. Capabilities
+         exist for reading, writing and filtering variant call format (VCF)
+         files. VariantAnnotation allows ready access to additional R /
+         Bioconductor facilities for advanced statistical analysis, data
+         transformation, visualization and integration with diverse genomic
+         resources. Availability and implementation: This package is
+         implemented in R and available for download at the Bioconductor Web
+         site
+         (http://bioconductor.org/packages/2.13/bioc/html/VariantAnnotation.html).
+         The package contains extensive help pages for individual functions and
+         a 'vignette' outlining typical work flows; it is made available under
+         the open source 'Artistic-2.0' license. Version 1.9.38 was used in
+         this article. Contact: valerie.obenchain@roswellpark.org",
          journal = "Bioinformatics")

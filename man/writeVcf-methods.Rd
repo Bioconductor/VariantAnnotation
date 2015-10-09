@@ -72,7 +72,7 @@
   \code{samtools}.
 }
 
-\author{Valerie Obenchain <vobencha@fhcrc.org> and Michael Lawrence}
+\author{Valerie Obenchain and Michael Lawrence}
 
 \seealso{
   \code{\link{readVcf}}

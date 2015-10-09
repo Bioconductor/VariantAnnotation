@@ -98,25 +98,25 @@
   function. Nucleic Acids Res. 2003 Jul 1;31(13):3812-4.
 }
 
-\author{Valerie Obenchain <vobencha@fhcrc.org>}
+\author{Valerie Obenchain}
 
 \examples{
-#  library(SIFT.Hsapiens.dbSNP137)
-#
-#  ## metadata
-#  metadata(SIFT.Hsapiens.dbSNP137)
-#
-#  ## keys are the DBSNPID (NCBI dbSNP ID)
-#  dbsnp <- keys(SIFT.Hsapiens.dbSNP137)
-#  head(dbsnp)
-#  columns(SIFT.Hsapiens.dbSNP137)
-#
-#  ## Return all columns. Note that the key, DBSNPID,
-#  ## is always returned. 
-#  select(SIFT.Hsapiens.dbSNP137, dbsnp[10])
-#  ## subset on keys and cols 
-#  cols <- c("VARIANT", "PROVEANPRED", "SIFTPRED")
-#  select(SIFT.Hsapiens.dbSNP137, dbsnp[20:23], cols)
+  if (require(SIFT.Hsapiens.dbSNP137)) {
+      ## metadata
+      metadata(SIFT.Hsapiens.dbSNP137)
+
+      ## keys are the DBSNPID (NCBI dbSNP ID)
+      dbsnp <- keys(SIFT.Hsapiens.dbSNP137)
+      head(dbsnp)
+      columns(SIFT.Hsapiens.dbSNP137)
+
+      ## Return all columns. Note that the key, DBSNPID,
+      ## is always returned. 
+      select(SIFT.Hsapiens.dbSNP137, dbsnp[10])
+      ## subset on keys and cols 
+      cols <- c("VARIANT", "PROVEANPRED", "SIFTPRED")
+      select(SIFT.Hsapiens.dbSNP137, dbsnp[20:23], cols)
+  }
 }
 
 \keyword{classes}

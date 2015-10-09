@@ -46,7 +46,7 @@
   specified in \code{query}. 
 } 
 
-\author{Valerie Obenchain <vobencha@fhcrc.org>}
+\author{Valerie Obenchain}
 
 \seealso{
   \link{predictCoding}

@@ -1,3 +1,46 @@
+CHANGES IN VERSION 1.16.0
+------------------------
+
+NEW FEATURES
+
+    o support REF and ALT values ".", "+" and "-" in predictCoding()
+
+    o return non-translated characters in VARCODON in predictCoding() output
+
+    o add 'verbose' option to readVcf() and friends
+
+    o writeVcf() writes 'fileformat' header line always 
+
+    o readVcf() converts REF and ALT values "*" and "I" to '' and '.'
+
+
+MODIFICATIONS
+
+    o VRanges uses '*' strand by default
+
+    o coerce 'alt' to DNStringSet for predictCoding,VRanges-method
+
+    o add detail to documentation for 'ignore.strand' in predictCoding()
+
+    o be robust to single requrested INFO column not present in vcf file
+
+    o replace old SummarizedExperiment class from GenomicRanges with the
+      new new RangedSummarizedExperiment from SummarizedExperiment
+      package
+
+    o return strand of 'subject' for intronic variants in locateVariants()
+
+
+BUG FIXES
+
+    o writeVcf() does not duplicate header lines when chunking 
+
+    o remove extra tab after INFO when no FORMAT data are present
+
+    o filteVcf() supports 'param' with ranges
+
+
+
 CHANGES IN VERSION 1.14.0
 ------------------------
 
