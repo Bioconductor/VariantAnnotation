@@ -73,6 +73,10 @@ importClassesFrom(BSgenome,
     BSgenome
 )
 
+importMethodsFrom(BSgenome, 
+    getSeq
+)
+
 importFrom(rtracklayer,
     liftOver
 )

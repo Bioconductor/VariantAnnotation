@@ -308,29 +308,3 @@
                   TXID=txid, CDSID=cdsid))
     res 
 }
-
-setMethod("getSeq", "XStringSet", function(x, names) {
-              stopifnot(is.character(names) || is(names, "GRanges"))
-              if (is.character(names)) {
-                  found <- names %in% names(x)
-                  regexNames <- unlist(lapply(names[!found], grep, names(x),
-                                              value=TRUE))
-                  names <- c(names[found], regexNames)
-                  return(x[names])
-              }
-              gr <- names
-              ignoringStrand <- any(strand(gr) != "*") &&
-                  !hasMethod(reverseComplement, class(x))
-              if (ignoringStrand) {
-                  warning("some strand(x) != '*' but ",
-                          "strand has no meaning for ", class(x))
-              }
-              rl <- as(ranges(gr), "RangesList")
-              names(rl) <- seqnames(gr)
-              ans <- x[rl]
-              if (!ignoringStrand) {
-                  minus <- strand(gr) == "-"
-                  ans[minus] <- reverseComplement(ans[minus])
-              }
-              ans
-          })
