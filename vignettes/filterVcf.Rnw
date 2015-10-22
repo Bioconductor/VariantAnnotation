@@ -4,71 +4,13 @@
 
 \documentclass[12pt]{article}
 
-\usepackage{url}
+<<style-Sweave, eval=TRUE, echo=FALSE, results=tex>>=
+BiocStyle::latex()
+@ 
 
-\newenvironment{packed_enum}{
-\begin{enumerate}
-  \setlength{\itemsep}{2pt}
-  \setlength{\parskip}{0pt}
-  \setlength{\parsep}{0pt}
-}{\end{enumerate}}
-
-
-\newenvironment{packed_list}{
-\begin{itemize}
-  \setlength{\itemsep}{2pt}
-  \setlength{\parskip}{0pt}
-  \setlength{\parsep}{0pt}
-}{\end{itemize}}
-
-
-\usepackage{times}
-\usepackage[usenames,dvipsnames]{color}
-\usepackage[colorlinks=true, linkcolor=Blue, urlcolor=Blue,
-  citecolor=Blue]{hyperref}
-
-\usepackage[authoryear,round]{natbib}
-\usepackage{comment}
-
-\usepackage[nottoc,numbib]{tocbibind}
-
-\textwidth=6.2in
-\textheight=8.5in
-%\parskip=.3cm
-
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{2ex}
-
-
-
-\oddsidemargin=.1in
-\evensidemargin=.1in
-\headheight=-.3in
-
-\newcommand{\scscst}{\scriptscriptstyle}
-\newcommand{\scst}{\scriptstyle}
-
-\newcommand{\Rfunction}[1]{{\texttt{#1}}}
-\newcommand{\Robject}[1]{{\texttt{#1}}}
-\newcommand{\Rpackage}[1]{{\textit{#1}}}
-\newcommand{\Rmethod}[1]{{\texttt{#1}}}
-\newcommand{\Rfunarg}[1]{{\texttt{#1}}}
-\newcommand{\Rclass}[1]{{\textit{#1}}}
-\newcommand{\Rcode}[1]{{\texttt{#1}}}
-\newcommand{\software}[1]{\textsf{#1}}
-\newcommand{\R}{\software{R}}
-\newcommand{\Bioconductor}{\software{Bioconductor}}
-
-\newcommand\Biocpkg[1]{%
-  {\href{http://bioconductor.org/packages/release/bioc/html/#1.html}%
-    {\textsl{#1}}}}
-
-
-\bibliographystyle{plainnat}
-
-
-\title{filterVcf:  Extract Variants of Interest from a Large VCF File}
+\title{\texttt{filterVcf()}:  Extract Variants of Interest from a Large VCF File}
 \author{Paul Shannon}
+\date{Created: 20 February, 2013 \\ Last modified: 22 October, 2015}
 
 \begin{document}
 
@@ -76,10 +18,6 @@
 \tableofcontents
 
 \section{Introduction}
-
-<<setup, echo=FALSE>>=
-options(width=80, prompt = " ", continue = " ")
-@ 
 
 Whole genome Variant Call Format (VCF) files are very large, typically
 containing millions of called variants, one call per line of text. 
@@ -105,7 +43,7 @@ will illustrate this first step also.
 \section{The Data: Paired Tumor/Normal Breast Cancer Variants}
 
 Complete Genomics Inc.\footnote{\url{http://www.completegenomics.com/public-data/cancer-data}} states:
-%% two whole genome VCF files[\citet{drmanac2010human}], accompanied by this description:
+%% two whole genome VCF files[\cite{drmanac2010human}], accompanied by this description:
 
 \begin{quote}
   To provide the scientific community with public access to data
@@ -137,16 +75,16 @@ them to a new, small VCF file.
 
 
 
-\section{Introducing the \Rmethod{filterVcf} Method}
+\section{Introducing the \Rfunction{filterVcf} Method}
 
-The \Rmethod{filterVcf} method reads (by chunks, about which more below)
+The \Rfunction{filterVcf} method reads (by chunks, about which more below)
 through a possibly very large VCF file to write a new,
 smaller VCF file which includes only those variant calling rows 
 which meet the criteria specified in \Robject{prefilters} and 
 \Robject{filters}.  
 
-Reading ``by chunks'' is accomplished using a tabix [\citet{li2011tabix}] file.
-The \Rfunarg{yieldSize} argument specifies how many variant lines are read
+Reading ``by chunks'' is accomplished using a tabix [\cite{li2011tabix}] file.
+The \Rcode{yieldSize} argument specifies how many variant lines are read
 into memory at each iteration.
 
 \begin{small}
@@ -159,25 +97,20 @@ filterVcf(tabix.file, genome, destination.file,
 \end{small}
 
 in which 
-\begin{packed_enum}
-  \item \emph{file.gz}: a gzipped vcf file with an accompanying Tabix
-    index file.
-
-  \item \emph{yieldSize}: the number of text (call variant) lines  to
-     read at a time.
-
-  \item \emph{genome}: a string indicating the genome assembly, e.g.,
-    ``hg19''.
-
-  \item \emph{prefilters}: one or more simple string-based filtering
-    functions, each of which returns a logical vector corresponding to
-    the vcf rows it will be passed (as simple character strings).
-
-  \item \emph{filters}: one or more filtering function, each of which
-    returns a logical vector, corresponding to the list of parsed vcf
-    structures it will be passed.
-
-\end{packed_enum}
+\begin{enumerate}
+\item \emph{file.gz}: a gzipped vcf file with an accompanying Tabix
+  index file.
+\item \emph{yieldSize}: the number of text (call variant) lines to
+  read at a time.
+\item \emph{genome}: a string indicating the genome assembly, e.g.,
+  ``hg19''.
+\item \emph{prefilters}: one or more simple string-based filtering
+  functions, each of which returns a logical vector corresponding to
+  the vcf rows it will be passed (as simple character strings).
+\item \emph{filters}: one or more filtering function, each of which
+  returns a logical vector, corresponding to the list of parsed vcf
+  structures it will be passed.
+\end{enumerate}
 
 \subsection{Prefilters}
 
@@ -187,7 +120,7 @@ character strings,  each of which is an \emph{unparsed} variant call line, as re
 from the input VCF file.  We use  \Rfunction{grepl} to 
 return a logical vector equal in length to the incoming
 vector of unparsed VCF lines.  Each prefilter and filter is called 
-repeatedly, with \Rfunarg{yieldSize} lines supplied on each invocation.
+repeatedly, with \Rcode{yieldSize} lines supplied on each invocation.
 \Rfunction{filterVcf} calls these functions repeatedly until the 
 input file is exhausted.  
 
@@ -356,17 +289,16 @@ tryosine kinase implicated in some cancers.  Though artificial, the
 case study illustrates all of the steps needed for broader, realistic
 surveys of whole genome variation data:
 
-\begin{packed_enum}
-
-  \item Filter by genomic coordinates.
-
-  \item Filter to extract only those variant calls which meet these criteria:  Germline, novel (not in dbSnp),
-     consisting of a single nucleotide, of sufficient allelic depth.
-     
-  \item Intersect these variants with recognized DNA elements.  In our case, we used short TFBS regulatory regions,
-     but the same method can be used with exons, splice sites, DNaseI footprints, methylation sites, etc.
-     
-\end{packed_enum}
+\begin{enumerate}
+\item Filter by genomic coordinates.
+\item Filter to extract only those variant calls which meet these
+  criteria: Germline, novel (not in dbSnp), consisting of a single
+  nucleotide, of sufficient allelic depth.
+\item Intersect these variants with recognized DNA elements.  In our
+  case, we used short TFBS regulatory regions, but the same method can
+  be used with exons, splice sites, DNaseI footprints, methylation
+  sites, etc.
+\end{enumerate}
 
 
 \section{Appendix: Filter by Genomic Region}
@@ -403,7 +335,5 @@ indexTabix("chr7-sub.vcf.gz", format="vcf")
 This code creates the small gzipped vcf and index files used in the examples above.
 
 \nocite{*} 
-
-\bibliography{filterVcf}
 
 \end{document}
