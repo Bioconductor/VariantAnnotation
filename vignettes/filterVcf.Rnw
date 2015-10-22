@@ -20,46 +20,49 @@ BiocStyle::latex()
 \section{Introduction}
 
 Whole genome Variant Call Format (VCF) files are very large, typically
-containing millions of called variants, one call per line of text. 
-The actual number of variants relevant to a particular study
-(of a disease such as breast cancer, for instance) will often be far
-fewer.  Thus the first task one faces when analyzing a whole genome
-VCF file is to identify and extract the relatively few variants which
-may be of interest, excluding all others.  This vignette
-illustrates several techniques for doing this.
+containing millions of called variants, one call per line of text.
+The actual number of variants relevant to a particular study (of a
+disease such as breast cancer, for instance) will often be far fewer.
+Thus the first task one faces when analyzing a whole genome VCF file
+is to identify and extract the relatively few variants which may be of
+interest, excluding all others.  This vignette illustrates several
+techniques for doing this.
 
-We demonstrate three methods: filtering by genomic region,
-filtering on attributes of each specific variant call, and intersecting
-with known regions of interest (exons, splice sites, regulatory regions,
-etc.).  We are primarily concerned with the latter two.
-However, in order to create the small VCF data file we use here for
-demonstration purposes, we employed genomic region filtering, reducing
-a very large whole genome two-sample breast cancer VCF file of
-fourteen million calls, to a file containing fewer than ten thousand
-calls in a one million base pair region of chromosome 7.  For the
-sake of reproducibility, and for completeness of exposition, we
-will illustrate this first step also.
+We demonstrate three methods: filtering by genomic region, filtering
+on attributes of each specific variant call, and intersecting with
+known regions of interest (exons, splice sites, regulatory regions,
+etc.).  We are primarily concerned with the latter two.  However, in
+order to create the small VCF data file we use here for demonstration
+purposes, we employed genomic region filtering, reducing a very large
+whole genome two-sample breast cancer VCF file of fourteen million
+calls, to a file containing fewer than ten thousand calls in a one
+million base pair region of chromosome 7.  For the sake of
+reproducibility, and for completeness of exposition, we will
+illustrate this first step also.
 
 \section{The Data: Paired Tumor/Normal Breast Cancer Variants}
 
-Complete Genomics Inc.\footnote{\url{http://www.completegenomics.com/public-data/cancer-data}} states:
+Complete Genomics
+Inc.\footnote{\url{http://www.completegenomics.com/public-data/cancer-data}}
+states:
 %% two whole genome VCF files[\cite{drmanac2010human}], accompanied by this description:
 
 \begin{quote}
   To provide the scientific community with public access to data
   generated from two paired tumor/normal cancer samples, Complete
   Genomics sequenced and analyzed cell-line samples of patients with
-  breast cancer (invasive ductal carcinomas). The cell line-derived DNA
-  are housed at ATCC. Samples have been sequenced to an average
-  genome-wide coverage of 123X for three of the samples, and 92X for for
-  the fourth sample.\footnote{Data generated with version 2.0.0.32 of the Complete 
-  Genomics assembly software, on high molecular weight genomic DNA 
-  isolated from the HCC1187 breast carcinoma cell line ATCC CRL 2322.
-  Sequencing methods documented in [Drmanac et al, 2010].}
+  breast cancer (invasive ductal carcinomas). The cell line-derived
+  DNA are housed at ATCC. Samples have been sequenced to an average
+  genome-wide coverage of 123X for three of the samples, and 92X for
+  for the fourth sample.\footnote{Data generated with version 2.0.0.32
+    of the Complete Genomics assembly software, on high molecular
+    weight genomic DNA isolated from the HCC1187 breast carcinoma cell
+    line ATCC CRL 2322.  Sequencing methods documented in [Drmanac et
+    al, 2010].}
 \end{quote}
 
-A small (1M base) subset of this data is included in the current package, and used 
-in the code presented below.
+A small (1M base) subset of this data is included in the current
+package, and used in the code presented below.
 
 \section{Filter by Genomic Region}
 
@@ -68,7 +71,7 @@ We identified this subset in a prior exploration of the full data set
 suitable for our purpose are found in a 1M base pair region of
 chromosome seven. The appendix to this document (see below) shows the
 few lines of code required to extract variant calls in that small
-region, from the very large file obtained from Complete Genomics 
+region, from the very large file obtained from Complete Genomics
 (\emph{"somaticVcfBeta-HCC1187-H-200-37-ASM-T1-N1.vcf.gz"}) and write
 them to a new, small VCF file.
 
@@ -83,9 +86,9 @@ smaller VCF file which includes only those variant calling rows
 which meet the criteria specified in \Robject{prefilters} and 
 \Robject{filters}.  
 
-Reading ``by chunks'' is accomplished using a tabix [\cite{li2011tabix}] file.
-The \Rcode{yieldSize} argument specifies how many variant lines are read
-into memory at each iteration.
+Reading ``by chunks'' is accomplished using a tabix
+[\cite{li2011tabix}] file.  The \Rcode{yieldSize} argument specifies
+how many variant lines are read into memory at each iteration.
 
 \begin{small}
 
@@ -115,18 +118,16 @@ in which
 \subsection{Prefilters}
 
 Prefilters are conceptually very simple.  They are functions which
-will be called with a single argument, a vector of
-character strings,  each of which is an \emph{unparsed} variant call line, as read
-from the input VCF file.  We use  \Rfunction{grepl} to 
-return a logical vector equal in length to the incoming
-vector of unparsed VCF lines.  Each prefilter and filter is called 
-repeatedly, with \Rcode{yieldSize} lines supplied on each invocation.
-\Rfunction{filterVcf} calls these functions repeatedly until the 
-input file is exhausted.  
+will be called with a single argument, a vector of character strings,
+each of which is an \emph{unparsed} variant call line, as read from
+the input VCF file.  We use \Rfunction{grepl} to return a logical
+vector equal in length to the incoming vector of unparsed VCF lines.
+Each prefilter and filter is called repeatedly, with \Rcode{yieldSize}
+lines supplied on each invocation.  \Rfunction{filterVcf} calls these
+functions repeatedly until the input file is exhausted.
 
-Notice how the logic of these prefilters is very simple, using \Rfunction{grepl}
-to do fast, simple, fixed pattern matching:
-
+Notice how the logic of these prefilters is very simple, using
+\Rfunction{grepl} to do fast, simple, fixed pattern matching:
 
 \begin{small}
 <<prefilters>>=
@@ -149,7 +150,6 @@ which passed the prefilters.  Therefore it pays to eliminate as many
 lines as possible using prefilters.  Filters are useful when there
 exists detailed criteria for inclusion and exclusion.  This can be
 seen below, especially in the \Rfunction{allelicDepth} function.
-
 
 \begin{small}
 <<filters>>=
@@ -179,10 +179,11 @@ allelicDepth <- function(x) {
 
 \subsection{FilterRules}
 
-\Robject{FilterRules} allow you to combine a list of filters, or of prefilters
-so that they may be passed as parameters to \emph{filterVcf}.
-We use them here to combine the \emph{isGermlinePrefilter} with the 
-\emph{notInDbsnpPrefilter}, and the \emph{isSnp} with the \emph{AD} filter.
+\Robject{FilterRules} allow you to combine a list of filters, or of
+prefilters so that they may be passed as parameters to
+\emph{filterVcf}.  We use them here to combine the
+\emph{isGermlinePrefilter} with the \emph{notInDbsnpPrefilter}, and
+the \emph{isSnp} with the \emph{AD} filter.
 
 
 \begin{small}
@@ -213,20 +214,25 @@ filterVcf(tabix.file,  "hg19", destination.file,
 
 \section{Look for SNPs in Regulatory Regions}
 
-We have now created a file containing 29 novel, Germline, SNP variant calls, each with
-a reasonable allelic depth, extracted from the 3808 calls in \emph{chr7-sub.vcf}.
-We examine those variants for overlap with regulatory regions, turning to
-the ENCODE project and using \Bioconductor's \Biocpkg{AnnotationHub}.
+We have now created a file containing 29 novel, Germline, SNP variant
+calls, each with a reasonable allelic depth, extracted from the 3808
+calls in \emph{chr7-sub.vcf}.  We examine those variants for overlap
+with regulatory regions, turning to the ENCODE project and using
+\Bioconductor's \Biocpkg{AnnotationHub}.
 
-The ENCODE project is a large, long-term effort to build a ``parts list'' of all the functional
-elements in the human genome.  They have recently focused on regulatory elements.  We use the
-\Bioconductor \Biocpkg{AnnotationHub} to download regulatory regions reported for a breast cancer
-cell line, with which to identify possibly functional, and possibly clinically relevant SNVs
-in the breast cancer tumor/normal genome we have been examining.
+The ENCODE project is a large, long-term effort to build a ``parts
+list'' of all the functional elements in the human genome.  They have
+recently focused on regulatory elements.  We use the \Bioconductor
+\Biocpkg{AnnotationHub} to download regulatory regions reported for a
+breast cancer cell line, with which to identify possibly functional,
+and possibly clinically relevant SNVs in the breast cancer
+tumor/normal genome we have been examining.
 
-The \Biocpkg{AnnotationHub} is a recent addition to \Bioconductor.  See here [TODO] for more information.
+The \Biocpkg{AnnotationHub} is a recent addition to \Bioconductor{}
+that facilitates access to genome-scale resources like ENCODE.
 
-\subsection{Load CTCF Transcription Factor Binding Regions Identified in MCF-7 Breast Cancer Cell Line}
+\subsection{Load CTCF Transcription Factor Binding Regions Identified
+  in MCF-7 Breast Cancer Cell Line}
 
 The \emph{MCF-7} Breast Cancer Cell line
 (\url{http://en.wikipedia.org/wiki/MCF-7}) was established forty years
@@ -244,8 +250,6 @@ in the intronic binding region of the cancer-related gene, EGFR.
 %% FIXME: delete next line when AnnotationHub in manifest
 \SweaveOpts{eval=FALSE}
 
-\begin{small}
-
 <<mcf7regulatoryRegions>>=
 library(AnnotationHub)
 hub <- AnnotationHub()
@@ -255,7 +259,6 @@ ctcf.regs <- paste("goldenpath.hg19.encodeDCC.wgEncodeUwTfbs",
                   sep=".")
 mcf7.gr <- hub[[ctcf.regs]]
 @ 
-\end{small}
 
 \subsection{Find SNPs in CTCF Binding Regions}
 
@@ -268,8 +271,8 @@ ov.mcf7 <- findOverlaps(vcf, mcf7.gr)
 @ 
 \end{small}
 
-There is just one SNV which overlaps with the MCF-7 regulatory regions.  Find
-out where, if anywhere, it fits within a gene model.
+There is just one SNV which overlaps with the MCF-7 regulatory
+regions.  Find out where, if anywhere, it fits within a gene model.
 
 \begin{small}
 
@@ -303,14 +306,16 @@ surveys of whole genome variation data:
 
 \section{Appendix: Filter by Genomic Region}
 
-The most basic form of VCF file filtering is by genomic region.  We demonstrate that here,
-extracting variant calls in a 1M base region of chromosome 7, writing them to a new file, compressing
-and then indexing that file.   These steps created the small VCF file which accompanies this vignette,
-and is used in the code shown above.  
+The most basic form of VCF file filtering is by genomic region.  We
+demonstrate that here, extracting variant calls in a 1M base region of
+chromosome 7, writing them to a new file, compressing and then
+indexing that file.  These steps created the small VCF file which
+accompanies this vignette, and is used in the code shown above.
 
-Note that this code is \emph{NOT} executed during the creation of this vignette:  we do not supply the very large
-VCF file that it operates on.  This code is here for tutorial purposes only, showing how you
-can filter by genomic region with a possibly large VCF file of your own.
+Note that this code is \emph{NOT} executed during the creation of this
+vignette: we do not supply the very large VCF file that it operates
+on.  This code is here for tutorial purposes only, showing how you can
+filter by genomic region with a possibly large VCF file of your own.
 
 \begin{small}
 \begin{verbatim}
@@ -332,7 +337,8 @@ indexTabix("chr7-sub.vcf.gz", format="vcf")
 
 \end{small}
 
-This code creates the small gzipped vcf and index files used in the examples above.
+This code creates the small gzipped vcf and index files used in the
+examples above.
 
 \nocite{*} 
 
