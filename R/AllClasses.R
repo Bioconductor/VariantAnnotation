@@ -275,7 +275,10 @@ setClass("AllVariants",
     paste("'strand' must always be '+' or '*'")
 }
 
-naToZero <- function(x) ifelse(is.na(x), 0L, x)
+naToZero <- function(x) {
+    x[is.na(x)] <- 0L
+    x
+}
 
 .valid.VRanges.depth <- function(object) {
   checkDepth <- function(name) {
