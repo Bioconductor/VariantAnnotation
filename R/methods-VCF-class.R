@@ -414,7 +414,60 @@ setMethod("cbind", "VCF",
 })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-### show methods
+### Coercion 
+###
+
+.from_SnpMatrix_to_VCF <- function(from, seqSource)
+{
+    if (!all(names(from) %in% c("genotypes", "fam", "map")))
+        stop("'from' must be a list with named elements 'genotypes', ",
+             "'fam' and 'map'")
+
+    ## match seqlevels style to seqSource
+    map <- from$map
+    chr <- as.character(map$chromosome)
+    seqlevelsStyle(chr) <- seqlevelsStyle(seqSource)
+    uniqueChr <- unique(chr)
+    if (any(invalid <- !uniqueChr %in% seqlevels(seqSource)))
+        stop("seqlevels not found in 'seqSource': ", 
+             paste(uniqueChr[invalid], collapse=", "))
+
+    ## ref
+    gr <- GRanges(chr, IRanges(map$position, width=1))
+    ref <- getSeq(seqSource, gr)
+
+    ## alt 
+    refIsAlt1 <- ref == map$allele.1
+    refIsAlt2 <- ref == map$allele.2
+    alt <- DNAStringSetList(as.list(map$allele.1))
+    alt[refIsAlt1] <- DNAStringSetList(as.list(map$allele.2[refIsAlt1]))
+    if (any(refNotFound <- refIsAlt1 & refIsAlt2)) {
+        ## FIXME: better way?
+        df <- data.frame(rbind(map$allele.1[refNotFound], 
+                               map$allele.2[refNotFound]))
+        alt[refNotFound] <- DNAStringSetList(as.list(df))
+    }
+
+    ## genotypes 
+    GT <- from$genotypes@.Data
+    nrowGT <- nrow(GT)
+    dnames <- dimnames(GT)
+    dimnames(GT) <- NULL
+    uniqueGT <- c("00", "01", "02", "03")
+    ## FIXME: are we missing "1/0"? 
+    newGT <- c("./.", "0/0", "0/1", "1/1") 
+    ## FIXME: takes ~30 sec for 2100739 snps
+    GT <- newGT[match(GT, uniqueGT)]
+    GT <- matrix(GT, byrow=TRUE, ncol=nrowGT)
+
+    ## FIXME: add dimnames
+    VCF(rowRanges=gr, fixed=DataFrame(REF=ref, ALT=alt), 
+        colData=DataFrame(Samples=seq_len(nrowGT)), 
+        geno=SimpleList(GT=GT))
+}
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Show methods
 ###
 
 setMethod(show, "VCF",
@@ -507,8 +560,10 @@ setMethod(show, "VCF",
     }
 }
 
+
+
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-### restrictToSNV 
+### restrictToSNV() 
 ###
 
 ### Creates a subset VCF with SNVs only. 'x' can be a CollapsedVCF 
@@ -519,7 +574,7 @@ restrictToSNV <- function(x, ...)
 }
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-### genotypeCodesToNucleotides
+### genotypeCodesToNucleotides()
 ###
 
 genotypeCodesToNucleotides <- function(vcf, ...) 
