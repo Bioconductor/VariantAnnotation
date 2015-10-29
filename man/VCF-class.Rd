@@ -15,6 +15,7 @@
 \alias{VCF}
 
 % Coercion methods:
+\alias{SnpMatrixToVCF}
 
 % Accessor methods:
 \alias{ref}
@@ -283,6 +284,14 @@
   This function converts the `GT` genotype codes in a \code{VCF} object
   to nucleotides. See also ?\code{readGT} to read in only `GT` data as 
   codes or nucleotides.
+}
+
+\section{SnpMatrixToVCF(from, seqSource)}{
+  This function converts the output from the \link[snpStats]{read.plink} 
+  function to a \code{VCF} class. \code{from} must be a list of length 3
+  with named elements "map", "fam" and "genotypes". \code{seqSource} can
+  be a \code{\link[BSgenome]{BSgenome}} or an \link{FaFile}
+  used for reference sequence extraction.
 }
 
 \section{Variant Type}{
