@@ -105,8 +105,8 @@
     if (any(.isStructural(flat))) {
         CharacterList(x)
     } else {
-        flat[grepl("I", x, fixed=TRUE)] <- "."
-        flat[grepl("*", x, fixed=TRUE)] <- "" 
+        flat[grepl("I", flat, fixed=TRUE)] <- "."
+        flat[grepl("*", flat, fixed=TRUE)] <- "" 
         DNAStringSetList(relist(flat, x))
     }
 }
