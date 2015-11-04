@@ -139,7 +139,7 @@ setMethod("filterVcf", "TabixFile",
     if (index) {
         if (verbose)
             message("compressing and indexing ", sQuote(file))
-        gzFilename <- sprintf("%s.gz", destination)
+        gzFilename <- sprintf("%s.bgz", destination)
         gzFilename <- bgzip(file, gzFilename, overwrite = TRUE)
         destination <- indexTabix(gzFilename, format = "vcf")
         unlink(file)
