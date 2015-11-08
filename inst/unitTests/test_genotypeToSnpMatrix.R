@@ -1,4 +1,5 @@
 library(snpStats) ## SnpMatrix class
+PLtoGP <- VariantAnnotation:::PLtoGP
 quiet <- suppressWarnings
 
 test_gSM_array_GT <- function() {
@@ -220,4 +221,5 @@ test_matrixToArray <- function() {
             checkEquals(unlist(mat[i,j]), arr[i,j,1:n])
         } 
     }
+    TRUE
 }
