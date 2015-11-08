@@ -69,6 +69,19 @@ test_gSM_VCF_GL <- function() {
                 as.vector(g2post(gtsm$genotypes[4,1])))
 }
 
+test_gSM_VCF_PL <- function() {
+    fl <- system.file("extdata", "hapmap_exome_chr22.vcf.gz", package="VariantAnnotation")
+    vcf <- readVcf(fl, "hg19")
+    gtsm <- quiet(genotypeToSnpMatrix(vcf, uncertain=TRUE))
+    checkIdentical(colnames(vcf), rownames(gtsm$genotypes))
+    checkIdentical(rownames(vcf), colnames(gtsm$genotypes))
+    checkIdentical(rownames(vcf), gtsm$map$snp.names)
+    checkIdentical(ref(vcf), gtsm$map$allele.1)
+    checkIdentical(alt(vcf), gtsm$map$allele.2)
+    checkEquals(unlist(PLtoGP(geno(vcf)$PL)[1,4]), 
+                as.vector(g2post(gtsm$genotypes[4,1])), tolerance=0.01)
+}
+
 test_gSM_VCF_structural <- function() {
     fl <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
     vcf <- readVcf(fl, "hg19")
@@ -137,6 +150,25 @@ test_GLtoGP_array <- function() {
     checkEquals(probs, gp)
 }
 
+test_PLtoGP_array <- function() {
+    probs <- aperm(array(c(0.4,0.3,0.3,
+                           0.5,0.1,0.4,
+                           0.9,0.05,0.05,
+                           0,1,0,
+                           0,0,1,
+                           1,NA,NA),
+                         dim=c(3,3,2)),
+                   c(2,3,1))
+    pl <- probs
+    for (i in 1:nrow(probs)) {
+        for (j in 1:ncol(probs)) {
+            pl[i,j,] <- -10*log10(probs[i,j,])
+        }
+    }
+    gp <- PLtoGP(pl)
+    checkEquals(probs, gp)
+}
+
 test_GLtoGP_matrix <- function() {
     probs <- matrix(c(list(c(0.4,0.3,0.3)),
                       list(c(0.5,0.1,0.4)),
@@ -152,6 +184,24 @@ test_GLtoGP_matrix <- function() {
         }
     }
     gp <- GLtoGP(gl)
+    checkEquals(probs, gp)
+}
+
+test_PLtoGP_matrix <- function() {
+    probs <- matrix(c(list(c(0.4,0.3,0.3)),
+                      list(c(0.5,0.1,0.4)),
+                      list(c(0.9,0.05,0.05)),
+                      list(c(0,1,0)),
+                      list(c(0,0,1)),
+                      list(c(1))),
+                    ncol=2)
+    pl <- probs
+    for (i in 1:nrow(probs)) {
+        for (j in 1:ncol(probs)) {
+            pl[i,j] <- list(-10*log10(unlist(probs[i,j])))
+        }
+    }
+    gp <- PLtoGP(pl)
     checkEquals(probs, gp)
 }
 

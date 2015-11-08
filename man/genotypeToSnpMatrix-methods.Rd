@@ -7,7 +7,7 @@
 \title{Convert genotype calls from a VCF file to a SnpMatrix object}
 
 \description{
-  Convert an array of genotype calls from the "GT", "GP", or "GL" 
+  Convert an array of genotype calls from the "GT", "GP", "GL" or "PL"
   FORMAT field of a VCF file to a \link[snpStats:SnpMatrix-class]{SnpMatrix}.
 }
 
@@ -19,13 +19,13 @@
 \arguments{
   \item{x}{
     A \code{CollapsedVCF} object or a \code{array} of genotype data 
-    from the "GT", "GP", or "GL" FORMAT field of a VCF file.  This \code{array} is created 
+    from the "GT", "GP", "GL" or "PL" FORMAT field of a VCF file.  This \code{array} is created 
     with a call to \code{readVcf} and can be accessed with \code{geno(<VCF>)}.
   }
   \item{uncertain}{
     A logical indicating whether the genotypes to convert
-    should come from the "GT" field (\code{uncertain=FALSE}) or the "GP" or 
-    "GL" field (\code{uncertain=TRUE}).
+    should come from the "GT" field (\code{uncertain=FALSE}) or the "GP", 
+    "GL" or "PL" field (\code{uncertain=TRUE}).
   }
   \item{ref}{
     A \code{DNAStringSet} of reference alleles.
@@ -40,7 +40,7 @@
 
 \details{
   \code{genotypeToSnpMatrix} converts an array of genotype calls from the 
-  "GT", "GP", or "GL" FORMAT field of a VCF file into a 
+  "GT", "GP", "GL" or "PL" FORMAT field of a VCF file into a 
   \link[snpStats:SnpMatrix-class]{SnpMatrix}. The following caveats apply, 
   \itemize{
     \item{no distinction is made between phased and unphased genotypes}
@@ -60,7 +60,7 @@
   allele values would be 0 = missing, 1 = "A/A", 2 = "A/B" or "B/A" and
   3 = "B/B".
   
-  The three genotype fields are defined as follows:
+  The genotype fields are defined as follows:
   \itemize{
     \item{GT : genotype, encoded as allele values separated by either of
       "/" or "|". The allele values are 0 for the reference allele and 1
@@ -68,7 +68,11 @@
     \item{GL : genotype likelihoods comprised of comma separated
       floating point log10-scaled likelihoods for all possible
       genotypes.  In the case of a reference allele A and a single
-      alternate allele B, the likelihoods will be ordered "A/A", "A/B", "B/B".}
+      alternate allele B, the likelihoods will be ordered "A/A", "A/B",
+      "B/B".}
+    \item{PL : the phred-scaled genotype likelihoods rounded to the
+      closest integer.  The ordering of values is the 
+      same as for the GL field.}
     \item{GP : the phred-scaled genotype posterior probabilities for all
       possible genotypes; intended to store
       imputed genotype probabilities.  The ordering of values is the
@@ -140,7 +144,7 @@
   mat$map
 
   ## ----------------------------------------------------------------
-  ## Probability-based encoding using "GL" or "GP"
+  ## Probability-based encoding using "GL", "PL" or "GP"
   ## ----------------------------------------------------------------
   ## Read a vcf file with a "GL" field.
   fl <- system.file("extdata", "gl_chr1.vcf", package="VariantAnnotation") 

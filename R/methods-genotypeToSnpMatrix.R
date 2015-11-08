@@ -53,8 +53,14 @@ setMethod("genotypeToSnpMatrix", "CollapsedVCF",
                 gt <- .matrixOfListsToArray(gt)
             }
             gt <- GLtoGP(gt)
+        } else if ("PL" %in% geno.cols) {
+            gt <- geno(x)$PL
+            if (mode(gt) == "list") {
+                gt <- .matrixOfListsToArray(gt)
+            }
+            gt <- PLtoGP(gt)
         } else {
-            warning("uncertain=TRUE requires GP or GL; returning NULL")
+            warning("uncertain=TRUE requires GP, GL or PL; returning NULL")
             return(.emptySnpMatrix())
         }
     }
@@ -186,6 +192,20 @@ GLtoGP <- function(gl) {
     } else {
         stop("gl must be a matrix of lists or a 3D array")
     }
+}
+
+## PL is same as GL except for a factor of -10
+## GL = log10(L), PL = -10*log10(L) (phred-scaled)
+PLtoGP <- function(pl) {
+    if (is.matrix(pl) && storage.mode(pl) == "list") {
+        gl <- pl
+        for (i in 1:length(gl)) {
+            gl[[i]] <- pl[[i]]/(-10)
+        }
+    } else {
+        gl <- pl/(-10)
+    }
+    GLtoGP(gl)
 }
 
 .listMatrixToArray <- function(x) {
