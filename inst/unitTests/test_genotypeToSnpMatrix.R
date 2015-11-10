@@ -1,5 +1,4 @@
 library(snpStats) ## SnpMatrix class
-PLtoGP <- VariantAnnotation:::PLtoGP
 quiet <- suppressWarnings
 
 test_gSM_array_GT <- function() {
