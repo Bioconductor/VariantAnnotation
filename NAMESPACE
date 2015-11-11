@@ -101,7 +101,7 @@ export(
     called, stackSamples, "altDepth<-", "refDepth<-", "totalDepth<-",
     probabilityToSnpMatrix, GLtoGP,
     readInfo, readGeno, readGT, genotypeCodesToNucleotides,
-    tabulate, pivot, VRangesScanVcfParam, readVcfAsVRanges,
+    tabulate, VRangesScanVcfParam, readVcfAsVRanges,
     isSNV, isInsertion, isDeletion, isIndel, isDelins, isTransition,
     isSubstitution,
     VcfFile, VcfFileList,
