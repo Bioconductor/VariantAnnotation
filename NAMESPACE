@@ -73,10 +73,6 @@ importClassesFrom(BSgenome,
     BSgenome
 )
 
-importMethodsFrom(BSgenome, 
-    getSeq
-)
-
 importFrom(rtracklayer,
     liftOver
 )
@@ -104,8 +100,8 @@ export(
     softFilterMatrix, "softFilterMatrix<-", hardFilters, "hardFilters<-",
     called, stackSamples, "altDepth<-", "refDepth<-", "totalDepth<-",
     probabilityToSnpMatrix, GLtoGP,
-    readInfo, readGeno, readGT, genotypeCodesToNucleotides, SnpMatrixToVCF,
-    tabulate, VRangesScanVcfParam, readVcfAsVRanges,
+    readInfo, readGeno, readGT, genotypeCodesToNucleotides,
+    tabulate, pivot, VRangesScanVcfParam, readVcfAsVRanges,
     isSNV, isInsertion, isDeletion, isIndel, isDelins, isTransition,
     isSubstitution,
     VcfFile, VcfFileList,
