@@ -349,7 +349,7 @@ setReplaceMethod("[",
     }
 })
 
-.compare <- GenomicRanges:::.compare
+.compare <- SummarizedExperiment:::.compare
 ## Appropriate for objects with different ranges and same samples.
 setMethod("rbind", "VCF",
     function(..., deparse.level=1)
@@ -366,8 +366,8 @@ setMethod("rbind", "VCF",
     fixed <- do.call(rbind, lapply(args, fixed))
     info <- do.call(rbind, lapply(args, info))
     rowRanges <- do.call(c, lapply(args, rowRanges))
-    colData <- GenomicRanges:::.cbind.DataFrame(args, colData, "colData")
-    assays <- GenomicRanges:::.bind.arrays(args, rbind, "assays")
+    colData <- SummarizedExperiment:::.cbind.DataFrame(args, colData, "colData")
+    assays <- do.call(rbind, lapply(args, slot, "assays"))
     elementMetadata <- do.call(rbind, lapply(args, slot, "elementMetadata"))
     metadata <- do.call(c, lapply(args, metadata))
 
@@ -400,11 +400,11 @@ setMethod("cbind", "VCF",
         stop("data in 'fixed(VCF)' must match.")
 
     fixed <- fixed(args[[1L]])
-    info <- GenomicRanges:::.cbind.DataFrame(args, info, "info") 
+    info <- SummarizedExperiment:::.cbind.DataFrame(args, info, "info") 
     rowRanges <- rowRanges(args[[1L]])
-    mcols(rowRanges) <- GenomicRanges:::.cbind.DataFrame(args, mcols, "mcols")
+    mcols(rowRanges) <- SummarizedExperiment:::.cbind.DataFrame(args, mcols, "mcols")
     colData <- do.call(rbind, lapply(args, colData))
-    assays <- GenomicRanges:::.bind.arrays(args, cbind, "assays")
+    assays <- do.call(rbind, lapply(args, slot, "assays"))
     metadata <- do.call(c, lapply(args, metadata))
 
     BiocGenerics:::replaceSlots(args[[1L]],
