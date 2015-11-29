@@ -404,7 +404,7 @@ setMethod("cbind", "VCF",
     rowRanges <- rowRanges(args[[1L]])
     mcols(rowRanges) <- SummarizedExperiment:::.cbind.DataFrame(args, mcols, "mcols")
     colData <- do.call(rbind, lapply(args, colData))
-    assays <- do.call(rbind, lapply(args, slot, "assays"))
+    assays <- do.call(cbind, lapply(args, slot, "assays"))
     metadata <- do.call(c, lapply(args, metadata))
 
     BiocGenerics:::replaceSlots(args[[1L]],
