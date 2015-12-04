@@ -107,7 +107,7 @@
     } else {
         flat[grepl("I", flat, fixed=TRUE)] <- "."
         flat[grepl("*", flat, fixed=TRUE)] <- "" 
-        DNAStringSetList(relist(flat, x))
+        relist(DNAStringSet(flat), x)
     }
 }
 
