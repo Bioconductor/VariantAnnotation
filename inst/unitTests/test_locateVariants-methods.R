@@ -131,6 +131,6 @@ test_locateVariants_match_predictCoding <- function()
     checkIdentical(loc$QUERYID, as.integer(1:7))
     checkIdentical(length(coding) , 6L)
     checkIdentical(loc$CDSID[1:6], coding$CDSID)
-    checkIdentical(as.character(coding$VARCODON[c(1,4)]), 
+    checkIdentical(unname(as.character(coding$VARCODON[c(1,4)])), 
                    as.character(DNAStringSet(c("AAG", "TAG"))))
 }
