@@ -74,6 +74,7 @@ setMethod("summarizeVariants", c("GRangesList", "VCF", "function"),
     fac_x_var <- table(subjectHits(hits), queryHits(hits))
     var_x_smp <- matrix(gtype, ncol=ncol(subject))
     fac_x_smp <- fac_x_var %*% var_x_smp
+    rownames(fac_x_smp) <- NULL 
 
     SummarizedExperiment(rowRanges=query[unique(subjectHits(hits))], 
                          colData=colData(subject), 

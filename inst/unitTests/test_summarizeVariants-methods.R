@@ -4,7 +4,7 @@ grl <- GRangesList(
     C=GRanges("20", IRanges(1110696, width=1)), 
     D=GRanges("20", IRanges(1110696, width=2)))
 
-test_summarizeOverlaps_ <- function()
+test_summarizeVariants <- function()
 {
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
     vcf <- readVcf(fl, "hg19")
