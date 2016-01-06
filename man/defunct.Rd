@@ -15,6 +15,8 @@
 \alias{dbSNPFilter}
 \alias{regionFilter}
 \alias{MatrixToSnpMatrix}
+\alias{VRangesScanVcfParam}
+\alias{restrictToSNV}
 
 \title{Defunct Functions in Package \code{VariantAnnotation}}
 
@@ -24,9 +26,10 @@
 }
 
 \section{usage}{
-  ## Defunct in > 1.15.0
+  ## Defunct in > 1.17.0
   \itemize{
-    \item getTranscriptSeqs()
+    \item VRangesScanVcfParam()
+    \item restrictToSNV()
   }
 
   ## Removed
@@ -36,14 +39,19 @@
     \item dbSNPFilter()
     \item regionFilter()
     \item MatrixToSnpMatrix()
+    \item getTranscriptSeqs()
   }
 }
 
 \details{
-  ## Defunct in > 1.15.0
+  ## Defunct in > 1.17.0
   \itemize{
-    \item \code{getTranscriptSeqs} has been replaced by
-          \code{extractTranscriptSeqs} in the GenomicFeatures package.
+    \item{
+      \code{VRangesScanVcfParam} has been replaced by \code{ScanVcfParam}.
+    }
+    \item{
+      \code{restrictToSVN} has been replaced by \code{isSNV}.
+    }
   }
 
   ## Removed
@@ -60,8 +68,13 @@
       \code{filterVcf}.
     }
     \item{
+      \code{regionFilter} has been replaced by \code{filterVcf}.
+    }
+    \item{
       \code{MatrixToSnpMatrix} has been replaced by \code{genotypeToSnpMatrix}.
     }
+    \item \code{getTranscriptSeqs} has been replaced by
+          \code{extractTranscriptSeqs} in the GenomicFeatures package.
   }
 }
 
@@ -76,5 +89,7 @@
     \item \code{\link{genotypeToSnpMatrix}}
     \item \code{\link[GenomicFeatures]{mapToTranscripts}}
     \item \code{\link[GenomicFeatures]{extractTranscriptSeqs}}
+    \item \code{\link{isSNV}}
+    \item \code{\link{ScanVcfParam}}
   }
 }

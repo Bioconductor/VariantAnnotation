@@ -563,7 +563,7 @@ setMethod(show, "VCF",
 ### or ExpandedVCF. Data in 'alt(x)' must be DNAStringSet or DNAStringSetList.
 restrictToSNV <- function(x, ...)
 {
-    .Deprecated("isSNV")
+    .Defunct("isSNV")
 }
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

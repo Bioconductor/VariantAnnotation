@@ -1,4 +1,5 @@
 ### =========================================================================
+
 ### VRanges: Variants in a GRanges
 ### -------------------------------------------------------------------------
 ###
@@ -474,7 +475,7 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
     geno <- c(geno, SimpleList(lapply(mcols(x)[genoMCols], genoArray)))
 
   info <- mcols(xUniq)[info]
-  
+ 
   VCF(rowRanges = rowRanges, colData = colData, metadata = metadata,
       fixed = fixed, geno = geno, info = info, collapsed = FALSE)
 }
@@ -486,8 +487,7 @@ setMethod("asVCF", "VRanges", vranges2Vcf)
 ###
 
 VRangesScanVcfParam <- function(fixed="ALT", info=NA, geno="AD", ...) {
-  .Deprecated("ScanVcfParam")
-  ScanVcfParam(fixed=fixed, info=info, geno=geno, ...)
+  .Defunct("ScanVcfParam")
 }
 
 readVcfAsVRanges <- function(x, genome, param=ScanVcfParam(),

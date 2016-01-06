@@ -56,7 +56,6 @@
 
 % VCF reading/writing:
 \alias{writeVcf,VRanges,ANY-method}
-\alias{VRangesScanVcfParam}
 \alias{readVcfAsVRanges}
 
 % Utilities:
@@ -370,14 +369,6 @@
       the \code{VRanges} can be specified as follows: 
 
       \preformatted{  ScanVcfParam(fixed = "ALT", info = NA, geno = "AD")) }
-    }
-    \item{}{
-      \code{VRangesScanVcfParam(fixed = "ALT", info = NA, geno = "AD", ...)}:
-      (Deprecated. Use ScanVcfParam() instead.)
-      Convenience constructor for a \code{\linkS4class{ScanVcfParam}}
-      object that is well suited for import to a \code{VRanges}. The
-      \code{fixed}, \code{info} and \code{geno} parameters, and anything
-      in \code{\dots} are passed to \code{\link{ScanVcfParam}}.
     }
   }
 }
