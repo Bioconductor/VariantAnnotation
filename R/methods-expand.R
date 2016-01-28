@@ -135,7 +135,7 @@ setMethod("expand", "CollapsedVCF",
         ## elementLengths same as ALT
         csums <- colSums(ielt) == 0L
         if (any(csums))
-            res <- IRanges:::.expandByColumnSet(ivar, inms[csums], TRUE)
+            res <- S4Vectors:::expandByColumnSet(ivar, inms[csums], TRUE)
         else
             res <- ivar[idx, , drop=FALSE] 
         ## elementLengths shorter than ALT
