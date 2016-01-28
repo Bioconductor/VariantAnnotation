@@ -216,7 +216,7 @@ test_matrixToArray <- function() {
     arr <- VariantAnnotation:::.matrixOfListsToArray(mat)
     for (i in 1:nrow(mat)) {
         for (j in 1:ncol(mat)) {
-            n <- elementLengths(mat[i,j])
+            n <- elementNROWS(mat[i,j])
             checkEquals(unlist(mat[i,j]), arr[i,j,1:n])
         } 
     }

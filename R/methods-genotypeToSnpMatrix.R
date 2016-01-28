@@ -27,7 +27,7 @@ setMethod("genotypeToSnpMatrix", "CollapsedVCF",
     alt <- alt(x)
     if (is(alt, "CompressedCharacterList")) {
         alt <- .toDNAStringSetList(alt)
-        if (all(elementLengths(alt) == 0L)) {
+        if (all(elementNROWS(alt) == 0L)) {
             warning("No nucleotide ALT values were detected.")
             return(.emptySnpMatrix())
         }
@@ -76,7 +76,7 @@ setMethod("genotypeToSnpMatrix", "array",
     if (!is(alt, "DNAStringSetList"))
         stop("'alt' must be a DNAStringSetList")
     # query ref and alt alleles for valid SNPs
-    altelt <- elementLengths(alt) == 1L 
+    altelt <- elementNROWS(alt) == 1L 
     snv <- .testForSNV(ref, alt) 
  
     # if x is a matrix, we have GT with a single value for each snp
@@ -209,7 +209,7 @@ PLtoGP <- function(pl) {
 }
 
 .listMatrixToArray <- function(x) {
-  n <- elementLengths(x)
+  n <- elementNROWS(x)
   maxn <- max(n)
   v <- unlist(x, use.names=FALSE)
   a <- array(as(NA, class(v)), dim=c(maxn, nrow(x), ncol(x)),
@@ -220,7 +220,7 @@ PLtoGP <- function(pl) {
 
 .matrixOfListsToArray <- function(x) {
     # find number of elements of each cell of x
-    n <- elementLengths(x)
+    n <- elementNROWS(x)
     maxn <- max(n)
  
     # for cells with less than the max number of elements, add NAs

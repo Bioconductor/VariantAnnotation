@@ -9,7 +9,7 @@ setMethod("expand", "CollapsedVCF",
         if (!row.names)
             names(rd) <- NULL
 
-        elt <- elementLengths(alt(x))
+        elt <- elementNROWS(alt(x))
         if (all(elt == 1L)) {
             fxd <- fixed(x)
             fxd$ALT <- unlist(alt(x), use.names=FALSE)
@@ -50,13 +50,13 @@ setMethod("expand", "CollapsedVCF",
     if (any(isA)) {
         gnms <- rownames(ghdr)[isA]
         gelt <- do.call(cbind, lapply(gnms, function(i) 
-                                      elt - elementLengths(gvar[[i]])))
-        ## elementLengths same as ALT
+                                      elt - elementNROWS(gvar[[i]])))
+        ## elementNROWS same as ALT
         csums <- colSums(gelt) == 0L
         if (any(csums))
             gvar[gnms[csums]] <- endoapply(gvar[gnms[csums]], function(i)
                                      matrix(unlist(i, use.names=FALSE)))
-        ## elementLengths shorter than ALT
+        ## elementNROWS shorter than ALT
         if (any(!csums)) {
             nms <- names(gvar) %in% names(csums)[!csums]
             reps <- lapply(list(gelt[!csums] + 1L), rep.int,
@@ -131,14 +131,14 @@ setMethod("expand", "CollapsedVCF",
     inms <- hnms[info(hdr)[hnms, "Number"] == "A"]
     if (length(inms) > 0L) {
         ielt <- do.call(cbind, lapply(inms, function(i) 
-                                      elt - elementLengths(ivar[[i]])))
-        ## elementLengths same as ALT
+                                      elt - elementNROWS(ivar[[i]])))
+        ## elementNROWS same as ALT
         csums <- colSums(ielt) == 0L
         if (any(csums))
             res <- S4Vectors:::expandByColumnSet(ivar, inms[csums], TRUE)
         else
             res <- ivar[idx, , drop=FALSE] 
-        ## elementLengths shorter than ALT
+        ## elementNROWS shorter than ALT
         if (any(!csums)) {
             nms <- colnames(ivar) %in% names(csums)[!csums]
             reps <- lapply(list(ielt[!csums] + 1L), rep.int,

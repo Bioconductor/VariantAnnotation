@@ -16,16 +16,16 @@ setMethod("predictCoding", c("CollapsedVCF", "TxDb", "ANY", "missing"),
     alt <- alt(query) 
     if (is(alt, "CharacterList")) {
         alt <- .toDNAStringSetList(alt)
-        if (sum(elementLengths(alt)) == 0L) {
+        if (sum(elementNROWS(alt)) == 0L) {
             stop("No nucleotide ALT values were detected.")
         }
     }
-    rd <- rep(rowRanges(query), elementLengths(alt))
+    rd <- rep(rowRanges(query), elementNROWS(alt))
     res <- callGeneric(rd, subject, seqSource, unlist(alt, use.names=FALSE), 
                 ..., ignore.strand=ignore.strand)
     ## adjust QUERYID for expansion of rowRanges
     res$QUERYID <- rep(seq_len(length(alt)),
-                       elementLengths(alt))[res$QUERYID]
+                       elementNROWS(alt))[res$QUERYID]
     res 
 })
 
@@ -78,7 +78,7 @@ setMethod("predictCoding", c("VRanges", "TxDb", "ANY", "missing"),
     }
 
     map <- data.frame(geneid=rep(names(cache[["txbygene"]]), 
-                          elementLengths(cache[["txbygene"]])),
+                          elementNROWS(cache[["txbygene"]])),
                       txid=mcols(unlist(cache[["txbygene"]], 
                           use.names=FALSE))[["tx_id"]],
                       stringsAsFactors=FALSE)

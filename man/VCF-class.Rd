@@ -270,7 +270,7 @@
       per ALT value. Variables with Number='A' have one value per alternate
       allele and are expanded accordingly. The 'AD' genotype field
       is expanded into REF/ALT pairs. For all other fields, the rows
-      are replicated to match the elementLengths of ALT.
+      are replicated to match the elementNROWS of ALT.
 
       The output is an ExpandedVCF with ALT as a \code{DNAStringSet} 
       or \code{character} (structural variants). By default rownames

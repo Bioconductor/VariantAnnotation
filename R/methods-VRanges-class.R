@@ -369,7 +369,7 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
     stop("'filter' must be a character vector naming metadata(x) elements",
          " to include as metadata in the VCF header.")
   metaStrings <- as.character(sapply(metadata(x)[meta], as.character))
-  if (any(elementLengths(metaStrings) != 1L))
+  if (any(elementNROWS(metaStrings) != 1L))
     stop("The elements named in 'meta' must be of length 1")
 
   if (any(is.na(sampleNames(x)))) {

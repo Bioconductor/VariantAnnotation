@@ -90,7 +90,7 @@
 .toDNAStringSetList <- function(x)
 {
     ### also used in predictCoding(), genotypeToSnpMatrix()
-    pbw <- PartitioningByWidth(elementLengths(x))
+    pbw <- PartitioningByWidth(elementNROWS(x))
     x <- unlist(x, use.names=FALSE)
     x[.isStructural(x)] <- ""
     xx <- sub(".", "", x, fixed=TRUE)

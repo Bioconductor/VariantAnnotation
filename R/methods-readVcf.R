@@ -176,14 +176,14 @@ setMethod(readVcf, c(file="character", genome="missing",
 
     ## replace
     GTstr <- strsplit(as.vector(GT), "[|,/]")
-    if (any(elementLengths(GTstr) !=2))
+    if (any(elementNROWS(GTstr) !=2))
         stop("only diploid variants are supported")
     GTmat <- matrix(unlist(GTstr), ncol=2, byrow=TRUE)
     GTA <- suppressWarnings(as.numeric(GTmat[,1]))
     GTB <- suppressWarnings(as.numeric(GTmat[,2]))
 
-    REFcs <- cumsum(elementLengths(REF))
-    ALTcs <- cumsum(elementLengths(ALT))
+    REFcs <- cumsum(elementNROWS(REF))
+    ALTcs <- cumsum(elementNROWS(ALT))
     cs <- REFcs + c(0, head(ALTcs, -1)) 
     offset <- rep(cs, ncol(res))
     alleles <- unlist(rbind(REF,ALT), use.names=FALSE)

@@ -33,7 +33,7 @@ setReplaceMethod("alt", c("CollapsedVCF", "DNAStringSetList"),
         gvcf <- grepl("NON_REF", flat, fixed=TRUE)
         structural <- .isStructural(flat)
     }
-    res <- FUN(rep(ref(x), elementLengths(alt(x))), flat)
+    res <- FUN(rep(ref(x), elementNROWS(alt(x))), flat)
     if (!is.null(structural))
         res[structural | is.na(structural)] <- FALSE
     if (any(gvcf))
@@ -41,7 +41,7 @@ setReplaceMethod("alt", c("CollapsedVCF", "DNAStringSetList"),
     ## relist
     lst <- relist(res, alt)
     if (singleAltOnly)
-        all(lst) & elementLengths(lst) == 1
+        all(lst) & elementNROWS(lst) == 1
     else
         any(lst)
 }

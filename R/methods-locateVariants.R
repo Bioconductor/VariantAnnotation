@@ -289,7 +289,7 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "PromoterVariants"),
 
         if (asHits)
             return(.consolidateHits(fo, length(query), length(subject),
-                elementLengths(subject)))
+                elementNROWS(subject)))
 
         if (length(fo) > 0) {
             queryid <- queryHits(fo)
@@ -415,7 +415,7 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
 
     if (asHits)
         return(.consolidateHits(fo, length(query), length(subject),
-            elementLengths(subject))) 
+            elementNROWS(subject))) 
     if (length(fo) > 0) {
         df <- unique(data.frame(queryid=queryHits(fo),
                      subjectid=togroup(subject)[subjectHits(fo)]))
@@ -471,7 +471,7 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
         res
     } else {
         q_range <- query[intergenic]
-        s_genes <- rep(names(subject), elementLengths(s_range))
+        s_genes <- rep(names(subject), elementNROWS(s_range))
         s_unlist <- unlist(s_range, use.names=FALSE)
 
         ## ID all genes that fall in upstream / downstream range.
@@ -555,7 +555,7 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
         }
 
         ss <- runValue(strand(subject)[txHits])
-        if (any(elementLengths(ss) > 1L)) {
+        if (any(elementNROWS(ss) > 1L)) {
             warning("'subject' has multiple strands per list element; ",
                     "setting strand to '*'")
             sstrand <- Rle("*", length(txHits))

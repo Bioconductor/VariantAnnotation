@@ -275,7 +275,7 @@ locateVariants(query, subject, region, ...)
   ## flanking id's so we first expand PRECEDEID and the corresponding
   ## variant ranges.
   p_ids <- unlist(loc_int$PRECEDEID, use.names=FALSE) 
-  exp_ranges <- rep(loc_int,  elementLengths(loc_int$PRECEDEID))
+  exp_ranges <- rep(loc_int,  elementNROWS(loc_int$PRECEDEID))
 
   ## Provide the variant GRanges as 'x' and the TxDb annotation as 'y' 
   ## to distance(). The 'id' and 'type' arguments describe an id found 

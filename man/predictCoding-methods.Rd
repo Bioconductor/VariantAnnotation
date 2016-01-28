@@ -215,8 +215,8 @@
   ## The GRanges must be expanded to have one row per alternate allele. 
   ## Variants 1, 2 and 10 have two alternate alleles.
   altallele <- alt(vcf)
-  eltlen <- elementLengths(altallele)
-  rd_exp <- rep(rd, eltlen)
+  eltROWS <- elementNROWS(altallele)
+  rd_exp <- rep(rd, eltROWS)
  
   ## Call predictCoding() with the expanded GRanges and the unlisted
   ## alternate allele as the 'varAllele'.

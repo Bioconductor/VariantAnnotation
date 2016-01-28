@@ -8,7 +8,7 @@ setMethod("snpSummary", "CollapsedVCF",
     alt <- alt(x)
     if (is(alt, "CompressedCharacterList")) {
         alt <- .toDNAStringSetList(alt)
-        if (all(elementLengths(alt) == 0L)) {
+        if (all(elementNROWS(alt) == 0L)) {
             warning("No nucleotide ALT values were detected.")
             return(.emptySnpSummary())
         }
@@ -82,9 +82,9 @@ setMethod("snpSummary", "CollapsedVCF",
 ## the same length as 'ref'. 
 .testForSNV <- function(ref, alt)
 {
-    altelt <- elementLengths(alt) == 1L
+    altelt <- elementNROWS(alt) == 1L
     altseq <- logical(length(alt))
-    idx <- rep(altelt, elementLengths(alt))
+    idx <- rep(altelt, elementNROWS(alt))
     altseq[altelt] = width(unlist(alt, use.names=FALSE)[idx]) == 1L
     altseq & (width(ref) == 1L)
 }

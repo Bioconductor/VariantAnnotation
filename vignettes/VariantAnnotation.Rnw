@@ -436,7 +436,7 @@ and allele.2 is the alternate allele.
 <<snpMatrix_ALT>>=
 allele2 <- res$map[["allele.2"]]
 ## number of alternate alleles per variant
-unique(elementLengths(allele2))
+unique(elementNROWS(allele2))
 @
 
 In addition to the called genotypes, genotype likelihoods or

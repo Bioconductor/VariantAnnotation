@@ -10,6 +10,6 @@ VRangesList <- function(...) {
 setMethod("stackSamples", "VRangesList", function(x) {
   stacked <- unlist(x, use.names=FALSE)
   if (!is.null(names(x)))
-    sampleNames(stacked) <- Rle(names(x), elementLengths(x))
+    sampleNames(stacked) <- Rle(names(x), elementNROWS(x))
   stacked
 })
