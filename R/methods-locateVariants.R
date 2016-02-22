@@ -447,7 +447,7 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
     txid <- rep(seq_len(slen), elen)
     dat <- cbind(queryHits(hits), as.integer(txid[subjectHits(hits)]))
     unq <- dat[!duplicated(dat),]
-    return(Hits(unq[,1], unq[,2], qlen, slen))
+    return(Hits(unq[,1], unq[,2], qlen, slen, sort.by.query=TRUE))
 }
 
 .intergenic <- function(query, subject, region, ignore.strand, ...)
