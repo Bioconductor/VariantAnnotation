@@ -417,8 +417,10 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
         return(.consolidateHits(fo, length(query), length(subject),
             elementNROWS(subject))) 
     if (length(fo) > 0) {
-        df <- unique(data.frame(queryid=queryHits(fo),
-                     subjectid=togroup(subject)[subjectHits(fo)]))
+        df <- unique(data.frame(
+            queryid=queryHits(fo),
+            subjectid=togroup(PartitioningByWidth(subject))[subjectHits(fo)]
+        ))
         GRanges(seqnames=seqnames(query)[df$queryid],
                 ranges=IRanges(ranges(query)[df$queryid]),
                 strand=unlist(strand(subject), use.names=FALSE)[df$subjectid],

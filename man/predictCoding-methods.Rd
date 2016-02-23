@@ -202,7 +202,7 @@
   ## Exon-centric or cDNA locations:
   exonsbytx <- exonsBy(txdb, "tx")
   cDNA <- mapToTranscripts(coding1[!duplicated(ranges(coding1))], exonsbytx)
-  coding1$cDNA <- ranges(cDNA)[togroup(coding1$QUERYID)]
+  coding1$cDNA <- ranges(cDNA)[togroup(PartitioningByWidth(coding1$QUERYID))]
 
   ## ----------------------------
   ## GRanges object as query 

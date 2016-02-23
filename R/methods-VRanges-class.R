@@ -164,7 +164,7 @@ parseFilterStrings <- function(x) {
   filterNames <- setdiff(unique(filters[!is.na(filters)]), "PASS")
   filterMat <- matrix(TRUE, length(x), length(filterNames),
                       dimnames = list(NULL, filterNames))
-  filterMat[cbind(togroup(filterSplit), match(filters, filterNames))] <- FALSE
+  filterMat[cbind(togroup(PartitioningByWidth(filterSplit)), match(filters, filterNames))] <- FALSE
   filterMat[is.na(x),] <- NA
   filterMat
 }
@@ -448,7 +448,7 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
         v <- v[sample.ord]
       }
       ind <- unlist(samplesToUniq, use.names=FALSE) +
-        (togroup(samplesToUniq)-1L)*length(xUniq)
+        (togroup(PartitioningByWidth(samplesToUniq))-1L)*length(xUniq)
       a <- matrix(NA_integer_, nrow=length(xUniq)*length(sampleLevels),
                   ncol=width)
       a[ind,] <- v
@@ -619,7 +619,7 @@ setMethod("merge", c("VRanges", "VRanges"), function(x, y, ...) {
 setMethod("liftOver", c("VRanges", "Chain"), function(x, chain, ...) {
   grl <- liftOver(GRanges(seqnames(x), ranges(x)), chain, ...)
   gr <- unlist(grl, use.names=FALSE)
-  ans <- x[togroup(grl)]
+  ans <- x[togroup(PartitioningByWidth(grl))]
   ans <- update(ans, seqinfo = seqinfo(gr), seqnames = seqnames(gr),
                 ranges = ranges(gr))
   relist(ans, grl)
