@@ -1,3 +1,10 @@
+CHANGES IN VERSION 1.20.0
+------------------------
+
+BUG FIXES
+
+    o scanVcf,character,missing-method ignores blank data lines.
+
 CHANGES IN VERSION 1.18.0
 ------------------------
 

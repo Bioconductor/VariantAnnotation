@@ -541,7 +541,7 @@ SEXP scan_vcf_character(SEXP file, SEXP yield, SEXP smap, SEXP fmap,
             end = buf0 + len1;
             continue;
         }
-        if ('#' == *buf0 || '\0' == *buf0) {
+        if ('#' == *buf0 || '\0' == *buf0 || '\n' == *buf0) {
             buf = buf0;
             continue;
         }
