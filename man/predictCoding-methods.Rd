@@ -201,8 +201,15 @@
 
   ## Exon-centric or cDNA locations:
   exonsbytx <- exonsBy(txdb, "tx")
-  cDNA <- mapToTranscripts(coding1[!duplicated(ranges(coding1))], exonsbytx)
-  coding1$cDNA <- ranges(cDNA)[togroup(PartitioningByWidth(coding1$QUERYID))]
+
+  cDNA <- mapToTranscripts(coding1, exonsbytx)
+  mcols(cDNA)$TXID <- names(exonsbytx)[mcols(cDNA)$transcriptsHits]
+  cDNA <- cDNA[mcols(cDNA)$TXID == mcols(coding1)$TXID[mcols(cDNA)$xHits]]
+
+  ## Make sure cDNA is parallel to coding1
+  stopifnot(identical(mcols(cDNA)$xHits, seq_along(coding1)))
+
+  coding1$cDNA <- ranges(cDNA)
 
   ## ----------------------------
   ## GRanges object as query 

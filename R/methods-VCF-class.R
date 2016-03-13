@@ -578,8 +578,8 @@ genotypeCodesToNucleotides <- function(vcf, ...)
 
     if (is(alt(vcf), "CharacterList"))
         stop("'ALT' must be a DNAStringSetList")
-    ALT <- relist(as.character(alt(vcf)@unlistData),
-                  PartitioningByWidth(alt(vcf))) 
+    ALT <- as.list(splitAsList(as.character(alt(vcf)@unlistData),
+                   togroup(PartitioningByWidth(alt(vcf))))) 
     REF <- as.character(ref(vcf))
     geno(vcf)$GT <- .geno2geno(NULL, ALT, REF, GT)
     vcf
