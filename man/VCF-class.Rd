@@ -80,7 +80,6 @@
 \alias{seqlevels,VCF-method}
 \alias{expand,CollapsedVCF-method}
 \alias{expand,ExpandedVCF-method}
-\alias{restrictToSNV}
 \alias{genotypeCodesToNucleotides}
 
 % show method:
@@ -488,7 +487,6 @@ alt(vcfLong)
 ## ----------------------------------------------------------------
 ## isSNV()
 ## ----------------------------------------------------------------
-## NOTE: isSNV() and family have replaced restrictToSNV().
 ## isSNV() returns a subset VCF containing SNVs only.
 
 vcf <- VCF(rowRanges = GRanges("chr1", IRanges(1:4*3, width=c(1, 2, 1, 1))))
