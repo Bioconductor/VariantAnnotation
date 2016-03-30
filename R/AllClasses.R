@@ -265,11 +265,6 @@ setClass("AllVariants",
       "'ref' must not match 'alt'")
 }
 
-.valid.VRanges.alt <- function(object) {
-  if (any(is.na(object@alt) & !is.na(object@altDepth)))
-    paste("if 'alt' is 'NA', then 'altDepth' should be 'NA'")
-}
-
 .valid.VRanges.strand <- function(object) {
   if (any(object@strand == "-"))
     paste("'strand' must always be '+' or '*'")
@@ -294,7 +289,6 @@ naToZero <- function(x) {
 .valid.VRanges <- function(object)
 {
   c(.valid.VRanges.ref(object),
-    .valid.VRanges.alt(object),
     .valid.VRanges.strand(object),
     .valid.VRanges.depth(object))
 }
