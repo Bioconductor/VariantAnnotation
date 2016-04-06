@@ -74,10 +74,10 @@
   \item{trimEmpty}{A logical(1) indicating whether \sQuote{GENO} fields
     with no values should be returned.
   }
-  \item{which}{A \code{\linkS4class{GRanges}} or \code{\linkS4class{RangedData}} 
-    describing the sequences and ranges to be queried. Variants whose \code{POS} 
-    lies in the interval(s) \code{[start, end]} are returned. If \code{which} is 
-    not specified all ranges are returned. 
+  \item{which}{A \code{\linkS4class{GRanges}} describing the sequences and
+    ranges to be queried. Variants whose \code{POS} lies in the interval(s)
+    \code{[start, end]} are returned. If \code{which} is not specified all
+    ranges are returned. 
   }
   \item{object}{An instance of class \code{ScanVcfParam}.
   }

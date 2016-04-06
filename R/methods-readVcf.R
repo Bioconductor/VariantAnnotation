@@ -20,14 +20,6 @@ setMethod(readVcf, c(file="TabixFile", genome="ANY",
 })
 
 setMethod(readVcf, c(file="TabixFile", genome="ANY",
-          param="RangedData"),
-    function(file, genome, param, ..., row.names=TRUE)
-{
-    .readVcf(file, genome, param=ScanVcfParam(which=param), 
-             row.names=row.names, ...)
-})
-
-setMethod(readVcf, c(file="TabixFile", genome="ANY",
           param="GRangesList"),
     function(file, genome, param, ..., row.names=TRUE)
 {

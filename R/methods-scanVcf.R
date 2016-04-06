@@ -176,12 +176,6 @@ setMethod(scanVcf, c("TabixFile", "RangesList"),
     .vcf_scan(file, ..., param=param) 
 })
 
-setMethod(scanVcf, c("TabixFile", "RangedData"),
-    function(file, ..., param)
-{
-    .vcf_scan(file, ..., param=param)
-})
-
 setMethod(scanVcf, c("TabixFile", "GRanges"),
     function(file, ..., param)
 {
