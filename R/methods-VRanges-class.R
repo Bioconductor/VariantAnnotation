@@ -550,11 +550,11 @@ setMethod("duplicated", "VRanges",
             if (!identical(incomparables, FALSE))
               stop("\"duplicated\" method for VRanges objects ",
                    "only accepts 'incomparables=FALSE'")
-            S4Vectors:::duplicatedIntegerQuads(as.factor(seqnames(x)),
-                                               as.factor(alt(x)),
-                                               start(x), width(x),
-                                               fromLast = fromLast,
-                                               method = method)
+            duplicatedIntegerQuads(as.factor(seqnames(x)),
+                                   as.factor(alt(x)),
+                                   start(x), width(x),
+                                   fromLast = fromLast,
+                                   method = method)
           })
 
 setMethod("match", c("VRanges", "VRanges"),
@@ -571,15 +571,14 @@ setMethod("match", c("VRanges", "VRanges"),
             merge(seqinfo(x), seqinfo(table))
             altLevels <- as.character(union(alt(x), alt(table)))
             x_seqnames <- GenomicRanges:::relevelSeqnamesForMatch(x, table)
-            S4Vectors:::matchIntegerQuads(x_seqnames,
-                                          factor(as.character(alt(x)),
+            matchIntegerQuads(x_seqnames, factor(as.character(alt(x)),
                                                  altLevels),
-                                          start(x), width(x),
-                                          as.factor(seqnames(table)),
-                                          factor(as.character(alt(table)),
-                                                 altLevels),
-                                          start(table), width(table),
-                                          nomatch = nomatch, method = method)
+                              start(x), width(x),
+                              as.factor(seqnames(table)),
+                              factor(as.character(alt(table)),
+                                     altLevels),
+                              start(table), width(table),
+                              nomatch = nomatch, method = method)
           })
 
 setMethod("%in%", c("VRanges", "TabixFile"),
