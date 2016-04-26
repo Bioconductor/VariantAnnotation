@@ -1,6 +1,4 @@
-SAMVARS=$(shell echo 'cat(shortPathName(system.file("usretc",
-    .Platform[["r_arch"]],\
-    "Rsamtools.mk", package="Rsamtools", mustWork=TRUE)))' |\
+SAMVARS=$(shell echo 'cat(Rsamtools:::.pkgconfig())' |\
     "${R_HOME}/bin/R" --vanilla --slave)
 include $(SAMVARS)
 
