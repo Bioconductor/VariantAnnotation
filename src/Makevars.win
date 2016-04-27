@@ -1,4 +1,4 @@
-SAMVARS=$(shell echo 'cat(Rsamtools:::.pkgconfig())' |\
+SAMVARS=$(shell echo 'cat(Rsamtools:::.pkgMk())' |\
     "${R_HOME}/bin/R" --vanilla --slave)
 include $(SAMVARS)
 
