@@ -1,6 +1,5 @@
 SAMTOOLS_PATH=\
-    `echo 'cat(Rsamtools:::.pkgconfig())' |\
-        "${R_HOME}/bin/R" --vanilla --slave`
+    `echo 'cat(Rsamtools:::.pkgLd())' | "${R_HOME}/bin/R" --vanilla --slave`
 SAMTOOLS_LIBS="$(SAMTOOLS_PATH)/libbam.a" "$(SAMTOOLS_PATH)/libbcf.a"\
     "$(SAMTOOLS_PATH)/libtabix.a" -lz -pthread
 SAMTOOLS_CPPFLAGS=-D_USE_KNETFILE -DBGZF_CACHE -D_FILE_OFFSET_BITS=64 \
