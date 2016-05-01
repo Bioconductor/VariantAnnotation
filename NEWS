@@ -1,3 +1,50 @@
+CHANGES IN VERSION 1.20.0
+------------------------
+
+NEW FEATURES
+
+    o add SnpMatrixToVCF()
+
+    o add patch from Stephanie Gogarten to support 'PL' in genotypeToSnpMatrix()
+
+
+MODIFICATIONS
+
+    o move getSeq,XStringSet-method from VariantAnnotation to BSgenome
+
+    o update filterVcf vignette
+
+    o remove 'pivot' export
+
+    o work on readVcf():
+      - 5X speedup for readVcf (at least in one case) by not using "==" to
+      compare a list to a character (the list gets coerced to character,
+      which is expensive for huge VCFs)
+      - avoiding relist.list()
+
+    o update summarizeVariants() to comply with new SummarizedExperiment 
+      rownames requirement
+
+    o defunct VRangesScanVcfParam() and restrictToSNV()
+
+    o use elementNROWS() instead of elementLengths()
+
+    o togroup(x) now only works on a ManyToOneGrouping object so replace
+      togroup(x, ...) calls with togroup(PartitioningByWidth(x), ...) when 'x'
+      is a list-like object that is not a ManyToOneGrouping object.
+
+    o drop validity assertion that altDepth must be NA when alt is NA
+      there are VCFs in the wild that use e.g. "*" for alt, but include depth
+
+    o export PLtoGP()
+
+    o VariantAnnotation 100% RangedData-free
+
+BUG FIXES
+
+    o use short path names in src/Makevars.win
+
+
 CHANGES IN VERSION 1.18.0
 ------------------------
 
@@ -11,6 +58,7 @@ BUG FIXES
     o scanVcf,character,missing-method ignores blank data lines.
 
     o Build path for C code made robust on Windows.
+
 
 CHANGES IN VERSION 1.16.0
 ------------------------
