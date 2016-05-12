@@ -18,6 +18,10 @@ import(Rsamtools)
 
 import(zlibbioc)
 
+importFrom(stats, pchisq, setNames)
+
+importFrom(utils, packageVersion)
+
 importClassesFrom(Biobase, 
     AssayData
 )

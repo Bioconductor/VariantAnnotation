@@ -14,7 +14,7 @@ setMethod("keys", "PROVEANDb",
 
 setMethod("columns", "PROVEANDb",
     function(x)
-        DBI:::dbListFields(x$conn, "proveandata") 
+        dbListFields(x$conn, "proveandata") 
 ) 
 
 setMethod("keytypes", "PROVEANDb",
