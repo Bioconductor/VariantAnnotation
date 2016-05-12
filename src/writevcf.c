@@ -2,8 +2,6 @@
 #include "samtools/kstring.h"
 #include <R_ext/Connections.h>
 
-Rconnection getConnection(int n);
-
 /* write all elements of 'list' genotype field */
 static void write_list_elt(SEXP v_elt, const char mv_sep, kstring_t *bufp) 
 {
@@ -182,7 +180,7 @@ void make_vcf_geno(SEXP conn, SEXP fixed, SEXP format, SEXP geno,
     int i, j, k, k_last, z, z_dim, z_max;
     int index;
     Rboolean fmt_search, fmt_found, *k_valid;
-    Rconnection con = getConnection(INTEGER(conn)[0]);
+    Rconnection con = R_GetConnection(conn);
 
     kstring_t buf;
     buf.l = buf.m = 0; buf.s = NULL;
