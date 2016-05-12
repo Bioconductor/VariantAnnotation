@@ -230,7 +230,7 @@ in the intronic binding region of the cancer-related gene, EGFR.
 library(AnnotationHub)
 hub <- AnnotationHub()
 id <- names(query(hub, "wgEncodeUwTfbsMcf7CtcfStdPkRep1.narrowPeak"))
-mcf7.gr <- hub[[id]]
+mcf7.gr <- hub[[tail(id, 1)]]
 @ 
 
 \subsection{Find SNPs in CTCF Binding Regions}
