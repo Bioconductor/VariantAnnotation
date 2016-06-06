@@ -40,7 +40,8 @@ importMethodsFrom(AnnotationDbi,
 )
 
 importFrom(GenomicFeatures, 
-    extractTranscriptSeqs, mapToTranscripts
+    extractTranscriptSeqs, mapToTranscripts, transcriptsBy,
+    intronsByTranscript
 )
 
 importClassesFrom(GenomicFeatures, 
@@ -115,7 +116,6 @@ export(
 exportMethods(
     filterVcf, scanVcf, scanVcfHeader, ScanVcfParam,
     readVcf, writeVcf, expand,
-    readVcfLongForm, ## Defunct
     predictCoding, getTranscriptSeqs, getSeq,
     genotypeToSnpMatrix, snpSummary,
     locateVariants, summarizeVariants,

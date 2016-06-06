@@ -71,14 +71,9 @@ setGeneric("intergenic<-", signature="x",
 ### read/write Vcf 
 ###
 
-setGeneric("readVcf", signature=c("file", "genome", "param"),
+setGeneric("readVcf", signature=c("file", "param"),
     function(file, genome, param, ...)
     standardGeneric("readVcf")
-)
-
-setGeneric("readVcfLongForm", signature=c("file", "genome", "param"),
-    function(file, genome, param, ...)
-    standardGeneric("readVcfLongForm")
 )
 
 setGeneric("writeVcf", signature=c("obj", "filename"),

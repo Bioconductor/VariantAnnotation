@@ -1,13 +1,13 @@
 \name{readVcf}
 \alias{readVcf}
-\alias{readVcf,character,ANY,ANY-method}
-\alias{readVcf,character,ANY,missing-method}
-\alias{readVcf,character,missing,missing-method}
-\alias{readVcf,TabixFile,ANY,ScanVcfParam-method}
-\alias{readVcf,TabixFile,ANY,RangesList-method}
-\alias{readVcf,TabixFile,ANY,GRanges-method}
-\alias{readVcf,TabixFile,ANY,GRangesList-method}
-\alias{readVcf,TabixFile,ANY,missing-method}
+\alias{readVcf,character,ANY-method}
+\alias{readVcf,character,missing-method}
+\alias{readVcf,character,missing-method}
+\alias{readVcf,TabixFile,ScanVcfParam-method}
+\alias{readVcf,TabixFile,RangesList-method}
+\alias{readVcf,TabixFile,GRanges-method}
+\alias{readVcf,TabixFile,GRangesList-method}
+\alias{readVcf,TabixFile,missing-method}
 
 %% lightweight read* functions
 \alias{readInfo}
@@ -21,21 +21,21 @@
 
 \usage{
 
-  \S4method{readVcf}{TabixFile,ANY,ScanVcfParam}(file, genome, param, 
+  \S4method{readVcf}{TabixFile,ScanVcfParam}(file, genome, param, 
       ..., row.names=TRUE)
-  \S4method{readVcf}{TabixFile,ANY,RangesList}(file, genome, param, 
+  \S4method{readVcf}{TabixFile,RangesList}(file, genome, param, 
       ..., row.names=TRUE)
-  \S4method{readVcf}{TabixFile,ANY,GRanges}(file, genome, param, 
+  \S4method{readVcf}{TabixFile,GRanges}(file, genome, param, 
       ..., row.names=TRUE)
-  \S4method{readVcf}{TabixFile,ANY,GRangesList}(file, genome, param, 
+  \S4method{readVcf}{TabixFile,GRangesList}(file, genome, param, 
       ..., row.names=TRUE)
-  \S4method{readVcf}{TabixFile,ANY,missing}(file, genome, param, 
+  \S4method{readVcf}{TabixFile,missing}(file, genome, param, 
       ..., row.names=TRUE)
-  \S4method{readVcf}{character,ANY,ANY}(file, genome, param, 
+  \S4method{readVcf}{character,ANY}(file, genome, param, 
       ..., row.names=TRUE)
-  \S4method{readVcf}{character,ANY,missing}(file, genome, param, 
+  \S4method{readVcf}{character,missing}(file, genome, param, 
       ..., row.names=TRUE)
-  \S4method{readVcf}{character,missing,missing}(file, genome, param, 
+  \S4method{readVcf}{character,missing}(file, genome, param, 
       ..., row.names=TRUE)
 
 ## Lightweight functions to read a single variable
@@ -59,6 +59,7 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
         character vector. Names of the character vector correspond to 
         chromosome names in the file. This identifier replaces the genome 
         information in the VCF \code{Seqinfo} (i.e., \code{seqinfo(vcf)}).
+        When not provided, \code{genome} is taken from the VCF file header.
       }
       \item{\code{Seqinfo}:}{ When \code{genome} is provided as a \code{Seqinfo}
         it is propagated to the VCF output. If seqinfo information can be 

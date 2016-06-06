@@ -4,39 +4,34 @@
 
 ## TabixFile
 
-setMethod(readVcf, c(file="TabixFile", genome="ANY", 
-          param="ScanVcfParam"), 
+setMethod(readVcf, c(file="TabixFile", param="ScanVcfParam"), 
     function(file, genome, param, ..., row.names=TRUE)
 {
     .readVcf(file, genome, param, row.names=row.names, ...)
 })
 
-setMethod(readVcf, c(file="TabixFile", genome="ANY",
-          param="GRanges"),
+setMethod(readVcf, c(file="TabixFile", param="GRanges"),
     function(file, genome, param, ..., row.names=TRUE)
 {
     .readVcf(file, genome, param=ScanVcfParam(which=param),
              row.names=row.names, ...)
 })
 
-setMethod(readVcf, c(file="TabixFile", genome="ANY",
-          param="GRangesList"),
+setMethod(readVcf, c(file="TabixFile", param="GRangesList"),
     function(file, genome, param, ..., row.names=TRUE)
 {
     .readVcf(file, genome, param=ScanVcfParam(which=param), 
              row.names=row.names, ...)
 })
 
-setMethod(readVcf, c(file="TabixFile", genome="ANY",
-          param="RangesList"),
+setMethod(readVcf, c(file="TabixFile", param="RangesList"),
     function(file, genome, param, ..., row.names=TRUE)
 {
     .readVcf(file, genome, param=ScanVcfParam(which=param), 
              row.names=row.names, ...)
 })
 
-setMethod(readVcf, c(file="TabixFile", genome="ANY",
-          param="missing"), 
+setMethod(readVcf, c(file="TabixFile", param="missing"), 
     function(file, genome, param, ..., row.names=TRUE)
 {
     .readVcf(file, genome, param=ScanVcfParam(), 
@@ -45,28 +40,19 @@ setMethod(readVcf, c(file="TabixFile", genome="ANY",
 
 ## character
 
-setMethod(readVcf, c(file="character", genome="ANY",
-          param="ANY"),
+setMethod(readVcf, c(file="character", param="ANY"),
     function(file, genome, param, ..., row.names=TRUE)
 {
     file <- .checkFile(file)
     .readVcf(file, genome, param, row.names=row.names, ...)
 })
 
-setMethod(readVcf, c(file="character", genome="ANY",
-          param="missing"),
+setMethod(readVcf, c(file="character", param="missing"),
     function(file, genome, param, ..., row.names=TRUE)
 {
     file <- .checkFile(file)
     .readVcf(file, genome, param=ScanVcfParam(), 
              row.names=row.names, ...)
-})
-
-setMethod(readVcf, c(file="character", genome="missing",
-          param="missing"),
-    function(file, genome, param, ..., row.names=TRUE)
-{
-    stop("'genome' argument is missing") 
 })
 
 .checkFile <- function(x)
@@ -85,6 +71,8 @@ setMethod(readVcf, c(file="character", genome="missing",
 
 .readVcf <- function(file, genome, param, row.names, ...)
 {
+    if (missing(genome))
+        genome <- seqinfo(scanVcfHeader(file))
     if (!is(genome, "character") & !is(genome, "Seqinfo"))
         stop("'genome' must be a 'character(1)' or 'Seqinfo' object")
     if (is(genome, "Seqinfo")) {
@@ -254,4 +242,3 @@ readGT <- function(file, nucleotides=FALSE, param=ScanVcfParam(), ...,
         dimnames(res)[[1]] <- names(rowRanges)
     res 
 } 
-
