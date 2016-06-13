@@ -14,6 +14,8 @@
 \alias{readGeno}
 \alias{readGT}
 
+%% import wrapper
+\alias{import,VcfFile,ANY,ANY-method}
 
 \title{Read VCF files}
 
@@ -42,6 +44,9 @@
 readInfo(file, x, param=ScanVcfParam(), ..., row.names=TRUE)
 readGeno(file, x, param=ScanVcfParam(), ..., row.names=TRUE)
 readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
+
+## Import wrapper
+\S4method{import}{VcfFile,ANY,ANY}(con, format, text, ...)
 }
 
 \arguments{
@@ -89,7 +94,10 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
     as nucleotides instead of the numeric representation.
     Applicable to \code{readGT} only.
   }
-  \item{\dots}{Additional arguments, passed to methods.
+  \item{con}{The \code{VcfFile} object to import.}
+  \item{format, text}{Ignored.}
+  \item{\dots}{Additional arguments, passed to methods. For
+    \code{import}, the arguments are passed to \code{readVcf}.
   }
 }
 

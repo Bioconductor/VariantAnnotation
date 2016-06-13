@@ -79,7 +79,7 @@ importClassesFrom(BSgenome,
 )
 
 importFrom(rtracklayer,
-    liftOver
+    liftOver, import
 )
 
 importFrom(utils, 
@@ -130,5 +130,7 @@ exportMethods(
 
     reference, samples, header, meta,
 
-    keys, keytypes, columns, select
+    keys, keytypes, columns, select,
+
+    import
 )
