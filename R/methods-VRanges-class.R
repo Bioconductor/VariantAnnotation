@@ -157,8 +157,8 @@ setMethod("relistToClass", "VRanges", function(x) "CompressedVRangesList")
 
 parseFilterStrings <- function(x) {
   x[x == "."] <- NA
-  if (all(is.na(x)))
-    return(matrix(nrow = length(x), ncol = 0L))
+  if (all(is.na(x)) || all(x == "PASS"))
+    return(FilterMatrix(matrix(nrow = length(x), ncol = 0L), FilterRules()))
   filterSplit <- strsplit(x, ";", fixed=TRUE)
   filters <- unlist(filterSplit)
   filterNames <- setdiff(unique(filters[!is.na(filters)]), "PASS")
@@ -229,7 +229,8 @@ setAs("VCF", "VRanges", function(from) {
   rownames(meta) <- NULL
   if (!is.null(rd$FILTER))
     filter <- parseFilterStrings(rd$FILTER)
-  else filter <- matrix(nrow = nrow(from), ncol = 0L)
+  else filter <- FilterMatrix(matrix(nrow = nrow(from), ncol = 0L),
+                              FilterRules())
   if (nsamp > 1L) {
     meta <- meta[rep(seq_len(nrow(meta)), nsamp),,drop=FALSE]
     filter <- filter[rep(seq_len(nrow(filter)), nsamp),,drop=FALSE]
@@ -237,6 +238,9 @@ setAs("VCF", "VRanges", function(from) {
     ranges <- rep(ranges, nsamp)
     alt <- rep(alt, nsamp)
     ref <- rep(ref, nsamp)
+  } else if (nsamp == 0L && !is.null(meta$DP)) {
+    totalDepth <- meta$DP
+    meta$DP <- NULL
   }
   if (!is.null(geno(from)$FT))
     filter <- cbind(filter, parseFilterStrings(as.vector(geno(from)$FT)))
@@ -296,7 +300,7 @@ makeINFOheader <- function(x) {
     else if (is.logical(xi))
       "Flag"
     else if (is.character(xi) || is.factor(xi)) {
-      if (all(nchar(as.character(xi)) == 1L))
+      if (all(nchar(as.character(xi)) == 1L, na.rm=TRUE))
         "Character"
       else "String"
     }
