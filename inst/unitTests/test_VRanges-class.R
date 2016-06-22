@@ -212,6 +212,7 @@ checkIdenticalVCF <- function(orig, vcf) {
   if (!is.null(orig$TS))
     orig$TS <- as.integer(orig$TS)
   softFilterMatrix(orig) <- as(softFilterMatrix(orig), "matrix")
+  softFilterMatrix(vcf) <- as(softFilterMatrix(vcf), "matrix")
   names(orig) <- names(vcf)
   ## Information loss due to binary nature of VCF filters
   if (!identical(softFilterMatrix(orig), softFilterMatrix(vcf))) {
@@ -254,9 +255,7 @@ test_VRanges_vcf <- function() {
   geno(vcfA) <- SimpleList()
   vrA.vcf <- as(vcfA, "VRanges")
   vrA.stripped <- VRanges(seqnames(vrA), ranges(vrA), ref(vrA), alt(vrA),
-                          sampleNames = sampleNames(vrA),
-                          softFilterMatrix = matrix(nrow = length(vrA),
-                            ncol = 0L))
+                          sampleNames = sampleNames(vrA))
   seqinfo(vrA.stripped) <- seqinfo(vrA)
   checkIdenticalVCF(vrA.stripped, vrA.vcf)
 
