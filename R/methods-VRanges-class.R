@@ -157,7 +157,7 @@ setMethod("relistToClass", "VRanges", function(x) "CompressedVRangesList")
 
 parseFilterStrings <- function(x) {
   x[x == "."] <- NA
-  if (all(is.na(x)) || all(x == "PASS"))
+  if (all(x == "PASS", na.rm=TRUE))
     return(FilterMatrix(matrix(nrow = length(x), ncol = 0L), FilterRules()))
   filterSplit <- strsplit(x, ";", fixed=TRUE)
   filters <- unlist(filterSplit)
