@@ -26,17 +26,18 @@ makeVRangesFromGRanges <- function(gr,
 
     ## match fields
     matched.fields <- match(tolower(args), tolower(names(mcols(gr))), 0)
-    matched <- matched.fields[matched.fields != 0L] 
+    found.fields <- matched.fields != 0L
+    matched <- matched.fields[found.fields]
 
     ## error for 'ref' (required)
-    if (!"ref.field" %in% names(args)[matched.fields != 0L])
+    if (!"ref.field" %in% names(args)[found.fields])
       stop("No 'ref' column could be identified.")
 
     ## extract fields, coerce to type
-    type <- c(rep('character', 2), rep('integer', 3), 'character')
     lst <- as.list(c(rep(NA_character_, 2), rep(NA_integer_, 3), NA_character_))
     names(lst) <- names(args)
-    lst[matched] <- lapply(matched, function(i) as(mcols(gr)[, i], type[i]))
+    type <- vapply(lst, class, character(1))
+    lst[found.fields] <- Map(as, mcols(gr)[matched], type[found.fields])
     if (keep.extra.columns)
         extra <- mcols(gr)[, -matched, drop=FALSE]
     else
