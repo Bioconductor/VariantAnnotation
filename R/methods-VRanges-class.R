@@ -200,12 +200,19 @@ setAs("VCF", "VRanges", function(from) {
   alt[!nzchar(alt)] <- NA
   alt[alt == "."] <- NA
   ad <- geno(from)$AD
-  if (!is.null(ad) && ncol(from) > 0L) {
-    refDepth <- ad[,,1,drop=FALSE]
-    altDepth <- ad[,,2,drop=FALSE]
-  } else {
-    refDepth <- NA_integer_
-    altDepth <- NA_integer_
+  refDepth <- NA_integer_
+  altDepth <- NA_integer_
+  if (is.array(ad) && ncol(from) > 0L) {
+    if (length(dim(ad)) == 3L) {
+        refDepth <- ad[,,1,drop=FALSE]
+        altDepth <- ad[,,2,drop=FALSE]
+    } else if (length(dim(ad)) == 2L) {
+        RD <- geno(from)$RD
+        if (is.matrix(RD)) {
+            refDepth <- RD
+        }
+        altDepth <- ad
+    }
   }
   totalDepth <- geno(from)$DP
   if (is.null(totalDepth) || ncol(from) == 0L)
