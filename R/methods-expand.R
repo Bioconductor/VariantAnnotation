@@ -72,7 +72,7 @@ setMethod("expand", "CollapsedVCF",
         AD <- gvar$AD
         if (!is.list(AD)) {
             ## 'Number' is integer
-            if (is(AD, "array")) {
+            if (is(AD, "array") && length(dim(AD)) == 3L) {
                 if ((length(unique(elt)) != 1L) || 
                     (dim(AD)[3] != unique(elt))) {
                     warning("'AD' was ignored: number of 'AD' values ",
