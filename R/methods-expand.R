@@ -73,7 +73,7 @@ setMethod("expand", "CollapsedVCF",
         if (!is.list(AD)) {
             ## 'Number' is integer
             if (is(AD, "array")) {
-                if ((length(unique(elt)) != 1L) && 
+                if ((length(unique(elt)) != 1L) || 
                     (dim(AD)[3] != unique(elt))) {
                     warning("'AD' was ignored: number of 'AD' values ",
                             "do not match REF + ALT")
