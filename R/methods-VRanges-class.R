@@ -249,8 +249,8 @@ setAs("VCF", "VRanges", function(from) {
     totalDepth <- meta$DP
     meta$DP <- NULL
   }
-  if (!is.null(geno(from)$FT))
-    filter <- cbind(filter, parseFilterStrings(as.vector(geno(from)$FT)))
+  if (!is.null(geno(from)[["FT"]]))
+    filter <- cbind(filter, parseFilterStrings(as.vector(geno(from)[["FT"]])))
   otherGeno <- geno(from)[setdiff(names(geno(from)), c("AD", "DP", "FT"))]
   if (length(otherGeno) > 0L)
     meta <- DataFrame(meta, lapply(otherGeno, genoToMCol))
