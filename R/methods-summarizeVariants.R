@@ -66,7 +66,7 @@ setMethod("summarizeVariants", c("GRangesList", "VCF", "function"),
             return(.baseSE(query, subject))
 
     ## genotypes
-    na <- c("0|0", "0/0", "./.", ".|.")
+    na <- c("0|0", "0/0", "./.", ".|.", ".")
     vcf_geno <- geno(subject)$GT[unique(queryHits(hits)), ]
     gtype <- as.numeric(!vcf_geno %in% na)
 

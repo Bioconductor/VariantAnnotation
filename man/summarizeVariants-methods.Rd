@@ -13,7 +13,7 @@
 \title{Summarize variants by sample}
 
 \description{
-  Variants in a VCF file are overlaped with an annotation 
+  Variants in a VCF file are overlapped with an annotation 
   region and summarized by sample. Genotype information in
   the VCF is used to determine which samples express 
   each variant.
