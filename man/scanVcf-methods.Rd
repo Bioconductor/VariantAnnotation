@@ -66,7 +66,7 @@ scanVcf(file, ..., param)
 
   The INFO field of the scanned VCF file is returned as a single
   \sQuote{packed} vector, as in the VCF file. The GENO field is a list of 
-  matricies, each matrix corresponds to a field as defined in the FORMAT 
+  matrices, each matrix corresponds to a field as defined in the FORMAT 
   field of the VCF header. Each matrix has as many rows as
   scanned in the VCF file, and as many columns as there are samples. As
   with the INFO field, the elements of the matrix are
@@ -80,7 +80,9 @@ scanVcf(file, ..., param)
   header information parsed into five categories, \code{samples}, 
   \code{meta}, \code{fixed}, \code{info} and \code{geno}. Each
   can be accessed with a `getter' of the same name
-  (e.g., info(<VCFHeader>)).
+  (e.g., info(<VCFHeader>)). If the file header has multiple rows 
+  with the same name (e.g., 'source') the row names of the DataFrame
+  are made unique in the usual way, 'source', 'source.1' etc. 
 
   \code{scanVcf} returns a list, with one element per range. Each list
   has 7 elements, obtained from the columns of the VCF specification:
