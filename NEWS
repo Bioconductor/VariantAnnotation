@@ -1,3 +1,40 @@
+CHANGES IN VERSION 1.22.0
+------------------------
+
+NEW FEATURES
+
+    o add import() wrapper for VCF files
+
+MODIFICATIONS
+
+    o use now-public R_GetConnection
+
+    o remove defunct readVcfLongForm() generic
+
+    o remove 'genome' argument from readVcf()
+
+    o improvements to VCF to VRanges coercion
+
+    o support Varscan2 AD/RD convention when coercing VCF to VRanges
+
+    o use [["FT"]] to avoid picking up FTZ field
+
+    o summarizeVariants() recognize '.' as missing GT field
+
+    o document scanVcfheader() behavior for duplicate row names
+
+
+BUG FIXES
+
+    o ensure only 1 matching hub resource selected in filterVcf vignette 
+
+    o fix check for FILT == "PASS"
+
+    o correct column alignment in makeVRangesFromGRanges()
+
+    o fix check for AD conformance
+
+
 CHANGES IN VERSION 1.20.0
 ------------------------
 
