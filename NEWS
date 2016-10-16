@@ -1,4 +1,4 @@
-CHANGES IN VERSION 1.22.0
+CHANGES IN VERSION 1.20.0
 ------------------------
 
 NEW FEATURES
@@ -35,7 +35,7 @@ BUG FIXES
     o fix check for AD conformance
 
 
-CHANGES IN VERSION 1.20.0
+CHANGES IN VERSION 1.19.0
 ------------------------
 
 NEW FEATURES
