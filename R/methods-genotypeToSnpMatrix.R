@@ -87,7 +87,7 @@ setMethod("genotypeToSnpMatrix", "array",
         }
 
         if (!all(snv)) {
-            warning("non-single nucleotide variations are set to NA")
+            message("non-single nucleotide variations are set to NA")
             x[!snv,] <- ".|."
         }
         map <- .genotypeToIntegerSNV(TRUE)
@@ -109,7 +109,7 @@ setMethod("genotypeToSnpMatrix", "array",
         }
 
         if (!all(snv)) {
-            warning("non-single nucleotide variations are set to NA")
+            message("non-single nucleotide variations are set to NA")
             x[!snv,,] <- NA
         }
 
