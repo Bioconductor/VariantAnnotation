@@ -197,7 +197,7 @@ test_VCF_seqlevels <- function()
     seqlevels(vcf)[seqlevels(vcf) == "1"] <- "chr1"
     checkIdentical(seqlevels(vcf), c("chr1", "2", "3", "4"))
  
-    seqlevels(vcf, force=TRUE) <- "3"
+    seqlevels(vcf, pruning.mode="coarse") <- "3"
     checkIdentical(seqlevels(vcf), "3")
 }
 
