@@ -55,7 +55,7 @@ setMethod("expand", "CollapsedVCF",
         csums <- colSums(gelt) == 0L
         if (any(csums))
             gvar[gnms[csums]] <- endoapply(gvar[gnms[csums]], function(i)
-                                     matrix(unlist(i, use.names=FALSE)))
+                matrix(unlist(i, use.names=FALSE), sum(elt), ncol(i)))
         ## elementNROWS shorter than ALT
         if (any(!csums)) {
             nms <- names(gvar) %in% names(csums)[!csums]
