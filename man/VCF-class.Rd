@@ -437,7 +437,7 @@ seqlevels(vcf2)
 
 ## The VCF can also be subset by seqlevel using 'keepSeqlevels'
 ## or 'dropSeqlevels'. See ?keepSeqlevels for details. 
-vcf3 <- keepSeqlevels(vcf2, "chr2")
+vcf3 <- keepSeqlevels(vcf2, "chr2", pruning.mode="coarse")
 seqlevels(vcf3)
 
 ## ----------------------------------------------------------------
