@@ -10,6 +10,8 @@ VcfFile <-
     function(file, index=paste(file, "tbi", sep="."), ...,
              yieldSize=NA_integer_)
 {
+    if (is(file, "VcfFile"))
+        return(file)
     tryCatch({
         Rsamtools:::.io_check_exists(c(file, index))
     }, error=function(err) {
