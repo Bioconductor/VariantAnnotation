@@ -187,8 +187,7 @@ setMethod("locateVariants", c("GRanges", "GRangesList", "FiveUTRVariants"),
 ### region = IntergenicVariants 
 ###
 
-setMethod("locateVariants", c("GRanges", "TxDb", 
-          "IntergenicVariants"),
+setMethod("locateVariants", c("GRanges", "TxDb", "IntergenicVariants"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE)
     {
@@ -198,11 +197,18 @@ setMethod("locateVariants", c("GRanges", "TxDb",
         ## for width(ranges) == 0 : decrement start to equal end value 
         if (any(insertion <- width(query) == 0))
             start(query)[insertion] <- start(query)[insertion] - 1
-        if (!exists("txbygene", cache, inherits=FALSE))
-            cache[["txbygene"]] <- transcriptsBy(subject, "gene")
-
-        callGeneric(query, cache[["txbygene"]], region, ..., 
-            ignore.strand=ignore.strand)
+        ## PRECEDEID and FOLLOWID as gene or transcript ids
+        if (distanceIDAsGeneID(region)) {
+            if (!exists("txbygene", cache, inherits=FALSE))
+                cache[["txbygene"]] <- transcriptsBy(subject, "gene")
+            callGeneric(query, cache[["txbygene"]], region, ..., 
+                ignore.strand=ignore.strand)
+        } else {
+            tx <- transcripts(subject)
+            names(tx) <- mcols(tx)$tx_id
+            callGeneric(query, as(tx, "GRangesList"), region, ..., 
+                ignore.strand=ignore.strand)
+        }
     }
 )
 
@@ -334,8 +340,12 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
             locateVariants(query, subject, CodingVariants(), cache=cache,
                            ignore.strand=ignore.strand)
         intron <- 
-            locateVariants(query, subject, IntronVariants(), cache=cache,
-                           ignore.strand=ignore.strand)
+            locateVariants(query, subject, 
+                IntergenicVariants(upstream(intergenic(region)), 
+                                   downstream(intergenic(region)),
+                                   distanceIDAsGeneID(intergenic(region))),
+                cache=cache,
+                ignore.strand=ignore.strand)
         splice <- 
             locateVariants(query, subject, SpliceSiteVariants(), 
                            cache=cache, ignore.strand=ignore.strand)
@@ -364,9 +374,10 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
                            cache=cache, ignore.strand=ignore.strand)
         intergenic <- 
             locateVariants(query, subject, 
-                           IntergenicVariants(upstream(intergenic(region)),
-                                              downstream(intergenic(region))), 
-                           cache=cache, ignore.strand=ignore.strand)
+              IntergenicVariants(upstream(intergenic(region)),
+                                 downstream(intergenic(region)), 
+                                 distanceIDAsGeneID(intergenic(region))),
+              cache=cache, ignore.strand=ignore.strand)
 
         ans <- c(coding, intron, fiveUTR, threeUTR, splice, promoter, intergenic)
         meta <- values(ans)

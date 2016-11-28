@@ -67,6 +67,14 @@ setGeneric("intergenic<-", signature="x",
     function(x, value) standardGeneric("intergenic<-")
 )
 
+setGeneric("distanceIDAsGeneID", signature="x",
+    function(x) standardGeneric("distanceIDAsGeneID")
+)
+
+setGeneric("distanceIDAsGeneID<-", signature="x",
+    function(x, value) standardGeneric("distanceIDAsGeneID<-")
+)
+
 ### -------------------------------------------------------------------------
 ### read/write Vcf 
 ###

@@ -16,11 +16,12 @@ setMethod("show", "AllVariants",
     {
         cat("class:", class(object), "\n")
         cat("promoter: \n")
-        cat("  upstream: ", upstream(promoter(object)), "\n")
-        cat("  downstream: ", downstream(promoter(object)), "\n")
+        cat("  upstream:", upstream(promoter(object)), "\n")
+        cat("  downstream:", downstream(promoter(object)), "\n")
         cat("intergenic: \n")
-        cat("  upstream: ", upstream(intergenic(object)), "\n")
-        cat("  downstream: ", downstream(intergenic(object)), "\n")
+        cat("  upstream:", upstream(intergenic(object)), "\n")
+        cat("  downstream:", downstream(intergenic(object)), "\n")
+        cat("  distanceIDAsGeneID:", distanceIDAsGeneID(intergenic(object)), "\n")
     }
 )
 
@@ -39,6 +40,7 @@ setMethod("show", "IntergenicVariants",
         cat("class:", class(object), "\n")
         cat("upstream:", upstream(object), "\n")
         cat("downstream:", downstream(object), "\n")
+        cat("distanceIDAsGeneID:", distanceIDAsGeneID(object), "\n")
     }
 )
 
@@ -70,12 +72,15 @@ SpliceSiteVariants <- function() new("SpliceSiteVariants")
         x
 }
 
-IntergenicVariants <- function(upstream=1e+06L, downstream=1e+06L)
+IntergenicVariants <- function(upstream=1e+06L, downstream=1e+06L,
+                               distanceIDAsGeneID=TRUE)
 {
     upstream <- .checkArgs(upstream, "upstream") 
     downstream <- .checkArgs(downstream, "downstream") 
+    if (!is.logical(distanceIDAsGeneID))
+        stop("'distanceIDAsGeneID' must be a logical")
     new("IntergenicVariants", upstream=upstream, 
-        downstream=downstream) 
+        downstream=downstream, distanceIDAsGeneID=distanceIDAsGeneID) 
 }
 
 PromoterVariants <- function(upstream=2000L, downstream=200L)
@@ -134,6 +139,27 @@ setReplaceMethod("downstream", "IntergenicVariants",
     x
 })
 
+setMethod("distanceIDAsGeneID", "IntergenicVariants",
+    function(x) slot(x, "distanceIDAsGeneID"))
+
+setReplaceMethod("distanceIDAsGeneID", "IntergenicVariants",
+    function(x, value)
+{
+    if (!is.logical(value))
+        stop("'distanceIDAsGeneID' must be a logical")
+    slot(x, "distanceIDAsGeneID") <- value 
+    x
+})
+
+setMethod("downstream", "IntergenicVariants",
+    function(x) slot(x, "downstream"))
+
+setReplaceMethod("downstream", "IntergenicVariants",
+    function(x, value)
+{
+    slot(x, "downstream") <- .checkArgs(value, "downstream") 
+    x
+})
 
 setMethod("promoter", "AllVariants",
     function(x) slot(x, "promoter"))
@@ -158,4 +184,3 @@ setReplaceMethod("intergenic", "AllVariants",
     slot(x, "intergenic") <- value 
     x
 })
-

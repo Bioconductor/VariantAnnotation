@@ -113,7 +113,7 @@ locateVariants(query, subject, region, ...)
       \code{FOLLOWID}. \code{upstream} and \code{downstream} arguments define 
       the acceptable distance from the query for the flanking genes. 
       \code{PRECEDEID} and \code{FOLLOWID} results are lists and contain all 
-      genes that fall within the defined distance. See examples for how
+      genes that fall within the defined distance. See the examples for how
       to compute the distance from ranges to PRECEDEID and FOLLOWID.
 
       \sQuote{promoter} variants fall within a specified range upstream and 
@@ -175,7 +175,11 @@ locateVariants(query, subject, region, ...)
       \sQuote{intergenic} variants do not fall within a transcript. The 
       \sQuote{GENEID} for these positions are \code{NA}. Lists of flanking
       genes that fall within the distance defined by \code{upstream} and 
-      \code{downstream} are given as \sQuote{PRECEDEID} and \sQuote{FOLLOWID}. 
+      \code{downstream} are given as \sQuote{PRECEDEID} and \sQuote{FOLLOWID}.
+      By default, the gene ID is returned in the \sQuote{PRECEDEID} and
+      \sQuote{FOLLOWID} columns. To return the transcipt id instead set
+      \code{distanceIDAsGeneID = FALSE} in the \code{IntergenicVariants()}
+      constructor.
 
       A \sQuote{spliceSite} variant overlaps any portion of the first 2 or last 
       2 nucleotides of an intron.
@@ -208,12 +212,16 @@ locateVariants(query, subject, region, ...)
     \item{\code{PRECEDEID}}{
       IDs for all genes the query precedes within the defined
       \code{upstream} and \code{downstream} distance. Only applicable
-      for \sQuote{intergenic} variants.
+      for \sQuote{intergenic} variants. By default this column contains gene ids;
+      to return transcript ids set \code{distanceIDAsGeneID = FALSE} in
+      the \code{IntergenicVariants} constructor.
     }
     \item{\code{FOLLOWID}}{
       IDs for all genes the query follows within the defined
       \code{upstream} and \code{downstream} distance. Only applicable
-      for \sQuote{intergenic} variants.
+      for \sQuote{intergenic} variants. By default this column contains gene ids;
+      to return transcript ids set \code{distanceIDAsGeneID = FALSE} in
+      the \code{IntergenicVariants} constructor.
     }
     All ID values will be \sQuote{NA} for variants with a location of
     \code{transcript_region} or \code{NA}.
@@ -281,6 +289,10 @@ locateVariants(query, subject, region, ...)
   ## to distance(). The 'id' and 'type' arguments describe an id found 
   ## in the TxDb. See the ?'nearest-methods' man page in GenomicFeatures
   ## for details.
+  ## NOTE: If you set distanceIDAsGeneID=FALSE in the IntergenicVariants()
+  ##       constructor the PRECEDEID and FOLLOWID columns contain 
+  ##       transcript ids instead of gene ids. In that case, 
+  ##       set type = "tx" in the call to distance().
   p_dist <- distance(exp_ranges, txdb, id=p_ids, type="gene")
   head(p_dist)
 

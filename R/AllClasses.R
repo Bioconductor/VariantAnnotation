@@ -233,7 +233,8 @@ setClass("SpliceSiteVariants", contains="VariantType")
 setClass("IntergenicVariants",
     contains="VariantType",
     representation(upstream="integer",
-                   downstream="integer")
+                   downstream="integer",
+                   distanceIDAsGeneID="logical")
 )
 
 setClass("PromoterVariants",
