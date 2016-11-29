@@ -293,16 +293,12 @@ locateVariants(query, subject, region, ...)
   ##       the PRECEDEID and FOLLOWID columns contain 
   ##       transcript ids instead of gene ids. In that case, 
   ##       set type = "tx" in the call to distance().
-  p_dist <- distance(exp_ranges, txdb, id=p_ids, type="gene")
-  head(p_dist)
 
-  ## Expanded view of ranges, gene id and distance:
-  exp_ranges$PRECEDE_DIST <- p_dist
-  exp_ranges
+  ## Compute distance for a single id:
+  distance(exp_ranges[1], txdb, id=p_ids[1], type="gene")
 
-  ## Collapsed view of ranges, gene id and distance:
-  loc_int$PRECEDE_DIST <- relist(p_dist, loc_int$PRECEDEID)
-  loc_int 
+  ## NOTE: The current distance method throws an error when a gene range
+  ##       is found on multiple chromosomes. A fix for this is on the TODO.
 
   ## ---------------------------------------------------------------------
   ## GRangesList as subject 
