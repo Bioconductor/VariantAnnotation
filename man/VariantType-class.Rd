@@ -33,10 +33,10 @@
 \alias{upstream<-,AllVariants-method}
 \alias{upstream<-,PromoterVariants-method}
 \alias{upstream<-,IntergenicVariants-method}
-\alias{distanceIDAsGeneID}
-\alias{distanceIDAsGeneID<-}
-\alias{distanceIDAsGeneID,IntergenicVariants-method}
-\alias{distanceIDAsGeneID<-,IntergenicVariants-method}
+\alias{idType}
+\alias{idType<-}
+\alias{idType,IntergenicVariants-method}
+\alias{idType<-,IntergenicVariants-method}
 \alias{downstream}
 \alias{downstream,AllVariants-method}
 \alias{downstream,PromoterVariants-method}
@@ -73,7 +73,7 @@
     ThreeUTRVariants()
     SpliceSiteVariants()
     IntergenicVariants(upstream = 1e+06L, downstream = 1e+06L,
-                       distanceIDAsGeneID=TRUE)
+                       idType="gene")
     PromoterVariants(upstream = 2000L, downstream = 200L)
     AllVariants(promoter = PromoterVariants(),
                 intergenic = IntergenicVariants())
@@ -95,9 +95,8 @@
   the number of base pairs upstream from the 5'-end and downstream from
   the 3'-end of the transcript region. See the ?\code{locateVariants} man
   page for details. \code{IntergenicVariants} also accepts a
-  \code{distanceIDAsGeneID} that controls what IDs are returned in the
-  PRECEDEID and FOLLOWID metadata columns. When TRUE (default), gene ids
-  are returned; when FALSE, transcript ids are returned.
+  \code{idType} that controls what IDs are returned in the
+  PRECEDEID and FOLLOWID metadata columns.
   
   \code{AllVariants} accepts \code{promoter} and
   \code{intergenic} arguments which are \code{PromoterVariants()} and
@@ -111,9 +110,9 @@
     upstream of the 5'-end and downstream of the 3'-end. Used in contructing 
     \code{PromoterVariants()} and \code{IntergenicVariants()} objects only.
   }
-  \item{distanceIDAsGeneID}{
-    \code{logical} indicating if the ids in the PRECEDEID and FOLLOWID 
-    metadata columns should be gene ids (TRUE) or transcript ids (FALSE). 
+  \item{idType}{
+    \code{character} indicating if the ids in the PRECEDEID and FOLLOWID 
+    metadata columns should be gene ids ("gene") or transcript ids ("tx"). 
     Applicable to \code{IntergenicVariants()} objects only.
   }
   \item{promoter}{
@@ -143,9 +142,10 @@
       downstream of the 3' end (excludes 3' end value).
     }
     \item{}{
-      \code{distanceIDAsGeneID(x)}, \code{distanceIDAsGeneID(x) <- value}:
-      Gets or sets the logical which controls what id is returned in 
-      the PRECEDEID and FOLLOWID output columns.
+      \code{idType(x)}, \code{idType(x) <- value}:
+      Gets or sets the \code{character()} which controls the id returned 
+      in the PRECEDEID and FOLLOWID output columns. Possible values are
+      "gene" and "tx".
     }
     \item{}{
       \code{promoters(x)}, \code{promoters(x) <- value}:

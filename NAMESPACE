@@ -98,7 +98,7 @@ export(
     FiveUTRVariants, ThreeUTRVariants, IntergenicVariants,
     SpliceSiteVariants, PromoterVariants, AllVariants,
     upstream, "upstream<-", downstream, "downstream<-",
-    distanceIDAsGeneID, "distanceIDAsGeneID<-",
+    idType, "idType<-",
     promoter, "promoter<-", intergenic, "intergenic<-",
     probabilityToSnpMatrix, GLtoGP, PLtoGP, restrictToSNV,
     VRanges, VRangesList, asVCF, softFilter, resetFilter,

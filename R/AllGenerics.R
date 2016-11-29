@@ -67,12 +67,12 @@ setGeneric("intergenic<-", signature="x",
     function(x, value) standardGeneric("intergenic<-")
 )
 
-setGeneric("distanceIDAsGeneID", signature="x",
-    function(x) standardGeneric("distanceIDAsGeneID")
+setGeneric("idType", signature="x",
+    function(x) standardGeneric("idType")
 )
 
-setGeneric("distanceIDAsGeneID<-", signature="x",
-    function(x, value) standardGeneric("distanceIDAsGeneID<-")
+setGeneric("idType<-", signature="x",
+    function(x, value) standardGeneric("idType<-")
 )
 
 ### -------------------------------------------------------------------------

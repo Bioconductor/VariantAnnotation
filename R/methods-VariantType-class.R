@@ -21,7 +21,7 @@ setMethod("show", "AllVariants",
         cat("intergenic: \n")
         cat("  upstream:", upstream(intergenic(object)), "\n")
         cat("  downstream:", downstream(intergenic(object)), "\n")
-        cat("  distanceIDAsGeneID:", distanceIDAsGeneID(intergenic(object)), "\n")
+        cat("  idType:", idType(intergenic(object)), "\n")
     }
 )
 
@@ -40,7 +40,7 @@ setMethod("show", "IntergenicVariants",
         cat("class:", class(object), "\n")
         cat("upstream:", upstream(object), "\n")
         cat("downstream:", downstream(object), "\n")
-        cat("distanceIDAsGeneID:", distanceIDAsGeneID(object), "\n")
+        cat("idType:", idType(object), "\n")
     }
 )
 
@@ -73,14 +73,19 @@ SpliceSiteVariants <- function() new("SpliceSiteVariants")
 }
 
 IntergenicVariants <- function(upstream=1e+06L, downstream=1e+06L,
-                               distanceIDAsGeneID=TRUE)
+                               idType=c("gene", "tx"))
 {
     upstream <- .checkArgs(upstream, "upstream") 
-    downstream <- .checkArgs(downstream, "downstream") 
-    if (!is.logical(distanceIDAsGeneID))
-        stop("'distanceIDAsGeneID' must be a logical")
+    downstream <- .checkArgs(downstream, "downstream")
+    if (missing(idType)) {
+        idType <- match.arg(idType)
+    } else {
+        idType <- tolower(idType)
+        if (!idType %in% c("gene", "tx")) 
+            stop("'idType' must be one of 'gene' or 'tx'")
+    }
     new("IntergenicVariants", upstream=upstream, 
-        downstream=downstream, distanceIDAsGeneID=distanceIDAsGeneID) 
+        downstream=downstream, idType=idType) 
 }
 
 PromoterVariants <- function(upstream=2000L, downstream=200L)
@@ -139,15 +144,15 @@ setReplaceMethod("downstream", "IntergenicVariants",
     x
 })
 
-setMethod("distanceIDAsGeneID", "IntergenicVariants",
-    function(x) slot(x, "distanceIDAsGeneID"))
+setMethod("idType", "IntergenicVariants",
+    function(x) slot(x, "idType"))
 
-setReplaceMethod("distanceIDAsGeneID", "IntergenicVariants",
+setReplaceMethod("idType", "IntergenicVariants",
     function(x, value)
 {
-    if (!is.logical(value))
-        stop("'distanceIDAsGeneID' must be a logical")
-    slot(x, "distanceIDAsGeneID") <- value 
+    if (!value %in% c("gene", "tx"))
+        stop("'idType' must be one of 'gene' or 'tx'")
+    slot(x, "idType") <- value 
     x
 })
 

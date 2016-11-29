@@ -177,8 +177,8 @@ locateVariants(query, subject, region, ...)
       genes that fall within the distance defined by \code{upstream} and 
       \code{downstream} are given as \sQuote{PRECEDEID} and \sQuote{FOLLOWID}.
       By default, the gene ID is returned in the \sQuote{PRECEDEID} and
-      \sQuote{FOLLOWID} columns. To return the transcipt id instead set
-      \code{distanceIDAsGeneID = FALSE} in the \code{IntergenicVariants()}
+      \sQuote{FOLLOWID} columns. To return the transcript ids instead set
+      \code{idType = "tx"} in the \code{IntergenicVariants()}
       constructor.
 
       A \sQuote{spliceSite} variant overlaps any portion of the first 2 or last 
@@ -213,14 +213,14 @@ locateVariants(query, subject, region, ...)
       IDs for all genes the query precedes within the defined
       \code{upstream} and \code{downstream} distance. Only applicable
       for \sQuote{intergenic} variants. By default this column contains gene ids;
-      to return transcript ids set \code{distanceIDAsGeneID = FALSE} in
+      to return transcript ids set \code{idType = "tx"} in
       the \code{IntergenicVariants} constructor.
     }
     \item{\code{FOLLOWID}}{
       IDs for all genes the query follows within the defined
       \code{upstream} and \code{downstream} distance. Only applicable
       for \sQuote{intergenic} variants. By default this column contains gene ids;
-      to return transcript ids set \code{distanceIDAsGeneID = FALSE} in
+      to return transcript ids set \code{idType = "tx"} in
       the \code{IntergenicVariants} constructor.
     }
     All ID values will be \sQuote{NA} for variants with a location of
@@ -289,8 +289,8 @@ locateVariants(query, subject, region, ...)
   ## to distance(). The 'id' and 'type' arguments describe an id found 
   ## in the TxDb. See the ?'nearest-methods' man page in GenomicFeatures
   ## for details.
-  ## NOTE: If you set distanceIDAsGeneID=FALSE in the IntergenicVariants()
-  ##       constructor the PRECEDEID and FOLLOWID columns contain 
+  ## NOTE: If idType='tx' in the IntergenicVariants() constructor
+  ##       the PRECEDEID and FOLLOWID columns contain 
   ##       transcript ids instead of gene ids. In that case, 
   ##       set type = "tx" in the call to distance().
   p_dist <- distance(exp_ranges, txdb, id=p_ids, type="gene")

@@ -198,16 +198,18 @@ setMethod("locateVariants", c("GRanges", "TxDb", "IntergenicVariants"),
         if (any(insertion <- width(query) == 0))
             start(query)[insertion] <- start(query)[insertion] - 1
         ## PRECEDEID and FOLLOWID as gene or transcript ids
-        if (distanceIDAsGeneID(region)) {
+        if (idType(region) == "gene") {
             if (!exists("txbygene", cache, inherits=FALSE))
                 cache[["txbygene"]] <- transcriptsBy(subject, "gene")
             callGeneric(query, cache[["txbygene"]], region, ..., 
                 ignore.strand=ignore.strand)
-        } else {
+        } else if (idType(region) == "tx") {
             tx <- transcripts(subject)
             names(tx) <- mcols(tx)$tx_id
             callGeneric(query, as(tx, "GRangesList"), region, ..., 
                 ignore.strand=ignore.strand)
+        } else {
+            stop("'idType' must be one of 'gene' or 'tx'")
         }
     }
 )
@@ -343,7 +345,7 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
             locateVariants(query, subject, 
                 IntergenicVariants(upstream(intergenic(region)), 
                                    downstream(intergenic(region)),
-                                   distanceIDAsGeneID(intergenic(region))),
+                                   idType(intergenic(region))),
                 cache=cache,
                 ignore.strand=ignore.strand)
         splice <- 
@@ -376,7 +378,7 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
             locateVariants(query, subject, 
               IntergenicVariants(upstream(intergenic(region)),
                                  downstream(intergenic(region)), 
-                                 distanceIDAsGeneID(intergenic(region))),
+                                 idType(intergenic(region))),
               cache=cache, ignore.strand=ignore.strand)
 
         ans <- c(coding, intron, fiveUTR, threeUTR, splice, promoter, intergenic)

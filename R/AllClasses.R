@@ -234,7 +234,7 @@ setClass("IntergenicVariants",
     contains="VariantType",
     representation(upstream="integer",
                    downstream="integer",
-                   distanceIDAsGeneID="logical")
+                   idType="character")
 )
 
 setClass("PromoterVariants",
