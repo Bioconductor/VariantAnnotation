@@ -93,7 +93,7 @@ static struct vcftype_t *_types_alloc(const int x_n, const int y_n,
         if (type == NILSXP) {   /* skip */
             types->u.list[j] =
                 _vcftype_new(NILSXP, NILSXP, *n, NULL, 0, 0, 0, 0);
-        } else if (*n == '.' || *n == 'A' || *n == 'G') { /* ragged array */
+        } else if (*n == '.' || *n == 'A' || *n == 'G' || *n == 'R') { 
             types->u.list[j] =
                 _vcftype_new(VECSXP, type, *n, dot, x_n, y_n, 1, 2);
         } else {                /* array */
@@ -268,10 +268,10 @@ static void _parse(char *line, const int irec,
                     break;
                 }
         }
-        /* type 'A' with no data need to be padded w/ NA's */
+        /* missing data for type 'A', 'G' and 'R' need to be padded w/ NA's */
         for (imapidx = 0; imapidx < imap_n; ++imapidx) {
             elt = info->u.list[imapidx];
-            if (elt->number == 'A' || elt->number == 'G')
+            if (elt->number == 'A' || elt->number == 'G' || elt->number == 'R')
                 _vcftype_padarray(elt, irec, 0, str, alt_n);
         }
     }
@@ -309,10 +309,10 @@ static void _parse(char *line, const int irec,
             elt = geno->u.list[ gmapidx[fmtidx] ];
             _vcftype_setarray(elt, irec, smapidx[j] - 1, field, alt_n, str);
         }
-        /* type 'A' and 'G' need to be padded w/ NA's */
+        /* missing data for type 'A', 'G' and 'R' need to be padded w/ NA's */
         for (fmtidx = 0; fmtidx < gmap_n; ++fmtidx) {
             elt = geno->u.list[fmtidx];
-            if (elt->number == 'A' || elt->number == 'G')
+            if (elt->number == 'A' || elt->number == 'G' || elt->number == 'R')
                 _vcftype_padarray(elt, irec, smapidx[j] - 1, str, alt_n);
         }
     }

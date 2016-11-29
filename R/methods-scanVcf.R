@@ -62,7 +62,7 @@ selectSome <- S4Vectors:::selectSome
 .vcf_map <-
     function(fmt, tag, nm, verbose)
 {
-    numberOk <- grepl("^[AG\\.[:digit:]+]$", fmt$Number)
+    numberOk <- grepl("^[AGR\\.[:digit:]+]$", fmt$Number)
     fmt$Number[!numberOk] <- "."
     mapType <- function(n, t) {
         if (t == "Flag") n <- "1"

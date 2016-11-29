@@ -253,9 +253,13 @@ void _vcftype_setarray(struct vcftype_t *vcftype,
         return;
 
     if (VECSXP == vcftype->type) { /* ragged array */
-        /* 'G' indicates one value per genotype */
+        /* 'G': one value per genotype */
         if (vcftype->number == 'G')
             ragged_n = ((ragged_n + 1) * (ragged_n + 2))/2;
+        /* 'R': one value per alternate allele + ref*/
+        else if (vcftype->number == 'R')
+            ragged_n = ragged_n + 1;
+        /* 'A': one value per alternate allele */
         else if (vcftype->number != 'A')
             ragged_n = _vcftype_ragged_n(field);
  
