@@ -73,7 +73,7 @@
     ThreeUTRVariants()
     SpliceSiteVariants()
     IntergenicVariants(upstream = 1e+06L, downstream = 1e+06L,
-                       idType="gene")
+                       idType=c("gene", "tx"))
     PromoterVariants(upstream = 2000L, downstream = 200L)
     AllVariants(promoter = PromoterVariants(),
                 intergenic = IntergenicVariants())
