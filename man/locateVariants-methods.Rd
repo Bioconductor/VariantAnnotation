@@ -285,20 +285,20 @@ locateVariants(query, subject, region, ...)
   p_ids <- unlist(loc_int$PRECEDEID, use.names=FALSE) 
   exp_ranges <- rep(loc_int,  elementNROWS(loc_int$PRECEDEID))
 
-  ## Provide the variant GRanges as 'x' and the TxDb annotation as 'y' 
-  ## to distance(). The 'id' and 'type' arguments describe an id found 
-  ## in the TxDb. See the ?'nearest-methods' man page in GenomicFeatures
-  ## for details.
-  ## NOTE: If idType='tx' in the IntergenicVariants() constructor
-  ##       the PRECEDEID and FOLLOWID columns contain 
-  ##       transcript ids instead of gene ids. In that case, 
-  ##       set type = "tx" in the call to distance().
+  ## Compute distances with the distance method defined in GenomicFeatures.
+  ## Help page can be found at ?`distance,GenomicRanges,TxDb-method`.
+  ## The method returns NA for ids that cannot be collapsed into a single 
+  ## range (e.g., genes with ranges on multiple chromosomes).
+  distance(exp_ranges, txdb, id=p_ids, type="gene")
 
-  ## Compute distance for a single id:
-  distance(exp_ranges[1], txdb, id=p_ids[1], type="gene")
+  ## To search for distance by transcript id set idType='tx' in the 
+  ## IntergenicVariants() constructor, e.g.,
+  ## locateVariants(vcf, txdb, region=IntergenicVariants(idType="tx"))
 
-  ## NOTE: The current distance method throws an error when a gene range
-  ##       is found on multiple chromosomes. A fix for this is on the TODO.
+  ## Unlist ids and expand ranges as before to get p_ids and exp_ranges.
+  ## Then call distance() with type = "tx":
+  ## distance(exp_ranges, txdb, id=p_ids, type="tx")
+
 
   ## ---------------------------------------------------------------------
   ## GRangesList as subject 
