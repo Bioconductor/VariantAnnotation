@@ -125,7 +125,7 @@ exportMethods(
 
     fixed, "fixed<-", ref, "ref<-", alt, "alt<-", qual, "qual<-",
     filt, "filt<-", info, "info<-", geno, "geno<-", strand, 
-    "strand<-", "[", "[<-", cbind, rbind, "mcols<-", 
+    "strand<-", "[", "[<-", cbind, rbind, "mcols<-", indexVcf,
 
     genome, seqlevels, seqinfo,
 
