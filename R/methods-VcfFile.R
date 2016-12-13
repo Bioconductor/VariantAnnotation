@@ -7,7 +7,7 @@
 ###
 
 VcfFile <-
-    function(file, index=paste(file, "tbi", sep="."), ...,
+    function(file, index, ...,
              yieldSize=NA_integer_)
 {
     if (is(file, "VcfFile"))
@@ -17,6 +17,10 @@ VcfFile <-
     }, error=function(err) {
         stop(sprintf("VcfFile: %s", conditionMessage(err)), call.=FALSE)
     })
+    if (missing(index))
+        index=paste(file, "tbi", sep=".")
+    if (!file.exists(index))
+         index = NA
     Rsamtools:::.RsamtoolsFile(.VcfFile, file, index, yieldSize=yieldSize, ...)
 }
 
