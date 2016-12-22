@@ -82,3 +82,17 @@ setMethod("indexVcf", "VcfFileList",
     }
     x    
 })
+
+setMethod("seqinfo", "VcfFile",
+    function(x)
+{
+    seqinfo(scanVcfHeader(path(x)))
+})
+
+setMethod("seqinfo", "VcfFileList",
+    function(x)
+{
+    si = lapply(x, function(elt) as(seqinfo(elt), "GRanges"))
+    grl <- as(si, "GRangesList")
+    seqinfo(grl)
+})
