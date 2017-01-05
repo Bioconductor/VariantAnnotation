@@ -1,14 +1,14 @@
-%\VignetteIndexEntry{filterVcf Overview}
+%\VignetteIndexEntry{2. Using filterVcf to Select Variants from VCF Files}
 %\VignetteDepends{VariantAnnotation}
 %\VignettePackage{VariantAnntation}
 
-\documentclass[12pt]{article}
+\documentclass{article}
 
 <<style-Sweave, eval=TRUE, echo=FALSE, results=tex>>=
-BiocStyle::latex()
+BiocStyle::latex2()
 @ 
 
-\title{\texttt{filterVcf()}:  Extract Variants of Interest from a Large VCF File}
+\title{2. Using \texttt{filterVcf()} to Select Variants from VCF Files}
 \author{Paul Shannon}
 \date{Created: 20 February, 2013 \\ Last modified: 22 October, 2015}
 

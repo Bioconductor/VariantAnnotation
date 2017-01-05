@@ -1,12 +1,12 @@
-%\VignetteIndexEntry{Introduction to VariantAnnotation}
+%\VignetteIndexEntry{1. Introduction to VariantAnnotation}
 
 \documentclass{article}
 
 <<style, eval=TRUE, echo=FALSE, results=tex>>=
-BiocStyle::latex()
+BiocStyle::latex2()
 @
 
-\title{Introduction to \Biocpkg{VariantAnnotation}}
+\title{1. Introduction to \Biocpkg{VariantAnnotation}}
 \author{Valerie Obenchain}
 \date{\today}
 
