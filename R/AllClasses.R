@@ -308,7 +308,7 @@ setTypedRle <- function(type) {
       slot(from, "values", check = FALSE) <- coercer(runValue(from))
     new(cname, from)
   })
-  setAs("vectorORfactor", cname, function(from) {
+  setAs("vector_or_factor", cname, function(from) {
     new(cname, Rle(coercer(from)))
   })
   setMethod("[", cname,
