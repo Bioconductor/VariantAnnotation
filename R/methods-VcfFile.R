@@ -27,7 +27,10 @@ VcfFile <-
 VcfFileList <-
     function(..., yieldSize=NA_integer_)
 {
-    Rsamtools:::.RsamtoolsFileList(..., yieldSize=yieldSize, class="VcfFile")
+    Rsamtools:::.RsamtoolsFileList(
+        ..., yieldSize=yieldSize, class="VcfFile",
+        classDef = VariantAnnotation::VcfFile
+    )
 }
 
 ### Methods
