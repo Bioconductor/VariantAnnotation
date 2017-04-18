@@ -1,3 +1,47 @@
+CHANGES IN VERSION 1.22.0
+------------------------
+
+NEW FEATURES
+
+    o add import() wrapper for VCF files
+
+    o add support for Number='R' in vcf parsing 
+
+    o add indexVcf() and methods for character,VcfFile,VcfFileList 
+
+MODIFICATIONS
+
+    o throw message() instead of warning() when non-nucleotide 
+      variations are set to NA
+
+    o replace 'force=TRUE' with 'pruning.mode="coarse"' in seqlevels() setter
+
+    o add 'pruning.mode' argument to keepSeqlevels() in man page example
+
+    o idempotent VcfFile()
+
+    o add 'idType' arg to IntergenicVariants() constructor 
+
+    o modify locateVariants man page example to work around 
+      issue that distance,GRanges,TxDb does not support gene ranges on 
+      multiple chromosomes
+
+    o modify VcfFile() constructor to detect index file if not specified
+
+    o order vignettes from intro to advanced; use BiocStyle::latex2() 
+
+    o remove unused SNPlocs.Hsapiens.dbSNP.20110815 from the Suggests field 
+
+    o follow rename change in S4Vectors from vector_OR_factor to
+      vector_or_factor
+
+    o pass classDef to .RsamtoolsFileList; VariantAnnotation may not be
+      on the search path
+
+BUG FIXES
+
+    o fix expansion of 'A' fields when there are multiple columns
+
 CHANGES IN VERSION 1.20.0
 ------------------------
 
