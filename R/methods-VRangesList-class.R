@@ -13,3 +13,6 @@ setMethod("stackSamples", "VRangesList", function(x) {
     sampleNames(stacked) <- Rle(names(x), elementNROWS(x))
   stacked
 })
+
+setMethod("ref", "VRangesList", function(x) List(lapply(x, ref)))
+setMethod("alt", "VRangesList", function(x) List(lapply(x, alt)))
