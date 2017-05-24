@@ -19,8 +19,8 @@
 
 setMethod("ref", "VRanges", function(x) x@ref)
 setReplaceMethod("ref", "VRanges", function(x, value) {
-  x@ref <- value
-  x
+    x@ref <- S4Vectors:::recycleVector(value, length(x))
+    x
 })
 setMethod("alt", "VRanges", function(x) x@alt)
 setReplaceMethod("alt", "VRanges", function(x, value) {
