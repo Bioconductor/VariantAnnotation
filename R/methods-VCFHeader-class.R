@@ -83,7 +83,8 @@ setMethod("info", "VCFHeader",
 {
     info <- slot(x, "header")$INFO
     if (is.null(info))
-        info <- DataFrame()
+        info <- DataFrame(Number=integer(), Type=character(),
+                          Description=character())
     info
 })
 
@@ -101,7 +102,8 @@ setMethod("geno", "VCFHeader",
 {
     geno <- slot(x, "header")$FORMAT
     if (is.null(geno))
-        geno <- DataFrame()
+        geno <- DataFrame(Number=integer(), Type=character(),
+                          Description=character())
     geno 
 })
 
