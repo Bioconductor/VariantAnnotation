@@ -365,7 +365,8 @@ setMethod("rbind", "VCF",
 
     fixed <- do.call(rbind, lapply(args, fixed))
     info <- do.call(rbind, lapply(args, info))
-    rowRanges <- do.call(c, lapply(args, rowRanges))
+    ## rowRanges should not contain REF, ALT, QUAL or FILTER
+    rowRanges <- do.call(c, lapply(args, slot, "rowRanges"))
     colData <- SummarizedExperiment:::.cbind.DataFrame(args, colData, "colData")
     assays <- do.call(rbind, lapply(args, slot, "assays"))
     elementMetadata <- do.call(rbind, lapply(args, slot, "elementMetadata"))
