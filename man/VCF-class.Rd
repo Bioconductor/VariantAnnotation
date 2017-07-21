@@ -70,6 +70,7 @@
 \alias{[,VCF-method}
 \alias{[,VCF,ANY,ANY-method}
 \alias{[,VCF,ANY,ANY,ANY-method}
+\alias{subset,VCF-method}
 \alias{[<-,VCF,ANY,ANY,VCF-method}
 
 % Combine methods
@@ -239,6 +240,14 @@
       \code{x[i, j]}, \code{x[i, j] <- value}: Gets or sets rows and columns.
       \code{i} and \code{j} can be integer or logical vectors. \code{value} is a
       replacement \code{VCF} object.
+    }
+    \item{}{
+      \code{subset(x, subset, select, ...)}: Restricts \code{x} by
+      evaluating the \code{subset} argument in the scope of
+      \code{rowData(x)} and \code{info(x)}, and \code{select} in the
+      context of \code{colData(x)}. The \code{subset} argument restricts
+      by rows, while the \code{select} argument restricts by column. The
+      \code{\dots} are passed to the underlying \code{subset()} calls.
     }
     \item{}{
       \code{cbind(...)}, \code{rbind(...)}: \code{cbind} combines objects with

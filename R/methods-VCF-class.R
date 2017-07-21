@@ -311,6 +311,16 @@ setMethod("[", c("VCF", "ANY", "ANY"),
     }
 })
 
+setMethod("subset", "VCF",
+          function(x, subset, select, ...)
+{
+    rowData <- rowRanges(x)
+    mcols(rowData) <- cbind(mcols(rowRanges(x)), info(x))
+    i <- S4Vectors:::evalqForSubset(subset, rowData, ...)
+    j <- S4Vectors:::evalqForSubset(select, colData(x), ...)
+    x[i, j]
+})
+
 setReplaceMethod("[",
     c("VCF", "ANY", "ANY", "VCF"),
     function(x, i, j, ..., value)
