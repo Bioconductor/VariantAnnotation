@@ -115,9 +115,8 @@
 
 \seealso{
   \code{\link{readVcf}},
-  \code{\link{predictCoding}}
+  \code{\link{predictCoding}},
   \code{\link{locateVariants}}
-  \code{\link{summarizeVariants}},
 }
 
 \examples{

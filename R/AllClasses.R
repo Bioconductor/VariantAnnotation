@@ -22,8 +22,8 @@ setClass("VCF",
 
     if (nrow(ffld) != 0) {
         if (nrow(ffld) != xlen)
-            return(paste("'fixed(object)' and 'rowRanges(object) must have the same ",
-                   "number of rows", sep=""))
+            return(paste0("'fixed(object)' and 'rowRanges(object) ",
+                          "must have the same number of rows", sep=""))
         if (!all(nms %in% c("REF", "ALT", "QUAL", "FILTER")))
             return(paste("'fixed(object)' colnames must be ",
                    "'REF', 'ALT', 'QUAL' and 'FILTER'", sep=""))

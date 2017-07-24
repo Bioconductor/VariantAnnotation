@@ -126,24 +126,24 @@
   \describe{
     \item{}{
       \code{rowRanges(x, ..., fixed = TRUE)}, \code{rowRanges(x) <- value}:
-      Gets or sets the rowRanges. The CHROM, POS, ID and REF fields are used to
-      create a \code{GRanges} object.  Ranges are created using POS as the start
-      value and width of the reference allele (REF). The IDs become the
-      rownames. If they are missing (i.e., \sQuote{.}) a string of
-      CHROM:POS_REF/ALT is used instead.  The \code{genome} argument is stored
-      in the seqinfo of the \code{GRanges} and can be accessed with
-      \code{genome(<VCF>)}.
-      
+      Gets or sets the rowRanges. The CHROM, POS, ID, POS and REF fields are
+      used to create a \code{GRanges} object. The start of the ranges are
+      defined by POS and the width is equal to the width of the reference
+      allele REF.  The IDs become the rownames. If they are missing (i.e.,
+      \sQuote{.}) a string of CHROM:POS_REF/ALT is used instead.  The
+      \code{genome} argument is stored in the seqinfo of the \code{GRanges} and
+      can be accessed with \code{genome(<VCF>)}.
+ 
       When \code{fixed = TRUE}, REF, ALT, QUAL and FILT metadata columns are 
-      included. 
-      
+      displayed as metadata columns. To modify the \code{fixed} fields, use
+      the \code{fixed<-} setter. 
+
       One metadata column, \code{paramRangeID}, is included with the
       \code{rowRanges}. This ID is meaningful when multiple ranges are
       specified in the \code{ScanVcfParam} and distinguishes which records
       match each range.
 
-      The metadata columns can be accessed with \code{mcols(x)$<variable>} or 
-      the following accessors:
+      The metadata columns can be accessed with the following:
       \itemize{
         \item{\code{ref(x)}, \code{ref(x) <- value}:
           Gets or sets the reference allele (REF). \code{value} must 
@@ -166,11 +166,17 @@
       }
     }
     \item{}{
+      \code{mcols(x)}, \code{mcols(x) <- value}:
+       These methods behave the same as \code{mcols(rowRanges(x))} and 
+       \code{mcols(rowRanges(x)) <- value}. 
+
+       To modify the \code{fixed} fields use the \code{fixed<-} setter.
+    }
+    \item{}{
       \code{fixed(x)}, \code{fixed(x) <- value}:
        Gets or sets a DataFrame of REF, ALT, QUAL and FILTER only. 
-       Note these fields are displayed as metadata columns when
-       \code{rowRanges(VCF)} is invoked. The fields can be replaced using 
-       \code{rowRanges<-} but it is more efficient to do so with \code{fixed<-}. 
+       Note these fields are displayed as metadata columns with
+       the rowRanges() data (set to fixed = FALSE to suppress).
     }
     \item{}{
       \code{info(x, ..., row.names = TRUE)}, \code{info(x) <- value}:
@@ -415,17 +421,16 @@ vcf <- readVcf(fl, genome="hg19")
 ## the rowRanges() accessor.
 rowRanges(vcf)
 
-## Individual fields can be extracted with ref(), alt(), qual() 
-## and filt().
+## Suppress fixed fields:
+rowRanges(vcf, fixed=FALSE)
+
+## Individual fields can be extracted with ref(), alt(), qual(), filt() etc.
 qual(vcf)
 ref(vcf)
-
-## All 'info' fields can be extracted together along
-## with the GRanges of locations.
 head(info(vcf))
 
-## All genotype fields can be seen with geno(). Individual
-## fields are accessed with '$' or '[['.
+## Extract genotype fields with geno(). Access specific fields with 
+## '$' or '[['.
 geno(vcf)
 identical(geno(vcf)$GQ, geno(vcf)[[2]])
 

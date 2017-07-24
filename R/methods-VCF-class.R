@@ -145,26 +145,29 @@ setMethod("rowRanges", "VCF",
     gr
 })
 
+
 setReplaceMethod("rowRanges", c("VCF", "GRanges"),
     function(x, value)
 {
-    fixed_idx <- names(mcols(value)) %in% c("REF", "ALT", "QUAL", "FILTER")
-    slot(x, "fixed") <- mcols(value)[fixed_idx] 
-    slot(x, "rowRanges") <- value[,!fixed_idx]
-    validObject(x)
+    invalid <- names(mcols(value)) %in% c("REF", "ALT", "QUAL", "FILT")
+    if (any(invalid))
+        stop(paste0("'value' columns must not be named 'REF', 'ALT', ",
+             "'QUAL' or 'FILT'. Use the 'fixed<-' setter to modify fixed ",
+             "fields."))
+    slot(x, "rowRanges") <- value
     x
 })
-
-### Must define VCF methods for 'mcols<-' and 'dimnames<-' instead of 
-### inheriting from RangedSummarizedExperiment. 'fixed' fields are stored in 
-### a separate slot and not as metadata columns of 'rowRanges'.
 
 setReplaceMethod("mcols", c("VCF", "DataFrame"),
     function(x, ..., value)
 {
-    idx <- names(value) %in% "paramRangeID"
-    fixed(x) <- value[!idx] 
-    slot(x, "rowRanges") <- value[,idx]
+    invalid <- names(value) %in% c("REF", "ALT", "QUAL", "FILT")
+    if (any(invalid))
+        stop(paste0("'value' columns must not be named 'REF', 'ALT', ",
+             "'QUAL' or 'FILT'. Use the 'fixed<-' setter to modify fixed ",
+             "fields."))
+    mcols(rowRanges(x)) <- value
+    validObject(x)
     x
 })
 
