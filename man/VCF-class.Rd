@@ -161,14 +161,16 @@
         }
         \item{\code{filt(x)}, \code{filt(x) <- value}:
           Returns or sets the filter data (FILT). \code{value} must 
-          be a \code{character(1L)}.
+          be a \code{character(1L)}. Names must be one of 'REF', 'ALT',
+          'QUAL' or 'FILT'.
         }
       }
     }
     \item{}{
       \code{mcols(x)}, \code{mcols(x) <- value}:
        These methods behave the same as \code{mcols(rowRanges(x))} and 
-       \code{mcols(rowRanges(x)) <- value}. 
+       \code{mcols(rowRanges(x)) <- value}. 'value' cannot contain column
+       names of 'REF', 'ALT', 'QUAL' or 'FILT'.
 
        To modify the \code{fixed} fields use the \code{fixed<-} setter.
     }
