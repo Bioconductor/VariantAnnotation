@@ -76,7 +76,7 @@ test_VCF_rowRanges_info_geno <- function() {
     vcf <- readVcf(fl, genome="hg19")
     ## rowRanges
     v1 <- vcf
-    rowRanges(v1) <- rowRanges(v1)[5:1]
+    rowRanges(v1) <- rowRanges(v1, fixed=FALSE)[5:1]
     checkIdentical(rownames(vcf), rev(rownames(v1)))
 
     ## info
