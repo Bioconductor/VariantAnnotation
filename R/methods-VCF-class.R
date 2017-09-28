@@ -556,8 +556,9 @@ setMethod(show, "VCF",
     printSimpleList(geno, margin=margin) 
     if (length(header(object))) {
         if (length(hdr <- geno(header(object)))) {
-            nms <- intersect(names(geno(object)), rownames(hdr))
-            diff <- setdiff(names(geno(object)), rownames(hdr))
+            gnames <- names(geno(object, withDimnames = FALSE))
+            nms <- intersect(gnames, rownames(hdr))
+            diff <- setdiff(gnames, rownames(hdr))
             if (length(nms)) {
                 cat("geno(header(vcf)):\n")
                 headerrec(as.data.frame(hdr[nms,]))
