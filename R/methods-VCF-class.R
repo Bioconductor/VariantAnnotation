@@ -145,28 +145,23 @@ setMethod("rowRanges", "VCF",
     gr
 })
 
-
 setReplaceMethod("rowRanges", c("VCF", "GRanges"),
     function(x, value)
 {
-    invalid <- names(mcols(value)) %in% c("REF", "ALT", "QUAL", "FILT")
-    if (any(invalid))
-        stop(paste0("'value' columns must not be named 'REF', 'ALT', ",
-             "'QUAL' or 'FILT'. Use the 'fixed<-' setter to modify fixed ",
-             "fields."))
-    slot(x, "rowRanges") <- value
+    ## This method does not manage the 'fixed' fields REF, ALT, QUAL, FILTER
+    ## Use "fixed<-" instead.
+    sub <- value[,!names(mcols(value)) %in% c("REF", "ALT", "QUAL", "FILTER")]
+    slot(x, "rowRanges") <- sub 
     x
 })
 
-setReplaceMethod("mcols", c("VCF", "DataFrame"),
+setReplaceMethod("mcols", c("VCF", "ANY"),
     function(x, ..., value)
 {
-    invalid <- names(value) %in% c("REF", "ALT", "QUAL", "FILT")
-    if (any(invalid))
-        stop(paste0("'value' columns must not be named 'REF', 'ALT', ",
-             "'QUAL' or 'FILT'. Use the 'fixed<-' setter to modify fixed ",
-             "fields."))
-    mcols(rowRanges(x)) <- value
+    ## This method does not manage the 'fixed' fields REF, ALT, QUAL, FILTER
+    ## Use "fixed<-" instead.
+    sub <- value[,!names(value) %in% c("REF", "ALT", "QUAL", "FILTER")]
+    mcols(slot(x, "rowRanges")) <- sub 
     validObject(x)
     x
 })

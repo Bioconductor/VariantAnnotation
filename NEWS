@@ -1,3 +1,32 @@
+CHANGES IN VERSION 1.24.0
+------------------------
+
+NEW FEATURES
+
+    o Add subset,VCF-method that knows about info()
+
+    o Add alt,ref accessors for VRangesList 
+
+MODIFICATIONS
+
+    o More efficient show,VCF-method
+
+    o 'rowRanges<-' and 'mcols<-' on VCF class behave as they do
+      on RangedSummarizedExperiment
+
+    o info,VCFHeader() and geno,VCFHeader() return a DataFrame with
+      the correct columns in the case of empty
+
+BUG FIXES
+
+    o Fix "ref<-" recycling on VRanges 
+
+    o Fix bug in locateVariants(); code to fetch IntronVariants() was
+      incorrectly fetching IntergenicVariants()
+
+    o Fix bug in rbind,VCF,VCF-method
+
+
 CHANGES IN VERSION 1.22.0
 ------------------------
 

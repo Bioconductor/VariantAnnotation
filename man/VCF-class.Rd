@@ -46,8 +46,8 @@
 \alias{info<-}
 \alias{info<-,VCF,DataFrame-method}
 \alias{rowRanges,VCF-method}
-\alias{rowRanges<-,VCF-method}
-\alias{mcols<-,VCF,DataFrame-method}
+\alias{rowRanges<-,VCF,GRanges-method}
+\alias{mcols<-,VCF,ANY-method}
 \alias{dimnames<-,VCF,list-method}
 \alias{geno}
 \alias{geno,VCF-method}
@@ -134,7 +134,7 @@
       \code{genome} argument is stored in the seqinfo of the \code{GRanges} and
       can be accessed with \code{genome(<VCF>)}.
  
-      When \code{fixed = TRUE}, REF, ALT, QUAL and FILT metadata columns are 
+      When \code{fixed = TRUE}, REF, ALT, QUAL and FILTER metadata columns are 
       displayed as metadata columns. To modify the \code{fixed} fields, use
       the \code{fixed<-} setter. 
 
@@ -160,19 +160,18 @@
           be an \code{numeric(1L)}.
         }
         \item{\code{filt(x)}, \code{filt(x) <- value}:
-          Returns or sets the filter data (FILT). \code{value} must 
+          Returns or sets the filter data. \code{value} must 
           be a \code{character(1L)}. Names must be one of 'REF', 'ALT',
-          'QUAL' or 'FILT'.
+          'QUAL' or 'FILTER'.
         }
       }
     }
     \item{}{
       \code{mcols(x)}, \code{mcols(x) <- value}:
        These methods behave the same as \code{mcols(rowRanges(x))} and 
-       \code{mcols(rowRanges(x)) <- value}. 'value' cannot contain column
-       names of 'REF', 'ALT', 'QUAL' or 'FILT'.
-
-       To modify the \code{fixed} fields use the \code{fixed<-} setter.
+       \code{mcols(rowRanges(x)) <- value}. This method does not manage the
+       fixed fields, 'REF', 'ALT', 'QUAL' or 'FILTER'. To modify those
+       columns use \code{fixed<-}.
     }
     \item{}{
       \code{fixed(x)}, \code{fixed(x) <- value}:
