@@ -101,12 +101,7 @@
 \section{Constructors}{
   \describe{
     \item{}{
-      \code{readVcf(rowRanges = GRanges(), colData = DataFrame(), 
-                exptData = list(), fixed = DataFrame(), 
-                info = DataFrame(), geno = SimpleList(), 
-                ..., collapsed=TRUE, verbose = FALSE)}
-      Creates a CollapsedVCF class from data in a Variant Call
-      Format file on disk. 
+      \code{readVcf(file, genome, param, ..., row.names=TRUE)}
     }
     \item{}{
       \code{VCF(rowRanges = GRanges(), colData = DataFrame(), 
@@ -116,6 +111,9 @@
                 verbose = FALSE)}
       Creates CollapsedVCF when \code{collapsed = TRUE} and an
       ExpandedVCF when \code{collapsed = FALSE}.
+
+      This is a low-level constructor used internally. Most instances
+      of the \code{VCF} class are created with \code{readVCF}.
     }
   }
 }
@@ -143,7 +141,7 @@
       specified in the \code{ScanVcfParam} and distinguishes which records
       match each range.
 
-      The metadata columns can be accessed with the following:
+      The metadata columns of a VCF object are accessed with the following:
       \itemize{
         \item{\code{ref(x)}, \code{ref(x) <- value}:
           Gets or sets the reference allele (REF). \code{value} must 
@@ -412,6 +410,9 @@
 }
 
 \examples{
+
+## readVcf() parses data into a VCF object: 
+
 fl <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
 vcf <- readVcf(fl, genome="hg19")
 
