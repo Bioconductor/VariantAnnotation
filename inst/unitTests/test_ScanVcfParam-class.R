@@ -4,8 +4,10 @@ test_ScanVcfParam_which <- function()
                         seq2=IRanges(c(100, 1000), c(1000, 2000)))
     svp <- ScanVcfParam(which=which)
     checkIdentical(which, vcfWhich(svp))
-    checkException(vcfWhich(svp) <- DataFrame(), silent=TRUE)
-    checkException(vcfWhich(svp) <- SimpleList(), silent=TRUE)
+    vcfWhich(svp) <- DataFrame()
+    checkTrue(is(vcfWhich(svp), "RangesList"))
+    vcfWhich(svp) <- SimpleList()
+    checkTrue(is(vcfWhich(svp), "RangesList"))
 }
 
 test_ScanVcfParam_fixed <- function()

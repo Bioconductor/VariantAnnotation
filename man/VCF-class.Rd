@@ -47,6 +47,7 @@
 \alias{info<-,VCF,DataFrame-method}
 \alias{rowRanges,VCF-method}
 \alias{rowRanges<-,VCF,GRanges-method}
+\alias{mcols<-,VCF-method}
 \alias{mcols<-,VCF,ANY-method}
 \alias{dimnames<-,VCF,list-method}
 \alias{geno}
