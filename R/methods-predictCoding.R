@@ -150,12 +150,30 @@ setMethod("predictCoding", c("VRanges", "TxDb", "ANY", "missing"),
     ## substitute and translate
     refAA <- varAA <- AAStringSet(rep("", length(txlocal))) 
     if (any(valid)) {
+        ## 2 genetic.code versions
+        alt.init.codons <- attr(genetic.code, "alt_init_codons")
+        gc <- genetic.code
+        gc.no.alt.init.codons <- genetic.code
+        attr(gc.no.alt.init.codons, "alt_init_codons") <- character()
+ 
+        ## ignore alt_init_codons 
         subseq(varCodon, altpos, width=refwidth) <- altallele
-        refAA[valid] <- translate(refCodon[valid], genetic.code=genetic.code,
+        refAA[valid] <- translate(refCodon[valid], 
+                                  genetic.code=gc.no.alt.init.codons,
                                   if.fuzzy.codon=if.fuzzy.codon)
         varAA <- AAStringSet(rep("", length(txlocal))) 
-        varAA[valid] <- translate(varCodon[valid], genetic.code=genetic.code, 
+        varAA[valid] <- translate(varCodon[valid], 
+                                  genetic.code=gc.no.alt.init.codons, 
                                   if.fuzzy.codon=if.fuzzy.codon)
+
+        ## respect alt_init_codons at the start of the CDS
+        cds.start <- start(txlocal$CDSLOC) == 1L
+        varAA.to.modify <- varCodon %in% alt.init.codons & cds.start
+        refAA.to.modify <- refCodon %in% alt.init.codons & cds.start
+        if (any(cds.start)) {
+            varAA[varCodon %in% alt.init.codons & cds.start] <- "M"
+            refAA[refCodon %in% alt.init.codons & cds.start] <- "M"
+        }
     }
 
     ## results
