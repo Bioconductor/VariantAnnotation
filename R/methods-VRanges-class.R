@@ -200,7 +200,7 @@ setAs("VCF", "VRanges", function(from) {
   alt[!nzchar(alt)] <- NA
   alt[alt == "."] <- NA
   ad <- geno(from)$AD
-  dp4 <- geno(from)$DP4
+  dp4 <- info(from)$DP4
   refDepth <- NA_integer_
   altDepth <- NA_integer_
   if (is.array(ad) && ncol(from) > 0L) {
@@ -214,9 +214,14 @@ setAs("VCF", "VRanges", function(from) {
         }
         altDepth <- ad
     }
-  } else if (is.array(dp4) && length(dim(dp4)) == 3L && ncol(from) > 0) {
-      refDepth <- dp4[,,1,drop=FALSE] + dp4[,,2,drop=FALSE]
-      altDepth <- dp4[,,3,drop=FALSE] + dp4[,,4,drop=FALSE]
+  } else {
+      if (is(dp4, "List") && info(header(from))["DP4","Number"] == "4") {
+          dp4 <- as.matrix(dp4)
+      }
+      if (is.matrix(dp4) && ncol(dp4) == 4L) {
+          refDepth <- dp4[,1,drop=FALSE] + dp4[,2,drop=FALSE]
+          altDepth <- dp4[,3,drop=FALSE] + dp4[,4,drop=FALSE]
+      }
   }
   totalDepth <- geno(from)$DP
   if (is.null(totalDepth) || ncol(from) == 0L)
