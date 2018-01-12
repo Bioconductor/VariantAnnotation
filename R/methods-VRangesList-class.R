@@ -4,7 +4,7 @@
 ###
 
 VRangesList <- function(...) {
-  new("SimpleVRangesList", GenomicRangesList(...))
+  new("SimpleVRangesList", GenomicRangesList(...), elementType="VRanges")
 }
 
 setMethod("stackSamples", "VRangesList", function(x) {

@@ -169,7 +169,6 @@ test_VRanges_subassign <- function() {
 test_VRanges_combine <- function() {
   vr <- make_TARGET_VRanges()
   vr.rep <- vr[rep(seq_len(length(vr)), 2)]
-  hardFilters(vr.rep) <- FilterRules()
   vr.combined <- c(vr, vr)
   checkIdentical(vr.combined, vr.rep)
 }

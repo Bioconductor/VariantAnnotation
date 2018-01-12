@@ -323,6 +323,12 @@ setTypedRle <- function(type) {
                        ans <- callGeneric(x = as(x, "Rle"), i = i, value = value)
                      as(ans, paste0(class(runValue(ans)), "Rle"))
                    })
+  setMethod("replaceROWS", cname,
+            function(x, i, value) {
+              x <- as(x, "Rle")
+              ans <- callNextMethod()
+              as(ans, paste0(class(runValue(ans)), "Rle"))
+            })
   setMethod("window", cname,
             function(x, ...) {
               as(callNextMethod(), cname)
@@ -387,7 +393,7 @@ setClass("VRanges",
 
 setClass("VRangesList", representation("VIRTUAL"),
          prototype = prototype(elementType = "VRanges"),
-         contains = "List")
+         contains = "GenomicRangesList")
 
 setClass("SimpleVRangesList",
          contains = c("VRangesList", "SimpleGenomicRangesList"))
