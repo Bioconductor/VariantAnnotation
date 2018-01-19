@@ -3,7 +3,7 @@
 \documentclass{article}
 
 <<style, eval=TRUE, echo=FALSE, results=tex>>=
-BiocStyle::latex2()
+BiocStyle::latex()
 @
 
 \title{1. Introduction to \Biocpkg{VariantAnnotation}}
