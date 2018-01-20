@@ -1,6 +1,6 @@
 \name{predictCoding}
 \alias{predictCoding}
-\alias{predictCoding,Ranges,TxDb,ANY,DNAStringSet-method}
+\alias{predictCoding,IntegerRanges,TxDb,ANY,DNAStringSet-method}
 \alias{predictCoding,GRanges,TxDb,ANY,DNAStringSet-method}
 \alias{predictCoding,CollapsedVCF,TxDb,ANY,missing-method}
 \alias{predictCoding,ExpandedVCF,TxDb,ANY,missing-method}
@@ -15,18 +15,18 @@
 \usage{
 \S4method{predictCoding}{CollapsedVCF,TxDb,ANY,missing}(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 \S4method{predictCoding}{ExpandedVCF,TxDb,ANY,missing}(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
-\S4method{predictCoding}{Ranges,TxDb,ANY,DNAStringSet}(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
+\S4method{predictCoding}{IntegerRanges,TxDb,ANY,DNAStringSet}(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 \S4method{predictCoding}{GRanges,TxDb,ANY,DNAStringSet}(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 \S4method{predictCoding}{VRanges,TxDb,ANY,missing}(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 }
 
 \arguments{
-  \item{query}{A \linkS4class{VCF}, \link{Ranges}, \link{GRanges} or
+  \item{query}{A \linkS4class{VCF}, \link{IntegerRanges}, \link{GRanges} or
     \code{VRanges} instance containing the variants to be annotated. If
-    \code{query} is a \link[IRanges]{Ranges} or \code{VRanges} it is coerced to
-    a \link{GRanges}.  If a \linkS4class{VCF} is provided the \code{GRanges}
-    returned by the \code{rowRanges()} accessor will be used. All metadata
-    columns are ignored.
+    \code{query} is a \link[IRanges]{IntegerRanges} or \code{VRanges} it is
+    coerced to a \link{GRanges}.  If a \linkS4class{VCF} is provided the
+    \code{GRanges} returned by the \code{rowRanges()} accessor will be used.
+    All metadata columns are ignored.
 
     When \code{query} is not a \code{VCF} object a \code{varAllele} must be
     provided. The \code{varAllele} must be a \code{DNAStringSet} the same length

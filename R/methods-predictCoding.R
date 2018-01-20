@@ -2,7 +2,7 @@
 ### predictCoding methods 
 ### =========================================================================
 
-setMethod("predictCoding", c("Ranges", "TxDb", "ANY", "DNAStringSet"),
+setMethod("predictCoding", c("IntegerRanges", "TxDb", "ANY", "DNAStringSet"),
     function(query, subject, seqSource, varAllele, ..., ignore.strand=FALSE)
 {
     callGeneric(as(query, "GRanges"), subject, seqSource, varAllele, ...,

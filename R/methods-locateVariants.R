@@ -7,7 +7,7 @@
 ### IntergenicVariants, SpliceSiteVariants, PromoterVariants, AllVariants
 ### 
 ### Each region has the following methods : 
-### query %in% Ranges, VCF, GRanges
+### query %in% IntegerRanges, VCF, GRanges
 ### subject %in% TxDb, GRangesList 
 
 
@@ -15,7 +15,7 @@
 ### methods applicable to all variant regions 
 ###
 
-setMethod("locateVariants", c("Ranges", "TxDb", "VariantType"),
+setMethod("locateVariants", c("IntegerRanges", "TxDb", "VariantType"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE, asHits=FALSE)
 {
@@ -23,7 +23,7 @@ setMethod("locateVariants", c("Ranges", "TxDb", "VariantType"),
         ignore.strand=ignore.strand, asHits=asHits)
 })
 
-setMethod("locateVariants", c("Ranges", "GRangesList", "VariantType"),
+setMethod("locateVariants", c("IntegerRanges", "GRangesList", "VariantType"),
     function(query, subject, region, ..., cache=new.env(parent=emptyenv()),
              ignore.strand=FALSE, asHits=FALSE)
 {
