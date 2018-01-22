@@ -170,7 +170,7 @@ selectSome <- S4Vectors:::selectSome
     })
 }
 
-setMethod(scanVcf, c("TabixFile", "RangesList"),
+setMethod(scanVcf, c("TabixFile", "IntegerRangesList"),
     function(file, ..., param)
 {
     .vcf_scan(file, ..., param=param) 

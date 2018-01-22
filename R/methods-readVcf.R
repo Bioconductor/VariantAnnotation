@@ -24,7 +24,7 @@ setMethod(readVcf, c(file="TabixFile", param="GRangesList"),
              row.names=row.names, ...)
 })
 
-setMethod(readVcf, c(file="TabixFile", param="RangesList"),
+setMethod(readVcf, c(file="TabixFile", param="IntegerRangesList"),
     function(file, genome, param, ..., row.names=TRUE)
 {
     .readVcf(file, genome, param=ScanVcfParam(which=param), 

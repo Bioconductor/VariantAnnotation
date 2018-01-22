@@ -1,5 +1,5 @@
 ### =========================================================================
-### VRangesList: Where there is a Ranges, there must be a List
+### VRangesList: Where there is an IntegerRanges, there must be a List
 ### -------------------------------------------------------------------------
 ###
 

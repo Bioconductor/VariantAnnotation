@@ -4,7 +4,7 @@
 \alias{readVcf,character,missing-method}
 \alias{readVcf,character,missing-method}
 \alias{readVcf,TabixFile,ScanVcfParam-method}
-\alias{readVcf,TabixFile,RangesList-method}
+\alias{readVcf,TabixFile,IntegerRangesList-method}
 \alias{readVcf,TabixFile,GRanges-method}
 \alias{readVcf,TabixFile,GRangesList-method}
 \alias{readVcf,TabixFile,missing-method}
@@ -25,7 +25,7 @@
 
   \S4method{readVcf}{TabixFile,ScanVcfParam}(file, genome, param, 
       ..., row.names=TRUE)
-  \S4method{readVcf}{TabixFile,RangesList}(file, genome, param, 
+  \S4method{readVcf}{TabixFile,IntegerRangesList}(file, genome, param, 
       ..., row.names=TRUE)
   \S4method{readVcf}{TabixFile,GRanges}(file, genome, param, 
       ..., row.names=TRUE)
@@ -78,7 +78,7 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
     }
   }
   \item{param}{An instance of \code{\linkS4class{ScanVcfParam}}, \code{GRanges},
-    \code{GRangesList} or \code{RangesList}. VCF files can be 
+    \code{GRangesList} or \code{IntegerRangesList}. VCF files can be 
     subset on genomic coordinates (ranges) or elements in the VCF fields. Both 
     genomic coordinates and VCF elements can be specified in a 
     \code{\linkS4class{ScanVcfParam}}. See ?\code{ScanVcfParam} for details.

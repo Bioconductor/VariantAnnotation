@@ -1,13 +1,13 @@
 test_ScanVcfParam_which <- function()
 {
-    which <- RangesList(seq1=IRanges(1000, 2000), 
-                        seq2=IRanges(c(100, 1000), c(1000, 2000)))
+    which <- IRangesList(seq1=IRanges(1000, 2000), 
+                         seq2=IRanges(c(100, 1000), c(1000, 2000)))
     svp <- ScanVcfParam(which=which)
     checkIdentical(which, vcfWhich(svp))
     vcfWhich(svp) <- DataFrame()
-    checkTrue(is(vcfWhich(svp), "RangesList"))
+    checkTrue(is(vcfWhich(svp), "IntegerRangesList"))
     vcfWhich(svp) <- SimpleList()
-    checkTrue(is(vcfWhich(svp), "RangesList"))
+    checkTrue(is(vcfWhich(svp), "IntegerRangesList"))
 }
 
 test_ScanVcfParam_fixed <- function()

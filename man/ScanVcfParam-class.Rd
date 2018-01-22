@@ -95,7 +95,7 @@
 }
 \section{Slots}{
   \describe{
-    \item{\code{which}:}{Object of class \code{"RangesList"} indicating
+    \item{\code{which}:}{Object of class \code{"IntegerRangesList"} indicating
       which reference sequence and coordinate variants must overlap.
     }
     \item{\code{fixed}:}{Object of class \code{"character"} indicating
