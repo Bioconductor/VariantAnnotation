@@ -185,7 +185,7 @@
     }
     \item{}{
       \code{geno(x, withDimnames=TRUE)}, \code{geno(x) <- value}:
-       Gets a SimpleList of genotype data.
+       oets a SimpleList of genotype data.
        \code{value} is a SimpleList. To replace a single variable in
        the SimpleList use \code{geno(x)$variable <- value}; in this 
        case \code{value} must be a matrix or array. By default
@@ -378,7 +378,9 @@
           file header or other information about the overall experiment.
     \item \code{rowRanges}: A \link{GRanges}-class instance defining the
            variant ranges and associated metadata columns of REF, ALT, QUAL 
-           and FILTER.
+           and FILTER. While the REF, ALT, QUAL and FILTER fields can
+           be displayed as metadata columns they cannot be modified with
+           \code{rowRanges<-}. To modify these fields use \code{fixed<-}. 
     \item \code{colData}: A \link{DataFrame}-class instance describing the 
           samples and associated metadata.
     \item \code{geno}: The \code{assays} slot from
