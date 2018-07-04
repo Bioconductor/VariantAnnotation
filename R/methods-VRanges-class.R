@@ -238,7 +238,7 @@ setAs("VCF", "VRanges", function(from) {
   if (!is.null(mcols(rd)$QUAL)) {
     meta <- cbind(mcols(rd)["QUAL"], meta)
   }
-  if (!is.null(meta$END)) {
+  if (is.integer(meta$END)) {
     end(ranges)[!is.na(meta$END)] <- meta$END[!is.na(meta$END)]
     meta$END <- NULL
   }
