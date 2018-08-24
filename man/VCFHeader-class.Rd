@@ -29,6 +29,8 @@
 \alias{geno,VCFHeader-method}
 \alias{geno<-,VCFHeader,missing,DataFrame-method}
 \alias{seqinfo,VCFHeader-method}
+\alias{vcfFields}
+\alias{vcfFields,VCFHeader-method}
 
 % show method:
 \alias{show,VCFHeader-method}
@@ -95,6 +97,14 @@
       Returns a character() vector with names of reference sequences.
       Not relevant for \code{scanVcfHeader}.
     }
+    \item{}{
+      \code{vcfFields(x)}:
+      Returns a SimpleList of all available VCF fields, with names of
+      \code{fixed}, \code{info}, \code{geno} and \code{samples}
+      indicating the four categories. Each element is a character() vector
+      of available VCF field names within each category. 
+    }
+    
   }
 }
 
@@ -113,8 +123,8 @@
 }
 
 \details{
-  The \code{VCFHeader} class is holds header information from a
-  from VCF file. 
+  The \code{VCFHeader} class holds header information from a
+  VCF file. 
 
   Slots :
   \describe{
@@ -141,4 +151,5 @@
   fixed(hdr)
   info(hdr)
   geno(hdr)
+  vcfFields(hdr)
 }

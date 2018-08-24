@@ -210,6 +210,9 @@ setGeneric("meta<-", signature=c("x", "value"),
     function(x, value) standardGeneric("meta<-"),
 )
 
+setGeneric("vcfFields", signature = "x",
+           function(x, ...) standardGeneric("vcfFields"))
+
 ### -------------------------------------------------------------------------
 ### snp encoding methods 
 ###

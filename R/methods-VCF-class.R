@@ -279,6 +279,13 @@ setReplaceMethod("header", c("VCF", "VCFHeader"),
     x
 })
 
+## vcfFields
+setMethod("vcfFields", "VCF",
+          function(x, ...)
+{
+    vcfFields(header(x))
+})
+
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Subsetting and combining
 ###

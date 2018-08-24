@@ -127,6 +127,16 @@ function(x)
                genome = if (is.null(contig$assembly)) NA else contig$assembly)
 })
 
+## vcfFields
+setMethod("vcfFields", "VCFHeader", function(x, ...)
+{
+    SimpleList(fixed = names(fixed(x)), 
+               info = rownames(info(x)),
+               geno = rownames(geno(x)),
+               samples = samples(x)
+               )
+})
+
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Show
 ###

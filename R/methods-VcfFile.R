@@ -100,3 +100,17 @@ setMethod("seqinfo", "VcfFileList",
     grl <- as(si, "GRangesList")
     seqinfo(grl)
 })
+
+setMethod("vcfFields", "character",
+          function(x, ...)
+{
+    stopifnot(!is.na(x), file.exists(x) > 0)
+    hdr <- scanVcfHeader(x)
+    vcfFields(hdr)
+})
+
+setMethod("vcfFields", "VcfFile",
+          function(x, ...)
+{
+    vcfFields(path(x))
+})
