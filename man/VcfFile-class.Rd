@@ -6,6 +6,8 @@
 % con/destructors
 \alias{VcfFile}
 \alias{VcfFileList}
+\alias{vcfFields,character-method}
+\alias{vcfFields,VcfFile-method}
 
 \title{Manipulate Variant Call Format (Vcf) files.}
 
@@ -21,25 +23,49 @@
 }
 
 \section{usage}{
-
-## Constructors
-
-VcfFile(file, index = paste(file, "tbi", sep="."), ...,
-        yieldSize=NA_integer_)
-VcfFileList(..., yieldSize=NA_integer_)
-
-## Accessors
-index(object)
-path(object, ...)
-isOpen(con, rw="")
-yieldSize(object, ...)
-yieldSize(object, ...) <- value
-show(object)
-
-## Opening / closing
-open(con, ...)
-close(con, ...)
-
+  
+  ## Constructors
+  \describe{
+    \item{}{
+      VcfFile(file, index = paste(file, "tbi", sep="."), ...,
+      yieldSize=NA_integer_)
+    }
+    \item{}{
+      VcfFileList(..., yieldSize=NA_integer_)
+    }
+  }
+  
+  ## Accessors
+  \describe{
+    \item{}{
+      index(object)}
+    \item{}{
+      path(object, ...)}
+    \item{}{
+      isOpen(con, rw="")}
+    \item{}{
+      yieldSize(object, ...)}
+    \item{}{
+      yieldSize(object, ...) <- value}
+    \item{}{
+      show(object)
+    }
+  }
+  
+  ## Opening / closing
+  \describe{
+    \item{}{
+      open(con, ...)}
+    \item{}{
+      close(con, ...)}
+  }
+  
+  ## method
+  \describe{
+    \item{}{
+      vcfFields(object)
+    }
+  }
 }
 
 \section{arguments}{
@@ -81,7 +107,7 @@ close(con, ...)
   \code{\linkS4class{TabixFile}} and \code{\linkS4class{TabixFileList}} 
   classes.
 
-  Opening / closing:
+  ## Opening / closing:
   \describe{
     \item{open}{Opens the (local or remote) \code{path} and
       \code{index}. Returns a \code{VcfFile} instance. 
@@ -94,7 +120,7 @@ close(con, ...)
       re-opened with \code{open.VcfFile}.}
   }
 
-  Accessors: 
+  ## Accessors: 
   \describe{
     \item{path}{Returns a character(1) vector of the Vcf path name.}
 
@@ -103,7 +129,18 @@ close(con, ...)
     \item{yieldSize, yieldSize<-}{Return or set an integer(1) vector
       indicating yield size.}
   }
+
+  ## Methods:
+  \describe{
+    \item{vcfFields}{
+      Returns a SimpleList of all available VCF fields, with names of
+      \code{fixed}, \code{info}, \code{geno} and \code{samples}
+      indicating the four categories. Each element is a character() vector
+      of available VCF field names within each category. 
+    }
+  }
 }
+
 \author{Valerie Obenchain}
 
 \examples{
@@ -111,6 +148,8 @@ fl <- system.file("extdata", "chr7-sub.vcf.gz", package="VariantAnnotation",
                   mustWork=TRUE)
 vcffile <- VcfFile(fl)
 vcffile
+vcfFields(fl)
+vcfFields(vcffile)
 
 param <- GRanges("7", IRanges(c(55000000,  55900000), width=10000))
 vcf <- readVcf(vcffile, "hg19", param=param)

@@ -66,6 +66,8 @@
 \alias{header,VCF-method}
 \alias{header<-}
 \alias{header<-,VCF,VCFHeader-method}
+\alias{vcfFields,VCF-method}
+
 
 % Subset methods
 \alias{[,VCF-method}
@@ -234,6 +236,12 @@
          \item{\code{meta(header(x))}}
          \item{\code{samples(header(x))}}
       }
+    }
+    \item{}{\code{vcfFields(x)}
+      Returns a SimpleList of all available VCF fields, with names of
+      \code{fixed}, \code{info}, \code{geno} and \code{samples}
+      indicating the four categories. Each element is a character() vector
+      of available VCF field names within each category. 
     }
   }
 }
@@ -433,6 +441,9 @@ rowRanges(vcf, fixed=FALSE)
 qual(vcf)
 ref(vcf)
 head(info(vcf))
+
+## All available VCF field names can be contracted with vcfFields(). 
+vcfFields(vcf)
 
 ## Extract genotype fields with geno(). Access specific fields with 
 ## '$' or '[['.
