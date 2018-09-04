@@ -4,7 +4,7 @@ CHANGES IN VERSION 1.27.5
 NEW FEATURES
 
     o Add vcfFields method for character, VCFHeader, VcfFile and VCF
-    to return all available vcf fields.
+    to return all available vcf fields in CharacterList().
 
 CHANGES IN VERSION 1.24.0
 ------------------------

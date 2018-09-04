@@ -238,10 +238,10 @@
       }
     }
     \item{}{\code{vcfFields(x)}
-      Returns a SimpleList of all available VCF fields, with names of
-      \code{fixed}, \code{info}, \code{geno} and \code{samples}
-      indicating the four categories. Each element is a character() vector
-      of available VCF field names within each category. 
+      Returns a \code{\link[IRanges]{CharacterList}} of all available VCF
+      fields, with names of \code{fixed}, \code{info}, \code{geno} and
+      \code{samples} indicating the four categories. Each element is a
+      character() vector of available VCF field names within each category. 
     }
   }
 }
