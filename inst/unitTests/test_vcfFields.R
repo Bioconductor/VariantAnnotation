@@ -1,4 +1,4 @@
-test_VcfFile_vcfFields <- function(){
+test_vcfFields <- function(){
 
     ## empty
     checkException(vcfFields(), silent = TRUE)
@@ -10,7 +10,7 @@ test_VcfFile_vcfFields <- function(){
     flds <- vcfFields(fl)
 
     checkTrue(validObject(flds))
-    checkTrue(is(flds, "SimpleList"))
+    checkTrue(is(flds, "CharacterList"))
     checkIdentical(names(flds), c("fixed", "info", "geno", "samples"))
 
     ## signatures
