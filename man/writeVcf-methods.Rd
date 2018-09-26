@@ -37,19 +37,14 @@
 \details{A VCF file can be written out from data in a \code{VCF} file. More
   general methods to write out from other objects may be added in the future.
 
-  \code{writeVcf} conforms to the VCF standards on the 1000 Genomes Project
-  web site (see references). When 'fileformat' is not present in the header
-  data, format is written out according to the standard at the time of the
-  Bioconductor release, e.g., for Bioconductor 3.1 the format is VCFv4.2.
-
-  Large VCF files (i.e., > 1e5 records) are written out in chunks; VCF
-  files with < 1e5 records are not chunked. The optimal number of records
-  per chunk depends on both the number of records and complexity of the
-  data. Currently \code{writeVcf} determines records per chunk based on the 
-  total number of records only. To override this behavior or experiment with 
-  other values use \code{nchunk} as an integer or NA. An integer value 
-  represents the number of records per chunk reguardless of the size of the VCF; 
-  NA disables all chunking.
+  \code{writeVcf} Large VCF files (i.e., > 1e5 records) are written out in 
+  chunks; VCF files with < 1e5 records are not chunked. The optimal number of
+  records per chunk depends on both the number of records and complexity of the
+  data. Currently \code{writeVcf} determines records per chunk based on the
+  total number of records only. To override this behavior or experiment with
+  other values use \code{nchunk} as an integer or NA. An integer value
+  represents the number of records per chunk reguardless of the size of the
+  VCF; NA disables all chunking.
   \itemize{
     \item writeVcf(vcf, tempfile())                ## default chunking
     \item writeVcf(vcf, tempfile(), nchunk = 1e6)  ## chunk by 1e6
