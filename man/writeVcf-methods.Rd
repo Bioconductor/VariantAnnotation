@@ -34,16 +34,40 @@
   }
 }
 
-\details{A VCF file can be written out from data in a \code{VCF} file. More
+\note{
+  NOTE: \code{VariantAnnotation} >= 1.27.6 supports VCFv4.3. See the NOTE on 
+  the \code{?VCFHeader} man page under the \code{meta()} extractor for 
+  a description of how header parsing has changed to accommodate the new 
+  header lines with key name of 'META'.
+}
+
+\details{
+  A VCF file can be written out from data in a \code{VCF} object. More
   general methods to write out from other objects may be added in the future.
 
-  \code{writeVcf} Large VCF files (i.e., > 1e5 records) are written out in 
+  \code{writeVcf} writes out the header fields in a \code{VCF} object 
+  'as-is' with the exception of these key-value pairs:
+  \itemize{
+    \item  fileformat: When missing, a line is added at the top of the
+           file with the current supported version.
+           \code{VariantAnnotation} >=1.27.6 supports VCFv4.3.
+
+    \item  fileDate: When missing, a line is added with today's date.
+           If the key-value pair exists, the date is overwritten with
+           today's date.
+
+    \item  contig: When missing, \code{VariantAnnotation} attempts to
+           use the \code{Seqinfo} of the \code{VCF} object to determine
+           the contig information.
+  }
+
+  Large VCF files (i.e., > 1e5 records) are written out in 
   chunks; VCF files with < 1e5 records are not chunked. The optimal number of
   records per chunk depends on both the number of records and complexity of the
   data. Currently \code{writeVcf} determines records per chunk based on the
   total number of records only. To override this behavior or experiment with
   other values use \code{nchunk} as an integer or NA. An integer value
-  represents the number of records per chunk reguardless of the size of the
+  represents the number of records per chunk regardless of the size of the
   VCF; NA disables all chunking.
   \itemize{
     \item writeVcf(vcf, tempfile())                ## default chunking

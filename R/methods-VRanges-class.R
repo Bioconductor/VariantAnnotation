@@ -423,13 +423,17 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
                      packageVersion("VariantAnnotation")),
                    phasing = "unphased", 
                    metaStrings)
-  meta_header <- DataFrame(Value = meta_vector, row.names = names(meta_vector))
+  nms <- names(meta_vector)
+  meta_df <- DataFrame(Value = meta_vector, row.names = nms)
+  meta_header <- as(splitAsList(meta_df, nms), "SimpleDataFrameList")
   genoMCols <- setdiff(names(mcols(x)), info)
   header <- VCFHeader(reference = seqlevels(x), samples = sampleLevels,
-                      header = DataFrameList(META = meta_header,
-                        FORMAT = makeFORMATheader(mcols(x)[genoMCols]),
-                        INFO = makeINFOheader(mcols(xUniq)[info]),
-                        FILTER = makeFILTERheader(x)))
+                      header = c(meta_header,
+                        DataFrameList(
+                          FORMAT = makeFORMATheader(mcols(x)[genoMCols]),
+                          INFO = makeINFOheader(mcols(xUniq)[info]),
+                          FILTER = makeFILTERheader(x))
+                     ))
   metadata <- list(header = header)
 
   alt <- as.character(alt(xUniq))
