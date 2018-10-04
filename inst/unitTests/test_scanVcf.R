@@ -107,10 +107,21 @@ test_scanVcfHeader_VarScan <- function()
     fl <- system.file("extdata", "ex2.vcf",
                       package="VariantAnnotation")
     hd <- scanVcfHeader(fl)
-    checkIdentical(length(names(header(hd))), 7L)
-    checkIdentical(names(meta(hd)), c("META", "contig", "SAMPLE", "PEDIGREE"))
+    checkIdentical(length(names(header(hd))), 11L)
+    nms <- c("fileDate", "fileformat", "phasing", "reference", "source",
+             "contig", "SAMPLE", "PEDIGREE")
+    checkIdentical(names(meta(hd)), nms)
     checkIdentical(header(hd)$contig[["assembly"]], "B36")
 } 
+
+test_scanVcfHeader_META <- function()
+{
+    fl <- system.file("unitTests", "cases", "meta_header.vcf",
+                      package="VariantAnnotation")
+    hd <- scanVcfHeader(fl)
+    nms <- c("fileformat", "Tassel", "META", "SAMPLE")
+    checkIdentical(names(meta(hd)), nms)
+}
 
 test_scan_row.names <- function()
 {

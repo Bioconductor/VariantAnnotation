@@ -12,7 +12,7 @@ Authors@R: c(person("Valerie", "Obenchain", role=c("aut", "cre"),
 License: Artistic-2.0
 Depends: R (>= 2.8.0), methods, BiocGenerics (>= 0.15.3),
         GenomeInfoDb (>= 1.15.2), GenomicRanges (>= 1.31.8),
-        SummarizedExperiment (>= 1.9.9), Rsamtools (>= 1.31.2)
+        SummarizedExperiment (>= 1.9.9), Rsamtools (>= 1.33.6)
 Imports: utils, DBI, zlibbioc, Biobase, S4Vectors (>= 0.17.24),
         IRanges (>= 2.13.13), XVector (>= 0.19.7), Biostrings (>= 2.47.6),
         AnnotationDbi (>= 1.27.9), rtracklayer (>= 1.39.7),

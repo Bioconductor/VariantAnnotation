@@ -109,39 +109,80 @@
     paste0(contig, ">")
 }
 
+.pasteMultiFieldDF <- function(df, nms) {
+    prs <- paste(rep(colnames(df), each=nrow(df)), "=",
+                 unlist(lapply(df, as.character), use.names=FALSE),
+                 sep="")
+    lst <- split(prs, row(df))
+    lns <- unstrsplit(lst, ",")
+    paste("##", nms, "=<", lns, ">", sep="")
+}
+
 .makeVcfHeader <- function(obj, ...)
 {
     hdr <- header(obj)
-    ## compliance with VCFv4.2
+    ## If fileformat is >=v4.2 or does not exist --> set GENO 'AD' field
+    ## to Number 'G'. The Number field indicates the number of values
+    ## contained in the INFO field. 'G' is a special character and means
+    ## the field has one value for each possible genotype. 
     fileformat <- "fileformat" %in% rownames(meta(hdr)$META)
+    if (!fileformat)
+        fileformat <- "fileformat" %in% names(meta(hdr))
+
     if (fileformat && grepl(fileformat, "v4.2", fixed=TRUE) || !fileformat) {
         if (any(idx <- rownames(geno(hdr)) == "AD"))
             geno(hdr)[idx,]$Number <- "G"
     }
 
+    ## Format all header lines
     dflist <- header(hdr)
-    header <- Map(.formatHeader, as.list(dflist), as.list(names(dflist)))
-    header <- c(header, .contigsFromSeqinfo(seqinfo(obj)))
-    samples <- colnames(obj)
+    header <- Map(.formatHeader, as.list(dflist), 
+                  as.list(names(dflist)))
+
+    ## If contig, fileformat do not exist --> add them 
+    contig <- any(grepl("contig", names(header), fixed=TRUE))
+    if (!contig)
+        header <- c(header, .contigsFromSeqinfo(seqinfo(obj)))
+    fileformat <- any(grepl("fileformat", names(header), fixed=TRUE))
+    if (!fileformat) {
+        fileformat <- paste("##fileformat=VCFv4.3")
+        header <- c(header, fileformat) 
+    } 
+    ## Last line before data
     colnms <- c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO")
     if (length(geno(obj, withDimnames=FALSE)) > 0L) {
-      colnms <- c(colnms, "FORMAT", samples[!is.null(samples)])
+        samples <- colnames(obj)
+        colnms <- c(colnms, "FORMAT", samples[!is.null(samples)])
     }
     colnms <- paste(colnms, collapse="\t")
     unlist(c(header, colnms), use.names=FALSE)
 }
 
-.formatHeader <- function(df, nms, filedate)
+.formatHeader <- function(df, nms)
 {
-    if (nms == "META") {
+    ## Support serialized VCF objects with old "META" DataFrame.
+    if (nms == "META" && ncol(df) == 1L) {
         if (!"fileformat" %in% rownames(df))
-            df <- rbind(DataFrame(Value="VCFv4.2", row.names="fileformat"), df)
+            df <- rbind(DataFrame(Value="VCFv4.3", row.names="fileformat"), df)
         fd <- format(Sys.time(), "%Y%m%d")
         if ("fileDate" %in% rownames(df))
             df[rownames(df) == "fileDate", ] <- fd
         else
             df <- rbind(df, DataFrame(Value=fd, row.names="fileDate"))
         paste("##", rownames(df), "=", df[,1], sep="")
+    ## Support VCF v4.2 and v4.3 PEDIGREE field
+    } else if(nms == "PEDIGREE") {
+        if (!is.null(rownames(df)))
+            df <- DataFrame(ID = rownames(df), df)
+        .pasteMultiFieldDF(df, nms)
+    ## 'simple' key-value pairs
+    } else if(ncol(df) == 1L && nrow(df) == 1L) {
+        if (nms == "fileDate") {
+            fd <- format(Sys.time(), "%Y%m%d")
+            paste("##fileDate=", fd, sep="")
+        } else
+            paste("##", nms, "=", df[,1], sep="")
+    ## 'non-simple' key-value pairs
     } else {
         if ("Description" %in% colnames(df)) {
             if (nrow(df) == 0L)
@@ -149,14 +190,9 @@
             df$Description <-
               ifelse(is.na(df$Description), "\".\"",
                            paste("\"", df$Description, "\"", sep=""))
-            df <- DataFrame(ID = rownames(df), df)
-            prs <- paste(rep(colnames(df), each=nrow(df)), "=",
-                         unlist(lapply(df, as.character), use.names=FALSE),
-                         sep="")
-            lst <- split(prs, row(df))
-            lns <- unstrsplit(lst, ",")
-            paste("##", nms, "=<", lns, ">", sep="")
         }
+        df <- DataFrame(ID = rownames(df), df)
+        .pasteMultiFieldDF(df, nms)
     }
 }
 

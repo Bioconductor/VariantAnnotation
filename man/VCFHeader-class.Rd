@@ -66,11 +66,23 @@
     }
     \item{}{
       \code{meta(x)}, \code{meta(x)<- value}: The getter returns a
-      \code{DataFrameList} with possible names of META, SAMPLE and PEDIGREE. The
-      META \code{DataFrame} is a catch-all for non-standard header fields. This
-      includes any information represented as simple key-value pairs. The
-      replacement \code{value} can be a \code{DataFrame} or
-      \code{DataFrameList}.
+      \code{DataFrameList}. Each \code{DataFrame} represents a unique
+      "key" name in the header file. Multiple header lines
+      with the same "key" are parsed into the same \code{DataFrame}
+      with the "ID" field as the row names. Simple header lines
+      have no "ID" field in which case the "key" is used as the
+      row name.
+ 
+      NOTE: In VariantAnnotation <= 1.27.25, the \code{meta()} extractor
+      returned a \code{DataFrame} called "META" which held all simple
+      key-value header lines. The VCF 4.3 specs allowed headers lines
+      with key name "META" which caused a name clash with the pre-existing
+      "META" \code{DataFrame}. 
+
+      In \code{VariantAnnotation} >=1.27.26 the "META" \code{DataFrame} was
+      split and each row became its own separate \code{DataFrame}. Calling
+      \code{meta()} on a \code{VCFHeader} object now returns a list of
+      \code{DataFrames}, one for each unique key name in the header.
     }
     \item{}{
       \code{fixed(x), fixed(x)<- value}:
