@@ -6,8 +6,10 @@
 % con/destructors
 \alias{VcfFile}
 \alias{VcfFileList}
+\alias{vcfFields,missing-method}
 \alias{vcfFields,character-method}
 \alias{vcfFields,VcfFile-method}
+\alias{vcfFields,VcfFileList-method}
 
 \title{Manipulate Variant Call Format (Vcf) files.}
 

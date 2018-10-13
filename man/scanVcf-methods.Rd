@@ -2,6 +2,7 @@
 \Rdversion{1.1}
 
 \alias{scanVcfHeader}
+\alias{scanVcfHeader,missing-method}
 \alias{scanVcfHeader,character-method}
 \alias{scanVcf}
 \alias{scanVcf,character,ScanVcfParam-method}

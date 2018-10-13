@@ -280,8 +280,14 @@ setReplaceMethod("header", c("VCF", "VCFHeader"),
 })
 
 ## vcfFields
+setMethod("vcfFields", "missing",
+    function(x, ...)
+{
+    vcfFields(VCFHeader())
+})
+
 setMethod("vcfFields", "VCF",
-          function(x, ...)
+    function(x, ...)
 {
     vcfFields(header(x))
 })

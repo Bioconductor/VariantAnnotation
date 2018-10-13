@@ -1,9 +1,14 @@
 test_vcfFields <- function(){
+    ## invalid
+    checkException(vcfFields(NA_character_), silent = TRUE)
+    checkException(vcfFields(tempfile()), silent = TRUE)
 
     ## empty
-    checkException(vcfFields(), silent = TRUE)
-    checkException(vcfFields(NA), silent = TRUE)
-    checkException(vcfFields("/path/to/file"), silent = TRUE)
+    target <- CharacterList(
+        fixed = character(), info = character(), geno = character(),
+        samples = character()
+    )
+    checkIdentical(target, vcfFields())
 
     ## structure
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
@@ -11,7 +16,8 @@ test_vcfFields <- function(){
 
     checkTrue(validObject(flds))
     checkTrue(is(flds, "CharacterList"))
-    checkIdentical(names(flds), c("fixed", "info", "geno", "samples"))
+    target <- c(fixed = 1L, info = 6L, geno = 4L, samples = 3L)
+    checkIdentical(target, lengths(flds))
 
     ## signatures
     hdr <- scanVcfHeader(fl)
@@ -26,5 +32,8 @@ test_vcfFields <- function(){
     checkIdentical(flds, flds.hdr)
     checkIdentical(flds, flds.vf)
     checkIdentical(flds, flds.vcf)
-    
+
+    ## VCFFileList
+    vfl <- VcfFileList(c(fl, fl))
+    checkIdentical(vcfFields(vfl[[1]]), vcfFields(vfl))
 }

@@ -93,6 +93,12 @@ test_scanVcf_crlf <- function()
     checkIdentical(scanVcfHeader(fl), scanVcfHeader(xx))
 }
 
+test_scanVcfHeader <- function()
+{
+    checkIdentical(VCFHeader(), scanVcfHeader())
+    checkIdentical(VCFHeader(), scanVcfHeader(character()))
+}
+
 test_scanVcfHeader_VarScan <- function()
 {
     fl <- system.file("unitTests", "cases", "VarScan_header.vcf",
