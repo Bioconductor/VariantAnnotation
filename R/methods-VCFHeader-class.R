@@ -130,7 +130,7 @@ function(x)
 ## vcfFields
 setMethod("vcfFields", "VCFHeader", function(x, ...)
 {
-    CharacterList(fixed = names(fixed(x)), 
+    CharacterList(fixed = c("REF", "ALT", "QUAL", "FILTER"), 
                   info = rownames(info(x)),
                   geno = rownames(geno(x)),
                   samples = samples(x)
