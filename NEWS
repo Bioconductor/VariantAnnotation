@@ -1,10 +1,49 @@
-CHANGES IN VERSION 1.27.5
+CHANGES IN VERSION 1.28.0
 ------------------------
 
 NEW FEATURES
 
+    o Update package to support VCF format version 4.3
+
+    - SAMPLE field lines can now have key 'SAMPLE' or 'META'.
+      To avoid a name clash, the existing 'META' DataFrame has
+      been split by row into separate DataFrames. The
+      'meta(VCFHeader)' getter now returns one DataFrame
+      per unique key in the header.
+    - PEDIGREE header line now begins with 'ID'
+
     o Add vcfFields method for character, VCFHeader, VcfFile and VCF
-    to return all available vcf fields in CharacterList().
+      to return all available vcf fields in CharacterList().
+
+    o Add support for single breakend notation (thanks d-cameron)
+
+BUG FIXES
+
+    o .formatInfo() now return a column with all 'NA' for a missing value
+      instead of dropping the column.
+
+
+CHANGES IN VERSION 1.26.0
+------------------------
+
+MODIFICATIONS
+
+    o Clarify fixed fields must be 
+
+    o Following renaming of RangesList class -> IntegerRangesList
+
+    o Updates to accommodate change to '[<-' method for SummarizedExperiment
+
+    o DP4 assumed to come from INFO field
+
+    o Extract altDepth and totalDepth from DP4 GENO field when present
+
+    o predictCoding() now respects 'alt_init_codons' at the start of CDS
+      region only
+
+    o Remove error message in 'rowRanges<-' and 'mcol<-' methods that
+      check for fixed column name.
+
 
 CHANGES IN VERSION 1.24.0
 ------------------------
@@ -15,7 +54,6 @@ NEW FEATURES
 
     o Add alt,ref accessors for VRangesList 
 
-MODIFICATIONS
 
     o More efficient show,VCF-method
 
