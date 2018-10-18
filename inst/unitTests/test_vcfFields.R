@@ -16,7 +16,7 @@ test_vcfFields <- function(){
 
     checkTrue(validObject(flds))
     checkTrue(is(flds, "CharacterList"))
-    target <- c(fixed = 1L, info = 6L, geno = 4L, samples = 3L)
+    target <- c(fixed = 4L, info = 6L, geno = 4L, samples = 3L)
     checkIdentical(target, lengths(flds))
 
     ## signatures

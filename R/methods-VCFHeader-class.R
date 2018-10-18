@@ -130,7 +130,9 @@ function(x)
 ## vcfFields
 setMethod("vcfFields", "VCFHeader", function(x, ...)
 {
-    CharacterList(fixed = c("REF", "ALT", "QUAL", "FILTER"), 
+    fixed <- names(fixed(x))
+    if (!is.null(fixed)) fixed <- c("REF", "ALT", "QUAL", "FILTER")
+    CharacterList(fixed = fixed,
                   info = rownames(info(x)),
                   geno = rownames(geno(x)),
                   samples = samples(x)
