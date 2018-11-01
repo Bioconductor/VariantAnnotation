@@ -330,9 +330,9 @@ makeINFOheader <- function(x) {
 
 makeFILTERheader <- function(x) {
   mat <- softFilterMatrix(x)
-  if (!is(mat, "FilterMatrix"))
-    return(DataFrame())
-  rules <- filterRules(mat)
+  if (is(mat, "FilterMatrix"))
+      rules <- filterRules(mat)
+  else rules <- FilterRules()
   df <- mcols(rules)
   if (is.null(df)) {
     df <- new("DataFrame", nrows = length(rules))
