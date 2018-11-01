@@ -110,6 +110,8 @@
 }
 
 .pasteMultiFieldDF <- function(df, nms) {
+    if (nrow(df) == 0L)
+        return(character(0L))
     prs <- paste(rep(colnames(df), each=nrow(df)), "=",
                  unlist(lapply(df, as.character), use.names=FALSE),
                  sep="")
