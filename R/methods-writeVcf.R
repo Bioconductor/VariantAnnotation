@@ -148,12 +148,10 @@
         header <- c(fileDate, header)
     }
     idx <- which(names(header) == "fileformat")
-    if (idx != 1) {
+    if (length(idx) && idx != 1) {
         fileformat <- header[idx] 
         header[idx] <- NULL
         header <- c(fileformat, header) 
-    } else {
-        warning("header is missing 'fileformat' field")
     }
     contig <- any(grepl("contig", names(header), fixed=TRUE))
     if (!contig)
