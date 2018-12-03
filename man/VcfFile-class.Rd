@@ -138,7 +138,8 @@
       Returns a \code{\link[IRanges]{CharacterList}} of all available VCF
       fields, with names of \code{fixed}, \code{info}, \code{geno} and
       \code{samples} indicating the four categories. Each element is a
-      character() vector of available VCF field names within each category.
+      character() vector of available VCF field names within each
+      category. It works for both local and remote vcf file. 
     }
   }
 }
@@ -156,6 +157,12 @@ vcfFields(vcffile)
 param <- GRanges("7", IRanges(c(55000000,  55900000), width=10000))
 vcf <- readVcf(vcffile, "hg19", param=param)
 dim(vcf)
+
+## `vcfFields` also works for remote vcf filepath.  
+\dontrun{
+chr22url <- "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz"
+vcfFields(chr22url)
+}
 }
 
 \keyword{classes}
