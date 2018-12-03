@@ -141,15 +141,22 @@
     header <- Map(.formatHeader, as.list(dflist), 
                   as.list(names(dflist)))
 
-    ## If contig, fileformat do not exist --> add them 
+    ## If fileformat, fileDate or contig do not exist --> add them 
+    fileDate <- any(grepl("fileDate", names(header), fixed=TRUE))
+    if (!fileDate) {
+        fileDate <- paste("##fileDate=", format(Sys.time(), "%Y%m%d"), sep="")
+        header <- c(fileDate, header)
+    }
+    idx <- which(names(header) == "fileformat")
+    if (length(idx) && idx != 1) {
+        fileformat <- header[idx] 
+        header[idx] <- NULL
+        header <- c(fileformat, header) 
+    }
     contig <- any(grepl("contig", names(header), fixed=TRUE))
     if (!contig)
         header <- c(header, .contigsFromSeqinfo(seqinfo(obj)))
-    fileformat <- any(grepl("fileformat", names(header), fixed=TRUE))
-    if (!fileformat) {
-        fileformat <- paste("##fileformat=VCFv4.3")
-        header <- c(header, fileformat) 
-    } 
+
     ## Last line before data
     colnms <- c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO")
     if (length(geno(obj, withDimnames=FALSE)) > 0L) {

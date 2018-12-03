@@ -104,7 +104,7 @@ setMethod("seqinfo", "VcfFileList",
 setMethod("vcfFields", "character",
     function(x, ...)
 {
-    stopifnot(!is.na(x), all(file.exists(x)))
+    stopifnot(!is.na(x))
     hdr <- scanVcfHeader(x)
     vcfFields(hdr)
 })
