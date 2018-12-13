@@ -62,3 +62,30 @@ test_expand_gvcf <- function()
     checkIdentical(dim(geno(exp)$AD), c(7L, 1L, 2L))
     checkIdentical(geno(exp)$AD[,,1], as.integer(c(NA, 17, 17, NA, 20, 20, NA)))
 }
+
+
+test_expand_adr_adf <- function()
+{
+	fl <- system.file("unitTests", "cases", "ex1-seq1-90.vcf", package = "VariantAnnotation")
+	vcf <- readVcf(fl, genome = "")
+	exp <- expand(vcf)
+	seqName <- "seq1:90_N/G";sampleName <- colnames(vcf)[1]
+	
+	# for all/forward/revert strands
+	tmp <- sapply(c("AD", "ADF", "ADR"), function(var){
+		
+		# original counts
+		countsVcf <- geno(vcf)[[var]][seqName, sampleName][[1]]
+				
+		# in VCF: counts reported first for reference, then alternative alleles
+		# check counts for reference allele
+		checkTrue(all(geno(exp)[[var]][, sampleName, 1] == countsVcf[1]))
+		
+		# check if counts for alternative alleles
+		idxMatch <- match(alt(vcf)[[1]], alt(exp))
+		countsExpand <- geno(exp)[[var]][idxMatch, sampleName, 2]
+		checkIdentical(countsExpand, countsVcf[-1]) 
+
+	})
+
+}
