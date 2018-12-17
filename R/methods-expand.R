@@ -13,15 +13,9 @@ setMethod("expand", "CollapsedVCF",
         if (all(elt == 1L)) {
             fxd <- fixed(x)
             fxd$ALT <- unlist(alt(x), use.names=FALSE)
-			ghdr <- geno(header(x))
-			isR <- rownames(ghdr) == "AD" | ghdr$Number == "R"
-            if (any(isR)){
-            	varsR <- rownames(ghdr)[isR]
-				geno(x)[varsR] <- endoapply(
-					geno(x)[varsR], function(i)
-					.expandAD(i, nrow(x), ncol(x))
-				)
-		  	}
+            AD <- "AD" %in% names(geno(x))
+            if (AD)
+              geno(x)$AD <- .expandAD(geno(x)$AD, nrow(x), ncol(x))
             return(VCF(rd, colData(x), metadata(x), fxd, .unlistAltInfo(x), 
                        geno(x), ..., collapsed=FALSE))
         }
@@ -73,30 +67,28 @@ setMethod("expand", "CollapsedVCF",
         }
         gvar
     }
-    ## AD (for back-compatibility) and 'Number=A' (ADF/ADR): one value for REF and each ALT
-	isR <- names(gvar) %in% c("AD", rownames(ghdr)[ghdr$Number == "R"])
-	for(i in which(isR)){
-		varR <- names(gvar)[i]
-        gvarR <- gvar[[varR]]
-        if (!is.list(gvarR)) {
+    ## AD field: one value for REF and each ALT
+    if (any(isAD <- names(gvar) == "AD")) {
+        AD <- gvar$AD
+        if (!is.list(AD)) {
             ## 'Number' is integer
-            if (is(gvarR, "array") && length(dim(gvarR)) == 3L) {
+            if (is(AD, "array") && length(dim(AD)) == 3L) {
                 if ((length(unique(elt)) != 1L) || 
-                    (dim(gvarR)[3] != unique(elt))) {
-                    warning("'", varR, "' was ignored: number of '", varR, "' values ",
+                    (dim(AD)[3] != unique(elt))) {
+                    warning("'AD' was ignored: number of 'AD' values ",
                             "do not match REF + ALT")
-					isR[i] <- FALSE 
+                    isAD[isAD] <- FALSE 
                 }
             } else {
-				isR[i] <- FALSE 
+               isAD[isAD] <- FALSE 
             }
         } else {
-            ## 'Number' is '.' or 'R'
-            gvar[[varR]] <- .expandAD(gvarR, length(idx), ncol(x))
+            ## 'Number' is '.'
+            gvar$AD <- .expandAD(AD, length(idx), ncol(x))
         }
-	}
-	isA <- names(gvar) %in% rownames(ghdr)[isA]
-    gvar[!isA & !isR] <- endoapply(gvar[!isA & !isR], function(i) {
+    }
+    isA <- names(gvar) %in% rownames(ghdr)[isA]
+    gvar[!isA & !isAD] <- endoapply(gvar[!isA & !isAD], function(i) {
                               if (is(i, "matrix")) {
                                   matrix(i[idx, ], nrow=length(idx),
                                          ncol=ncol(x))

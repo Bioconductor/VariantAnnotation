@@ -291,8 +291,7 @@
       \code{expand(x, ..., row.names = FALSE)}:
       Expand (unlist) the ALT column of a CollapsedVCF object to one row 
       per ALT value. Variables with Number='A' have one value per alternate
-      allele and are expanded accordingly. The 'AD' genotype field (and any
-      variables with 'Number' set to 'R')
+      allele and are expanded accordingly. The 'AD' genotype field
       is expanded into REF/ALT pairs. For all other fields, the rows
       are replicated to match the elementNROWS of ALT.
 
