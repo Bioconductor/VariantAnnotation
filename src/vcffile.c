@@ -539,7 +539,6 @@ SEXP scan_vcf_character(SEXP file, SEXP yield, SEXP smap, SEXP fmap,
             buf0 = Realloc(buf0, len1, char);
             buf = buf0 + len0 - 1;
             end = buf0 + len1;
-            continue;
         }
         if ('#' == *buf0 || '\0' == *buf0 || '\n' == *buf0) {
             buf = buf0;
@@ -623,7 +622,7 @@ SEXP tabix_as_vcf(tabix_t *tabix, ti_iter_t iter, const int yield,
         _parse_free(parse);
         Rf_error("read line failed, corrupt or invalid file?");
     }
-        
+ 
     Free(buf);
 
     _vcf_grow(parse->vcf, irec);
