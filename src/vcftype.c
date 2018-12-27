@@ -222,7 +222,7 @@ void _vcftype_set(struct vcftype_t *vcftype,
         break;
     case STRSXP:
         vcftype->u.character[idx] =
-            ('.' == *field) ? vcftype->charDotAs : field;
+            (strcmp(".", field) == 0) ? vcftype->charDotAs : field;
         break;
     default:
         Rf_error("(internal) unhandled field type '%s'",

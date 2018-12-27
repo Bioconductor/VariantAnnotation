@@ -240,7 +240,7 @@ test_readGT <- function()
     fl <- system.file("unitTests", "cases", "no_INFO_header.vcf", 
                       package="VariantAnnotation")
     GT <- readGT(fl, nucleotides=TRUE)
-    checkIdentical(unname(GT[,1]), rep(".", 5))
+    checkIdentical(unname(GT[,1]), rep("./.", 5))
     ## genotypeCodesToNucleotides
     vcf0 <- readVcf(fl, "")
     vcf1 <- genotypeCodesToNucleotides(vcf0)
@@ -254,4 +254,7 @@ test_buffer_realloc <- function()
     vcf <- readVcf(fl)
     target <- c("gridss9_272646b", "gridss9_31852o")
     checkIdentical(target, names(vcf))
+
+    target <- ".GGGGGGGGG"
+    checkIdentical(target, alt(vcf)[[1]])
 }
