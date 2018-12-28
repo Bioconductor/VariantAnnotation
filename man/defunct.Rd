@@ -25,11 +25,6 @@
 }
 
 \section{usage}{
-  ## Defunct in > 1.17.0
-  \itemize{
-    \item VRangesScanVcfParam()
-    \item restrictToSNV()
-  }
 
   ## Removed
   \itemize{
@@ -39,19 +34,12 @@
     \item regionFilter()
     \item MatrixToSnpMatrix()
     \item getTranscriptSeqs()
+    \item VRangesScanVcfParam()
+    \item restrictToSNV()
   }
 }
 
 \details{
-  ## Defunct in > 1.17.0
-  \itemize{
-    \item{
-      \code{VRangesScanVcfParam} has been replaced by \code{ScanVcfParam}.
-    }
-    \item{
-      \code{restrictToSVN} has been replaced by \code{isSNV}.
-    }
-  }
 
   ## Removed
   \itemize{
@@ -72,8 +60,16 @@
     \item{
       \code{MatrixToSnpMatrix} has been replaced by \code{genotypeToSnpMatrix}.
     }
-    \item \code{getTranscriptSeqs} has been replaced by
-          \code{extractTranscriptSeqs} in the GenomicFeatures package.
+    \item{ 
+      \code{getTranscriptSeqs} has been replaced by
+      \code{extractTranscriptSeqs} in the GenomicFeatures package.
+    }
+    \item{
+      \code{VRangesScanVcfParam} has been replaced by \code{ScanVcfParam}.
+    }
+    \item{
+      \code{restrictToSVN} has been replaced by \code{isSNV}.
+    }
   }
 }
 

@@ -579,17 +579,6 @@ setMethod(show, "VCF",
 }
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-### restrictToSNV() 
-###
-
-### Creates a subset VCF with SNVs only. 'x' can be a CollapsedVCF 
-### or ExpandedVCF. Data in 'alt(x)' must be DNAStringSet or DNAStringSetList.
-restrictToSNV <- function(x, ...)
-{
-    .Defunct("isSNV")
-}
-
-### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### genotypeCodesToNucleotides()
 ###
 
@@ -607,4 +596,3 @@ genotypeCodesToNucleotides <- function(vcf, ...)
     geno(vcf)$GT <- .geno2geno(NULL, ALT, REF, GT)
     vcf
 }
-
