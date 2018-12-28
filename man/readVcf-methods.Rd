@@ -165,14 +165,22 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
       returned as a single, unparsed column.
     }
     \item{Missing data: }{
-      Missing data in VCF files are represented by a dot ("."). \code{readVcf} 
-      retains the dot as a character string for data type character and converts 
-      it to \code{NA} for data types numeric or double. 
+      Missing data in VCF files on disk are represented by a dot ("."). 
+      \code{readVcf} retains the dot as a character string for data type 
+      character and converts it to \code{NA} for data types numeric or double. 
 
       Because the data are stored in rectangular data structures there is a
       value for each \code{info} and \code{geno} field element in the \code{VCF} 
       class. If the element was missing or was not collected for a particular 
       variant the value will be \code{NA}.
+
+      In the case of the ALT field we have the following treatment of 
+      special characters / missing values:
+      \itemize{
+        \item '.' true missings become empty characters
+        \item '*' are treated as missing and become empty characters
+        \item 'I' are treated as undefined and become '.'
+      }
     }
     \item{Efficient Usage: }{
       Subsets of data (i.e., specific variables, positions or samples) can 
@@ -214,11 +222,11 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
       REF, ALT, QUAL and FILTER fields of the VCF are parsed into a 
       \code{DataFrame}.
 
-      REF is returned as a DNAStringSet. ALT will be a character vector for
-      structural variants and a DNAStringSetList otherwise. '*' characters
-      are treated as missings and become an empty character in a
-      DNAStringSetList. 'I' characters are treated as undefined and become
-      a '.' in a DNAStringSetList.
+      REF is returned as a DNAStringSet. 
+ 
+      ALT is a CharacterList when it contains structural variants and a 
+      DNAStringSetList otherwise. See also the 'Details' section 
+      for 'Missing data'.
     }
     \item{info: }{
       Data from the INFO field of the VCF is parsed into a \code{DataFrame}.
