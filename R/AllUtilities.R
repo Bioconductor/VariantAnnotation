@@ -87,9 +87,11 @@
         Logical = LogicalList(data))
 }
 
+## Converts structural variants in a CharacterList to a '.'
+## DNAStringSetList. Used in predictCoding(), genotypeToSnpMatrix()
+## and snpSummary().
 .toDNAStringSetList <- function(x)
 {
-    ### also used in predictCoding(), genotypeToSnpMatrix()
     pbw <- PartitioningByWidth(elementNROWS(x))
     x <- unlist(x, use.names=FALSE)
     x[.isStructural(x)] <- ""
@@ -97,6 +99,8 @@
     relist(DNAStringSet(xx), pbw)
 }
 
+## Returns structural variants in a CharacterList and all others in
+## a DNAStringSetList. Used in .scanVcfToVCF().
 .formatALT <- function(x)
 {
     if (is.null(x))
@@ -111,6 +115,9 @@
     }
 }
 
+## The grep for '.' here is looking for '.' as *part* of the ALT field.
+## If the ALT were '.' only, with no other characters, it would have been
+## converted to an empty string in the C code before it reached this point.
 .isStructural <- function(x)
 {
     grepl("<", x, fixed=TRUE) |
