@@ -146,3 +146,19 @@ test_prefilterOnSomaticStatusThenFilterOnSnps <- function()
     vcf.germline.snp <- readVcf(filtered.filename, "hg19")   # 
     checkEquals(nrow(vcf.germline.snp), 98)
 }
+
+test_index <- function()
+{
+    vcf <- VcfFile(system.file("extdata", "chr22.vcf.gz", 
+                   package="VariantAnnotation"))
+
+    prefilter = FilterRules(function(x) TRUE)
+    ans <- filterVcf(vcf, destination=tempfile(), index=TRUE,
+                     prefilters=prefilter)
+    checkTrue(file.exists(ans))
+
+    filter <- FilterRules(function(x) TRUE)
+    ans <- filterVcf(vcf, destination=tempfile(), index=TRUE,
+                     filters=filter)
+    checkTrue(file.exists(ans))
+}

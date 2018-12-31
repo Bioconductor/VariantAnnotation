@@ -127,7 +127,6 @@ setMethod("filterVcf", "TabixFile",
         } else {
             ## file.rename does not work across file systems, so be expensive
             file.copy(file, destination)
-            unlink(file)
         }
       }
 
