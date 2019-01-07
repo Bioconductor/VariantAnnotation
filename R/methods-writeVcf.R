@@ -180,7 +180,7 @@
             df <- rbind(df, DataFrame(Value=fd, row.names="fileDate"))
         paste("##", rownames(df), "=", df[,1], sep="")
     ## Support VCF v4.2 and v4.3 PEDIGREE field
-    } else if(nms == "PEDIGREE") {
+    } else if(nms == "PEDIGREE" || nms == "ALT") {
         if (!is.null(rownames(df)))
             df <- DataFrame(ID = rownames(df), df)
         .pasteMultiFieldDF(df, nms)
