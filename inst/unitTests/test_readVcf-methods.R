@@ -247,14 +247,14 @@ test_readGT <- function()
     checkIdentical(GT, geno(vcf1)$GT)
 }
 
-test_buffer_realloc <- function()
-{
-    fl <- system.file("unitTests", "cases", "buffer_realloc.vcf",
-                      package="VariantAnnotation")
-    vcf <- readVcf(fl)
-    target <- c("gridss9_272646b", "gridss9_31852o")
-    checkIdentical(target, names(vcf))
-
-    target <- ".GGGGGGGGG"
-    checkIdentical(target, alt(vcf)[[1]])
-}
+#test_buffer_realloc <- function()
+#{
+#    fl <- system.file("unitTests", "cases", "buffer_realloc.vcf",
+#                      package="VariantAnnotation")
+#    vcf <- readVcf(fl)
+#    target <- c("gridss9_272646b", "gridss9_31852o")
+#    checkIdentical(target, names(vcf))
+#
+#    target <- ".GGGGGGGGG"
+#    checkIdentical(target, alt(vcf)[[1]])
+#}

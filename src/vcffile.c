@@ -539,6 +539,7 @@ SEXP scan_vcf_character(SEXP file, SEXP yield, SEXP smap, SEXP fmap,
             buf0 = Realloc(buf0, len1, char);
             buf = buf0 + len0 - 1;
             end = buf0 + len1;
+            continue;
         }
         if ('#' == *buf0 || '\0' == *buf0 || '\n' == *buf0) {
             buf = buf0;
