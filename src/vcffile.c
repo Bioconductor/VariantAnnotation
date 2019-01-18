@@ -534,7 +534,7 @@ SEXP scan_vcf_character(SEXP file, SEXP yield, SEXP smap, SEXP fmap,
 
     while (Z_NULL != gzgets(gz, buf, end - buf)) {
         int  n = strlen(buf);
-        if (n == end - buf - 1 && (*(end - 2) != '\n' || *(end - 2) != '\r')) {
+        if (n == end - buf - 1 && (*(end - 2) != '\n' && *(end - 2) != '\r')) {
             const int len0 = end - buf0, len1 = len0 * 1.6;
             buf0 = Realloc(buf0, len1, char);
             buf = buf0 + len0 - 1;
