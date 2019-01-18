@@ -244,7 +244,7 @@ ov.mcf7 <- findOverlaps(vcf, mcf7.gr)
 There is just one SNV which overlaps with the MCF-7 regulatory
 regions.  Find out where, if anywhere, it fits within a gene model.
 
-<<locateVariant, eval=FALSE>>=
+<<locateVariant>>=
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene 
 locateVariants(vcf[6,], txdb, AllVariants())

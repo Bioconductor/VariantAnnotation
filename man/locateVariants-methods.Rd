@@ -264,8 +264,8 @@ locateVariants(query, subject, region, ...)
   intersect(seqlevels(vcf), seqlevels(txdb))
 
   ## Overlaps for all possible variant locations.
-  # loc_all <- locateVariants(vcf, txdb, AllVariants())
-  # table(loc_all$LOCATION)
+  loc_all <- locateVariants(vcf, txdb, AllVariants())
+  table(loc_all$LOCATION)
 
   ## ---------------------------------------------------------------------
   ## Variants in intergenic regions
