@@ -239,7 +239,8 @@ setAs("VCF", "VRanges", function(from) {
     meta <- cbind(mcols(rd)["QUAL"], meta)
   }
   if (is.integer(meta$END)) {
-    end(ranges)[!is.na(meta$END)] <- meta$END[!is.na(meta$END)]
+    end(ranges)[!is.na(meta$END)] <- pmax(start(ranges)[!is.na(meta$END)],
+                                          meta$END[!is.na(meta$END)])
     meta$END <- NULL
   }
   rownames(meta) <- NULL
@@ -386,7 +387,7 @@ vranges2Vcf <- function(x, info = character(), filter = character(),
          " FORMAT field.")
   if (!is.character(meta) || any(is.na(meta)) ||
       any(!meta %in% names(metadata(x))))
-    stop("'filter' must be a character vector naming metadata(x) elements",
+    stop("'meta' must be a character vector naming metadata(x) elements",
          " to include as metadata in the VCF header.")
   metaStrings <- as.character(sapply(metadata(x)[meta], as.character))
   if (any(elementNROWS(metaStrings) != 1L))
