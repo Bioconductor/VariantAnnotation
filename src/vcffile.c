@@ -7,7 +7,7 @@
 #include "utilities.h"
 #include "IRanges_interface.h"
 #include "XVector_interface.h"
-#include "samtools/khash.h"
+#include <htslib/khash.h>
 #include "strhash.h"
 
 enum { ROWRANGES_IDX = 0, REF_IDX, ALT_IDX, QUAL_IDX, FILTER_IDX,
@@ -167,7 +167,7 @@ static struct vcftype_t *_vcf_alloc(const int vcf_n, SEXP smap,
             vcf->u.list[FILTER_IDX] =
                 _vcftype_new(type, NILSXP, *n, dot, vcf_n, 1, 1, 0);
         } else
-            Rf_error("(internal) unknown 'fixed' field '%s'", nm);
+            Rf_error("[internal] unknown 'fixed' field '%s'", nm);
     }
 
     /* INFO, FORMAT fields */
@@ -512,9 +512,9 @@ SEXP scan_vcf_character(SEXP file, SEXP yield, SEXP smap, SEXP fmap,
     struct parse_t *parse;
     Rboolean row_names = LOGICAL(rownames)[0];
 
-    if (!IS_INTEGER(yield) || 1L != Rf_length(yield))
+    if (!IS_INTEGER(yield) || Rf_length(yield) != 1)
         Rf_error("'yield' must be integer(1)");
-    if (!IS_CHARACTER(file) || 1L != Rf_length(file))
+    if (!IS_CHARACTER(file) || Rf_length(file) != 1)
         Rf_error("'file' must be character(1) or as on ?scanVcf");
     if (!IS_LOGICAL(rownames))
         Rf_error("'row.names' must be TRUE or FALSE");
@@ -577,54 +577,35 @@ SEXP scan_vcf_character(SEXP file, SEXP yield, SEXP smap, SEXP fmap,
     return result;
 }
 
-/* --- .Call ENTRY POINT --- */
-SEXP tabix_as_vcf(tabix_t *tabix, ti_iter_t iter, const int yield,
-                  SEXP state, SEXP rownames)
+/* --- .Call CALLBACK FUNCTION --- */
+SEXP tabix_as_vcf(htsFile *file, tbx_t *index, hts_itr_t *iter,
+                  const int yield, SEXP state, SEXP rownames)
 {
-    Rboolean row_names = LOGICAL(rownames)[0];
-    const ti_conf_t *conf = ti_get_conf(tabix->idx);
-    SEXP sample = VECTOR_ELT(state, 0), fmap = VECTOR_ELT(state, 1);
-    const int nrec = NA_INTEGER == yield ? TBX_INIT_SIZE : yield;
-    struct parse_t *parse =
-        _parse_new(nrec, sample, fmap, VECTOR_ELT(state, 2),
-                   VECTOR_ELT(state, 3));
-
-    int BUFLEN = 4096;
-    char *buf = Calloc(BUFLEN, char);
-
-    int linelen;
-    const char *line;
-
     int irec = 0;
-    while (NULL != (line = ti_read(tabix, iter, &linelen))) {
+    kstring_t ksbuf = {0, 0, NULL};
 
-        if (conf->meta_char == *line)
+    Rboolean row_names = LOGICAL(rownames)[0];
+    SEXP sample = VECTOR_ELT(state, 0);
+    SEXP fmap = VECTOR_ELT(state, 1);
+
+    const int nrec = yield == NA_INTEGER ? TBX_INIT_SIZE : yield;
+    struct parse_t *parse = _parse_new(nrec, sample, fmap,
+                                       VECTOR_ELT(state, 2),
+                                       VECTOR_ELT(state, 3));
+
+    const tbx_conf_t conf = index->conf;
+    while (tbx_itr_next(file, index, iter, &ksbuf) >= 0) {
+        if (ksbuf.s[0] == conf.meta_char)
             continue;
-
         if (irec == parse->vcf_n)
             _parse_grow(parse, 0);
-
-        if (linelen + 1 > BUFLEN) {
-            Free(buf);
-            BUFLEN = 2 * linelen;
-            buf = Calloc(BUFLEN, char);
-        }
-        memcpy(buf, line, linelen);
-        buf[linelen] = '\0';
-
-        _parse(buf, irec, parse, row_names);
-        irec += 1;
-        if (NA_INTEGER != yield && irec == parse->vcf_n)
+        _parse(ksbuf.s, irec, parse, row_names);
+        irec++;
+        if (yield != NA_INTEGER && irec == parse->vcf_n)
             break;
     }
 
-    if (tabix->fp->errcode) {
-        Free(buf);
-        _parse_free(parse);
-        Rf_error("read line failed, corrupt or invalid file?");
-    }
- 
-    Free(buf);
+    free(ksbuf.s);
 
     _vcf_grow(parse->vcf, irec);
 
@@ -632,6 +613,6 @@ SEXP tabix_as_vcf(tabix_t *tabix, ti_iter_t iter, const int yield,
     _vcf_types_tidy(parse, result);
     _parse_free(parse);
     UNPROTECT(1);
-
     return result;
 }
+

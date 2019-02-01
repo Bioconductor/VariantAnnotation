@@ -1,6 +1,4 @@
-SAMVARS=$(shell echo 'cat(Rsamtools:::.pkgMk())' |\
+RHTSLIB_LIBS=$(shell echo 'Rhtslib::pkgconfig("PKG_LIBS")'|\
     "${R_HOME}/bin/R" --vanilla --slave)
-include $(SAMVARS)
+PKG_LIBS=$(RHTSLIB_LIBS)
 
-PKG_LIBS=$(SAMTOOLS_LIBS)
-PKG_CPPFLAGS=$(SAMTOOLS_CPPFLAGS)

@@ -1,7 +1,7 @@
 #ifndef _STRHASH_H_
 #define _STRHASH_H_
 
-#include "samtools/khash.h"
+#include <htslib/khash.h>
 
 KHASH_SET_INIT_STR(strhash)
 
