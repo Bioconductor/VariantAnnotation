@@ -1,6 +1,6 @@
+##fileformat=VCFv4.1
 ##source=VariantTools 1.3.2
 ##phasing=unphased
-##fileformat=VCFv4.1
 ##project=example
 ##fileDate=20130419
 ##FORMAT=<ID=AD,Number=A,Type=Integer,Description="Read depth for REF and ALT">
