@@ -3,7 +3,7 @@ Type: Package
 Title: Annotation of Genetic Variants
 Description: Annotate variants, compute amino acid coding changes,
         predict coding outcomes.
-Version: 1.29.17
+Version: 1.29.18
 Authors@R: c(person("Valerie", "Obenchain", role=c("aut", "cre"),
         email="maintainer@bioconductor.org"),
     person("Martin", "Morgan", role="aut"),
@@ -12,7 +12,7 @@ Authors@R: c(person("Valerie", "Obenchain", role=c("aut", "cre"),
 License: Artistic-2.0
 Depends: R (>= 2.8.0), methods, BiocGenerics (>= 0.15.3),
         GenomeInfoDb (>= 1.15.2), GenomicRanges (>= 1.31.8),
-        SummarizedExperiment (>= 1.9.9), Rsamtools (>= 1.33.6)
+        SummarizedExperiment (>= 1.9.9), Rsamtools (>= 1.99.0)
 Imports: utils, DBI, zlibbioc, Biobase, S4Vectors (>= 0.17.24),
         IRanges (>= 2.13.13), XVector (>= 0.19.7), Biostrings (>= 2.47.6),
         AnnotationDbi (>= 1.27.9), rtracklayer (>= 1.39.7),
@@ -22,9 +22,8 @@ Suggests: RUnit, AnnotationHub, BSgenome.Hsapiens.UCSC.hg19,
         SNPlocs.Hsapiens.dbSNP.20101109, SIFT.Hsapiens.dbSNP132,
         SIFT.Hsapiens.dbSNP137, PolyPhen.Hsapiens.dbSNP131, snpStats,
         ggplot2, BiocStyle
-LinkingTo: S4Vectors, IRanges, XVector, Biostrings, Rsamtools
+LinkingTo: S4Vectors, IRanges, XVector, Biostrings, Rhtslib
 LazyLoad: yes
 biocViews: DataImport, Sequencing, SNP, Annotation,
         Genetics, VariantAnnotation
 Video: https://www.youtube.com/watch?v=Ro0lHQ_J--I&list=UUqaMSQd_h-2EDGsU6WDiX0Q
-RoxygenNote: 6.1.1

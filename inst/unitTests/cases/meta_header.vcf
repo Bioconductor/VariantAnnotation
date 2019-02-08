@@ -4,7 +4,7 @@
 ##FORMAT=<ID=AD,Number=.,Type=Integer,Description="Allelic depths for the reference and alternate alleles in the order listed">
 ##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth (only filtered reads used for calling)">
 ##FORMAT=<ID=GQ,Number=1,Type=Float,Description="Genotype Quality">
-##FORMAT=<ID=PL,Number=.,Type=Float,Description="Normalized, Phred-scaled likelihoods for AA,AB,BB genotypes where A=ref and B=alt; not applicable if site is not biallelic">
+##FORMAT=<ID=PL,Number=G,Type=Float,Description="Normalized, Phred-scaled likelihoods for AA,AB,BB genotypes where A=ref and B=alt; not applicable if site is not biallelic">
 ##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of Samples With Data">
 ##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
 ##INFO=<ID=AF,Number=.,Type=Float,Description="Allele Frequency">
@@ -12,5 +12,5 @@
 ##META=<ID=Ploidy,Type=String,Number=.,Description="Ploidy with respect to reference genome">
 ##SAMPLE=<ID=Sam1,Species="Miscanthus sinensis",Ploidy="2x",Description="Sample1">
 ##SAMPLE=<ID=Sam2,Species="Miscanthus sacchariflorus",Ploidy="4x",Description="Sample2">
-#CHROM    POS    ID    REF    ALT    QUAL    FILTER    INFO    FORMAT    Sam1    Sam2
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	Sam1	Sam2
 Chr01	1000	S01_1000	G	A	100	PASS	DP=20	GT:AD	0/0:10,0	0/1:5,5

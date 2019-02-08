@@ -5,7 +5,7 @@
 #include "IRanges_interface.h"
 #include "XVector_interface.h"
 #include "Biostrings_interface.h"
-#include "samtools/khash.h"
+#include <htslib/khash.h>
 
 KHASH_MAP_INIT_STR(ref, int)
 

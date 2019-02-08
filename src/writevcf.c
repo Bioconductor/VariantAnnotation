@@ -1,5 +1,5 @@
 #include "writevcf.h"
-#include "samtools/kstring.h"
+#include <htslib/kstring.h>
 #include <R_ext/Connections.h>
 
 /* write all elements of 'list' genotype field */
