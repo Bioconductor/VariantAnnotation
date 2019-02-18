@@ -15,7 +15,7 @@ enum { ROWRANGES_IDX = 0, REF_IDX, ALT_IDX, QUAL_IDX, FILTER_IDX,
 enum { POS_IDX = 0, ID_IDX };
 
 static const int N_FLDS = 7;
-static const int TBX_INIT_SIZE = 32767;
+static const int TBX_INIT_SIZE = 512;
 
 KHASH_SET_INIT_STR(WARNINGS)
 
