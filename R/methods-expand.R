@@ -80,20 +80,19 @@ setMethod("expand", "CollapsedVCF",
 			varR <- names(gvar)[i]
 			gvarR <- gvar[[varR]]
 			if (!is.list(gvarR)) {
-            ## 'Number' is integer
-			if (is(gvarR, "array") && length(dim(gvarR)) == 3L) {
-	                if ((length(unique(elt)) != 1L) || (dim(gvarR)[3] != unique(elt))) {
-						warning("'", varR, "' was ignored: number of '", varR, "' values ",
-	                            "do not match REF + ALT")
-						isR[i] <- FALSE 
-	                }
-	            } else {
-					## 'Number' is '.' or 'R'
-					gvar[[varR]] <- .expandAD(gvarR, length(idx), ncol(x))
-	            }
+	            ## 'Number' is integer
+				if (is(gvarR, "array") && length(dim(gvarR)) == 3L) {
+		                if ((length(unique(elt)) != 1L) || (dim(gvarR)[3] != unique(elt))) {
+							warning("'", varR, "' was ignored: number of '", varR, "' values ",
+		                            "do not match REF + ALT")
+							isR[i] <- FALSE 
+		                }
+		         } else {
+					 isR[i] <- FALSE 
+		        }
         } else {
             ## 'Number' is '.'
-            gvar$AD <- .expandAD(AD, length(idx), ncol(x))
+			gvar[[varR]] <- .expandAD(gvarR, length(idx), ncol(x))
         }
     }
 	isA <- names(gvar) %in% rownames(ghdr)[isA]
