@@ -14,9 +14,9 @@ setMethod("expand", "CollapsedVCF",
             fxd <- fixed(x)
             fxd$ALT <- unlist(alt(x), use.names=FALSE)
 			ghdr <- geno(header(x))
-			isR <- rownames(ghdr) == "AD" | ghdr$Number == "R"
-			if (any(isR)){
-				varsR <- rownames(ghdr)[isR]
+			varsR <- rownames(ghdr)[rownames(ghdr) == "AD" | ghdr$Number == "R"]
+			varsR <- varsR[varsR %in% names(geno(x))]
+			if (length(varsR) > 0){
 				geno(x)[varsR] <- endoapply(
 					geno(x)[varsR], function(i)
 						.expandAD(i, nrow(x), ncol(x))
