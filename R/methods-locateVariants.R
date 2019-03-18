@@ -561,7 +561,8 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
             cds <- mcols(usub)$cds_id[map2$transcriptsHits]
             if (length(cds)) {
                 cdslst <- unique(splitAsList(cds, map2$xHits))
-                cdsid <- cdslst
+                cdsid <- IntegerList(vector("list", length(xHits)))
+                cdsid[unique(map2$xHits)] <- cdslst
             }
         }
 
