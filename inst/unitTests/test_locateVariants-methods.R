@@ -130,7 +130,7 @@ test_locateVariants_match_predictCoding <- function()
     coding <- predictCoding(vcf, txdb, Hsapiens)
     checkIdentical(loc$QUERYID, as.integer(1:7))
     checkIdentical(length(coding) , 6L)
-    checkIdentical(loc$CDSID[1:6], coding$CDSID)
+    checkIdentical(unname(loc$CDSID[1:6]), unname(coding$CDSID))
     checkIdentical(unname(as.character(coding$VARCODON[c(1,4)])), 
                    as.character(DNAStringSet(c("AAG", "TAG"))))
 }
