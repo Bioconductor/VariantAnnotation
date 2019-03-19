@@ -298,9 +298,23 @@
     map2 <- mapToTranscripts(unname(from)[xHits], flat_to,
                              ignore.strand=ignore.strand)
     cds <- mcols(flat_to)$cds_id[map2$transcriptsHits]
+    ## CodingVariants() must fall within a coding region.
+    ## mapToTranscripts() will map ranges that span intron 
+    ## junctions and overlap multiple exons/cds regions. Because 
+    ## of this, it's possible for 'map' to return a hit for a 
+    ## query that 'map2' will not. (The subject in
+    ## 'map' is a GRangesList and in 'map2' it's unlisted.)
+    ## Only ranges identified by 'map' and 'map2' are kept.
+    ## Ranges identified by 'map' only are discarded.
     if (length(cds)) {
-        cdslst <- unique(splitAsList(cds, map2$xHits))
-        cdsid <- cdslst
+        cdsid <- unique(splitAsList(cds, map2$xHits))
+        keep <- logical(length(xHits))
+        keep[unique(map2$xHits)] <- TRUE
+        if (any(!keep)) {
+            map <- map[keep]
+            txHits <- map$transcriptsHits
+            xHits <- map$xHits
+        }
     }
     if (is.null(txid <- names(to)[txHits]))
         txid <- NA_integer_
