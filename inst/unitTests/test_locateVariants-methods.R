@@ -134,3 +134,7 @@ test_locateVariants_match_predictCoding <- function()
     checkIdentical(unname(as.character(coding$VARCODON[c(1,4)])), 
                    as.character(DNAStringSet(c("AAG", "TAG"))))
 }
+    gr2 <- GRanges("chr20", IRanges(
+        start=c(5, 77054, 77054, 77058, 77057, 77057, 77055), 
+        end=c(55, 77055, 77055, 77058, 77058, 77058, 77054)),
+        paramRangeID=rep(NA, 7))
