@@ -393,12 +393,11 @@ setClass("VRanges",
 
 setClass("VRangesList", representation("VIRTUAL"),
          prototype = prototype(elementType = "VRanges"),
-         contains = "GenomicRangesList")
+         contains = "GRangesList")
 
 setClass("SimpleVRangesList",
-         contains = c("VRangesList", "SimpleGenomicRangesList"))
+         contains = c("VRangesList", "SimpleGRangesList"))
 
 setClass("CompressedVRangesList",
-         representation(elementMetadata = "DataFrame"),
-         prototype = prototype(unlistData = new("VRanges")),
-         contains = c("VRangesList", "GRangesList"))
+         representation(unlistData = "VRanges"),
+         contains = c("VRangesList", "CompressedGRangesList"))
