@@ -50,13 +50,14 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
 }
 
 \arguments{
-  \item{file}{A \code{\link{TabixFile}} instance or character() name of the VCF 
+  \item{file}{A \code{\link{VcfFile}} (synonymous with
+    \code{\link{TabixFile}}) instance or character() name of the VCF
     file to be processed. When ranges are specified in \code{param},
-    \code{file} must be a \code{\link{TabixFile}}. 
+    \code{file} must be a \code{\link{VcfFile}}.
 
-    Use of the \code{\link{TabixFile}} methods are encouraged as they are
-    more efficient than the character() methods. See ?\code{TabixFile} and
-    ?\code{indexTabix} for help creating a \code{\link{TabixFile}}.
+    Use of the \code{\link{VcfFile}} methods are encouraged as they are
+    more efficient than the character() methods. See ?\code{VcfFile},
+    and ?\code{indexVcf} for help creating a \code{\link{VcfFile}}.
   }
   \item{genome}{A \code{character} or \code{Seqinfo} object.
     \itemize{
@@ -109,8 +110,8 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
           \code{readVcf} imports records from bzip compressed or uncompressed 
           VCF files. Data are parsed into a \code{\linkS4class{VCF}} object 
           using the file header information if available. To import a subset 
-          of ranges the VCF must have a Tabix index file. An index file can be 
-          created with \code{bzip} and \code{indexTabix} functions.
+          of ranges the VCF must have an index file. An index file can be 
+          created with \code{bzip} and \code{indexVcf} functions.
 
           The \code{readInfo}, \code{readGeno} and \code{readGT} functions
           are lightweight versions of \code{readVcf} and import a single
@@ -191,7 +192,7 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
  
       Another option for handling large files is to iterate through the
       data in chunks by setting the \code{yieldSize} parameter in a 
-      \code{TabixFile} object. Iteration can be through all data fields or
+      \code{VcfFile} object. Iteration can be through all data fields or
       a subset defined by a \code{ScanVcfParam}. See example below, 
       `Iterating through VCF with yieldSize`.
     }
@@ -265,6 +266,8 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
 }
 
 \seealso{
+  \code{\link{indexVcf}},
+  \code{\link{VcfFile}},
   \code{\link{indexTabix}},
   \code{\link{TabixFile}},
   \code{\link{scanTabix}},
@@ -330,13 +333,12 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
   ## ---------------------------------------------------------------------
 
   ## Subset on genome coordinates:
-  ## 'file' must have a Tabix index
+  ## 'file' must have an index
   rngs <- GRanges("20", IRanges(c(14370, 1110000), c(17330, 1234600)))
   names(rngs) <- c("geneA", "geneB")
   param <- ScanVcfParam(which=rngs) 
   compressVcf <- bgzip(fl, tempfile())
-  idx <- indexTabix(compressVcf, "vcf")
-  tab <- TabixFile(compressVcf, idx)
+  tab <- indexVcf(compressVcf)
   vcf <- readVcf(tab, "hg19", param)
 
   ## When data are subset by range ('which' argument in ScanVcfParam),
@@ -386,7 +388,7 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
   ## ---------------------------------------------------------------------
   fl <- system.file("extdata", "chr22.vcf.gz", package="VariantAnnotation")
   param <- ScanVcfParam(fixed="ALT", geno=c("GT", "GL"), info=c("LDAF"))
-  tab <- TabixFile(fl, yieldSize=4000)
+  tab <- VcfFile(fl, yieldSize=4000)
   open(tab)
   while (nrow(vcf_yield <- readVcf(tab, "hg19", param=param)))
       cat("vcf dim:", dim(vcf_yield), "\n")
