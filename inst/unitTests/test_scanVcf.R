@@ -28,7 +28,7 @@ test_FixedTypes <- function()
 test_InfoTypes <- function()
 {
     fmt <- info(scanVcfHeader(fl))
-    info <- scn[[1]]$INFO 
+    info <- scn[[1]]$INFO
 
     checkIdentical(as.integer(c(3, 3, 2, 3, 3)), info$NS)
     checkIdentical(as.integer(c(14, 11, 10, 13, 9)), info$DP)
@@ -45,10 +45,10 @@ test_GenoTypes <- function()
     checkEquals(typeof(unlist(geno$GT)), "character")
     checkIdentical(lapply(geno, class), list(GT="matrix", GQ="matrix",
                    DP="matrix", HQ="array"))
-    mat <- matrix(c(1, 3, 6, 7, 4, 8, 5, 0, 4, 2, 5, 3, 4, 2, 3), 
+    mat <- matrix(c(1, 3, 6, 7, 4, 8, 5, 0, 4, 2, 5, 3, 4, 2, 3),
         nrow=5, dimnames=list(NULL, c("NA00001", "NA00002", "NA00003")))
     checkEquals(mat, geno$DP)
-} 
+}
 
 test_scanVcf_no_FORMAT_column <- function()
 {
@@ -69,7 +69,7 @@ test_scanVcf_FORMAT_header_no_SAMPLEs <- function()
     checkTrue(all(sapply(geno, nrow) == 5L))
     checkTrue(all(sapply(geno, ncol) == 0L))
 }
- 
+
 test_scanVcf_no_INFO_header <- function()
 {
     fl <- system.file(package="VariantAnnotation", "unitTests",
@@ -91,6 +91,30 @@ test_scanVcf_crlf <- function()
 {
     writeLines(readLines(fl), xx <- tempfile(), sep="\r\n")
     checkIdentical(scanVcfHeader(fl), scanVcfHeader(xx))
+}
+
+test_scanVcf_connection_n <- function()
+{
+    fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
+
+    res <- scanVcf(file(fl))
+    checkIdentical(5L, length(res[[1]]$REF))
+
+    res <- scanVcf(file(fl), n = 1000)
+    checkIdentical(5L, length(res[[1]]$REF))
+
+    res <- scanVcf(file(fl), n = 1)
+    checkIdentical(1L, length(res[[1]]$REF))
+
+    vcf <- file(fl)
+    open(vcf)
+    for (i in 1:10) {
+        res <- scanVcf(vcf, n = 1)
+        if (!length(res[[1]]$REF))
+            break
+    }
+    close(vcf)
+    checkIdentical(6L, i)
 }
 
 test_scanVcfHeader <- function()
@@ -118,7 +142,7 @@ test_scanVcfHeader_VarScan <- function()
              "contig", "SAMPLE", "PEDIGREE")
     checkIdentical(names(meta(hd)), nms)
     checkIdentical(header(hd)$contig[["assembly"]], "B36")
-} 
+}
 
 test_scanVcfHeader_META <- function()
 {
@@ -137,6 +161,6 @@ test_scan_row.names <- function()
     scn <- scanVcf(fl, row.names=FALSE)
     checkTrue(is.null(names(scn$rowRanges)))
     param <- ScanVcfParam(which=GRanges("7", IRanges(55000723, 55000789)))
-    scn <- scanVcf(fl, param=param, row.names=FALSE) 
+    scn <- scanVcf(fl, param=param, row.names=FALSE)
     checkTrue(is.null(names(scn$rowRanges)))
 }

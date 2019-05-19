@@ -4,6 +4,6 @@
 
 setMethod("import", "VcfFile", function(con, format, text, ...) {
     if (!missing(format))
-        checkArgFormat(con, format)
+        rtracklayer:::checkArgFormat(con, format)
     readVcf(con, ...)
 })

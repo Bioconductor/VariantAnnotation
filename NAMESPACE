@@ -57,7 +57,8 @@ importMethodsFrom(GenomicFeatures,
 importFrom(XVector, "subseq", "subseq<-")
 
 importFrom(Biostrings,
-    AAStringSet, DNAStringSet, DNAStringSetList, DNA_BASES, getSeq
+    AAStringSet, DNAStringSet, DNAStringSetList, DNA_BASES, getSeq,
+    GENETIC_CODE
 )
 
 importMethodsFrom(Biostrings,
