@@ -93,6 +93,30 @@ test_scanVcf_crlf <- function()
     checkIdentical(scanVcfHeader(fl), scanVcfHeader(xx))
 }
 
+test_scanVcf_connection_n <- function()
+{
+    fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
+
+    res <- scanVcf(file(fl))
+    checkIdentical(5L, length(res[[1]]$REF))
+
+    res <- scanVcf(file(fl), n = 1000)
+    checkIdentical(5L, length(res[[1]]$REF))
+
+    res <- scanVcf(file(fl), n = 1)
+    checkIdentical(1L, length(res[[1]]$REF))
+
+    vcf <- file(fl)
+    open(vcf)
+    for (i in 1:10) {
+        res <- scanVcf(vcf, n = 1)
+        if (!length(res[[1]]$REF))
+            break
+    }
+    close(vcf)
+    checkIdentical(6L, i)
+}
+
 test_scanVcfHeader <- function()
 {
     checkIdentical(VCFHeader(), scanVcfHeader())

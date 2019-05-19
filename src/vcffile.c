@@ -498,7 +498,7 @@ SEXP scan_vcf_connection(SEXP txt, SEXP smap, SEXP fmap, SEXP imap,
 
     SEXP result = PROTECT(Rf_allocVector(VECSXP, 1));
     SET_VECTOR_ELT(result, 0, _vcf_as_SEXP(parse, fmap, smap, row_names));
-    _vcf_types_tidy(parse, result);
+    _vcf_types_tidy(parse, VECTOR_ELT(result, 0));
     _parse_free(parse);
     UNPROTECT(1);
 

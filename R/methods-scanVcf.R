@@ -150,22 +150,34 @@ selectSome <- S4Vectors:::selectSome
 }
 
 .vcf_scan_connection <-
-    function(file, ..., fixed=character(), info=character(),
+    function(file, ..., n = -1, fixed=character(), info=character(),
              geno=character(), samples=character(), row.names=TRUE)
 {
+    if (!isOpen(file)) {
+        open(file, "r")
+        on.exit(close(file))
+    }
     tryCatch({
-        file <- summary(file)$description
-        maps <- .vcf_scan_header_maps(file, fixed, info, geno, samples, ...)
+        path <- summary(file)$description
+        maps <- .vcf_scan_header_maps(path, fixed, info, geno, samples)
 
-        txt <- readLines(file, ...)
-        txt <- txt[!grepl("^#", txt)] # FIXME: handle header lines better
+        txt <- character(0)
+        repeat {
+            input <- readLines(file, n)
+            if (length(input) == 0L)
+                break
+            input <- input[!grepl("^#", input)]
+            n <- n - length(input)
+            txt <- c(txt, input)
+        }
+
         result <- .Call(.scan_vcf_connection, txt, maps$samples,
                         maps$fmap, maps$imap, maps$gmap, row.names)
         setNames(result, "*:*-*")
     }, scanTabix_io = function(err) {
             stop("scanVcf: ", conditionMessage(err), call. = FALSE)
     }, error = function(err) {
-            stop("scanVcf: ", conditionMessage(err), "\n  path: ", 
+            stop("scanVcf: ", conditionMessage(err), "\n  path: ",
                  summary(file)$description, call. = FALSE)
     })
 }
