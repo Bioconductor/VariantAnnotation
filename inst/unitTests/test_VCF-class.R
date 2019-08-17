@@ -45,7 +45,7 @@ test_VCF_fixed <- function() {
     checkException(filt(vcf) <- as.list(filt(vcf)), silent=TRUE)
 
     ## fixed 
-    checkTrue(class(fixed(vcf)) == "DataFrame")
+    checkTrue(is(fixed(vcf), "DataFrame"))
     checkException(fixed(vcf) <- NULL, silent=TRUE)
     checkException(fixed(vcf) <- as.matrix(fixed(vcf)), 
         silent=TRUE)
@@ -80,7 +80,7 @@ test_VCF_rowRanges_info_geno <- function() {
     checkIdentical(rownames(vcf), rev(rownames(v1)))
 
     ## info
-    checkTrue(class(info(vcf)) == "DataFrame")
+    checkTrue(is(info(vcf), "DataFrame"))
     checkException(info(vcf) <- NULL, silent=TRUE)
     v1 <- vcf 
     checkException(info(v1) <- DataFrame(), silent=TRUE)
