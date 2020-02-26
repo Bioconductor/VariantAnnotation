@@ -220,7 +220,7 @@ setMethod("geno", c("VCF", "character"),
 setReplaceMethod("geno", c("VCF", "missing", "SimpleList"),
     function(x, i, ..., value)
 {
-    assays(x) <- value
+    assays(x, withDimnames=FALSE) <- value
     .valid.VCFHeadervsVCF.fields(x, geno)
     x
 })
@@ -228,7 +228,7 @@ setReplaceMethod("geno", c("VCF", "missing", "SimpleList"),
 setReplaceMethod("geno", c("VCF", "character", "matrix"),
     function(x, i, ..., value)
 {
-    assay(x, i) <- value
+    assay(x, i, withDimnames=FALSE) <- value
     .valid.VCFHeadervsVCF.fields(x, geno)
     x
 })
@@ -236,7 +236,7 @@ setReplaceMethod("geno", c("VCF", "character", "matrix"),
 setReplaceMethod("geno", c("VCF", "numeric", "matrix"),
     function(x, i, ..., value)
 {
-    assay(x, i) <- value
+    assay(x, i, withDimnames=FALSE) <- value
     .valid.VCFHeadervsVCF.fields(x, geno)
     x
 })
@@ -244,7 +244,7 @@ setReplaceMethod("geno", c("VCF", "numeric", "matrix"),
 setReplaceMethod("geno", c("VCF", "missing", "matrix"),
     function(x, i, ..., value)
 {
-    assay(x) <- value
+    assay(x, withDimnames=FALSE) <- value
     .valid.VCFHeadervsVCF.fields(x, geno)
     x
 })
