@@ -32,7 +32,7 @@ test_InfoTypes <- function()
 
     checkIdentical(as.integer(c(3, 3, 2, 3, 3)), info$NS)
     checkIdentical(as.integer(c(14, 11, 10, 13, 9)), info$DP)
-    checkEquals(class(info$AF), "matrix")
+    checkTrue(is(info$AF,"matrix"))
     checkIdentical(c(TRUE, FALSE, TRUE, FALSE, FALSE), info$DB)
     checkIdentical(c(TRUE, rep(FALSE, 4)), info$H2)
 }
@@ -43,7 +43,7 @@ test_GenoTypes <- function()
     geno <- scn[[1]]$GENO
 
     checkEquals(typeof(unlist(geno$GT)), "character")
-    checkIdentical(lapply(geno, class), list(GT="matrix", GQ="matrix",
+    checkIdentical(lapply(geno, function(x) class(x)[1]), list(GT="matrix", GQ="matrix",
                    DP="matrix", HQ="array"))
     mat <- matrix(c(1, 3, 6, 7, 4, 8, 5, 0, 4, 2, 5, 3, 4, 2, 3),
         nrow=5, dimnames=list(NULL, c("NA00001", "NA00002", "NA00003")))

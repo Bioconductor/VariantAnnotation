@@ -95,7 +95,7 @@ test_VCF_rowRanges_info_geno <- function() {
     checkIdentical(geno(vcf)$CNQ, geno(vcf)[["CNQ"]])
     checkIdentical(geno(vcf)[["CN"]], assays(vcf)[["CN"]])
 
-    checkTrue(class(geno(vcf, "GT")) == "matrix")
+    checkTrue(is(geno(vcf, "GT"), "matrix"))
     v1 <- vcf
     geno(v1, "GT") <- matrix(NA, nrow=5, ncol=3)
     checkIdentical(unique(as.vector(geno(v1, "GT"))), NA)
