@@ -151,9 +151,8 @@ setMethod("genotypeToSnpMatrix", "array",
 }
 
 probabilityToSnpMatrix <- function(probs) {
-    ok <- suppressWarnings(require("snpStats", quietly=TRUE, 
-                                   character.only=TRUE))
-    ok || stop("'snpStats' required; try BiocManager::install('snpStats')", call.=FALSE) 
+    requireNamespace("snpStats", quietly = TRUE) ||
+        stop("'snpStats' required; try BiocManager::install('snpStats')")
 
     if (ncol(probs) != 3)
         stop("input matrix should have 3 columns: P(A/A), P(A/B), P(B/B)")
@@ -169,10 +168,10 @@ probabilityToSnpMatrix <- function(probs) {
     # post2g can't handle missing data
     if (sum(missing) > 0) {
         probs[missing,] <- 0
-        g <- post2g(probs)
+        g <- snpStats::post2g(probs)
         g[missing] <- as.raw(0)
     } else {
-        g <- post2g(probs)
+        g <- snpStats::post2g(probs)
     }
     g <-  matrix(g, nrow=1, dimnames=list(NULL, rownames(probs)))
     new("SnpMatrix", g)
