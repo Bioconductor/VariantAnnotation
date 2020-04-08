@@ -56,8 +56,6 @@
 
 .makeVcfGeno <- function(filename, fixed, geno, dvcf, ...)
 {
-    if (any(is.null(names(geno))))
-        stop("all 'geno(<VCF>)' fields must be named")
     if ("GT" %in% names(geno)) {
         geno <- geno[c("GT", setdiff(names(geno), "GT"))]
     }
