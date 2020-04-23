@@ -522,7 +522,7 @@ setMethod(show, "VCF",
         lx <- length(x)
         nc <- ncol(mcols(x))
         nms <- names(mcols(x))
-        cat(margin, class(x), " with ",
+        cat(margin, classNameForDisplay(x), " with ",
             nc, " metadata ", ifelse(nc == 1L, "column", "columns"),
             ": ", paste0(nms, collapse=", "), "\n", sep="")
     }
@@ -530,7 +530,7 @@ setMethod(show, "VCF",
     {
         nc <- ncol(x)
         nms <- names(x)
-        cat(margin, class(x), " with ",
+        cat(margin, classNameForDisplay(x), " with ",
             nc, ifelse(nc == 1, " column", " columns"),
             ": ", prettydescr(paste0(nms, collapse=", ")), "\n", sep="")
     }
@@ -538,11 +538,11 @@ setMethod(show, "VCF",
     {
         lo <- length(x)
         nms <- names(x)
-        cat(margin, class(x), " of length ", lo, 
+        cat(margin, classNameForDisplay(x), " of length ", lo, 
             ": ", prettydescr(paste0(nms, collapse=", ")), "\n", sep="")
     }
     margin <- "  "
-    cat("class:", class(object), "\n")
+    cat("class:", classNameForDisplay(object), "\n")
     cat("dim:", dim(object), "\n")
     cat("rowRanges(vcf):\n")
     printSmallGRanges(rowRanges(object), margin=margin)

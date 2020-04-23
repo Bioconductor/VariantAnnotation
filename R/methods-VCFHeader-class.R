@@ -154,7 +154,7 @@ setMethod(show, "VCFHeader",
         txt <- sprintf(fmt, length(vals), lbls)
         cat(strwrap(txt, exdent=exdent, ...), sep="\n")
     }
-    cat("class:", class(object), "\n")
+    cat("class:", classNameForDisplay(object), "\n")
 
     samples <- samples(object) 
     scat("samples(%d): %s\n", samples)

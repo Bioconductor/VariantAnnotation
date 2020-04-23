@@ -94,7 +94,7 @@ selectSome <- S4Vectors:::selectSome
                    if (field[[1]] == 0L && !is.logical(field[[2]]))
                        stop(paste0('only "flag" INFO fields should ',
                             'have Number = 0 in the header; ', fname, ' is "', 
-                            class(field[[2]]), '"'))
+                            classNameForDisplay(field[[2]]), '"'))
                    else field 
                }, imap, names(imap)
         )

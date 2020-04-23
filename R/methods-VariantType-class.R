@@ -7,14 +7,14 @@
 setMethod("show", "VariantType",
     function(object) 
     {
-        cat("class:", class(object), "\n")
+        cat("class:", classNameForDisplay(object), "\n")
     }
 )
 
 setMethod("show", "AllVariants",
     function(object) 
     {
-        cat("class:", class(object), "\n")
+        cat("class:", classNameForDisplay(object), "\n")
         cat("promoter: \n")
         cat("  upstream:", upstream(promoter(object)), "\n")
         cat("  downstream:", downstream(promoter(object)), "\n")
@@ -28,7 +28,7 @@ setMethod("show", "AllVariants",
 setMethod("show", "PromoterVariants",
     function(object) 
     {
-        cat("class:", class(object), "\n")
+        cat("class:", classNameForDisplay(object), "\n")
         cat("upstream:", upstream(object), "\n")
         cat("downstream:", downstream(object), "\n")
     }
@@ -37,7 +37,7 @@ setMethod("show", "PromoterVariants",
 setMethod("show", "IntergenicVariants",
     function(object) 
     {
-        cat("class:", class(object), "\n")
+        cat("class:", classNameForDisplay(object), "\n")
         cat("upstream:", upstream(object), "\n")
         cat("downstream:", downstream(object), "\n")
         cat("idType:", idType(object), "\n")
@@ -172,7 +172,7 @@ setMethod("promoter", "AllVariants",
 setReplaceMethod("promoter", "AllVariants",
     function(x, value)
 {
-    if (class(value) != "PromoterVariants")
+    if (!is(value, "PromoterVariants"))
         stop("'value' must be a 'PromoterVariants' object")
     slot(x, "promoter") <- value 
     x
@@ -184,7 +184,7 @@ setMethod("intergenic", "AllVariants",
 setReplaceMethod("intergenic", "AllVariants",
     function(x, value)
 {
-    if (class(value) != "IntergenicVariants")
+    if (!is(value, "IntergenicVariants"))
         stop("'value' must be a 'IntergenicVariants' object")
     slot(x, "intergenic") <- value 
     x

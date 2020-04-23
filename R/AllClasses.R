@@ -216,7 +216,7 @@ setClass("VariantType",
 setMethod("show", "VariantType",
     function(object)
     {
-        cat("class:", class(object), "\n")
+        cat("class:", classNameForDisplay(object), "\n")
     }
 )
 
