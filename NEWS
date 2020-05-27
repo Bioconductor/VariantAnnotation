@@ -1,3 +1,11 @@
+CHANGES IN VERSION 1.36.0
+-------------------------
+
+NEW FEATURES
+
+    o ref<-, alt<-, qual<- and filt<- allow replacement value length
+      recycling
+
 CHANGES IN VERSION 1.28.0
 ------------------------
 

@@ -14,8 +14,7 @@
 setReplaceMethod("alt", c("CollapsedVCF", "DNAStringSetList"),
     function(x, value)
 {
-    if (length(value) != length(rowRanges(x)))
-        stop("length(value) must equal length(rowRanges(x))")
+    value <- .recycleVector(alt(x), value)
     slot(x, "fixed")$ALT <- value
     x
 })

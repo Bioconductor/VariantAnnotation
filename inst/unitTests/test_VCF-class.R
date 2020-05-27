@@ -20,12 +20,14 @@ test_VCF_construction <- function() {
 test_VCF_fixed <- function() {
     fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
     vcf <- readVcf(fl, genome="hg19")
+    vcf1 <- vcf
 
     ## ref
     checkTrue(class(ref(vcf)) == "DNAStringSet")
     checkException(ref(vcf) <- NULL, silent=TRUE)
-    checkException(ref(vcf) <- as.character(ref(vcf)), 
-        silent=TRUE)
+    checkException(ref(vcf) <- as.character(ref(vcf)), silent=TRUE)
+    ref(vcf1) <- ref(vcf)[1]
+    checkIdentical(rep(ref(vcf)[1], nrow(vcf)), ref(vcf1))
 
     ## alt 
     checkTrue(class(alt(vcf)) == "DNAStringSetList")
@@ -33,16 +35,22 @@ test_VCF_fixed <- function() {
     v1 <- vcf
     alt(v1) <- CharacterList(list("A", "A", c("G", "T"), "", c("G", "GTCT"))) 
     checkTrue(validObject(v1))
+    alt(vcf1) <- alt(vcf)[1]
+    checkIdentical(rep(alt(vcf)[1], nrow(vcf)), alt(vcf1))
 
     ## qual 
     checkTrue(class(qual(vcf)) == "numeric")
     checkException(qual(vcf) <- NULL, silent=TRUE)
     checkException(qual(vcf) <- as.character(qual(vcf)), silent=TRUE)
+    qual(vcf1) <- qual(vcf)[1] # recylcing
+    checkIdentical(rep(qual(vcf)[1], nrow(vcf)), qual(vcf1))
 
     ## filt 
     checkTrue(class(filt(vcf)) == "character")
     checkException(filt(vcf) <- NULL, silent=TRUE)
     checkException(filt(vcf) <- as.list(filt(vcf)), silent=TRUE)
+    filt(vcf1) <- filt(vcf)[1] # recylcing
+    checkIdentical(rep(filt(vcf)[1], nrow(vcf)), filt(vcf1))
 
     ## fixed 
     checkTrue(is(fixed(vcf), "DataFrame"))

@@ -45,10 +45,11 @@ VCF <-
 ### Getters and Setters
 ###
 
-.checkLength <- function (x, len) 
+.recycleVector <- function(x, value)
 {
-    if (len != length(slot(x, "rowRanges"))) 
-        stop("length(value) must equal length(rowRanges(x))")
+    ## warns when number of values not a sub-multiple of length of x
+    x[] <- value
+    x
 }
 
 ### ref 
@@ -61,7 +62,7 @@ setMethod("ref", "VCF",
 setReplaceMethod("ref", c("VCF", "DNAStringSet"),
     function(x, value)
 {
-    .checkLength(x, length(value))
+    value <- .recycleVector(ref(x), value)
     slot(x, "fixed")$REF <- value
     x
 })
@@ -76,7 +77,7 @@ setMethod("alt", "VCF",
 setReplaceMethod("alt", c("CollapsedVCF", "CharacterList"),
     function(x, value)
 {
-    .checkLength(x, length(value))
+    value <- .recycleVector(as(alt(x), "CharacterList"), value)
     slot(x, "fixed")$ALT <- value
     x
 })
@@ -84,7 +85,7 @@ setReplaceMethod("alt", c("CollapsedVCF", "CharacterList"),
 setReplaceMethod("alt", c("ExpandedVCF", "character"),
     function(x, value)
 {
-    .checkLength(x, length(value))
+    value <- .recycleVector(as.character(alt(x)), value)
     slot(x, "fixed")$ALT <- value
     x
 })
@@ -99,7 +100,7 @@ setMethod("qual", "VCF",
 setReplaceMethod("qual", c("VCF", "numeric"),
     function(x, value)
 {
-    .checkLength(x, length(value))
+    value <- .recycleVector(qual(x), value)
     slot(x, "fixed")$QUAL <- value
     x
 })
@@ -114,7 +115,7 @@ setMethod("filt", "VCF",
 setReplaceMethod("filt", c("VCF", "character"),
     function(x, value)
 {
-    .checkLength(x, length(value))
+    value <- .recycleVector(filt(x), value)
     slot(x, "fixed")$FILTER <- value
     x
 })
