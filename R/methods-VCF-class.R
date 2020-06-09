@@ -297,7 +297,7 @@ setMethod("vcfFields", "VCF",
 ### Subsetting and combining
 ###
 
-setMethod(vertical_slot_names, "VCF", function(x) {
+setMethod(parallel_slot_names, "VCF", function(x) {
     c("fixed", "info", callNextMethod())
 })
 

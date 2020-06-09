@@ -3,7 +3,7 @@ Type: Package
 Title: Annotation of Genetic Variants
 Description: Annotate variants, compute amino acid coding changes,
         predict coding outcomes.
-Version: 1.35.1
+Version: 1.35.2
 Authors@R: c(person("Bioconductor Package", "Maintainer", role=c("aut", "cre"),
         email="maintainer@bioconductor.org"),
     person("Valerie", "Oberchain", role="aut"),
@@ -12,10 +12,10 @@ Authors@R: c(person("Bioconductor Package", "Maintainer", role=c("aut", "cre"),
     person("Stephanie", "Gogarten", role="ctb"))
 License: Artistic-2.0
 Depends: R (>= 2.8.0), methods, BiocGenerics (>= 0.15.3),
-        GenomeInfoDb (>= 1.15.2), GenomicRanges (>= 1.37.4),
-        SummarizedExperiment (>= 1.9.9), Rsamtools (>= 1.99.0)
-Imports: utils, DBI, zlibbioc, Biobase, S4Vectors (>= 0.17.24),
-        IRanges (>= 2.13.13), XVector (>= 0.19.7), Biostrings (>= 2.47.6),
+        GenomeInfoDb (>= 1.15.2), GenomicRanges (>= 1.41.5),
+        SummarizedExperiment (>= 1.19.5), Rsamtools (>= 1.99.0)
+Imports: utils, DBI, zlibbioc, Biobase, S4Vectors (>= 0.27.12),
+        IRanges (>= 2.23.9), XVector (>= 0.29.2), Biostrings (>= 2.57.2),
         AnnotationDbi (>= 1.27.9), rtracklayer (>= 1.39.7),
         BSgenome (>= 1.47.3), GenomicFeatures (>= 1.31.3)
 Suggests: RUnit, AnnotationHub, BSgenome.Hsapiens.UCSC.hg19,
