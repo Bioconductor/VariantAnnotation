@@ -1,26 +1,18 @@
 useDynLib(VariantAnnotation, .registration=TRUE)
 
 import(methods)
-
+importFrom(utils, packageVersion)
+importFrom(stats, pchisq, setNames)
 import(BiocGenerics)
-
+importFrom(MatrixGenerics, rowRanges)
 import(S4Vectors)
-
 import(IRanges)
-
 import(GenomeInfoDb)
-
 import(GenomicRanges)
-
 import(SummarizedExperiment)
-
 import(Rsamtools)
 
 import(zlibbioc)
-
-importFrom(stats, pchisq, setNames)
-
-importFrom(utils, packageVersion)
 
 importClassesFrom(Biobase, 
     AssayData
