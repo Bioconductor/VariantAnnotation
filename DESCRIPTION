@@ -3,7 +3,7 @@ Type: Package
 Title: Annotation of Genetic Variants
 Description: Annotate variants, compute amino acid coding changes,
         predict coding outcomes.
-Version: 1.35.4
+Version: 1.36.0
 Authors@R: c(person("Bioconductor Package", "Maintainer", role=c("aut", "cre"),
         email="maintainer@bioconductor.org"),
     person("Valerie", "Oberchain", role="aut"),
