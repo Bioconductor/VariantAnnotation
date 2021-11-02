@@ -300,7 +300,7 @@ makeFORMATheader <- function(x) {
 makeINFOheader <- function(x) {
   df <- mcols(x)
   if (is.null(df))
-    df <- new("DataFrame", nrows = length(x))
+    df <- make_zero_col_DFrame(length(x))
   rownames(df) <- names(x)
   numberForColumn <- function(xi) {
     if (length(dim(xi)) == 2)
@@ -336,7 +336,7 @@ makeFILTERheader <- function(x) {
   else rules <- FilterRules()
   df <- mcols(rules)
   if (is.null(df)) {
-    df <- new("DataFrame", nrows = length(rules))
+    df <- make_zero_col_DFrame(length(rules))
   }
   if (is.null(df$Description)) {
     exprs <- as.logical(lapply(rules, is.expression))
