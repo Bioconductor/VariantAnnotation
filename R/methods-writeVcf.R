@@ -181,6 +181,13 @@
     } else if(nms == "PEDIGREE" || nms == "ALT") {
         if (!is.null(rownames(df)))
             df <- DataFrame(ID = rownames(df), df)
+        if ("Description" %in% colnames(df)) {      # VJC respond LTLA 20 Nov 2021
+            if (nrow(df) == 0L)
+                return(character())
+            df$Description <-
+              ifelse(is.na(df$Description), "\".\"",
+                           paste("\"", df$Description, "\"", sep=""))
+        }                                           # end response
         .pasteMultiFieldDF(df, nms)
     ## 'simple' key-value pairs
     } else if(ncol(df) == 1L && nrow(df) == 1L) {

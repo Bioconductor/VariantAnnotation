@@ -110,3 +110,26 @@ test_writeVcf_geno <- function()
     vcf2 <- readVcf(dest, "") 
     checkIdentical(geno(vcf1)$GL, geno(vcf2)$GL)
 }
+
+test_alt_description_quoting = function()   # https://github.com/Bioconductor/VariantAnnotation/issues/52
+{
+fl <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
+vcf <- readVcf(fl, genome="hg19")
+tmp <- tempfile()
+writeVcf(vcf, filename=tmp)
+#lines = readLines(tmp) # missing from chunk above
+#lines[grepl("ALT=", lines)]
+require("S4Vectors")
+good = new("DFrame", rownames = c("DEL", "DEL:ME:ALU", "DEL:ME:L1", 
+"DUP", "DUP:TANDEM", "INS", "INS:ME:ALU", "INS:ME:L1", "INV", 
+"CNV"), nrows = 10L, elementType = "ANY", elementMetadata = NULL, 
+    metadata = list(), listData = list(Description = c("Deletion", 
+    "Deletion of ALU element", "Deletion of L1 element", "Duplication", 
+    "Tandem Duplication", "Insertion of novel sequence", "Insertion of ALU element", 
+    "Insertion of L1 element", "Inversion", "Copy number variable region"
+    )))
+chkr = readVcf(tmp)
+chk = fixed(header(readVcf(tmp)))$ALT
+checkIdentical(chk, good)
+}
+
