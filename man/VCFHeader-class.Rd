@@ -73,13 +73,13 @@
       have no "ID" field in which case the "key" is used as the
       row name.
  
-      NOTE: In VariantAnnotation <= 1.27.25, the \code{meta()} extractor
+      NOTE: In VariantAnnotation <= 1.27.5, the \code{meta()} extractor
       returned a \code{DataFrame} called "META" which held all simple
       key-value header lines. The VCF 4.3 specs allowed headers lines
       with key name "META" which caused a name clash with the pre-existing
       "META" \code{DataFrame}. 
 
-      In \code{VariantAnnotation} >=1.27.26 the "META" \code{DataFrame} was
+      In \code{VariantAnnotation} >=1.27.6 the "META" \code{DataFrame} was
       split and each row became its own separate \code{DataFrame}. Calling
       \code{meta()} on a \code{VCFHeader} object now returns a list of
       \code{DataFrames}, one for each unique key name in the header.
