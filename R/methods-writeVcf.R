@@ -190,7 +190,8 @@
         }                                           # end response
         .pasteMultiFieldDF(df, nms)
     ## 'simple' key-value pairs
-    } else if(ncol(df) == 1L && nrow(df) == 1L) {
+    ## (Rsamtools reports unstructured headers as one column named "Value")
+    } else if(ncol(df) == 1L && names(df)[1] == "Value" && nrow(df) == 1L) {
         if (nms == "fileDate") {
             fd <- format(Sys.time(), "%Y%m%d")
             paste("##fileDate=", fd, sep="")
