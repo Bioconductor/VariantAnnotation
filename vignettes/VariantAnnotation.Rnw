@@ -148,14 +148,14 @@ We will use the info data to compare quality measures between
 novel (i.e., not in dbSNP) and known (i.e., in dbSNP) variants 
 and the variant type present in the file. Variants with 
 membership in dbSNP can be identified by using the appropriate 
-SNPlocs package for hg19.
+SNPlocs package for the hg19 genome (GRCh37).
 <<examine_dbSNP>>=
-library(SNPlocs.Hsapiens.dbSNP.20101109)
-rd <- rowRanges(vcf)
-seqlevels(rd) <- "ch22"
-ch22snps <- getSNPlocs("ch22")
-dbsnpchr22 <- sub("rs", "", names(rd)) %in% ch22snps$RefSNP_id
-table(dbsnpchr22)
+library(SNPlocs.Hsapiens.dbSNP144.GRCh37)
+vcf_rsids <- names(rowRanges(vcf))
+chr22snps <- snpsBySeqname(SNPlocs.Hsapiens.dbSNP144.GRCh37, "22")
+chr22_rsids <- mcols(chr22snps)$RefSNP_id
+in_dbSNP <- vcf_rsids %in% chr22_rsids
+table(in_dbSNP)
 @
 
 Info variables of interest are 'VT', 'LDAF' and 'RSQ'.
@@ -166,7 +166,7 @@ info(header(vcf))[c("VT", "LDAF", "RSQ"),]
 
 Create a data frame of quality measures of interest ...
 <<examine_quality>>=
-metrics <- data.frame(QUAL=qual(vcf), inDbSNP=dbsnpchr22,
+metrics <- data.frame(QUAL=qual(vcf), in_dbSNP=in_dbSNP,
     VT=info(vcf)$VT, LDAF=info(vcf)$LDAF, RSQ=info(vcf)$RSQ)
 @
 
@@ -175,7 +175,7 @@ For instance, genotype imputation quality is higher for the known
 variants in dbSNP.
 <<examine_ggplot2, fig=TRUE>>=
 library(ggplot2)
-ggplot(metrics, aes(x=RSQ, fill=inDbSNP)) +
+ggplot(metrics, aes(x=RSQ, fill=in_dbSNP)) +
     geom_density(alpha=0.5) +
     scale_x_continuous(name="MaCH / Thunder Imputation Quality") +
     scale_y_continuous(name="Density") +
