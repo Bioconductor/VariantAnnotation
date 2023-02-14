@@ -17,7 +17,7 @@ setClass("VCF",
 .valid.VCF.fixed <- function(object)
 {
     xlen <- dim(object)[1]
-    ffld <- slot(object, "fixed")
+    ffld <- fixed(object)
     nms <- colnames(ffld)
 
     if (nrow(ffld) != 0) {
@@ -43,7 +43,7 @@ setClass("VCF",
 .valid.VCF.info <- function(object)
 {
     xlen <- nrow(object)
-    i <- slot(object, "info")
+    i <- info(object)
     if (nrow(i) != xlen)
         return("'info' must have the same number of rows as 'rowRanges'")
     NULL
