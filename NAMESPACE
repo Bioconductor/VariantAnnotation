@@ -116,7 +116,7 @@ exportMethods(
     isSNV, isInsertion, isDeletion, isIndel, isDelins, isTransition,
     isSubstitution,
 
-    fixed, "fixed<-", ref, "ref<-", alt, "alt<-", qual, "qual<-",
+    updateObject, fixed, "fixed<-", ref, "ref<-", alt, "alt<-", qual, "qual<-",
     filt, "filt<-", info, "info<-", geno, "geno<-", strand, 
     "strand<-", "[", "[<-", cbind, rbind, "mcols<-", indexVcf, vcfFields, subset,
 

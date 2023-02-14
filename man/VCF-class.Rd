@@ -18,6 +18,11 @@
 \alias{SnpMatrixToVCF}
 
 % Accessor methods:
+\alias{updateObject,VCF-method}
+\alias{fixed}
+\alias{fixed,VCF-method}
+\alias{fixed<-}
+\alias{fixed<-,VCF,DataFrame-method}
 \alias{ref}
 \alias{ref,VCF-method}
 \alias{ref<-}
@@ -37,10 +42,6 @@
 \alias{filt,VCF-method}
 \alias{filt<-}
 \alias{filt<-,VCF,character-method}
-\alias{fixed}
-\alias{fixed,VCF-method}
-\alias{fixed<-}
-\alias{fixed<-,VCF,DataFrame-method}
 \alias{info}
 \alias{info,VCF-method}
 \alias{info<-}

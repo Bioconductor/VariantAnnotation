@@ -42,6 +42,21 @@ VCF <-
 }
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### updateObject()
+###
+
+setMethod("updateObject", "VCF",
+    function(object, ..., verbose=FALSE)
+    {
+        # Fix VCF-specific slots.
+        object@fixed <- updateObject(object@fixed, ..., verbose=verbose)
+        object@info <- updateObject(object@info, ..., verbose=verbose)
+        # Call method for RangedSummarizedExperiment objects.
+        callNextMethod()
+    }
+)
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Getters and Setters
 ###
 
@@ -52,11 +67,27 @@ VCF <-
     x
 }
 
+### fixed
+setMethod("fixed", "VCF",
+    function(x)
+{
+    ## Fix old DataFrame instance on-the-fly.
+    updateObject(slot(x, "fixed"), check=FALSE)
+})
+
+setReplaceMethod("fixed", c("VCF", "DataFrame"),
+    function(x, value)
+{
+    slot(x, "fixed") <- value
+    validObject(x)
+    x
+})
+
 ### ref 
 setMethod("ref", "VCF", 
     function(x) 
 {
-    slot(x, "fixed")$REF
+    fixed(x)$REF
 })
 
 setReplaceMethod("ref", c("VCF", "DNAStringSet"),
@@ -71,7 +102,7 @@ setReplaceMethod("ref", c("VCF", "DNAStringSet"),
 setMethod("alt", "VCF", 
     function(x) 
 {
-    slot(x, "fixed")$ALT
+    fixed(x)$ALT
 })
 
 setReplaceMethod("alt", c("CollapsedVCF", "CharacterList"),
@@ -94,7 +125,7 @@ setReplaceMethod("alt", c("ExpandedVCF", "character"),
 setMethod("qual", "VCF", 
     function(x) 
 {
-    slot(x, "fixed")$QUAL
+    fixed(x)$QUAL
 })
 
 setReplaceMethod("qual", c("VCF", "numeric"),
@@ -109,7 +140,7 @@ setReplaceMethod("qual", c("VCF", "numeric"),
 setMethod("filt", "VCF", 
     function(x) 
 {
-    slot(x, "fixed")$FILTER
+    fixed(x)$FILTER
 })
 
 setReplaceMethod("filt", c("VCF", "character"),
@@ -120,29 +151,16 @@ setReplaceMethod("filt", c("VCF", "character"),
     x
 })
 
-### fixed 
-setMethod("fixed", "VCF", 
-    function(x) 
-{
-    slot(x, "fixed")
-})
-
-setReplaceMethod("fixed", c("VCF", "DataFrame"),
-    function(x, value)
-{
-    slot(x, "fixed") <- value
-    validObject(x)
-    x
-})
-
 ### rowRanges
 setMethod("rowRanges", "VCF", 
     function(x, ..., fixed = TRUE) 
 {
     gr <- slot(x, "rowRanges")
-    if (fixed)
-        if (length(slot(x, "fixed")) != 0L)
-            mcols(gr) <- append(mcols(gr), slot(x, "fixed"))
+    if (fixed) {
+        x_fixed <- fixed(x)
+        if (length(x_fixed) != 0L)
+            mcols(gr) <- append(mcols(gr), x_fixed)
+    }
     gr
 })
 
@@ -181,7 +199,8 @@ setReplaceMethod("dimnames", c("VCF", "list"),
 setMethod("info", "VCF", 
     function(x, ..., row.names = TRUE) 
 {
-    info <- slot(x, "info")
+    ## Fix old DataFrame instance on-the-fly.
+    info <- updateObject(slot(x, "info"), check=FALSE)
     if (row.names && !anyDuplicated(rownames(x)))
         rownames(info) <- rownames(x)
     info
@@ -318,12 +337,12 @@ setMethod("[", c("VCF", "ANY", "ANY"),
         callNextMethod(x, , j, ...)
     } else if (missing(j)) {
         callNextMethod(x, i, ,
-                       info=slot(x, "info")[i,,drop=FALSE],
-                       fixed=slot(x, "fixed")[i,,drop=FALSE], ...)
+                       info=info(x)[i,,drop=FALSE],
+                       fixed=fixed(x)[i,,drop=FALSE], ...)
     } else {
         callNextMethod(x, i, j,
-                       info=slot(x, "info")[i,,drop=FALSE],
-                       fixed=slot(x, "fixed")[i,,drop=FALSE], ...)
+                       info=info(x)[i,,drop=FALSE],
+                       fixed=fixed(x)[i,,drop=FALSE], ...)
     }
 })
 
@@ -353,23 +372,23 @@ setReplaceMethod("[",
     } else if (missing(j)) {
         callNextMethod(x, i, ,
             info=local({
-            ii <- slot(x, "info")
-            ii[i,] <- slot(value, "info")
+            ii <- info(x)
+            ii[i,] <- info(value)
             ii 
         }), fixed=local({
-            ff <- slot(x, "fixed") 
-            ff[i,] <- slot(value, "fixed") 
+            ff <- fixed(x)
+            ff[i,] <- fixed(value)
             ff
         }), ..., value=value)
     } else {
         callNextMethod(x, i, j,
             info=local({
-            ii <- slot(x, "info")
-            ii[i,] <- slot(value, "info")
+            ii <- info(x)
+            ii[i,] <- info(value)
             ii 
         }), fixed=local({
-            ff <- slot(x, "fixed") 
-            ff[i,] <- slot(value, "fixed") 
+            ff <- fixed(x)
+            ff[i,] <- fixed(value)
             ff
         }), ..., value=value)
     }
