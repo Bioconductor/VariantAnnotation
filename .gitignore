@@ -1,3 +1,7 @@
 *.o
 *.so
 *.project
+# R project files
+*.Rproj
+.Rproj.user
+.Ruserdata 
