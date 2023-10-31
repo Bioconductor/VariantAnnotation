@@ -3,7 +3,7 @@ Type: Package
 Title: Annotation of Genetic Variants
 Description: Annotate variants, compute amino acid coding changes,
         predict coding outcomes.
-Version: 1.49.0
+Version: 1.49.1
 Authors@R: c(
         person("Valerie", "Oberchain", role="aut"),
         person("Martin", "Morgan", role="aut"),
@@ -14,7 +14,7 @@ Authors@R: c(
 License: Artistic-2.0
 Depends: R (>= 4.0.0), methods, BiocGenerics (>= 0.37.0), MatrixGenerics,
         GenomeInfoDb (>= 1.15.2), GenomicRanges (>= 1.41.5),
-        SummarizedExperiment (>= 1.19.5), Rsamtools (>= 1.99.0)
+        SummarizedExperiment (>= 1.19.5), Rsamtools (>= 2.19.1)
 Imports: utils, DBI, zlibbioc, Biobase, S4Vectors (>= 0.27.12),
         IRanges (>= 2.23.9), XVector (>= 0.29.2), Biostrings (>= 2.57.2),
         AnnotationDbi (>= 1.27.9), rtracklayer (>= 1.39.7),
@@ -24,7 +24,7 @@ Suggests: RUnit, AnnotationHub, BSgenome.Hsapiens.UCSC.hg19,
         SNPlocs.Hsapiens.dbSNP144.GRCh37, SIFT.Hsapiens.dbSNP132,
         SIFT.Hsapiens.dbSNP137, PolyPhen.Hsapiens.dbSNP131, snpStats,
         ggplot2, BiocStyle, knitr
-LinkingTo: S4Vectors, IRanges, XVector, Biostrings, Rhtslib (>= 1.99.3)
+LinkingTo: S4Vectors, IRanges, XVector, Biostrings, Rhtslib (>= 2.99.0)
 SystemRequirements: GNU make
 LazyLoad: yes
 biocViews: DataImport, Sequencing, SNP, Annotation,
