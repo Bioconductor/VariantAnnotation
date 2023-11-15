@@ -3,7 +3,7 @@
 #include <R_ext/Connections.h>
 
 /* write all elements of 'list' genotype field */
-static void write_list_elt(SEXP v_elt, const char mv_sep, kstring_t *bufp) 
+static void write_list_elt(SEXP v_elt, const char mv_sep, kstring_t *bufp)
 {
     SEXPTYPE v_type;
     int v, v_len;
@@ -18,7 +18,7 @@ static void write_list_elt(SEXP v_elt, const char mv_sep, kstring_t *bufp)
             break;
         case INTSXP:
             for (v = 0; v < v_len; v++) {
-                if (NA_INTEGER != INTEGER(v_elt)[v]) 
+                if (NA_INTEGER != INTEGER(v_elt)[v])
                     kputw(INTEGER(v_elt)[v], bufp);
                 else
                     kputc('.', bufp);
@@ -62,7 +62,7 @@ static void write_geno_sample(int i, int j, int k_last, Rboolean *k_valid,
     SEXPTYPE type;
     double d_elt;
     int k, z, z_dim, z_max, index, i_elt;
- 
+
     for (k = 0; k < n_fields; ++k) {
         if (!k_valid[k])
             continue;
@@ -71,7 +71,7 @@ static void write_geno_sample(int i, int j, int k_last, Rboolean *k_valid,
         z_dim = INTEGER(geno_zdim)[k];
         z_max = (NA_INTEGER != z_dim) ? z_dim : 1;
         for (z = 0; z < z_max; ++z) {
-            index = i + j*n_rows + z*n_rows*n_samples; 
+            index = i + j*n_rows + z*n_rows*n_samples;
             switch (type) {
             case NILSXP:
                 break;
@@ -80,7 +80,7 @@ static void write_geno_sample(int i, int j, int k_last, Rboolean *k_valid,
                 break;
             case INTSXP:
                 i_elt = INTEGER(field)[index];
-                if (NA_INTEGER != i_elt) 
+                if (NA_INTEGER != i_elt)
                     kputw(i_elt, bufp);
                 else
                     kputc('.', bufp);
@@ -156,20 +156,20 @@ static Rboolean valid_geno_elt(SEXP field, int index)
             break;
     }
     return valid;
-} 
+}
 
-/* --- .Call ENTRY POINT --- 
- * 'conn'       : connection 
+/* --- .Call ENTRY POINT ---
+ * 'conn'       : connection
  * 'fixed'      : character vector of FIXED fields
  * 'format'     : character vector of FORMAT names
  * 'geno'       : list of genotype data
  * 'separators' : character vector of length 2 consisting of a field
- *                separator (first) and multi-value per field 
+ *                separator (first) and multi-value per field
  *                separator (second)
  * 'vcf_dim'    : integer vector of length 2 (n rows, n cols)
- * 'geno_zdim'  : integer vector of z dimension of genotype data 
+ * 'geno_zdim'  : integer vector of z dimension of genotype data
 */
-void make_vcf_geno(SEXP conn, SEXP fixed, SEXP format, SEXP geno, 
+SEXP make_vcf_geno(SEXP conn, SEXP fixed, SEXP format, SEXP geno,
                    SEXP separators, SEXP vcf_dim, SEXP geno_zdim)
 {
     const char f_sep = *CHAR(STRING_ELT(separators, 0));
@@ -212,7 +212,7 @@ void make_vcf_geno(SEXP conn, SEXP fixed, SEXP format, SEXP geno,
             z_max = (NA_INTEGER != z_dim) ? z_dim : 1;
             for (j = 0; j < n_samples && fmt_search; ++j) {
                 for (z = 0; z < z_max; ++z) {
-                    index = i + j*n_rows + z*n_rows*n_samples; 
+                    index = i + j*n_rows + z*n_rows*n_samples;
                     if (valid_geno_elt(field, index)) {
                         /* avoid trailing f_sep */
                         if (fmt_found)
@@ -225,7 +225,7 @@ void make_vcf_geno(SEXP conn, SEXP fixed, SEXP format, SEXP geno,
                         fmt_search = FALSE;
                         fmt_found = TRUE;
                         break;
-                    } else if (k == n_fields - 1 && 
+                    } else if (k == n_fields - 1 &&
                                z == z_max - 1 &&
                                j == n_samples - 1) {
                             kputc('\t', &buf);
@@ -237,7 +237,7 @@ void make_vcf_geno(SEXP conn, SEXP fixed, SEXP format, SEXP geno,
         /* write genotype fields if present */
         if (n_samples > 0) {
             for (j = 0; j < n_samples; ++j) {
-                write_geno_sample(i, j, k_last, k_valid, geno_zdim, n_rows, 
+                write_geno_sample(i, j, k_last, k_valid, geno_zdim, n_rows,
                                   n_samples, n_fields, geno, f_sep, mv_sep,
                                   &buf);
                 if (j < n_samples - 1) {
@@ -258,7 +258,9 @@ void make_vcf_geno(SEXP conn, SEXP fixed, SEXP format, SEXP geno,
     }
 
     free(buf.s);
- }
+
+    return R_NilValue;
+}
 
 /* paste-collapse character matrix by row, ignoring NAs */
 SEXP matrix_pasteCollapseRows(SEXP x, SEXP sep) {
