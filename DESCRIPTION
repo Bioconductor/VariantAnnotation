@@ -3,7 +3,7 @@ Type: Package
 Title: Annotation of Genetic Variants
 Description: Annotate variants, compute amino acid coding changes,
         predict coding outcomes.
-Version: 1.49.3
+Version: 1.49.4
 Authors@R: c(
         person("Valerie", "Oberchain", role="aut"),
         person("Martin", "Morgan", role="aut"),

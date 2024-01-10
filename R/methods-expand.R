@@ -40,8 +40,14 @@ setMethod("expand", "CollapsedVCF",
             mcols(rdexp) <- NULL
         } else rdexp <- rd[idx, "paramRangeID"]
 
-        VCF(rdexp, colData(x), metadata(x), fexp, iexp, gexp,
-            ..., collapsed=FALSE)
+        tmp = VCF(rdexp, colData(x), metadata(x), fexp, iexp, gexp,
+            ..., collapsed=FALSE)  # https://github.com/Bioconductor/VariantAnnotation/issues/79 says 'A' should not occur in info(header())$Number
+        nhi = info(header(tmp))
+        num = nhi$Number
+        inda = grep("A", num)
+        if (length(inda)>0) num[inda] = "1"
+        info(header(tmp))$Number = num
+        tmp
     }
 )
 
