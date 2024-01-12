@@ -43,7 +43,7 @@ static void vcfwarn(khash_t(WARNINGS) *warnings,
     va_start(argp, fmt);
     (void) vsnprintf(buf, bufsize, fmt, argp);
     va_end(argp);
-    Rf_warning(buf);
+    Rf_warning("%s", buf);
     Free(buf);
 
     return;
