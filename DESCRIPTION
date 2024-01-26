@@ -3,7 +3,7 @@ Type: Package
 Title: Annotation of Genetic Variants
 Description: Annotate variants, compute amino acid coding changes,
         predict coding outcomes.
-Version: 1.49.5
+Version: 1.49.6
 Authors@R: c(
         person("Valerie", "Oberchain", role="aut"),
         person("Martin", "Morgan", role="aut"),
@@ -23,12 +23,13 @@ Suggests: RUnit, AnnotationHub, BSgenome.Hsapiens.UCSC.hg19,
         TxDb.Hsapiens.UCSC.hg19.knownGene,
         SNPlocs.Hsapiens.dbSNP144.GRCh37, SIFT.Hsapiens.dbSNP132,
         SIFT.Hsapiens.dbSNP137, PolyPhen.Hsapiens.dbSNP131, snpStats,
-        ggplot2, BiocStyle, knitr
+        ggplot2, BiocStyle, knitr, magick, jsonlite, httr,
+	rjsoncons
 LinkingTo: S4Vectors, IRanges, XVector, Biostrings, Rhtslib (>= 2.99.0)
 SystemRequirements: GNU make
 LazyLoad: yes
 biocViews: DataImport, Sequencing, SNP, Annotation,
         Genetics, VariantAnnotation
 Video: https://www.youtube.com/watch?v=Ro0lHQ_J--I&list=UUqaMSQd_h-2EDGsU6WDiX0Q
-RoxygenNote: 7.1.2
+RoxygenNote: 7.3.1
 VignetteBuilder: knitr

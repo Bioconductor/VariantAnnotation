@@ -1,0 +1,126 @@
+---
+title: "ensemblVEP: using the REST API with Bioconductor"
+author: "Vincent J. Carey, stvjc at channing.harvard.edu"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{ensemblVEP: using the REST API with Bioconductor}
+  %\VignetteEncoding{UTF-8}
+output:
+  BiocStyle::html_document:
+    highlight: pygments
+    number_sections: yes
+    theme: united
+    toc: yes
+bibliography: ens.bib
+---
+
+```{r setup,echo=FALSE,results="hide",message=FALSE}
+library(BiocStyle)
+library(VariantAnnotation)
+library(jsonlite)
+library(httr)
+```
+
+# Introduction
+
+Ensembl's Variant Effect Predictor is described in @McLaren2016.
+
+Prior to Bioconductor 3.19, the ensemblVEP package provided
+access to Ensembl's predictions
+through an interface between Perl and MySQL.
+
+In 3.19 VariantAnnotation supports the use of the VEP component
+of the REST API at [https://rest.ensembl.org](https://rest.ensembl.org/).
+
+# Acquire annotation on variants from a VCF file
+
+The function `vep_by_region` will accept
+a VCF object as defined in `r Biocpkg("VariantAnnotation")`.
+
+```{r dodemo,message=FALSE}
+library(VariantAnnotation)
+fl <- system.file("extdata", "chr22.vcf.gz", package="VariantAnnotation")
+r22 = readVcf(fl)
+r22
+```
+
+In this example we confine attention to single nucleotide variants.
+
+There is a limit of 200 locations in a request, and 55000 requests per hour.
+We'll base our query on 100 positions in the chr22 VCF.
+
+```{r lksnv}
+dr = which(width(rowRanges(r22))!=1)
+r22s = r22[-dr]
+res = vep_by_region(r22[1:100], snv_only=FALSE, chk_max=FALSE)
+jans = toJSON(content(res))
+```
+
+There are various ways to work with the result of this query to the API.
+We'll use the `r CRANpkg('rjsoncons')` JSON processing infrastructure
+to dig in and understand aspects of the API behavior.
+
+First, the top-level concepts produced for each variant can
+be retrieved using
+```{r doj1, message=FALSE}
+library(rjsoncons)
+names(jsonlite::fromJSON(jmespath(jans, "[*]")))
+```
+
+Annotation of the most severe consequence known will typically
+be of interest:
+```{r doj2}
+table(jsonlite::fromJSON(jmespath(jans, "[*].most_severe_consequence")))
+```
+
+There is variability in the structure of data returned for each query.
+```{r doj3}
+head(fromJSON(jmespath(jans, "[*].regulatory_feature_consequences")))
+```
+
+Furthermore, the content of the motif feature consequences field seems
+very peculiar.
+
+```{r lktaaaa}
+table(unlist(fromJSON(jmespath(jans, "[*].motif_feature_consequences"))))
+```
+
+# Transforming the API response to GRanges
+
+We'll consider the following approach to converting
+the API response to a GenomicRanges GRanges instance.  Eventually
+this may become part of the package.
+
+```{r lkmakeg, message=FALSE}
+library(GenomicRanges)
+.make_GRanges = function( vep_response ) {
+  stopifnot(inherits(vep_response, "response"))  # httr
+  nested = fromJSON(toJSON(content(vep_response)))
+  ini = GRanges(seqnames = unlist(nested$seq_region_name),
+    IRanges(start=unlist(nested$start), end=unlist(nested$end)))
+  dr = match(c("seq_region_name", "start", "end"), names(nested))
+  mcols(ini) = DataFrame(nested[,-dr])
+  ini
+}
+tstg = .make_GRanges( res )
+tstg[,1]  # full print is unwieldy
+names(mcols(tstg))
+```
+
+Now information about variants can be retrieved with
+range operations.  Deep annotation
+requires nested structure of the metadata columns.
+
+```{r lkmc}
+mcols(tstg)[1, "transcript_consequences"]
+```
+
+# Further work
+
+An important element of prior work in ensemblVEP supports
+feeding annotation back into the VCF used to generate
+the effect prediction query.  This seems feasible but
+concrete use cases are of interest.
+
+# References
