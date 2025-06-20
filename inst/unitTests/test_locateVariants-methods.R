@@ -31,7 +31,7 @@ test_locateVariants_queryAsVCF <- function()
 {
     fl <- system.file("extdata", "gl_chr1.vcf", package="VariantAnnotation")
     vcf <- readVcf(fl, "hg19")
-    vcf <- renameSeqlevels(vcf, c("1" = "chr1"))
+    seqlevels(vcf) <- c("1" = "chr1")
     loc1 <- locateVariants(vcf, txdb, IntergenicVariants())
     loc2 <- locateVariants(rowRanges(vcf), txdb, IntergenicVariants())
     checkIdentical(loc1, loc2) 

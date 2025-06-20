@@ -464,13 +464,18 @@ identical(geno(vcf)$GQ, geno(vcf)[[2]])
 seqlevels(vcf)
 
 ## Rename the seqlevels to start with 'chr'.
-vcf2 <- renameSeqlevels(vcf, paste0("chr", seqlevels(vcf))) 
+vcf2 <- vcf
+seqlevels(vcf2) <- paste0("chr", seqlevels(vcf2))
 seqlevels(vcf2)
 
-## The VCF can also be subset by seqlevel using 'keepSeqlevels'
-## or 'dropSeqlevels'. See ?keepSeqlevels for details. 
-vcf3 <- keepSeqlevels(vcf2, "chr2", pruning.mode="coarse")
+## Dropping some of the seqlevels can have the effect of reducing
+## the length of the VCF object by keeping only its elements that
+## belong to the remaining seqlevels.
+vcf3 <- vcf2
+length(vcf3)
+seqlevels(vcf3, pruning.mode="coarse") <- "chr2"
 seqlevels(vcf3)
+length(vcf3)
 
 ## ----------------------------------------------------------------
 ## Header information 

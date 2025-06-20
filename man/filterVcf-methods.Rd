@@ -98,6 +98,8 @@ if (require(TxDb.Hsapiens.UCSC.hg19.knownGene)) {
   txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
   exons <- exons(txdb)
   exons22 <- exons[seqnames(exons) == "chr22"]
+
+  library(GenomeInfoDb)
   seqlevelsStyle(exons22) <- "NCBI"  ## match chrom names in VCF file
  
   ## Range-based filter:

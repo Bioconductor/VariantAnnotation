@@ -258,7 +258,7 @@ locateVariants(query, subject, region, ...)
   intersect(seqlevels(vcf), seqlevels(txdb))
 
   ## Rename seqlevels with renameSeqlevesl().
-  vcf <- renameSeqlevels(vcf, paste0("chr", seqlevels(vcf)))
+  seqlevels(vcf) <- paste0("chr", seqlevels(vcf))
 
   ## Confirm.
   intersect(seqlevels(vcf), seqlevels(txdb))

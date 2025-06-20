@@ -472,7 +472,7 @@ SnpMatrixToVCF <- function(from, seqSource)
     ## match seqlevels style to seqSource
     map <- from$map
     chr <- as.character(map$chromosome)
-    seqlevelsStyle(chr) <- seqlevelsStyle(seqSource)
+    GenomeInfoDb::seqlevelsStyle(chr) <- GenomeInfoDb::seqlevelsStyle(seqSource)
     uniqueChr <- unique(chr)
     if (any(invalid <- !uniqueChr %in% seqlevels(seqSource)))
         stop("seqlevels not found in 'seqSource': ", 

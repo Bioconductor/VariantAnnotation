@@ -191,7 +191,7 @@
   vcf <- readVcf(fl, "hg19")
 
   ## Rename seqlevels in the VCF object to match those in the TxDb.
-  vcf <- renameSeqlevels(vcf, "chr22")
+  seqlevels(vcf) <- "chr22"
   ## Confirm common seqlevels
   intersect(seqlevels(vcf), seqlevels(txdb))
  

@@ -248,7 +248,7 @@ test_VRanges_vcf <- function() {
   
   vrA <- vr[sampleNames(vr) == "A"]
   runValue(sampleNames(vrA)) <- factor(runValue(sampleNames(vrA)))
-  vrA <- keepSeqlevels(vrA, unique(as.character(seqnames(vrA))))
+  seqlevels(vrA) <- unique(as.character(seqnames(vrA)))
   writeVcf(vrA, dest)
   vcfA <- readVcf(dest, genome = "hg19")
   vcfA.vr <- as(vcfA, "VRanges")

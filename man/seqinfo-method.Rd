@@ -28,7 +28,7 @@
 \author{Lori Shepherd}
 
 \seealso{
-  \code{\link{VcfFile}}, \code{\link[GenomeInfoDb]{Seqinfo}}
+  \code{\link{VcfFile}}, \code{\link[Seqinfo]{Seqinfo}}
 }
 
 \examples{
