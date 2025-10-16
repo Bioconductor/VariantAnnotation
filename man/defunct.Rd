@@ -43,33 +43,17 @@
 
   ## Removed
   \itemize{
-    \item{
-      \code{refLocsToLocalLocs} has been replaced by \code{mapToTranscripts}
+    \item \code{refLocsToLocalLocs} has been replaced by \code{mapToTranscripts}
       and \code{pmapToTranscripts}.
-    }
-    \item{
-      \code{readVcfLongForm} has been replaced by \code{expand}.
-    }
-    \item{
-      \code{dbSNPFilter} and \code{regionFilter} have been replaced by 
+    \item \code{readVcfLongForm} has been replaced by \code{expand}.
+    \item \code{dbSNPFilter} and \code{regionFilter} have been replaced by 
       \code{filterVcf}.
-    }
-    \item{
-      \code{regionFilter} has been replaced by \code{filterVcf}.
-    }
-    \item{
-      \code{MatrixToSnpMatrix} has been replaced by \code{genotypeToSnpMatrix}.
-    }
-    \item{ 
-      \code{getTranscriptSeqs} has been replaced by
+    \item \code{regionFilter} has been replaced by \code{filterVcf}.
+    \item \code{MatrixToSnpMatrix} has been replaced by \code{genotypeToSnpMatrix}.
+    \item \code{getTranscriptSeqs} has been replaced by
       \code{extractTranscriptSeqs} in the GenomicFeatures package.
-    }
-    \item{
-      \code{VRangesScanVcfParam} has been replaced by \code{ScanVcfParam}.
-    }
-    \item{
-      \code{restrictToSVN} has been replaced by \code{isSNV}.
-    }
+    \item \code{VRangesScanVcfParam} has been replaced by \code{ScanVcfParam}.
+    \item \code{restrictToSVN} has been replaced by \code{isSNV}.
   }
 }
 

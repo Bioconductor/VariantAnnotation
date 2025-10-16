@@ -143,7 +143,7 @@
 
 \section{Constructors}{
   \describe{
-    \item{}{
+    \item{VRanges}{
       \code{VRanges(seqnames = Rle(), ranges = IRanges(), ref = character(), 
         alt = NA_character_, totalDepth = NA_integer_, refDepth = NA_integer_, 
         altDepth = NA_integer_, ..., sampleNames = NA_character_, 
@@ -163,7 +163,7 @@
           reference read depth (NA allowed).}
         \item{\code{altDepth}}{integer vector/Rle, containing the
           reference read depth (NA allowed).}
-        \item{\code{\ldots}}{Arguments passed to the \code{GRanges}
+        \item{\code{...}}{Arguments passed to the \code{GRanges}
           constructor.}
         \item{\code{sampleNames}}{character/factor vector/Rle, containing the
           sample names (NA allowed).}
@@ -176,7 +176,7 @@
           subset the object to its current state.}
       }
     }
-    \item{}{
+    \item{makeVRangesFromGRanges}{
       \code{makeVRangesFromGRanges(gr, 
                                    ref.field="ref",
                                    alt.field="alt",
@@ -229,7 +229,7 @@
   These functions/methods coerce objects to and from \code{VRanges}:
  
   \describe{
-    \item{}{
+    \item{asVCF}{
       \code{asVCF(x, info = character(), filter = character(), meta =
         character())}: Creates a VCF object from a VRanges object. The
       following gives the mapping from VRanges components to VCF:
@@ -263,10 +263,10 @@
       logical column with the reverse coercion. There are many other
       cases of irreversibility.
     }
-    \item{}{
+    \item{as(from, "VCF")}{
       \code{as(from, "VCF")}: Like calling \code{asVCF(from)}.
     }
-    \item{}{
+    \item{as(from, "VRanges")}{
       \code{as(from, "VRanges")}:
       When \code{from} is a \code{VCF} this coercion is essentially
       the inverse of \code{asVCF}. Information missing in the VCF
@@ -287,44 +287,44 @@
   provides the following, where \code{x} is a VRanges object.
 
   \describe{
-    \item{}{
+    \item{alt}{
       \code{alt(x), alt(x) <- value}: Get or set the alt allele (character).
     }
-    \item{}{
+    \item{ref}{
       \code{ref(x), ref(x) <- value}: Get or set the ref allele (character).
     }
-    \item{}{
+    \item{altDepth}{
       \code{altDepth(x), altDepth(x) <- value}: Get or set the alt allele
       read depth (integer).
     }
-    \item{}{
+    \item{refDepth}{
       \code{refDepth(x), refDepth(x) <- value}: Get or set the ref
       allele read depth (integer).
     }
-    \item{}{
+    \item{totalDepth}{
       \code{totalDepth(x), totalDepth(x) <- value}: Get or set the total
       read depth (integer).
     }
-    \item{}{
+    \item{altFraction}{
       \code{altFraction(x)}: Returns \code{altDepth(x)/totalDepth(x)} (numeric).
     }
-    \item{}{
+    \item{sampleNames}{
       \code{sampleNames(x), sampleNames(x) <- value}: Get or set the
       sample names (character/factor).
     }
-    \item{}{
+    \item{softFilterMatrix}{
       \code{softFilterMatrix(x), softFilterMatrix(x) <- value}: Gets or
       sets the soft filter matrix (any matrix, but ideally a
       \code{FilterMatrix}).
     }
-    \item{}{
+    \item{resetFilter}{
       \code{resetFilter(x)}: Removes all columns from \code{softFilterMatrix}.
     }
-    \item{}{
+    \item{called}{
       \code{called(x)}: Returns whether all filter results in
       \code{softFilterMatrix(x)} are \code{TRUE} for each variant.
     }
-    \item{}{
+    \item{hardFilters}{
       \code{hardFilters(x), hardFilters(x) <- value}: Gets or
       sets the hard filters (those applied to yield the current subset).
     }
@@ -333,16 +333,16 @@
 
 \section{Utilities and Conveniences}{
   \describe{
-    \item{}{
+    \item{match}{
       \code{match(x)}: Like GRanges \code{match}, except matches on the
       combination of chromosome, start, width, and \strong{alt}.
     }
-    \item{}{
+    \item{tabulate}{
       \code{tabulate(bin)}: Finds \code{unique(bin)} and counts how many
       times each unique element occurs in \code{bin}. The result is
       stored in \code{mcols(bin)$sample.count}.
     }
-    \item{}{
+    \item{softFilter}{
       \code{softFilter(x, filters, ...)}: applies the \code{FilterRules}
       in \code{filters} to \code{x}, storing the results in
       \code{softFilterMatrix}.
@@ -352,11 +352,11 @@
 
 \section{Input/Output to/from VCF}{
   \describe{
-    \item{}{
+    \item{writeVcf}{
       \code{writeVcf(obj, filename, ...)}: coerces to a VCF object and
       writes it to a file; see \code{\link{writeVcf}}.
     }
-    \item{}{
+    \item{readVcfAsVRanges}{
       \code{readVcfAsVRanges(x, genome, param = ScanVcfParam(), ...)}:
       Reads a VCF \code{x} directly into a \code{VRanges};
       see \code{\link{readVcf}} for details on the arguments.

@@ -71,7 +71,7 @@
   be transcripts-by-sample. If the \code{GRangesList} is genes,
   the count matrix will be gene-by-sample.
 
-  \itemize{
+  \describe{
     \item{Counting with locateVariants() :}{
 
       Variant counts are always summarized transcript-by-sample.

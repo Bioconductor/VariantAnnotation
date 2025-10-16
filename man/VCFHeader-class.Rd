@@ -44,7 +44,7 @@
 
 \section{Constructor}{
   \describe{
-    \item{}{
+    \item{VCFHeader}{
       \code{VCFHeader(reference = character(), samples = character(), 
                       header = DataFrameList(), ...)
       }
@@ -55,16 +55,16 @@
 \section{Accessors}{
   In the following code snippets \code{x} is a VCFHeader object.
   \describe{
-    \item{}{
+    \item{samples}{
       \code{samples(x)}:
       Returns a character() vector of names of samples. 
     }
-    \item{}{
+    \item{header}{
       \code{header(x)}:
       Returns all information in the header slot which includes
       \code{meta}, \code{info} and \code{geno} if present.
     }
-    \item{}{
+    \item{meta}{
       \code{meta(x)}, \code{meta(x)<- value}: The getter returns a
       \code{DataFrameList}. Each \code{DataFrame} represents a unique
       "key" name in the header file. Multiple header lines
@@ -84,7 +84,7 @@
       \code{meta()} on a \code{VCFHeader} object now returns a list of
       \code{DataFrames}, one for each unique key name in the header.
     }
-    \item{}{
+    \item{fixed}{
       \code{fixed(x), fixed(x)<- value}:
       Returns a \code{DataFrameList} of information pertaining to any of
       \sQuote{REF}, \sQuote{ALT}, \sQuote{FILTER} and \sQuote{QUAL}. 
@@ -92,24 +92,24 @@
       the following names, \sQuote{QUAL}, \sQuote{FILTER}, \sQuote{REF} 
       and \sQuote{ALT}. 
     }
-    \item{}{
+    \item{info}{
       \code{info(x)}, \code{info(x)<- value}:
       Gets or sets a \code{DataFrame} of \sQuote{INFO} information.
       Replacement value must be a \code{DataFrame} with 3 columns
       named \sQuote{Number}, \sQuote{Type} and \sQuote{Description}. 
     }
-    \item{}{
+    \item{geno}{
       \code{geno(x)}, \code{geno(x)<- value}:
       Returns a \code{DataFrame} of \sQuote{FORMAT} information.
       Replacement value must be a \code{DataFrame} with 3 columns
       named \sQuote{Number}, \sQuote{Type} and \sQuote{Description}. 
     }
-    \item{}{
+    \item{reference}{
       \code{reference(x)}:
       Returns a character() vector with names of reference sequences.
       Not relevant for \code{scanVcfHeader}.
     }
-    \item{}{
+    \item{vcfFields}{
       \code{vcfFields(x)}:
       Returns a \code{\link[IRanges]{CharacterList}} of all available VCF
       fields, with names of \code{fixed}, \code{info}, \code{geno} and

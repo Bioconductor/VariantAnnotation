@@ -26,7 +26,7 @@
   }
   \item{\dots}{Additional arguments, passed to methods.
       \itemize{
-        \item{nchunk:} Integer or NA. When provided this argument
+        \item nchunk: Integer or NA. When provided this argument
         overrides the default chunking behavior of \code{writeVcf}, 
         see Details section. An integer value specifies the number
         of records in each chunk; NA disables chunking.

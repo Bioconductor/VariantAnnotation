@@ -60,7 +60,7 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
     and ?\code{indexVcf} for help creating a \code{\link{VcfFile}}.
   }
   \item{genome}{A \code{character} or \code{Seqinfo} object.
-    \itemize{
+    \describe{
       \item{\code{character}:}{ Genome identifier as a single string or named 
         character vector. Names of the character vector correspond to 
         chromosome names in the file. This identifier replaces the genome 
