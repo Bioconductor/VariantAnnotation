@@ -22,28 +22,28 @@
 \section{Methods}{
   In the code below, \code{x} is a \code{PolyPhenDb} object.
   \describe{
-    \item{}{
+    \item{metadata}{
       \code{metadata(x)}:
       Returns \code{x}'s metadata in a data frame.
     }
-    \item{}{
+    \item{columns}{
       \code{columns(x)}:
       Returns the names of the \code{columns} that can be used to subset the
       data columns. For column descriptions see \code{?PolyPhenDbColumns}.
     }
-    \item{}{
+    \item{keys}{
       \code{keys(x)}:
       Returns the names of the \code{keys} that can be used to subset the
       data rows. The \code{keys} values are the rsid's.
     }
-    \item{}{
+    \item{select}{
       \code{select(x, keys = NULL, columns = NULL, ...)}:
       Returns a subset of data defined by the character vectors \code{keys} 
       and \code{columns}. If no \code{keys} are supplied, all rows are
       returned. If no \code{columns} are supplied, all columns
       are returned. See \code{?PolyPhenDbColumns} for column descriptions.
     } 
-    \item{}{
+    \item{duplicateRSID}{
       \code{duplicateRSID(x)}:
       Returns a named list of duplicate rsid groups. The names are the 
       \code{keys}, the list elements are the rsid's that have been 

@@ -96,7 +96,7 @@
   All functions return a logical vector the length of \code{x}.
   Variants in gvcf files with NON_REF alt alleles return TRUE;
   structural variants return FALSE.
-  \itemize{
+  \describe{
     \item{isSNV: }{
       Reference and alternate alleles are both a single nucleotide long.
     }

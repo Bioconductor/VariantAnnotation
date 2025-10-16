@@ -131,28 +131,28 @@
   In the following code, \code{x} is a \code{PromoterVariants} or a
   \code{AllVariants} object.
   \describe{
-    \item{}{
+    \item{upstream}{
       \code{upstream(x)}, \code{upstream(x) <- value}:
       Gets or sets the number of base pairs defining a range
       upstream of the 5' end (excludes 5' start value).
     }
-    \item{}{
+    \item{downstream}{
       \code{downstream(x)}, \code{downstream(x) <- value}:
       Gets or sets the number of base pairs defining a range
       downstream of the 3' end (excludes 3' end value).
     }
-    \item{}{
+    \item{idType}{
       \code{idType(x)}, \code{idType(x) <- value}:
       Gets or sets the \code{character()} which controls the id returned 
       in the PRECEDEID and FOLLOWID output columns. Possible values are
       "gene" and "tx".
     }
-    \item{}{
+    \item{promoters}{
       \code{promoters(x)}, \code{promoters(x) <- value}:
       Gets or sets the \code{PromoterVariants} in the 
       \code{AllVariants} object.
     }
-    \item{}{
+    \item{intergenic}{
       \code{intergenic(x)}, \code{intergenic(x) <- value}:
       Gets or sets the \code{IntergenicVariants} in the 
       \code{AllVariants} object.

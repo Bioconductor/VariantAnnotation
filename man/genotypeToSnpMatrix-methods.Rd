@@ -43,10 +43,10 @@
   "GT", "GP", "GL" or "PL" FORMAT field of a VCF file into a 
   \link[snpStats:SnpMatrix-class]{SnpMatrix}. The following caveats apply, 
   \itemize{
-    \item{no distinction is made between phased and unphased genotypes}
-    \item{variants with >1 ALT allele are set to NA}
-    \item{only single nucleotide variants are included; others are set to NA}
-    \item{only diploid calls are included; others are set to NA}
+    \item no distinction is made between phased and unphased genotypes
+    \item variants with >1 ALT allele are set to NA
+    \item only single nucleotide variants are included; others are set to NA
+    \item only diploid calls are included; others are set to NA
   }
 
   In VCF files, 0 represents the reference allele and integers greater than 0
@@ -62,21 +62,21 @@
   
   The genotype fields are defined as follows:
   \itemize{
-    \item{GT : genotype, encoded as allele values separated by either of
+    \item GT : genotype, encoded as allele values separated by either of
       "/" or "|". The allele values are 0 for the reference allele and 1
-      for the alternate allele.}
-    \item{GL : genotype likelihoods comprised of comma separated
+      for the alternate allele.
+    \item GL : genotype likelihoods comprised of comma separated
       floating point log10-scaled likelihoods for all possible
       genotypes.  In the case of a reference allele A and a single
       alternate allele B, the likelihoods will be ordered "A/A", "A/B",
-      "B/B".}
-    \item{PL : the phred-scaled genotype likelihoods rounded to the
+      "B/B".
+    \item PL : the phred-scaled genotype likelihoods rounded to the
       closest integer.  The ordering of values is the 
-      same as for the GL field.}
-    \item{GP : the phred-scaled genotype posterior probabilities for all
+      same as for the GL field.
+    \item GP : the phred-scaled genotype posterior probabilities for all
       possible genotypes; intended to store
       imputed genotype probabilities.  The ordering of values is the
-      same as for the GL field.}
+      same as for the GL field.
   }
 
   If \code{uncertain=TRUE}, the posterior probabilities of the three
