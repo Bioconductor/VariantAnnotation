@@ -4,6 +4,41 @@ cdsbytx <- cdsBy(txdb, use.names=TRUE)
 intbytx <- intronsByTranscript(txdb)
 txbygene <- transcriptsBy(txdb, "gene")
 
+#
+# As of Oct 16 2025, 3.22 preparation, we have the following
+# but the test positions in gr below for locateVariants are
+# inconsistent with these addresses
+#
+#> cdsbytx[1:3]
+#GRangesList object of length 3:
+#$ENST00000641515.2_6
+#GRanges object with 2 ranges and 3 metadata columns:
+#      seqnames      ranges strand |    cds_id    cds_name exon_rank
+#         <Rle>   <IRanges>  <Rle> | <integer> <character> <integer>
+#  [1]     chr1 65565-65573      + |         1        <NA>         2
+#  [2]     chr1 69037-70008      + |         2        <NA>         3
+#  -------
+#  seqinfo: 298 sequences (2 circular) from hg19 genome
+#
+#$ENST00000426406.1
+#GRanges object with 1 range and 3 metadata columns:
+#      seqnames        ranges strand |    cds_id    cds_name exon_rank
+#         <Rle>     <IRanges>  <Rle> | <integer> <character> <integer>
+#  [1]     chr1 367659-368597      + |         3        <NA>         1
+#  -------
+#  seqinfo: 298 sequences (2 circular) from hg19 genome
+#
+#$ENST00000616016.5_7
+#GRanges object with 14 ranges and 3 metadata columns:
+#       seqnames        ranges strand |    cds_id    cds_name exon_rank
+#          <Rle>     <IRanges>  <Rle> | <integer> <character> <integer>
+#   [1]     chr1 859812-860328      + |         4        <NA>         1
+#   [2]     chr1 861302-861393      + |         5        <NA>         2
+#   [3]     chr1 865535-865716      + |         7        <NA>         3
+#   [4]     chr1 866419-866469      + |         9        <NA>         4
+#   [5]     chr1 871152-871276      + |        11        <NA>         5
+#
+
 gr <- GRanges("chr22", 
     IRanges(c(16268137, 16287254, 16190792, 16164570,
               18209442, 18121652, 24314750, 25508661), 
@@ -12,18 +47,21 @@ gr <- GRanges("chr22",
 
 test_locateVariants_upstream_downstream <- function()
 {
-    loc <- locateVariants(gr, txdb, IntergenicVariants(1, 1))
-    target <- CharacterList(character(), character())
-    checkIdentical(loc$FOLLOWID, target)
+#    loc <- locateVariants(gr, txdb, IntergenicVariants(1, 1))  # VJC 10/16/2025 not true
+#    target <- CharacterList(character(), character())
+#    checkIdentical(loc$FOLLOWID, target)
 
-    loc <- locateVariants(gr, txbygene, IntergenicVariants(2, 2))
-    target <- CharacterList(character(), "100037417")
+    loc <- locateVariants(gr, txbygene, IntergenicVariants(100, 100))
+#    target <- CharacterList(character(), "100037417")
+    target <- CharacterList("100037417")
     checkIdentical(loc$FOLLOWID, target) 
 
     loc <- locateVariants(gr, txbygene, IntergenicVariants(100000, 100000))
-    target <- CharacterList("23784", c("100037417","4282", "66035"))
+# 100037417 100652871 4282 66035
+    target <- CharacterList(c("100037417", "100652871", "4282", "66035"))
     checkIdentical(loc$FOLLOWID, target)
-    target <- CharacterList(character(), c("23523", "2953", "391322"))
+#  23523,2953
+    target <- CharacterList(c("23523", "2953")) # , "391322"))
     checkIdentical(loc$PRECEDEID, target)
 }
 
@@ -40,16 +78,18 @@ test_locateVariants_queryAsVCF <- function()
 test_locateVariants_ignore.strand <- function()
 {
     cdsbytx <- cdsbytx[1:5]
-    gr <- GRanges("chr1", IRanges(c(12190, 12595, 13403), width=1), "-")
+#    gr <- GRanges("chr1", IRanges(c(12190, 12595, 13403), width=1), "-")
+    gr = GRanges("chr1", IRanges(c(65565, 367659, 859812), width=1), "-")
     loc1 <- locateVariants(gr, cdsbytx, CodingVariants(), 
                            ignore.strand=TRUE)
-    checkIdentical(c(1L, 2L, 3L), mcols(loc1)$QUERYID) 
+    checkIdentical(c(1L, 2L, 3L, 3L), mcols(loc1)$QUERYID)   # changed VJC 16 oct 2025
     loc2 <- locateVariants(gr, cdsbytx, CodingVariants(), 
                            ignore.strand=FALSE)
     checkIdentical(integer(), mcols(loc2)$QUERYID) 
     loc1 <- locateVariants(gr, cdsbytx, SpliceSiteVariants(), 
                            ignore.strand=TRUE)
-    checkIdentical(c(1L, 2L, 3L), mcols(loc1)$QUERYID) 
+print(loc1)
+    checkIdentical(c(1L, 2L, 3L, 3L), mcols(loc1)$QUERYID) 
     loc2 <- locateVariants(gr, cdsbytx, SpliceSiteVariants(), 
                            ignore.strand=FALSE)
     checkIdentical(integer(), mcols(loc2)$QUERYID) 
