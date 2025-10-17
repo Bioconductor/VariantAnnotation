@@ -99,14 +99,15 @@
 \section{Fields}{
 
   \code{VcfFile} and \code{VcfFileList} classes inherit fields from the
-  \code{\linkS4class{TabixFile}} and \code{\linkS4class{TabixFileList}} 
+  \code{\link[Rsamtools]{TabixFile}} and \code{\link[Rsamtools]{TabixFileList}}
   classes.
 }
 
 \section{Functions and methods}{
 
   \code{VcfFile} and \code{VcfFileList} classes inherit methods from the
-  \code{\linkS4class{TabixFile}} and \code{\linkS4class{TabixFileList}} 
+  \code{\link[Rsamtools:TabixFile-class]{TabixFile}} and
+  \code{\link[Rsamtools:TabixFileList-class]{TabixFileList}}
   classes.
 
   ## Opening / closing:

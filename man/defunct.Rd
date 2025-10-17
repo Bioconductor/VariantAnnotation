@@ -79,7 +79,7 @@
 
 \seealso{
   \itemize{
-    \item \code{\link{expand}}
+    \item \code{\link[S4Vectors]{expand}}
     \item \code{\link{filterVcf}}
     \item \code{\link{genotypeToSnpMatrix}}
     \item \code{\link[GenomicFeatures]{mapToTranscripts}}

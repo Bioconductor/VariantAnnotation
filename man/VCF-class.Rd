@@ -315,7 +315,7 @@
   This function converts the output from the \link[snpStats]{read.plink} 
   function to a \code{VCF} class. \code{from} must be a list of length 3
   with named elements "map", "fam" and "genotypes". \code{seqSource} can
-  be a \code{\link[BSgenome]{BSgenome}} or an \link{FaFile}
+  be a \code{\link[BSgenome]{BSgenome}} or an \link[Rsamtools]{FaFile}
   used for reference sequence extraction.
 }
 
@@ -376,23 +376,23 @@
 
   Slots unique to \code{VCF} and subclasses,
   \itemize{
-    \item \code{fixed}: A \link{DataFrame} containing the REF, ALT, QUAL 
-      and FILTER fields from a VCF file.
-    \item \code{info}: A \link{DataFrame} containing the INFO fields from 
-      a VCF file.
+    \item \code{fixed}: A \link[S4Vectors:DataFrame-class]{DataFrame} containing
+      the REF, ALT, QUAL  and FILTER fields from a VCF file.
+    \item \code{info}: A \link[S4Vectors:DataFrame-class]{DataFrame} containing
+      the INFO fields from  a VCF file.
   }
 
   Slots inherited from \code{RangedSummarizedExperiment},
   \itemize{
     \item \code{metadata}: A \code{list} containing the 
           file header or other information about the overall experiment.
-    \item \code{rowRanges}: A \link{GRanges}-class instance defining the
-           variant ranges and associated metadata columns of REF, ALT, QUAL 
-           and FILTER. While the REF, ALT, QUAL and FILTER fields can
-           be displayed as metadata columns they cannot be modified with
-           \code{rowRanges<-}. To modify these fields use \code{fixed<-}. 
-    \item \code{colData}: A \link{DataFrame}-class instance describing the 
-          samples and associated metadata.
+    \item \code{rowRanges}: A \link[GenomicRanges:GRanges-class]{GRanges} class
+           instance defining the variant ranges and associated metadata columns
+           of REF, ALT, QUAL and FILTER. While the REF, ALT, QUAL and FILTER
+           fields can be displayed as metadata columns they cannot be modified
+           with \code{rowRanges<-}. To modify these fields use \code{fixed<-}.
+    \item \code{colData}: A \link[S4Vectors:DataFrame-class]{DataFrame} class
+          instance describing the samples and associated metadata.
     \item \code{geno}: The \code{assays} slot from
           \code{RangedSummarizedExperiment} has been renamed as \code{geno}
           for the VCF class. This slot contains the genotype information
@@ -413,7 +413,7 @@
 \author{Valerie Obenchain}
 
 \seealso{
-  \link{GRanges},
+  \link[GenomicRanges:GRanges-class]{GRanges},
   \link[S4Vectors]{DataFrame},
   \link[S4Vectors]{SimpleList},
   \link[SummarizedExperiment]{RangedSummarizedExperiment},
