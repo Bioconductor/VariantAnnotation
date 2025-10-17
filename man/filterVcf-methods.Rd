@@ -20,7 +20,7 @@
 }
 
 \arguments{
-  \item{file}{A \code{character(1)} file path or \code{\link{TabixFile}}
+  \item{file}{A \code{character(1)} file path or \code{\link[Rsamtools]{TabixFile}}
     specifying the VCF file to be filtered.}
 
   \item{genome}{A \code{character(1)} identifier}
@@ -34,14 +34,14 @@
     messages should be printed.}
 
   \item{index}{A \code{logical(1)} indicating whether the filtered file
-    should be compressed and indexed (using \code{\link{bgzip}} and
-    \code{indexTabix}).}
+    should be compressed and indexed (using \code{\link[Rsamtools]{bgzip}} and
+    \code{\link[Rsamtools]{indexTabix}}).}
 
-  \item{prefilters}{A \code{\link{FilterRules}} instance contains rules for
-    filtering un-parsed lines of the VCF file.}
+  \item{prefilters}{A \code{\link[S4Vectors:FilterRules-class]{FilterRules}}
+    instance contains rules for filtering un-parsed lines of the VCF file.}
 
-  \item{filters}{A \code{\link{FilterRules}} instance contains rules for
-    filtering fully parsed VCF objects.}
+  \item{filters}{A \code{\link[S4Vectors:FilterRules-class]{FilterRules}}
+    instance contains rules for filtering fully parsed VCF objects.}
 
   \item{param}{A \code{\link{ScanVcfParam}} instance restricting input
     of particular \code{info} or \code{geno} fields, or genomic

@@ -41,7 +41,7 @@ scanVcf(file, ..., param)
 
 \arguments{
   \item{file}{For \code{scanVcf} and \code{scanVcfHeader}, the character() 
-    file name, \code{\link{TabixFile}}, or class \code{connection} 
+    file name, \code{\link[Rsamtools]{TabixFile}}, or class \code{connection}
     (\code{file()} or \code{bgzip()}) of the \sQuote{VCF} file to be 
     processed.
   }
@@ -56,7 +56,7 @@ scanVcf(file, ..., param)
 \details{
   The argument \code{param} allows portions of the file to be input, but 
   requires that the file be bgzip'd and indexed as a 
-  \code{\linkS4class{TabixFile}}.
+  \code{\link[Rsamtools]{TabixFile}}.
 
   \code{scanVcf} with \code{param="missing"} and \code{file="character"}
   or \code{file="connection"} scan the entire file. With
@@ -134,8 +134,8 @@ scanVcf(file, ..., param)
 
 \seealso{
   \code{\link{readVcf}} 
-  \code{\link{BcfFile}} 
-  \code{\link{TabixFile}}
+  \code{\link[Rsamtools]{BcfFile}}
+  \code{\link[Rsamtools]{TabixFile}}
 }
 
 \author{

@@ -51,7 +51,7 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
 
 \arguments{
   \item{file}{A \code{\link{VcfFile}} (synonymous with
-    \code{\link{TabixFile}}) instance or character() name of the VCF
+    \code{\link[Rsamtools]{TabixFile}}) instance or character() name of the VCF
     file to be processed. When ranges are specified in \code{param},
     \code{file} must be a \code{\link{VcfFile}}.
 
@@ -268,10 +268,10 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
 \seealso{
   \code{\link{indexVcf}},
   \code{\link{VcfFile}},
-  \code{\link{indexTabix}},
-  \code{\link{TabixFile}},
-  \code{\link{scanTabix}},
-  \code{\link{scanBcf}},
+  \code{\link[Rsamtools]{indexTabix}},
+  \code{\link[Rsamtools]{TabixFile}},
+  \code{\link[Rsamtools]{scanTabix}},
+  \code{\link[Rsamtools]{scanBcf}},
   \code{\link{expand,CollapsedVCF-method}}
 }
 

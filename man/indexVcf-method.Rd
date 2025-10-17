@@ -31,7 +31,7 @@
 \details{
   If \code{x} is a character vector, assumes they are the path(s) to
   bgzf-compressed VCF file(s). If an index does not exist, one is
-  created. VCF files can be compreseed using \code{\link{bgzip}}. A
+  created. VCF files can be compreseed using \code{\link[Rsamtools]{bgzip}}. A
   \code{VcfFile} or \code{VcfFileList} is returned.
 
   If a \code{VcfFile} or \code{VcfFileList} is given, the index file is

@@ -21,12 +21,13 @@
 }
 
 \arguments{
-  \item{query}{A \linkS4class{VCF}, \link{IntegerRanges}, \link{GRanges} or
-    \code{VRanges} instance containing the variants to be annotated. If
-    \code{query} is a \link[IRanges]{IntegerRanges} or \code{VRanges} it is
-    coerced to a \link{GRanges}.  If a \linkS4class{VCF} is provided the
-    \code{GRanges} returned by the \code{rowRanges()} accessor will be used.
-    All metadata columns are ignored.
+  \item{query}{A \linkS4class{VCF}, \link[IRanges]{IntegerRanges},
+    \link[GenomicRanges:GRanges-class]{GRanges} or \code{VRanges} instance
+    containing the variants to be annotated. If \code{query} is a
+    \link[IRanges]{IntegerRanges} or \code{VRanges} it is coerced to a
+    \link[GenomicRanges:GRanges-class]{GRanges}.  If a \linkS4class{VCF} is
+    provided the \code{GRanges} returned by the \code{rowRanges()} accessor will
+    be used. All metadata columns are ignored.
 
     When \code{query} is not a \code{VCF} object a \code{varAllele} must be
     provided. The \code{varAllele} must be a \code{DNAStringSet} the same length
@@ -43,8 +44,8 @@
     \link[GenomicFeatures]{TxDb} objects with 
     \code{makeTxDbFromGFF()} in the \code{txdbmaker} package.
   } 
-  \item{seqSource}{A \code{\link[BSgenome]{BSgenome}} instance or an \link{FaFile}
-    to be used for sequence extraction.
+  \item{seqSource}{A \code{\link[BSgenome]{BSgenome}} instance or an
+    \link[Rsamtools]{FaFile} to be used for sequence extraction.
   }
   \item{varAllele}{A \link[Biostrings]{DNAStringSet} containing the variant
     (alternate) alleles. The length of \code{varAllele} must equal the length
