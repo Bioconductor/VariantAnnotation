@@ -376,9 +376,9 @@
 
   Slots unique to \code{VCF} and subclasses,
   \itemize{
-    \item \code{fixed}: A \link[S4Vectors:DataFrame-class]{DataFrame} containing
+    \item \code{fixed}: A \link[S4Vectors]{DataFrame} containing
       the REF, ALT, QUAL  and FILTER fields from a VCF file.
-    \item \code{info}: A \link[S4Vectors:DataFrame-class]{DataFrame} containing
+    \item \code{info}: A \link[S4Vectors]{DataFrame} containing
       the INFO fields from  a VCF file.
   }
 
@@ -386,12 +386,12 @@
   \itemize{
     \item \code{metadata}: A \code{list} containing the 
           file header or other information about the overall experiment.
-    \item \code{rowRanges}: A \link[GenomicRanges:GRanges-class]{GRanges} class
+    \item \code{rowRanges}: A \link[GenomicRanges]{GRanges} class
            instance defining the variant ranges and associated metadata columns
            of REF, ALT, QUAL and FILTER. While the REF, ALT, QUAL and FILTER
            fields can be displayed as metadata columns they cannot be modified
            with \code{rowRanges<-}. To modify these fields use \code{fixed<-}.
-    \item \code{colData}: A \link[S4Vectors:DataFrame-class]{DataFrame} class
+    \item \code{colData}: A \link[S4Vectors]{DataFrame} class
           instance describing the samples and associated metadata.
     \item \code{geno}: The \code{assays} slot from
           \code{RangedSummarizedExperiment} has been renamed as \code{geno}
@@ -413,7 +413,7 @@
 \author{Valerie Obenchain}
 
 \seealso{
-  \link[GenomicRanges:GRanges-class]{GRanges},
+  \link[GenomicRanges]{GRanges},
   \link[S4Vectors]{DataFrame},
   \link[S4Vectors]{SimpleList},
   \link[SummarizedExperiment]{RangedSummarizedExperiment},

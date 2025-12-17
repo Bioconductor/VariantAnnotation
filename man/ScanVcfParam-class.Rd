@@ -74,7 +74,7 @@
   \item{trimEmpty}{A logical(1) indicating whether \sQuote{GENO} fields
     with no values should be returned.
   }
-  \item{which}{A \link[GenomicRanges:GRanges-class]{GRanges} describing the
+  \item{which}{A \link[GenomicRanges]{GRanges} describing the
     sequences and ranges to be queried. Variants whose \code{POS} lies in the
     interval(s) \code{[start, end]} are returned. If \code{which} is not
     specified all ranges are returned.

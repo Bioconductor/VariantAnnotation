@@ -143,7 +143,7 @@
     }
     \item{\code{sample}}{character() vector 
     }
-    \item{\code{header}}{\link[IRanges:DataFrameList-class]{DataFrameList} class
+    \item{\code{header}}{\link[IRanges]{DataFrameList} class
     }
   }
 }
@@ -152,7 +152,7 @@
 
 \seealso{
   \code{\link{scanVcfHeader}},
-  \code{\link[IRanges:DataFrameList-class]{DataFrameList}}
+  \code{\link[IRanges]{DataFrameList}}
 }
 
 \examples{
