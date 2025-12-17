@@ -106,8 +106,8 @@
 \section{Functions and methods}{
 
   \code{VcfFile} and \code{VcfFileList} classes inherit methods from the
-  \code{\link[Rsamtools:TabixFile-class]{TabixFile}} and
-  \code{\link[Rsamtools:TabixFileList-class]{TabixFileList}}
+  \code{\link[Rsamtools]{TabixFile}} and
+  \code{\link[Rsamtools]{TabixFileList}}
   classes.
 
   ## Opening / closing:

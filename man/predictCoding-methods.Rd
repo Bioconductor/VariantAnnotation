@@ -22,10 +22,10 @@
 
 \arguments{
   \item{query}{A \linkS4class{VCF}, \link[IRanges]{IntegerRanges},
-    \link[GenomicRanges:GRanges-class]{GRanges} or \code{VRanges} instance
+    \link[GenomicRanges]{GRanges} or \code{VRanges} instance
     containing the variants to be annotated. If \code{query} is a
     \link[IRanges]{IntegerRanges} or \code{VRanges} it is coerced to a
-    \link[GenomicRanges:GRanges-class]{GRanges}.  If a \linkS4class{VCF} is
+    \link[GenomicRanges]{GRanges}.  If a \linkS4class{VCF} is
     provided the \code{GRanges} returned by the \code{rowRanges()} accessor will
     be used. All metadata columns are ignored.
 

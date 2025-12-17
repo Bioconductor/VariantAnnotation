@@ -37,10 +37,10 @@
     should be compressed and indexed (using \code{\link[Rsamtools]{bgzip}} and
     \code{\link[Rsamtools]{indexTabix}}).}
 
-  \item{prefilters}{A \code{\link[S4Vectors:FilterRules-class]{FilterRules}}
+  \item{prefilters}{A \code{\link[S4Vectors]{FilterRules-class}}
     instance contains rules for filtering un-parsed lines of the VCF file.}
 
-  \item{filters}{A \code{\link[S4Vectors:FilterRules-class]{FilterRules}}
+  \item{filters}{A \code{\link[S4Vectors]{FilterRules-class}}
     instance contains rules for filtering fully parsed VCF objects.}
 
   \item{param}{A \code{\link{ScanVcfParam}} instance restricting input
