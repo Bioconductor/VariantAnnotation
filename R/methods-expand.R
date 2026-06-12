@@ -34,10 +34,17 @@ setMethod("expand", "CollapsedVCF",
         fexp$ALT <- unlist(alt(x), use.names=FALSE)
         gexp <- .expandGeno(x, hdr, elt, idx)
 
-        ## rowRanges
+        ## rowRanges — preserve non-standard mcols (user-added columns);
+        ## drop only the VCF fixed columns (REF/ALT/QUAL/FILTER/paramRangeID)
+        ## which will be re-attached via fexp. (GitHub issue #85)
+        .vcf_fixed_cols <- c("REF", "ALT", "QUAL", "FILTER", "paramRangeID")
         if (is.null(rd$paramRangeID)) {
             rdexp <- rd[idx, ]
-            mcols(rdexp) <- NULL
+            extra_cols <- setdiff(names(mcols(rdexp)), .vcf_fixed_cols)
+            mcols(rdexp) <- if (length(extra_cols) > 0L)
+                mcols(rdexp)[extra_cols]
+            else
+                NULL
         } else rdexp <- rd[idx, "paramRangeID"]
 
         tmp = VCF(rdexp, colData(x), metadata(x), fexp, iexp, gexp,

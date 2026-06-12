@@ -1,3 +1,15 @@
+CHANGES IN VERSION 1.59.4
+-------------------------
+
+ENHANCEMENTS
+
+    o expand() on a CollapsedVCF now preserves non-standard rowRanges
+      metadata columns (user-added mcols such as SNP_name, num_alts, etc.).
+      Previously mcols(rdexp) <- NULL unconditionally dropped all columns;
+      now only the VCF fixed columns (REF/ALT/QUAL/FILTER/paramRangeID)
+      are removed before the expanded fixed data are re-attached.
+      (GitHub issue #85)
+
 CHANGES IN VERSION 1.59.3
 -------------------------
 
