@@ -99,11 +99,22 @@
 
 .contigsFromSeqinfo <- function(si) 
 {
+    ## Only emit ##contig lines for sequences that carry at least some
+    ## information (length or assembly).  If everything is NA we would
+    ## produce bare "##contig=<ID=x>" placeholders that add noise and break
+    ## round-trip equality (issue #78).
+    has_len  <- !is.na(seqlengths(si))
+    has_asm  <- !is.na(genome(si))
+    keep     <- has_len | has_asm
+    if (!any(keep)) return(character(0L))
+    si <- si[seqnames(si)[keep]]
+    has_len <- has_len[keep]
+    has_asm <- has_asm[keep]
     contig <- paste0("##contig=<ID=", seqnames(si))
-    contig[!is.na(seqlengths(si))] <-
-      paste0(contig, ",length=", seqlengths(si))[!is.na(seqlengths(si))]
-    contig[!is.na(genome(si))] <-
-      paste0(contig, ",assembly=\"", genome(si), "\"")[!is.na(genome(si))]
+    contig[has_len] <-
+      paste0(contig, ",length=", seqlengths(si))[has_len]
+    contig[has_asm] <-
+      paste0(contig, ",assembly=\"", genome(si), "\"")[has_asm]
     paste0(contig, ">")
 }
 
@@ -139,7 +150,9 @@
     header <- Map(.formatHeader, as.list(dflist), 
                   as.list(names(dflist)))
 
-    ## If fileformat, fileDate or contig do not exist --> add them 
+    ## If fileformat or fileDate do not exist --> add them.
+    ## Crucially, do NOT overwrite an existing fileDate: preserving the
+    ## original date is important for provenance and round-trip fidelity (#78).
     fileDate <- any(grepl("fileDate", names(header), fixed=TRUE))
     if (!fileDate) {
         fileDate <- paste("##fileDate=", format(Sys.time(), "%Y%m%d"), sep="")
@@ -171,11 +184,11 @@
     if (nms == "META" && ncol(df) == 1L) {
         if (!"fileformat" %in% rownames(df))
             df <- rbind(DataFrame(Value="VCFv4.3", row.names="fileformat"), df)
-        fd <- format(Sys.time(), "%Y%m%d")
-        if ("fileDate" %in% rownames(df))
-            df[rownames(df) == "fileDate", ] <- fd
-        else
+        ## Only add fileDate if not already present; never overwrite (#78)
+        if (!"fileDate" %in% rownames(df)) {
+            fd <- format(Sys.time(), "%Y%m%d")
             df <- rbind(df, DataFrame(Value=fd, row.names="fileDate"))
+        }
         paste("##", rownames(df), "=", df[,1], sep="")
     ## Support VCF v4.2 and v4.3 PEDIGREE field
     } else if(nms == "PEDIGREE" || nms == "ALT") {
@@ -192,11 +205,8 @@
     ## 'simple' key-value pairs
     ## (Rsamtools reports unstructured headers as one column named "Value")
     } else if(ncol(df) == 1L && names(df)[1] == "Value" && nrow(df) == 1L) {
-        if (nms == "fileDate") {
-            fd <- format(Sys.time(), "%Y%m%d")
-            paste("##fileDate=", fd, sep="")
-        } else
-            paste("##", nms, "=", df[,1], sep="")
+        ## Preserve existing fileDate; do not overwrite with today's date (#78)
+        paste("##", nms, "=", df[,1], sep="")
     ## 'non-simple' key-value pairs
     } else {
         if ("Description" %in% colnames(df)) {

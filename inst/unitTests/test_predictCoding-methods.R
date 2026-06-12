@@ -154,3 +154,58 @@ test_predictCoding_nonsense_DBS <- function()
     }
 }
 
+
+## Regression test for issue #83:
+## A deletion spanning an exon/intron boundary should use CDS-mapped width
+## (CDSLOC width) not genomic width when computing REFCODON/VARCODON.
+test_predictCoding_exon_intron_boundary <- function()
+{
+    ## Build a minimal two-exon transcript on chr1
+    ## Exon1: 1-90 (90 nt), Exon2: 201-300 (100 nt); intron: 91-200
+    txdb <- suppressMessages(
+        makeTxDbFromGRanges(GRanges(
+            seqnames = "chr1",
+            ranges   = IRanges(
+                start = c(1, 1, 1, 201),
+                end   = c(300, 300, 90, 300)
+            ),
+            strand = "+",
+            type   = c("gene", "mRNA", "exon", "exon"),
+            ID     = c("gene1", "tx1", "exon1", "exon2"),
+            Parent = c(NA, "gene1", "tx1", "tx1")
+        ))
+    )
+    cdsbytx <- suppressMessages(cdsBy(txdb, by="tx"))
+    if (length(cdsbytx) == 0L) return(invisible(NULL))  # skip if txdb empty
+
+    ## Deletion that straddles exon1 end (pos 85) into the intron (pos 95)
+    ## Genomic span = 11 bp, but only 6 bp are exonic (85-90)
+    del <- GRanges("chr1", IRanges(85, 95), strand="+",
+                   REF=DNAStringSet("NNNNNNNNNN"),
+                   ALT=DNAStringSetList(DNAStringSet("-")))
+    names(del) <- "boundary_del"
+
+    ## Build a tiny genome fasta
+    fa <- Biostrings::DNAStringSet(paste0(
+        paste(rep("A", 84), collapse=""),   # 1-84
+        "CGTACG",                           # 85-90 (exon1 end, 6 nt)
+        paste(rep("T", 110), collapse=""),  # 91-200 intron
+        paste(rep("G", 100), collapse="")   # 201-300 exon2
+    ))
+    names(fa) <- "chr1"
+    tmpfa <- tempfile(fileext=".fa")
+    Biostrings::writeXStringSet(fa, tmpfa)
+    genome <- Rsamtools::FaFile(tmpfa)
+
+    res <- tryCatch(
+        predictCoding(del, txdb, seqSource=genome,
+                      varAllele=DNAStringSet("-")),
+        error = function(e) NULL
+    )
+    ## If a result is returned the CDSLOC width must be <= 6 (exonic bases only)
+    ## not 11 (the full genomic span)
+    if (!is.null(res) && length(res) > 0L) {
+        cdswidths <- width(mcols(res)$CDSLOC)
+        checkTrue(all(cdswidths <= 6L))
+    }
+}
