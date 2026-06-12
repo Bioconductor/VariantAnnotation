@@ -61,8 +61,10 @@ setMethod("locateVariants", c("GRanges", "TxDb", "CodingVariants"),
        ## for width(ranges) == 0 : decrement start to equal end value 
         if (any(insertion <- width(query) == 0))
             start(query)[insertion] <- start(query)[insertion] - 1
-        if (!exists("cdsbytx", cache, inherits=FALSE))
-            cache[["cdsbytx"]] <- cdsBy(subject)
+        if (!exists("cdsbytx", cache, inherits=FALSE)) {
+            z <- cdsBy(subject)
+            cache[["cdsbytx"]] <- z[lengths(z) > 0L]
+        }
         res <- callGeneric(query, cache[["cdsbytx"]], region, ..., 
             ignore.strand=ignore.strand, asHits=asHits)
         if (is(res, "GenomicRanges") & length(res) > 0L) {
@@ -95,8 +97,10 @@ setMethod("locateVariants", c("GRanges", "TxDb", "IntronVariants"),
         ## for width(ranges) == 0 : decrement start to equal end value 
         if (any(insertion <- width(query) == 0))
             start(query)[insertion] <- start(query)[insertion] - 1
-        if (!exists("intbytx", cache, inherits=FALSE))
-            cache[["intbytx"]] <- intronsByTranscript(subject)
+        if (!exists("intbytx", cache, inherits=FALSE)) {
+            z <- intronsByTranscript(subject)
+            cache[["intbytx"]] <- z[lengths(z) > 0L]
+        }
         res <- callGeneric(query, cache[["intbytx"]], region, ...,
             ignore.strand=ignore.strand, asHits=asHits)
         if (is(res, "GenomicRanges") & length(res) > 0L) {
@@ -129,8 +133,10 @@ setMethod("locateVariants", c("GRanges", "TxDb", "ThreeUTRVariants"),
         ## for width(ranges) == 0 : decrement start to equal end value 
         if (any(insertion <- width(query) == 0)) 
             start(query)[insertion] <- start(query)[insertion] - 1 
-        if (!exists("threeUTRbytx", cache, inherits=FALSE))
-            cache[["threeUTRbytx"]] <- threeUTRsByTranscript(subject)
+        if (!exists("threeUTRbytx", cache, inherits=FALSE)) {
+            z <- threeUTRsByTranscript(subject)
+            cache[["threeUTRbytx"]] <- z[lengths(z) > 0L]
+        }
         res <- callGeneric(query, cache[["threeUTRbytx"]], region, ...,
             ignore.strand=ignore.strand, asHits=asHits)
         if (is(res, "GenomicRanges") & length(res) > 0L) {
@@ -163,8 +169,10 @@ setMethod("locateVariants", c("GRanges", "TxDb", "FiveUTRVariants"),
         ## for width(ranges) == 0 : decrement start to equal end value 
         if (any(insertion <- width(query) == 0))
             start(query)[insertion] <- start(query)[insertion] - 1
-        if (!exists("fiveUTRbytx", cache, inherits=FALSE))
-            cache[["fiveUTRbytx"]] <- fiveUTRsByTranscript(subject)
+        if (!exists("fiveUTRbytx", cache, inherits=FALSE)) {
+            z <- fiveUTRsByTranscript(subject)
+            cache[["fiveUTRbytx"]] <- z[lengths(z) > 0L]
+        }
         res <- callGeneric(query, cache[["fiveUTRbytx"]], region, ...,
             ignore.strand=ignore.strand, asHits=asHits)
         if (is(res, "GenomicRanges") & length(res) > 0L) {
@@ -199,8 +207,10 @@ setMethod("locateVariants", c("GRanges", "TxDb", "IntergenicVariants"),
             start(query)[insertion] <- start(query)[insertion] - 1
         ## PRECEDEID and FOLLOWID as gene or transcript ids
         if (idType(region) == "gene") {
-            if (!exists("txbygene", cache, inherits=FALSE))
-                cache[["txbygene"]] <- transcriptsBy(subject, "gene")
+            if (!exists("txbygene", cache, inherits=FALSE)) {
+                z <- transcriptsBy(subject, "gene")
+                cache[["txbygene"]] <- z[lengths(z) > 0L]
+            }
             callGeneric(query, cache[["txbygene"]], region, ..., 
                 ignore.strand=ignore.strand)
         } else if (idType(region) == "tx") {
@@ -235,8 +245,10 @@ setMethod("locateVariants", c("GRanges", "TxDb", "SpliceSiteVariants"),
         ## for width(ranges) == 0 : decrement start to equal end value 
         if (any(insertion <- width(query) == 0))
             start(query)[insertion] <- start(query)[insertion] - 1
-        if (!exists("intbytx", cache, inherits=FALSE))
-            cache[["intbytx"]] <- intronsByTranscript(subject)
+        if (!exists("intbytx", cache, inherits=FALSE)) {
+            z <- intronsByTranscript(subject)
+            cache[["intbytx"]] <- z[lengths(z) > 0L]
+        }
         res <- callGeneric(query, cache[["intbytx"]], region, ...,
             ignore.strand=ignore.strand, asHits=asHits)
         if (is(res, "GenomicRanges") & length(res) > 0L) {
@@ -357,12 +369,13 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
         if (!exists("fiveUTRbytx", cache, inherits=FALSE)) {
             splicings <- 
                 GenomicFeatures:::.getSplicingsForTranscriptsWithCDSs(subject)
-            cache[["fiveUTRbytx"]] <- 
-                GenomicFeatures:::.make5UTRsByTranscript(subject, splicings)
+            z <- GenomicFeatures:::.make5UTRsByTranscript(subject, splicings)
+            cache[["fiveUTRbytx"]] <- z[lengths(z) > 0L]
         }
-        if (!exists("threeUTRbytx", cache, inherits=FALSE))
-            cache[["threeUTRbytx"]] <- 
-                GenomicFeatures:::.make3UTRsByTranscript(subject, splicings)
+        if (!exists("threeUTRbytx", cache, inherits=FALSE)) {
+            z <- GenomicFeatures:::.make3UTRsByTranscript(subject, splicings)
+            cache[["threeUTRbytx"]] <- z[lengths(z) > 0L]
+        }
 
         fiveUTR <- 
             locateVariants(query, subject, FiveUTRVariants(), 
