@@ -114,3 +114,43 @@ test_predictCoding_strand <- function()
     checkIdentical(mcols(current)$CDSLOC, IRanges(3, 3))
 }
 
+test_predictCoding_nonsense_DBS <- function()
+{
+    ## issue #84: DBS spanning two codons where one becomes stop (*) should
+    ## be classified as "nonsense", not "nonsynonymous"
+    ## Construct a minimal CDS: 9-nt coding seq on "+" strand
+    ## REF codon 3 = positions 7-9, codon 2 = positions 4-6
+    ## A DBS at positions 5-6 (end of codon2 / start of codon3) can yield
+    ## VARAA like "P*" — contains stop but wasn't caught by old %in% "*"
+    fa_path <- tempfile(fileext='.fa')
+    ## 9-nt CDS encodes e.g. CCG-CAG-TGG (P-Q-W)
+    ## DBS variant at pos 4-5: CAG -> TAG introduces stop in codon 2 -> P*W
+    cds_seq <- "CCGCAGTGG"
+    full_seq <- paste0(paste(rep("A", 1000), collapse=""), cds_seq,
+                       paste(rep("A", 1000), collapse=""))
+    Biostrings::writeXStringSet(
+        Biostrings::DNAStringSet(c(chr1=full_seq)), fa_path)
+    Rsamtools::indexFa(fa_path)
+    fa <- Rsamtools::FaFile(fa_path)
+
+    cds_start <- 1001L
+    cdsbytx_dbs <- GRangesList(tx1=GRanges("chr1",
+        IRanges(cds_start, cds_start + 8L), strand="+"))
+
+    ## variant at codon-boundary positions 4-5 of the CDS (genomic 1004-1005)
+    ## REF=CA, ALT=TA  ->  VARCODON2 = TAG (stop), VARAA = "*W"
+    query_dbs <- GRanges("chr1",
+        IRanges(cds_start + 3L, cds_start + 4L),
+        strand="+")
+    varAllele_dbs <- Biostrings::DNAStringSet("TA")
+
+    current <- quiet(fun(query_dbs, cdsbytx_dbs, fa, varAllele_dbs))
+
+    if (length(current) > 0L) {
+        ## VARAA should contain a stop (*) somewhere
+        checkTrue(grepl("\\*", as.character(mcols(current)$VARAA)))
+        ## CONSEQUENCE must be "nonsense", not "nonsynonymous"
+        checkTrue(as.character(mcols(current)$CONSEQUENCE) == "nonsense")
+    }
+}
+

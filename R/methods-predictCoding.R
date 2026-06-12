@@ -179,7 +179,7 @@ setMethod("predictCoding", c("VRanges", "TxDb", "ANY", "missing"),
     consequence <- rep("synonymous", length(txlocal))
     consequence[nonsynonymous] <- "nonsynonymous" 
     consequence[fmshift] <- "frameshift"
-    consequence[nonsynonymous & (as.character(varAA) %in% "*")] <- "nonsense" 
+    consequence[nonsynonymous & grepl("\\*", as.character(varAA), fixed=TRUE)] <- "nonsense" 
     consequence[zwidth | noTrans] <- "not translated" 
     consequence <- factor(consequence) 
  
