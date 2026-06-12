@@ -543,7 +543,9 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
         return(findOverlaps(query, subject, type="within", 
                             ignore.strand=ignore.strand))
 
-    map <- mapToTranscripts(unname(query), subject, 
+    ## Clip large variants to transcript bounds before mapping (issue #81)
+    query_clipped <- .clipToSubject(query, subject)
+    map <- mapToTranscripts(unname(query_clipped), subject, 
                             ignore.strand=ignore.strand)
     if (length(map) > 0) {
         xHits <- map$xHits
@@ -565,7 +567,7 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
         ## Ranges identified by 'map' only are discarded.
         if (vtype == "coding") {
            usub <- unlist(subject) ## names needed for mapping
-            map2 <- mapToTranscripts(unname(query)[xHits], usub,
+            map2 <- mapToTranscripts(unname(query_clipped)[xHits], usub,
                                      ignore.strand=ignore.strand)
             cds <- mcols(usub)$cds_id[map2$transcriptsHits]
             if (length(cds)) {

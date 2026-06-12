@@ -1,3 +1,15 @@
+CHANGES IN VERSION 1.59.2
+-------------------------
+
+BUG FIXES
+
+    o locateVariants() and predictCoding() no longer silently drop large
+      deletions (or other wide variants) whose genomic span extends beyond
+      transcript/CDS boundaries. Previously these were lost because
+      mapToTranscripts() uses findOverlaps(type="within") internally; the
+      fix clips variant ranges to the overlapping subject bounds before
+      mapping. (GitHub issue #81)
+
 CHANGES IN VERSION 1.36.0
 -------------------------
 

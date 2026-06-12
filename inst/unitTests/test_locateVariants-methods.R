@@ -178,3 +178,56 @@ test_locateVariants_match_predictCoding <- function()
         start=c(5, 77054, 77054, 77058, 77057, 77057, 77055), 
         end=c(55, 77055, 77055, 77058, 77058, 77058, 77054)),
         paramRangeID=rep(NA, 7))
+
+## ----------------------------------------------------------------------------
+## Issue #81: large deletions extending beyond transcript bounds were silently
+## dropped by locateVariants() / predictCoding() because mapToTranscripts()
+## uses findOverlaps(type="within") internally.
+## ----------------------------------------------------------------------------
+test_locateVariants_large_deletion_not_dropped <- function()
+{
+    ## Build a synthetic 3-exon transcript on a 2000 bp chromosome
+    ## Exon1: 100-299, Exon2: 400-599, Exon3: 700-899  (all "+")
+    cds_ranges <- GRanges("chr1",
+        IRanges(start=c(100L, 400L, 700L),
+                end  =c(299L, 599L, 899L)),
+        strand="+")
+    subject <- GRangesList(tx1=cds_ranges)
+
+    ## Small variant fully within exon2 -> should be found
+    q_small <- GRanges("chr1", IRanges(450L, 460L), strand="+")
+    loc_small <- locateVariants(q_small, subject, CodingVariants())
+    checkTrue(length(loc_small) > 0L,
+        "small intra-exon variant must be located (sanity check)")
+
+    ## Large deletion spanning ALL of exon2 and into the flanking introns:
+    ## genomic 350-650, which extends beyond the exon2 bounds (400-599)
+    ## Before the fix this was silently dropped.
+    q_large <- GRanges("chr1", IRanges(350L, 650L), strand="+")
+    loc_large <- locateVariants(q_large, subject, CodingVariants())
+    checkTrue(length(loc_large) > 0L,
+        "large deletion spanning exon bounds must not be silently dropped (#81)")
+
+    ## QUERYID should refer back to query index 1
+    checkIdentical(unique(loc_large$QUERYID), 1L)
+}
+
+test_localCoordinates_large_deletion_not_dropped <- function()
+{
+    ## Issue #81: test via .localCoordinates() (the internal function called by
+    ## predictCoding) that large deletions spanning CDS bounds are not dropped.
+    cds_start <- 501L
+    cds_ranges <- GRanges("chr1",
+        IRanges(cds_start, cds_start + 8L), strand="+",
+        cds_id=1L, cds_name=NA_character_, exon_rank=1L)
+    cdsbytx <- GRangesList(tx1=cds_ranges)
+
+    q_large <- GRanges("chr1",
+        IRanges(cds_start - 10L, cds_start + 18L), strand="+")
+    mcols(q_large)$varAllele <- Biostrings::DNAStringSet("A")
+
+    map <- VariantAnnotation:::.localCoordinates(
+        q_large, cdsbytx, ignore.strand=FALSE)
+    checkTrue(length(map) > 0L,
+        ".localCoordinates must not drop large deletion spanning CDS bounds (#81)")
+}

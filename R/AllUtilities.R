@@ -276,9 +276,50 @@
 ### predictCoding()
 ###
 
+.clipToSubject <- function(query, subject)
+{
+    ## For large deletions (and other wide variants) whose genomic span
+    ## extends beyond transcript/CDS boundaries, mapToTranscripts() silently
+    ## drops them because it uses findOverlaps(type="within") internally.
+    ## To handle these, we clip each query range to the bounding box of any
+    ## overlapping subject element, preserving strand and metadata.
+    ## Variants that don't overlap any subject are returned unchanged (they
+    ## will simply produce no hits in mapToTranscripts as before).
+    subj_flat <- unlist(subject, use.names=FALSE)
+    hits <- findOverlaps(query, subj_flat, type="any",
+                         ignore.strand=TRUE, minoverlap=1L)
+    if (length(hits) == 0L)
+        return(query)
+
+    ## For each query, compute the union span of all overlapping subject ranges
+    qh <- queryHits(hits)
+    sh <- subjectHits(hits)
+    subj_starts <- start(subj_flat)[sh]
+    subj_ends   <- end(subj_flat)[sh]
+    clip_start <- tapply(subj_starts, qh, min)
+    clip_end   <- tapply(subj_ends,   qh, max)
+    clip_idx   <- as.integer(names(clip_start))  ## unique query indices
+
+    clipped <- query
+    new_start <- pmax(start(clipped)[clip_idx], clip_start)
+    new_end   <- pmin(end(clipped)[clip_idx],   clip_end)
+    ## only clip ranges that actually extend beyond the subject
+    needs_clip <- start(clipped)[clip_idx] < clip_start |
+                  end(clipped)[clip_idx]   > clip_end
+    if (any(needs_clip)) {
+        idx_to_clip <- clip_idx[needs_clip]
+        start(clipped)[idx_to_clip] <- new_start[needs_clip]
+        end(clipped)[idx_to_clip]   <- new_end[needs_clip]
+    }
+    clipped
+}
+
 .localCoordinates <- function(from, to, ignore.strand, ...)
 {
     ## 'to' is a GRangesList of cds by transcript
+    ## Clip large variants (e.g. long deletions) to transcript bounds so
+    ## mapToTranscripts() does not silently drop them (see Bioc issue #81).
+    from <- .clipToSubject(from, to)
     map <- mapToTranscripts(unname(from), to, ignore.strand=ignore.strand, ...)
     if (length(map) == 0) {
         res <- GRanges()
