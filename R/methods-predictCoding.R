@@ -101,8 +101,6 @@ setMethod("predictCoding", c("VRanges", "TxDb", "ANY", "missing"),
     ## variant location in cds region
     mcols(query) <- append(mcols(query), DataFrame(varAllele=varAllele))
     txlocal <- .localCoordinates(query, cdsbytx, ignore.strand=FALSE, ...)
-    if (length(txlocal) == 0)
-        return(txlocal)
 
     ## reverse complement "-" strand
     valid <- rep(TRUE, length(txlocal))
@@ -186,7 +184,7 @@ setMethod("predictCoding", c("VRanges", "TxDb", "ANY", "missing"),
     consequence <- factor(consequence) 
  
     mcols(txlocal) <- append(mcols(txlocal), 
-        DataFrame(GENEID=NA_character_, 
+        DataFrame(GENEID=rep(NA_character_, length(txlocal)), 
                   CONSEQUENCE=consequence, 
                   REFCODON=refCodon, 
                   VARCODON=varCodon, 
