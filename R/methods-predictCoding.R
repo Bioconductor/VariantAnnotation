@@ -101,8 +101,6 @@ setMethod("predictCoding", c("VRanges", "TxDb", "ANY", "missing"),
     ## variant location in cds region
     mcols(query) <- append(mcols(query), DataFrame(varAllele=varAllele))
     txlocal <- .localCoordinates(query, cdsbytx, ignore.strand=FALSE, ...)
-    if (length(txlocal) == 0)
-        return(txlocal)
 
     ## reverse complement "-" strand
     valid <- rep(TRUE, length(txlocal))
@@ -114,7 +112,9 @@ setMethod("predictCoding", c("VRanges", "TxDb", "ANY", "missing"),
     }
 
     ## frameshift
-    refwidth <- width(txlocal)
+    ## Use CDS-mapped width (CDSLOC) rather than genomic width so that
+    ## exon/intron-spanning variants count only deleted CDS bases (#83).
+    refwidth <- width(mcols(txlocal)$CDSLOC)
     altallele <- mcols(txlocal)$varAllele
     fmshift <- abs(width(altallele) - refwidth) %% 3 != 0 
     if (any(fmshift))
@@ -181,12 +181,12 @@ setMethod("predictCoding", c("VRanges", "TxDb", "ANY", "missing"),
     consequence <- rep("synonymous", length(txlocal))
     consequence[nonsynonymous] <- "nonsynonymous" 
     consequence[fmshift] <- "frameshift"
-    consequence[nonsynonymous & (as.character(varAA) %in% "*")] <- "nonsense" 
+    consequence[nonsynonymous & grepl("\\*", as.character(varAA), fixed=TRUE)] <- "nonsense" 
     consequence[zwidth | noTrans] <- "not translated" 
     consequence <- factor(consequence) 
  
     mcols(txlocal) <- append(mcols(txlocal), 
-        DataFrame(GENEID=NA_character_, 
+        DataFrame(GENEID=rep(NA_character_, length(txlocal)), 
                   CONSEQUENCE=consequence, 
                   REFCODON=refCodon, 
                   VARCODON=varCodon, 
@@ -197,10 +197,14 @@ setMethod("predictCoding", c("VRanges", "TxDb", "ANY", "missing"),
 .getRefCodons <- function(txlocal, altpos, seqSource, cdsbytx)
 { 
     ## adjust codon end for 
-    ## - width of the reference sequence
+    ## - width of the reference sequence *in CDS coordinates* (not genomic)
     ## - position of alt allele substitution in the codon
+    ## Use CDSLOC width rather than genomic width so that variants that span
+    ## an exon/intron boundary do not incorrectly extend the REFCODON across
+    ## the splice junction into the next exon (issue #83).
+    cdswidth <- width(mcols(txlocal)$CDSLOC)
     cstart <- ((start(mcols(txlocal)$CDSLOC) - 1L) %/% 3L) * 3L + 1L
-    cend <- cstart + (((altpos + width(txlocal) - 2L) %/% 3L) * 3L + 2L)
+    cend <- cstart + (((altpos + cdswidth - 2L) %/% 3L) * 3L + 2L)
     txord <- match(mcols(txlocal)$TXID, names(cdsbytx))
     txseqs <- extractTranscriptSeqs(seqSource, cdsbytx[txord])
     DNAStringSet(substring(txseqs, cstart, cend))

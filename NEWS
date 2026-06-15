@@ -1,3 +1,44 @@
+CHANGES IN VERSION 1.59.4
+-------------------------
+
+ENHANCEMENTS
+
+    o expand() on a CollapsedVCF now preserves non-standard rowRanges
+      metadata columns (user-added mcols such as SNP_name, num_alts, etc.).
+      Previously mcols(rdexp) <- NULL unconditionally dropped all columns;
+      now only the VCF fixed columns (REF/ALT/QUAL/FILTER/paramRangeID)
+      are removed before the expanded fixed data are re-attached.
+      (GitHub issue #85)
+
+CHANGES IN VERSION 1.59.3
+-------------------------
+
+BUG FIXES
+
+    o locateVariants() no longer silently misses intronic (and UTR, splice-
+      site, coding) variants when called against a TxDb that contains
+      transcripts with no features (e.g. non-coding RNA transcripts that
+      have no CDS/intron records). Root cause: all six internal cache-
+      population sites called cdsBy()/intronsByTranscript()/etc. without
+      filtering empty list elements; findOverlaps() on a GRangesList with
+      empty elements returns spurious or absent hits depending on the
+      overlap type. Fix: filter lengths(x) > 0L at every cache-fill site
+      in methods-locateVariants.R. Reproducer from GitHub issue #87 (and
+      the earlier #76) now returns correct IntronVariants hits without
+      requiring a manual cache workaround. (GitHub issue #87)
+
+CHANGES IN VERSION 1.59.2
+-------------------------
+
+BUG FIXES
+
+    o locateVariants() and predictCoding() no longer silently drop large
+      deletions (or other wide variants) whose genomic span extends beyond
+      transcript/CDS boundaries. Previously these were lost because
+      mapToTranscripts() uses findOverlaps(type="within") internally; the
+      fix clips variant ranges to the overlapping subject bounds before
+      mapping. (GitHub issue #81)
+
 CHANGES IN VERSION 1.36.0
 -------------------------
 
