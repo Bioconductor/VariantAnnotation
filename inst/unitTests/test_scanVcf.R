@@ -153,6 +153,43 @@ test_scanVcfHeader_META <- function()
     checkIdentical(names(meta(hd)), nms)
 }
 
+test_scanVcfHeader_quotedEquals <- function()
+{
+    ## Regression test: scanVcfHeader must not truncate Description or other
+    ## quoted string values that contain '=' characters.
+    ## htslib (scanBcfHeader) splits on '=' without respecting quotes;
+    ## VariantAnnotation re-parses raw header lines to restore correct values.
+    tmp <- tempfile(fileext = ".vcf")
+    on.exit(unlink(tmp))
+    ## Note: literal double-quotes are embedded in the header lines below.
+    lines <- c(
+        '##fileformat=VCFv4.1',
+        paste0('##INFO=<ID=VRS,Number=R,Type=String,Description=',
+               '"Alleles [VRS version=2.0.1;VRS-Python version=2.1.1]">'),
+        '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
+        '##FILTER=<ID=PASS,Description="All filters passed">',
+        paste0('##GATKCommandLine=<ID=HaplotypeCaller,CommandLineOptions=',
+               '"analysis_type=HaplotypeCaller input=foo.bam">'),
+        '#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO'
+    )
+    writeLines(lines, tmp)
+    hd <- scanVcfHeader(tmp)
+
+    ## Description with embedded '=' must be preserved in full
+    checkIdentical(
+        info(hd)["VRS", "Description"],
+        "Alleles [VRS version=2.0.1;VRS-Python version=2.1.1]"
+    )
+    ## Normal (no '=' in value) still works
+    checkIdentical(geno(hd)["GT", "Description"], "Genotype")
+    checkIdentical(fixed(hd)$FILTER["PASS", "Description"], "All filters passed")
+    ## Arbitrary meta field with '=' in quoted value
+    checkIdentical(
+        meta(hd)$GATKCommandLine["HaplotypeCaller", "CommandLineOptions"],
+        "analysis_type=HaplotypeCaller input=foo.bam"
+    )
+}
+
 test_scan_row.names <- function()
 {
     fl <- system.file("extdata", "chr7-sub.vcf.gz", package="VariantAnnotation")
