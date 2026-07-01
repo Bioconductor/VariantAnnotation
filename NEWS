@@ -1,3 +1,16 @@
+CHANGES IN VERSION 1.59.1
+-------------------------
+
+BUG FIXES
+
+    o expand() no longer errors with "'data' must be of a vector type,
+      was 'NULL'" when called on sites-only VCFs (e.g., gnomAD allele
+      frequency files) that declare FORMAT fields in the header but have
+      no sample columns. The internal .expandAD() helper now returns an
+      appropriately-shaped empty array when the geno data is an empty
+      list (0 samples), instead of passing NULL to array(). (GitHub
+      issue #72)
+
 CHANGES IN VERSION 1.36.0
 -------------------------
 
