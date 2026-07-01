@@ -39,6 +39,28 @@
     if (is(ALT, "XStringSetList")) {
         ALT <- as(ALT, "CharacterList")
     }
+    ## Restore '*' for spanning deletion alleles stored as empty strings
+    ## at read time (GitHub issue #65). Per VCF spec, '*' represents a
+    ## spanning deletion allele. At read time, both '*' and '.' (no allele)
+    ## get converted to empty strings, making them indistinguishable.
+    ## Conservative fix: only restore '*' when an empty string appears
+    ## alongside other alleles (multi-allele context), since that's
+    ## unambiguously a spanning deletion. A lone empty string is written
+    ## as '.' to preserve monomorphic reference site semantics.
+    if (is(ALT, "CharacterList") || is(ALT, "List")) {
+        ALT <- endoapply(ALT, function(a) {
+            empty <- !is.na(a) & nchar(a) == 0L
+            if (any(empty) && length(a) > 1L)
+                a[empty] <- "*"
+            a
+        })
+    } else if (is.character(ALT)) {
+        ## ExpandedVCF: scalar character per row — ambiguous case.
+        ## These are already expanded so a single '*' would have been
+        ## the only allele for that row. Write as '*' since expand()
+        ## doesn't produce monomorphic rows.
+        ALT[!is.na(ALT) & nchar(ALT) == 0L] <- "*"
+    }
     ALT <- as.character(unstrsplit(ALT, ","))
     ALT[nchar(ALT) == 0L | is.na(ALT)] <- "."
     if (is.null(QUAL <- qual(obj)))
