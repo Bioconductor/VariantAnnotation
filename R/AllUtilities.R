@@ -110,7 +110,6 @@
         CharacterList(x)
     } else {
         flat[grepl("I", flat, fixed=TRUE)] <- "."
-        flat[grepl("*", flat, fixed=TRUE)] <- "" 
         relist(DNAStringSet(flat), x)
     }
 }
@@ -118,12 +117,15 @@
 ## The grep for '.' here is looking for '.' as *part* of the ALT field.
 ## If the ALT were '.' only, with no other characters, it would have been
 ## converted to an empty string in the C code before it reached this point.
+## '*' is the VCF spanning deletion allele — not valid DNA, treated as
+## structural so it's preserved in a CharacterList (GitHub issue #65).
 .isStructural <- function(x)
 {
     grepl("<", x, fixed=TRUE) |
     grepl("[", x, fixed=TRUE) |
     grepl("]", x, fixed=TRUE) |
-    grepl(".", x, fixed=TRUE)
+    grepl(".", x, fixed=TRUE) |
+    grepl("*", x, fixed=TRUE)
 }
 
 .formatInfo <- function(x, hdr, nrecords)
