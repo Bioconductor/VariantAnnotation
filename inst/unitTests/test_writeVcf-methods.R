@@ -133,3 +133,38 @@ chk = fixed(header(readVcf(tmp)))$ALT
 checkIdentical(chk, good)
 }
 
+
+## ---------------------------------------------------------------
+## Test for GitHub issue #78: faithful round-trip via writeVcf + readVcf
+## ---------------------------------------------------------------
+test_writeVcf_roundtrip_issue78 <- function()
+{
+    ## structural.vcf has all-NA seqinfo and an existing fileDate
+    fl <- system.file("extdata", "structural.vcf", package="VariantAnnotation")
+    out <- tempfile(fileext=".vcf")
+    on.exit(unlink(out))
+
+    first <- readVcf(fl)
+    writeVcf(first, out)
+    roundtrip <- readVcf(out)
+
+    ## Should be identical (no spurious contig lines, fileDate preserved)
+    checkTrue(isTRUE(all.equal(roundtrip, first)),
+        msg="structural.vcf round-trip should be perfect")
+
+    ## ex2.vcf has real seqinfo — contig lines should still be written
+    fl2 <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
+    out2 <- tempfile(fileext=".vcf")
+    on.exit(unlink(out2), add=TRUE)
+
+    first2 <- readVcf(fl2)
+    writeVcf(first2, out2)
+    roundtrip2 <- readVcf(out2)
+    checkTrue(isTRUE(all.equal(roundtrip2, first2)),
+        msg="ex2.vcf round-trip should be perfect")
+
+    ## Verify fileDate is preserved (not replaced with today's date)
+    lines <- readLines(out2)
+    fd_line <- grep("^##fileDate=", lines, value=TRUE)
+    checkIdentical(fd_line, "##fileDate=20090805")
+}

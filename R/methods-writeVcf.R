@@ -152,8 +152,15 @@
         header <- c(fileformat, header) 
     }
     contig <- any(grepl("contig", names(header), fixed=TRUE))
-    if (!contig)
-        header <- c(header, .contigsFromSeqinfo(seqinfo(obj)))
+    if (!contig) {
+        ## Only add contig lines if seqinfo carries useful information
+        ## (at least one non-NA seqlength or genome). Bare ##contig=<ID=X>
+        ## lines are uninformative and break round-trip fidelity (#78).
+        si <- seqinfo(obj)
+        has_info <- !all(is.na(seqlengths(si))) || !all(is.na(genome(si)))
+        if (has_info)
+            header <- c(header, .contigsFromSeqinfo(si))
+    }
 
     ## Last line before data
     colnms <- c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO")
@@ -171,11 +178,12 @@
     if (nms == "META" && ncol(df) == 1L) {
         if (!"fileformat" %in% rownames(df))
             df <- rbind(DataFrame(Value="VCFv4.3", row.names="fileformat"), df)
-        fd <- format(Sys.time(), "%Y%m%d")
-        if ("fileDate" %in% rownames(df))
-            df[rownames(df) == "fileDate", ] <- fd
-        else
+        ## Preserve existing fileDate for round-trip fidelity (#78).
+        ## Only add a new fileDate if none exists.
+        if (!"fileDate" %in% rownames(df)) {
+            fd <- format(Sys.time(), "%Y%m%d")
             df <- rbind(df, DataFrame(Value=fd, row.names="fileDate"))
+        }
         paste("##", rownames(df), "=", df[,1], sep="")
     ## Support VCF v4.2 and v4.3 PEDIGREE field
     } else if(nms == "PEDIGREE" || nms == "ALT") {
@@ -193,8 +201,8 @@
     ## (Rsamtools reports unstructured headers as one column named "Value")
     } else if(ncol(df) == 1L && names(df)[1] == "Value" && nrow(df) == 1L) {
         if (nms == "fileDate") {
-            fd <- format(Sys.time(), "%Y%m%d")
-            paste("##fileDate=", fd, sep="")
+            ## Preserve existing fileDate for round-trip fidelity (#78).
+            paste("##fileDate=", df[1, 1], sep="")
         } else
             paste("##", nms, "=", df[,1], sep="")
     ## 'non-simple' key-value pairs
