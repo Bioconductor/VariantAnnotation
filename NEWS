@@ -1,3 +1,20 @@
+CHANGES IN VERSION 1.59.1
+-------------------------
+
+BUG FIXES
+
+    o locateVariants() with IntergenicVariants now correctly classifies
+      flanking genes into PRECEDEID and FOLLOWID based on gene strand.
+      Previously, classification was purely positional (genes to the right
+      went to PRECEDEID, genes to the left went to FOLLOWID) regardless
+      of the gene's transcriptional orientation. Now:
+      - PRECEDEID contains genes the variant is upstream of (i.e., the
+        variant precedes the gene's TSS in transcriptional direction)
+      - FOLLOWID contains genes the variant is downstream of (i.e., the
+        variant follows the gene's TSS in transcriptional direction)
+      This matches Ensembl VEP's upstream_gene_variant/downstream_gene_variant
+      classification. (GitHub issue #55)
+
 CHANGES IN VERSION 1.36.0
 -------------------------
 
