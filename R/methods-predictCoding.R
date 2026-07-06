@@ -148,7 +148,8 @@ setMethod("predictCoding", c("VRanges", "TxDb", "ANY", "missing"),
                 " were not translated")
 
     ## substitute and translate
-    refAA <- varAA <- AAStringSet(rep("", length(txlocal))) 
+    refAA <- AAStringSet(rep("", length(txlocal)))
+    varAA <- AAStringSet(rep("", length(txlocal)))
     if (any(valid)) {
         ## 2 genetic.code versions
         alt.init.codons <- attr(genetic.code, "alt_init_codons")
@@ -181,7 +182,7 @@ setMethod("predictCoding", c("VRanges", "TxDb", "ANY", "missing"),
     consequence <- rep("synonymous", length(txlocal))
     consequence[nonsynonymous] <- "nonsynonymous" 
     consequence[fmshift] <- "frameshift"
-    consequence[nonsynonymous & grepl("\\*", as.character(varAA), fixed=TRUE)] <- "nonsense" 
+    consequence[nonsynonymous & grepl("\\*", as.character(varAA))] <- "nonsense" 
     consequence[zwidth | noTrans] <- "not translated" 
     consequence <- factor(consequence) 
  
