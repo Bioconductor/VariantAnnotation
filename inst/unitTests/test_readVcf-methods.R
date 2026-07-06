@@ -258,3 +258,33 @@ test_buffer_realloc <- function()
     target <- ".GGGGGGGGG"
     checkIdentical(target, alt(vcf)[[1]])
 }
+
+test_regular_gzip_readVcf <- function()
+{
+    ## Issue #32: regular gzip (bcftools -O z) should be transparently
+    ## re-compressed to BGZF so scanBcfHeader does not fail.
+    fl_bgzf <- system.file("extdata", "chr7-sub.vcf.gz",
+                           package = "VariantAnnotation")
+
+    ## Build a regular gzip copy in a tempfile
+    tmp_vcf <- tempfile(fileext = ".vcf")
+    tmp_gz  <- paste0(tmp_vcf, ".gz")
+    con_in  <- gzcon(file(fl_bgzf, "rb"))
+    txt     <- readLines(con_in)
+    close(con_in)
+    writeLines(txt, tmp_vcf)
+    con_out <- gzfile(tmp_gz, "wb")
+    writeLines(txt, con_out)
+    close(con_out)
+    on.exit({ unlink(tmp_vcf); unlink(tmp_gz) }, add = TRUE)
+
+    ## .is_bgzf should return FALSE for the regular gzip file
+    checkTrue(!VariantAnnotation:::.is_bgzf(tmp_gz))
+    ## .is_bgzf should return TRUE for the original BGZF file
+    checkTrue(VariantAnnotation:::.is_bgzf(fl_bgzf))
+
+    ## readVcf should succeed (transparently re-compresses to BGZF)
+    suppressMessages(vcf <- readVcf(tmp_gz, genome = "hg19"))
+    checkTrue(is(vcf, "CollapsedVCF"))
+    checkTrue(nrow(vcf) > 0L)
+}

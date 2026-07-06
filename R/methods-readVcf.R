@@ -55,6 +55,42 @@ setMethod(readVcf, c(file="character", param="missing"),
              row.names=row.names, ...)
 })
 
+.is_bgzf <- function(path)
+{
+    ## BGZF blocks carry a specific extra-field signature in the gzip header:
+    ##   byte  3 (FLG)  has the FEXTRA bit (0x04) set
+    ##   bytes 13-14 (first extra sub-field ID) equal 'B','C' (0x42, 0x43)
+    ## Regular gzip files are missing that sub-field even when FLG has FEXTRA.
+    bytes <- tryCatch(readBin(path, "raw", n = 18L), error = function(e) raw())
+    if (length(bytes) < 18L) return(FALSE)
+    ## magic: 0x1f 0x8b
+    if (!identical(bytes[1:2], as.raw(c(0x1f, 0x8b)))) return(FALSE)
+    ## FLG byte (4th) must have FEXTRA (0x04)
+    if (bitwAnd(as.integer(bytes[4L]), 0x04L) == 0L) return(FALSE)
+    ## SI1='B'(0x42), SI2='C'(0x43) at bytes 13-14 (1-based)
+    identical(bytes[13:14], as.raw(c(0x42, 0x43)))
+}
+
+.ensure_bgzf <- function(path)
+{
+    ## If the file is regular gzip (not BGZF), re-compress to a BGZF tempfile.
+    ## Returns the (possibly new) path; the caller is responsible for cleanup
+    ## via .bgzf_tempfiles if needed.
+    if (!grepl("\\.gz$", path, ignore.case = TRUE)) return(path)
+    if (.is_bgzf(path)) return(path)
+    message("Note: '", basename(path), "' appears to be regular gzip ",
+            "(not BGZF). Re-compressing to BGZF for htslib compatibility.")
+    tmp_vcf <- tempfile(fileext = ".vcf")
+    tmp_bgz <- paste0(tmp_vcf, ".bgz")
+    con_in  <- gzcon(file(path, "rb"))
+    txt <- readLines(con_in)
+    close(con_in)
+    writeLines(txt, tmp_vcf)
+    bgzip(tmp_vcf, tmp_bgz, overwrite = TRUE)
+    unlink(tmp_vcf)
+    tmp_bgz
+}
+
 .checkFile <- function(x)
 {
     if (1L != length(x)) 
@@ -62,6 +98,10 @@ setMethod(readVcf, c(file="character", param="missing"),
     ## Tabix index supplied as 'file'
     if (grepl("\\.tbi$", x))
         return(TabixFile(sub("\\.tbi", "", x)))
+
+    ## Transparently handle regular-gzip files (e.g. from bcftools -O z)
+    ## by re-compressing to BGZF, which htslib/scanBcfHeader requires.
+    x <- .ensure_bgzf(x)
 
     ## Attempt to create TabixFile
     tryCatch(x <- TabixFile(x), error=function(e) return(x))
