@@ -268,7 +268,10 @@ setMethod(writeVcf, c("VCF", "connection"),
 ### VRanges methods
 ###
 
-setMethod(writeVcf, "VRanges", function(obj, filename, ...)
+setMethod(writeVcf, "VRanges",
+    function(obj, filename, index = FALSE,
+             info = character(), filter = character(), meta = character(), ...)
 {
-    writeVcf(as(obj, "VCF"), filename, ...)
+    vcf <- asVCF(obj, info = info, filter = filter, meta = meta)
+    writeVcf(vcf, filename, index = index, ...)
 })
