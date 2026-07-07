@@ -2,6 +2,13 @@
 ### All classes 
 ### =========================================================================
 
+## Register S3 connection classes so S4 dispatch works with setMethod(*, "connection").
+## These must be called before any setMethod() that uses "connection" as a signature.
+setOldClass(c("textConnection", "connection"))
+setOldClass(c("rawConnection",  "connection"))
+setOldClass(c("url",            "connection"))
+setOldClass(c("file",           "connection"))
+
 
 ### -------------------------------------------------------------------------
 ### VCF (VIRTUAL) 
