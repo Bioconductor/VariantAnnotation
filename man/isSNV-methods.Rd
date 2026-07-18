@@ -96,19 +96,19 @@
   All functions return a logical vector the length of \code{x}.
   Variants in gvcf files with NON_REF alt alleles return TRUE;
   structural variants return FALSE.
-  \itemize{
+  \describe{
     \item{isSNV: }{
       Reference and alternate alleles are both a single nucleotide long.
     }
     \item{isInsertion: }{
-      Reference allele is a single nucleotide and the alternate allele 
+      Reference allele is a single nucleotide and the alternate allele
       is greater (longer) than a single nucleotide and the first
-      nucleotide of the alternate allele matches the reference. 
+      nucleotide of the alternate allele matches the reference.
     }
     \item{isDeletion: }{
-      Alternate allele is a single nucleotide and the reference allele 
+      Alternate allele is a single nucleotide and the reference allele
       is greater (longer) than a single nucleotide and the first
-      nucleotide of the reference allele matches the alternate. 
+      nucleotide of the reference allele matches the alternate.
     }
     \item{isIndel: }{
       The variant is either a deletion or insertion as determined
@@ -124,7 +124,7 @@
     }
     \item{isTransition: }{
       Reference and alternate alleles are both a single nucleotide long.
-      The reference-alternate pair interchange is of either two-ring 
+      The reference-alternate pair interchange is of either two-ring
       purines (A <-> G) or one-ring pyrimidines (C <-> T).
     }
   }

@@ -21,23 +21,19 @@
 \section{Methods}{
   In the code below, \code{x} is a \code{SIFTDb} object.
   \describe{
-    \item{}{
-      \code{metadata(x)}:
+    \item{\code{metadata(x)}}{
       Returns \code{x}'s metadata in a data frame.
     }
-    \item{}{
-      \code{columns(x)}:
+    \item{\code{columns(x)}}{
       Returns the names of the \code{columns} that can be used to subset the
       data columns.
     }
-    \item{}{
-      \code{keys(x)}:
+    \item{\code{keys(x)}}{
       Returns the names of the \code{keys} that can be used to subset the
       data rows. The \code{keys} values are the rsid's.
     }
-    \item{}{
-      \code{select(x, keys = NULL, columns = NULL, ...)}:
-      Returns a subset of data defined by the character vectors \code{keys} 
+    \item{\code{select(x, keys = NULL, columns = NULL, ...)}}{
+      Returns a subset of data defined by the character vectors \code{keys}
       and \code{columns}. If no \code{keys} are supplied, all rows are
       returned. If no \code{columns} are supplied, all columns
       are returned. For column descriptions see \code{?SIFTDbColumns}.

@@ -44,8 +44,8 @@
 
 \section{Constructor}{
   \describe{
-    \item{}{
-      \code{VCFHeader(reference = character(), samples = character(), 
+    \item{\code{VCFHeader}}{
+      \code{VCFHeader(reference = character(), samples = character(),
                       header = DataFrameList(), ...)
       }
     }
@@ -55,66 +55,59 @@
 \section{Accessors}{
   In the following code snippets \code{x} is a VCFHeader object.
   \describe{
-    \item{}{
-      \code{samples(x)}:
-      Returns a character() vector of names of samples. 
+    \item{\code{samples(x)}}{
+      Returns a character() vector of names of samples.
     }
-    \item{}{
-      \code{header(x)}:
+    \item{\code{header(x)}}{
       Returns all information in the header slot which includes
       \code{meta}, \code{info} and \code{geno} if present.
     }
-    \item{}{
-      \code{meta(x)}, \code{meta(x)<- value}: The getter returns a
+    \item{\code{meta(x)}, \code{meta(x)<- value}}{
+      The getter returns a
       \code{DataFrameList}. Each \code{DataFrame} represents a unique
       "key" name in the header file. Multiple header lines
       with the same "key" are parsed into the same \code{DataFrame}
       with the "ID" field as the row names. Simple header lines
       have no "ID" field in which case the "key" is used as the
       row name.
- 
+
       NOTE: In VariantAnnotation <= 1.27.5, the \code{meta()} extractor
       returned a \code{DataFrame} called "META" which held all simple
       key-value header lines. The VCF 4.3 specs allowed headers lines
       with key name "META" which caused a name clash with the pre-existing
-      "META" \code{DataFrame}. 
+      "META" \code{DataFrame}.
 
       In \code{VariantAnnotation} >=1.27.6 the "META" \code{DataFrame} was
       split and each row became its own separate \code{DataFrame}. Calling
       \code{meta()} on a \code{VCFHeader} object now returns a list of
       \code{DataFrames}, one for each unique key name in the header.
     }
-    \item{}{
-      \code{fixed(x), fixed(x)<- value}:
+    \item{\code{fixed(x)}, \code{fixed(x)<- value}}{
       Returns a \code{DataFrameList} of information pertaining to any of
-      \sQuote{REF}, \sQuote{ALT}, \sQuote{FILTER} and \sQuote{QUAL}. 
+      \sQuote{REF}, \sQuote{ALT}, \sQuote{FILTER} and \sQuote{QUAL}.
       Replacement value must be a \code{DataFrameList} with one or more of
-      the following names, \sQuote{QUAL}, \sQuote{FILTER}, \sQuote{REF} 
-      and \sQuote{ALT}. 
+      the following names, \sQuote{QUAL}, \sQuote{FILTER}, \sQuote{REF}
+      and \sQuote{ALT}.
     }
-    \item{}{
-      \code{info(x)}, \code{info(x)<- value}:
+    \item{\code{info(x)}, \code{info(x)<- value}}{
       Gets or sets a \code{DataFrame} of \sQuote{INFO} information.
       Replacement value must be a \code{DataFrame} with 3 columns
-      named \sQuote{Number}, \sQuote{Type} and \sQuote{Description}. 
+      named \sQuote{Number}, \sQuote{Type} and \sQuote{Description}.
     }
-    \item{}{
-      \code{geno(x)}, \code{geno(x)<- value}:
+    \item{\code{geno(x)}, \code{geno(x)<- value}}{
       Returns a \code{DataFrame} of \sQuote{FORMAT} information.
       Replacement value must be a \code{DataFrame} with 3 columns
-      named \sQuote{Number}, \sQuote{Type} and \sQuote{Description}. 
+      named \sQuote{Number}, \sQuote{Type} and \sQuote{Description}.
     }
-    \item{}{
-      \code{reference(x)}:
+    \item{\code{reference(x)}}{
       Returns a character() vector with names of reference sequences.
       Not relevant for \code{scanVcfHeader}.
     }
-    \item{}{
-      \code{vcfFields(x)}:
+    \item{\code{vcfFields(x)}}{
       Returns a \code{\link[IRanges]{CharacterList}} of all available VCF
       fields, with names of \code{fixed}, \code{info}, \code{geno} and
       \code{samples} indicating the four categories. Each element is a
-      character() vector of available VCF field names within each category. 
+      character() vector of available VCF field names within each category.
     }
   }
 }

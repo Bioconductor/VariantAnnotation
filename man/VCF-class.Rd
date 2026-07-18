@@ -104,14 +104,13 @@
 
 \section{Constructors}{
   \describe{
-    \item{}{
-      \code{readVcf(file, genome, param, ..., row.names=TRUE)}
+    \item{\code{readVcf(file, genome, param, ..., row.names=TRUE)}}{
     }
-    \item{}{
-      \code{VCF(rowRanges = GRanges(), colData = DataFrame(), 
-                exptData = list(header = VCFHeader()), 
-                fixed = DataFrame(), info = DataFrame(), 
-                geno = SimpleList(), ..., collapsed=TRUE, 
+    \item{\code{VCF(rowRanges, colData, exptData, fixed, info, geno, ...)}}{
+      \code{VCF(rowRanges = GRanges(), colData = DataFrame(),
+                exptData = list(header = VCFHeader()),
+                fixed = DataFrame(), info = DataFrame(),
+                geno = SimpleList(), ..., collapsed=TRUE,
                 verbose = FALSE)}
       Creates CollapsedVCF when \code{collapsed = TRUE} and an
       ExpandedVCF when \code{collapsed = FALSE}.
@@ -126,8 +125,7 @@
   In the following code snippets \code{x} is a CollapsedVCF or ExpandedVCF 
   object.
   \describe{
-    \item{}{
-      \code{rowRanges(x, ..., fixed = TRUE)}, \code{rowRanges(x) <- value}:
+    \item{\code{rowRanges(x, ..., fixed = TRUE)}, \code{rowRanges(x) <- value}}{
       Gets or sets the rowRanges. The CHROM, POS, ID, POS and REF fields are
       used to create a \code{GRanges} object. The start of the ranges are
       defined by POS and the width is equal to the width of the reference
@@ -135,10 +133,10 @@
       \sQuote{.}) a string of CHROM:POS_REF/ALT is used instead.  The
       \code{genome} argument is stored in the seqinfo of the \code{GRanges} and
       can be accessed with \code{genome(<VCF>)}.
- 
-      When \code{fixed = TRUE}, REF, ALT, QUAL and FILTER metadata columns are 
+
+      When \code{fixed = TRUE}, REF, ALT, QUAL and FILTER metadata columns are
       displayed as metadata columns. To modify the \code{fixed} fields, use
-      the \code{fixed<-} setter. 
+      the \code{fixed<-} setter.
 
       One metadata column, \code{paramRangeID}, is included with the
       \code{rowRanges}. This ID is meaningful when multiple ranges are
@@ -146,103 +144,93 @@
       match each range.
 
       The metadata columns of a VCF object are accessed with the following:
-      \itemize{
-        \item{\code{ref(x)}, \code{ref(x) <- value}:
-          Gets or sets the reference allele (REF). \code{value} must 
-          be a \code{DNAStringSet}. 
+      \describe{
+        \item{\code{ref(x)}, \code{ref(x) <- value}:}{
+          Gets or sets the reference allele (REF). \code{value} must
+          be a \code{DNAStringSet}.
         }
-        \item{\code{alt(x)}, \code{alt(x) <- value}:
-          Gets or sets the alternate allele data (ALT). When \code{x} is 
+        \item{\code{alt(x)}, \code{alt(x) <- value}:}{
+          Gets or sets the alternate allele data (ALT). When \code{x} is
           a CollapsedVCF, \code{value} must be a \code{DNAStringSetList}
           or \code{CompressedCharacterList}. For ExpandedVCF, \code{value}
           must be a \code{DNAStringSet} or \code{character}.
         }
-        \item{\code{qual(x)}, \code{qual(x) <- value}:
-          Returns or sets the quality scores (QUAL). \code{value} must 
+        \item{\code{qual(x)}, \code{qual(x) <- value}:}{
+          Returns or sets the quality scores (QUAL). \code{value} must
           be an \code{numeric(1L)}.
         }
-        \item{\code{filt(x)}, \code{filt(x) <- value}:
-          Returns or sets the filter data. \code{value} must 
+        \item{\code{filt(x)}, \code{filt(x) <- value}:}{
+          Returns or sets the filter data. \code{value} must
           be a \code{character(1L)}. Names must be one of 'REF', 'ALT',
           'QUAL' or 'FILTER'.
         }
       }
     }
-    \item{}{
-      \code{mcols(x)}, \code{mcols(x) <- value}:
-       These methods behave the same as \code{mcols(rowRanges(x))} and 
-       \code{mcols(rowRanges(x)) <- value}. This method does not manage the
-       fixed fields, 'REF', 'ALT', 'QUAL' or 'FILTER'. To modify those
-       columns use \code{fixed<-}.
+    \item{\code{mcols(x)}, \code{mcols(x) <- value}}{
+      These methods behave the same as \code{mcols(rowRanges(x))} and
+      \code{mcols(rowRanges(x)) <- value}. This method does not manage the
+      fixed fields, 'REF', 'ALT', 'QUAL' or 'FILTER'. To modify those
+      columns use \code{fixed<-}.
     }
-    \item{}{
-      \code{fixed(x)}, \code{fixed(x) <- value}:
-       Gets or sets a DataFrame of REF, ALT, QUAL and FILTER only. 
-       Note these fields are displayed as metadata columns with
-       the rowRanges() data (set to fixed = FALSE to suppress).
+    \item{\code{fixed(x)}, \code{fixed(x) <- value}}{
+      Gets or sets a DataFrame of REF, ALT, QUAL and FILTER only.
+      Note these fields are displayed as metadata columns with
+      the rowRanges() data (set to fixed = FALSE to suppress).
     }
-    \item{}{
-      \code{info(x, ..., row.names = TRUE)}, \code{info(x) <- value}:
-       Gets or sets a DataFrame of INFO variables. Row names are added
-       if unique and \code{row.names=TRUE}.
+    \item{\code{info(x, ..., row.names = TRUE)}, \code{info(x) <- value}}{
+      Gets or sets a DataFrame of INFO variables. Row names are added
+      if unique and \code{row.names=TRUE}.
     }
-    \item{}{
-      \code{geno(x, withDimnames=TRUE)}, \code{geno(x) <- value}:
-       oets a SimpleList of genotype data.
-       \code{value} is a SimpleList. To replace a single variable in
-       the SimpleList use \code{geno(x)$variable <- value}; in this 
-       case \code{value} must be a matrix or array. By default
-       row names are returned; to override specify
-       \code{geno(vcf, withDimnames=FALSE)}.
+    \item{\code{geno(x, withDimnames=TRUE)}, \code{geno(x) <- value}}{
+      Gets a SimpleList of genotype data.
+      \code{value} is a SimpleList. To replace a single variable in
+      the SimpleList use \code{geno(x)$variable <- value}; in this
+      case \code{value} must be a matrix or array. By default
+      row names are returned; to override specify
+      \code{geno(vcf, withDimnames=FALSE)}.
     }
-    \item{}{
-      \code{metadata(x)}:
-       Gets a \code{list} of experiment-related data. By default this
-       list includes the \sQuote{header} information from the VCF file. 
-       See the use of \code{header()} for details in extracting
-       header information. 
+    \item{\code{metadata(x)}}{
+      Gets a \code{list} of experiment-related data. By default this
+      list includes the \sQuote{header} information from the VCF file.
+      See the use of \code{header()} for details in extracting
+      header information.
     }
-    \item{}{
-      \code{colData(x)}, \code{colData(x) <- value}:
-      Gets or sets a \code{DataFrame} of sample-specific information. Each row 
-      represents a sample in the VCF file. \code{value} must be a 
-      \code{DataFrame} with rownames representing the samples in the VCF 
+    \item{\code{colData(x)}, \code{colData(x) <- value}}{
+      Gets or sets a \code{DataFrame} of sample-specific information. Each row
+      represents a sample in the VCF file. \code{value} must be a
+      \code{DataFrame} with rownames representing the samples in the VCF
       file.
     }
-    \item{}{
-      \code{genome(x)}:
+    \item{\code{genome(x)}}{
       Extract the \code{genome} information from the \code{GRanges} object
       returned by the \code{rowRanges} accessor.
     }
-    \item{}{
-      \code{seqlevels(x)}:
+    \item{\code{seqlevels(x)}}{
       Extract the \code{seqlevels} from the \code{GRanges} object
       returned by the \code{rowRanges} accessor.
     }
-    \item{}{
-      \code{strand(x)}:
+    \item{\code{strand(x)}}{
       Extract the \code{strand} from the \code{GRanges} object
       returned by the \code{rowRanges} accessor.
     }
-    \item{}{
-      \code{header(x)}, \code{header(x)<- value}:
+    \item{\code{header(x)}, \code{header(x)<- value}}{
       Get or set the VCF header information. Replacement value
-      must be a \code{VCFHeader} object. To modify individual elements 
-      use \code{info<-}, \code{geno<-} or \code{meta<-} on a 
+      must be a \code{VCFHeader} object. To modify individual elements
+      use \code{info<-}, \code{geno<-} or \code{meta<-} on a
       \sQuote{VCFHeader} object. See ?\code{VCFHeader} man page for
       details.
-       \itemize{
-         \item{\code{info(header(x))}}
-         \item{\code{geno(header(x))}}
-         \item{\code{meta(header(x))}}
-         \item{\code{samples(header(x))}}
+      \itemize{
+        \item \code{info(header(x))}
+        \item \code{geno(header(x))}
+        \item \code{meta(header(x))}
+        \item \code{samples(header(x))}
       }
     }
-    \item{}{\code{vcfFields(x)}
+    \item{\code{vcfFields(x)}}{
       Returns a \code{\link[IRanges]{CharacterList}} of all available VCF
       fields, with names of \code{fixed}, \code{info}, \code{geno} and
       \code{samples} indicating the four categories. Each element is a
-      character() vector of available VCF field names within each category. 
+      character() vector of available VCF field names within each category.
     }
   }
 }
@@ -251,21 +239,21 @@
   In the following code \code{x} is a VCF object, and \dots is a list
   of VCF objects.
   \describe{
-    \item{}{
-      \code{x[i, j]}, \code{x[i, j] <- value}: Gets or sets rows and columns.
+    \item{\code{x[i, j]}, \code{x[i, j] <- value}}{
+      Gets or sets rows and columns.
       \code{i} and \code{j} can be integer or logical vectors. \code{value} is a
       replacement \code{VCF} object.
     }
-    \item{}{
-      \code{subset(x, subset, select, ...)}: Restricts \code{x} by
+    \item{\code{subset(x, subset, select, ...)}}{
+      Restricts \code{x} by
       evaluating the \code{subset} argument in the scope of
       \code{rowData(x)} and \code{info(x)}, and \code{select} in the
       context of \code{colData(x)}. The \code{subset} argument restricts
       by rows, while the \code{select} argument restricts by column. The
       \code{\dots} are passed to the underlying \code{subset()} calls.
     }
-    \item{}{
-      \code{cbind(...)}, \code{rbind(...)}: \code{cbind} combines objects with
+    \item{\code{cbind(...)}, \code{rbind(...)}}{
+      \code{cbind} combines objects with
       identical ranges (\code{rowRanges}) but different samples (columns in
       \code{assays}). The colnames in \code{colData} must match or an error is
       thrown. Columns with duplicate names in \code{fixed}, \code{info} and
@@ -276,7 +264,7 @@
       in \code{colData} must contain the same data.  The \sQuote{Samples}
       columns in \code{colData} (created by \code{readVcf}) are renamed with a
       numeric extension ordered as they were input to \code{rbind} e.g.,
-      \dQuote{Samples.1, Samples.2, ...} etc. 
+      \dQuote{Samples.1, Samples.2, ...} etc.
 
       \code{metadata} from all objects are combined into a
       \code{list} with no name checking.
@@ -288,18 +276,17 @@
 \section{expand}{
   In the following code snippets \code{x} is a CollapsedVCF object.
   \describe{
-    \item{}{
-      \code{expand(x, ..., row.names = FALSE)}:
-      Expand (unlist) the ALT column of a CollapsedVCF object to one row 
+    \item{\code{expand(x, ..., row.names = FALSE)}}{
+      Expand (unlist) the ALT column of a CollapsedVCF object to one row
       per ALT value. Variables with Number='A' have one value per alternate
-      allele and are expanded accordingly. The 'AD' genotype field 
+      allele and are expanded accordingly. The 'AD' genotype field
       (and any variables with 'Number' set to 'R')
       is expanded into REF/ALT pairs. For all other fields, the rows
       are replicated to match the elementNROWS of ALT.
 
-      The output is an ExpandedVCF with ALT as a \code{DNAStringSet} 
+      The output is an ExpandedVCF with ALT as a \code{DNAStringSet}
       or \code{character} (structural variants). By default rownames
-      are NULL. When \code{row.names=TRUE} the expanded output has 
+      are NULL. When \code{row.names=TRUE} the expanded output has
       duplicated rownames corresponding to the original \code{x}.
     }
   }

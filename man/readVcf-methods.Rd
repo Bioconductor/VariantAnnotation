@@ -60,20 +60,20 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
     and ?\code{indexVcf} for help creating a \code{\link{VcfFile}}.
   }
   \item{genome}{A \code{character} or \code{Seqinfo} object.
-    \itemize{
-      \item{\code{character}:}{ Genome identifier as a single string or named 
-        character vector. Names of the character vector correspond to 
-        chromosome names in the file. This identifier replaces the genome 
+    \describe{
+      \item{\code{character}:}{ Genome identifier as a single string or named
+        character vector. Names of the character vector correspond to
+        chromosome names in the file. This identifier replaces the genome
         information in the VCF \code{Seqinfo} (i.e., \code{seqinfo(vcf)}).
         When not provided, \code{genome} is taken from the VCF file header.
       }
       \item{\code{Seqinfo}:}{ When \code{genome} is provided as a \code{Seqinfo}
-        it is propagated to the VCF output. If seqinfo information can be 
-        obtained from the file, 
+        it is propagated to the VCF output. If seqinfo information can be
+        obtained from the file,
         (i.e., seqinfo(scanVcfHeader(fl)) is not empty), the output
         \code{Seqinfo} is a product of merging the two.
 
-        If a param (i.e., ScanVcfParam) is used in the call to \code{readVcf}, 
+        If a param (i.e., ScanVcfParam) is used in the call to \code{readVcf},
         the seqlevels  of the param ranges must be present in \code{genome}.
       }
     }

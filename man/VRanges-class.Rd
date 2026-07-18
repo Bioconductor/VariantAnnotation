@@ -143,11 +143,11 @@
 
 \section{Constructors}{
   \describe{
-    \item{}{
-      \code{VRanges(seqnames = Rle(), ranges = IRanges(), ref = character(), 
-        alt = NA_character_, totalDepth = NA_integer_, refDepth = NA_integer_, 
-        altDepth = NA_integer_, ..., sampleNames = NA_character_, 
-        softFilterMatrix = FilterMatrix(matrix(nrow = length(gr), 
+    \item{\code{VRanges(...)}}{
+      \code{VRanges(seqnames = Rle(), ranges = IRanges(), ref = character(),
+        alt = NA_character_, totalDepth = NA_integer_, refDepth = NA_integer_,
+        altDepth = NA_integer_, ..., sampleNames = NA_character_,
+        softFilterMatrix = FilterMatrix(matrix(nrow = length(gr),
         ncol = 0L), FilterRules()), hardFilters = FilterRules())}:
       Creates a VRanges object.
       \describe{
@@ -176,7 +176,7 @@
           subset the object to its current state.}
       }
     }
-    \item{}{
+    \item{\code{makeVRangesFromGRanges(...)}}{
       \code{makeVRangesFromGRanges(gr, 
                                    ref.field="ref",
                                    alt.field="alt",
@@ -229,7 +229,7 @@
   These functions/methods coerce objects to and from \code{VRanges}:
  
   \describe{
-    \item{}{
+    \item{\code{asVCF(x, info, filter, meta)}}{
       \code{asVCF(x, info = character(), filter = character(), meta =
         character())}: Creates a VCF object from a VRanges object. The
       following gives the mapping from VRanges components to VCF:
@@ -263,18 +263,17 @@
       logical column with the reverse coercion. There are many other
       cases of irreversibility.
     }
-    \item{}{
-      \code{as(from, "VCF")}: Like calling \code{asVCF(from)}.
+    \item{\code{as(from, "VCF")}}{
+      Like calling \code{asVCF(from)}.
     }
-    \item{}{
-      \code{as(from, "VRanges")}:
+    \item{\code{as(from, "VRanges")}}{
       When \code{from} is a \code{VCF} this coercion is essentially
       the inverse of \code{asVCF}. Information missing in the VCF
       is imputed as NA.
 
       When \code{from} is a \code{GRanges}, metadata columns of
       \code{ref}, \code{alt}, \code{refDepth}, \code{altDepth},
-      \code{totalDepth} and \code{sampleNames} are transfered to 
+      \code{totalDepth} and \code{sampleNames} are transfered to
       the \code{VRanges} object. Additional metadata columns in
       the \code{GRanges} can be retained or dropped with
       \code{keep.extra.columns}. See also \code{makeVRangesFromGRanges}.
@@ -287,76 +286,70 @@
   provides the following, where \code{x} is a VRanges object.
 
   \describe{
-    \item{}{
-      \code{alt(x), alt(x) <- value}: Get or set the alt allele (character).
+    \item{\code{alt(x)}, \code{alt(x) <- value}}{
+      Get or set the alt allele (character).
     }
-    \item{}{
-      \code{ref(x), ref(x) <- value}: Get or set the ref allele (character).
+    \item{\code{ref(x)}, \code{ref(x) <- value}}{
+      Get or set the ref allele (character).
     }
-    \item{}{
-      \code{altDepth(x), altDepth(x) <- value}: Get or set the alt allele
-      read depth (integer).
+    \item{\code{altDepth(x)}, \code{altDepth(x) <- value}}{
+      Get or set the alt allele read depth (integer).
     }
-    \item{}{
-      \code{refDepth(x), refDepth(x) <- value}: Get or set the ref
-      allele read depth (integer).
+    \item{\code{refDepth(x)}, \code{refDepth(x) <- value}}{
+      Get or set the ref allele read depth (integer).
     }
-    \item{}{
-      \code{totalDepth(x), totalDepth(x) <- value}: Get or set the total
-      read depth (integer).
+    \item{\code{totalDepth(x)}, \code{totalDepth(x) <- value}}{
+      Get or set the total read depth (integer).
     }
-    \item{}{
-      \code{altFraction(x)}: Returns \code{altDepth(x)/totalDepth(x)} (numeric).
+    \item{\code{altFraction(x)}}{
+      Returns \code{altDepth(x)/totalDepth(x)} (numeric).
     }
-    \item{}{
-      \code{sampleNames(x), sampleNames(x) <- value}: Get or set the
-      sample names (character/factor).
+    \item{\code{sampleNames(x)}, \code{sampleNames(x) <- value}}{
+      Get or set the sample names (character/factor).
     }
-    \item{}{
-      \code{softFilterMatrix(x), softFilterMatrix(x) <- value}: Gets or
-      sets the soft filter matrix (any matrix, but ideally a
+    \item{\code{softFilterMatrix(x)}, \code{softFilterMatrix(x) <- value}}{
+      Gets or sets the soft filter matrix (any matrix, but ideally a
       \code{FilterMatrix}).
     }
-    \item{}{
-      \code{resetFilter(x)}: Removes all columns from \code{softFilterMatrix}.
+    \item{\code{resetFilter(x)}}{
+      Removes all columns from \code{softFilterMatrix}.
     }
-    \item{}{
-      \code{called(x)}: Returns whether all filter results in
+    \item{\code{called(x)}}{
+      Returns whether all filter results in
       \code{softFilterMatrix(x)} are \code{TRUE} for each variant.
     }
-    \item{}{
-      \code{hardFilters(x), hardFilters(x) <- value}: Gets or
-      sets the hard filters (those applied to yield the current subset).
+    \item{\code{hardFilters(x)}, \code{hardFilters(x) <- value}}{
+      Gets or sets the hard filters (those applied to yield the current subset).
     }
   }
 }
 
 \section{Utilities and Conveniences}{
   \describe{
-    \item{}{
-      \code{match(x)}: Like GRanges \code{match}, except matches on the
+    \item{\code{match(x)}}{
+      Like GRanges \code{match}, except matches on the
       combination of chromosome, start, width, and \strong{alt}.
     }
-    \item{}{
-      \code{tabulate(bin)}: Finds \code{unique(bin)} and counts how many
+    \item{\code{tabulate(bin)}}{
+      Finds \code{unique(bin)} and counts how many
       times each unique element occurs in \code{bin}. The result is
       stored in \code{mcols(bin)$sample.count}.
     }
-    \item{}{
-      \code{softFilter(x, filters, ...)}: applies the \code{FilterRules}
+    \item{\code{softFilter(x, filters, ...)}}{
+      Applies the \code{FilterRules}
       in \code{filters} to \code{x}, storing the results in
       \code{softFilterMatrix}.
     }
-  }  
+  }
 }
 
 \section{Input/Output to/from VCF}{
   \describe{
-    \item{}{
-      \code{writeVcf(obj, filename, ...)}: coerces to a VCF object and
+    \item{\code{writeVcf(obj, filename, ...)}}{
+      Coerces to a VCF object and
       writes it to a file; see \code{\link{writeVcf}}.
     }
-    \item{}{
+    \item{\code{readVcfAsVRanges(x, genome, param, ...)}}{
       \code{readVcfAsVRanges(x, genome, param = ScanVcfParam(), ...)}:
       Reads a VCF \code{x} directly into a \code{VRanges};
       see \code{\link{readVcf}} for details on the arguments.

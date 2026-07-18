@@ -71,12 +71,12 @@
   be transcripts-by-sample. If the \code{GRangesList} is genes,
   the count matrix will be gene-by-sample.
 
-  \itemize{
+  \describe{
     \item{Counting with locateVariants() :}{
 
       Variant counts are always summarized transcript-by-sample.
-      When \code{query} is a \code{GRangesList}, it must be compatible 
-      with the \code{VariantType}-class given as the \code{mode} argument. 
+      When \code{query} is a \code{GRangesList}, it must be compatible
+      with the \code{VariantType}-class given as the \code{mode} argument.
       The list below specifies the appropriate \code{GRangesList} for each
       \code{mode}.
       \describe{
@@ -88,17 +88,17 @@
         \item{PromoterVariants :}{list of transcripts}
       }
 
-      When \code{query} is a \code{TxDb}, the appropriate 
-      region-by-transcript \code{GRangesList} listed above is extracted 
-      internally and used as the annotation. 
+      When \code{query} is a \code{TxDb}, the appropriate
+      region-by-transcript \code{GRangesList} listed above is extracted
+      internally and used as the annotation.
 
     }
- 
+
     \item{Counting with a user-supplied function :}{
 
       \code{subject} must be a \code{GRangesList} and \code{mode} must
       be the name of a function. The count function must take 'query'
-      and 'subject' arguments and return a \code{Hits} object. Counts are 
+      and 'subject' arguments and return a \code{Hits} object. Counts are
       summarized by the outer list elements of the \code{GRangesList}.
     }
   }

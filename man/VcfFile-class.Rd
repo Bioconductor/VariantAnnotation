@@ -28,50 +28,50 @@
   
   ## Constructors
   \describe{
-    \item{}{
+    \item{VcfFile}{
       VcfFile(file, index = paste(file, "tbi", sep="."), ...,
       yieldSize=NA_integer_)
     }
-    \item{}{
+    \item{VcfFileList}{
       VcfFileList(..., yieldSize=NA_integer_)
     }
   }
-  
+
   ## Accessors
   \describe{
-    \item{}{
+    \item{index}{
       index(object)}
-    \item{}{
+    \item{path}{
       path(object, ...)}
-    \item{}{
+    \item{isOpen}{
       isOpen(con, rw="")}
-    \item{}{
+    \item{yieldSize}{
       yieldSize(object, ...)}
-    \item{}{
+    \item{yieldSize<-}{
       yieldSize(object, ...) <- value}
-    \item{}{
+    \item{show}{
       show(object)
     }
   }
-  
+
   ## Opening / closing
   \describe{
-    \item{}{
+    \item{open}{
       open(con, ...)}
-    \item{}{
+    \item{close}{
       close(con, ...)}
   }
-  
+
   ## method
   \describe{
-    \item{}{
+    \item{vcfFields}{
       vcfFields(object)
     }
   }
 }
 
 \section{arguments}{
-  \itemize{
+  \describe{
     \item{con}{An instance of \code{VcfFile}.}
 
     \item{file}{A character(1) vector to the Vcf file

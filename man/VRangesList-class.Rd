@@ -32,8 +32,7 @@
 
 \section{Constructor}{
   \describe{
-    \item{}{
-      \code{VRangesList(...)}:
+    \item{\code{VRangesList(...)}}{
       Creates a VRangesList object from \code{VRanges} objects in \dots.
     }
   }
@@ -41,12 +40,11 @@
 
 \section{Accessors}{
   \describe{
-    \item{}{
-      \code{alt(x)}: Returns a CharacterList or RleList, effectively by
+    \item{\code{alt(x)}}{
+      Returns a CharacterList or RleList, effectively by
       calling \code{alt(x[[i]])} on each element of \code{x}.
     }
-    \item{}{
-      \code{ref(x)}:
+    \item{\code{ref(x)}}{
       Returns a CharacterList, effectively by calling \code{ref(x[[i]])}
       on each element of \code{x}.
     }
@@ -55,8 +53,8 @@
 
 \section{Utilities}{
   \describe{
-    \item{}{
-      \code{stackSamples(x)}: Concentrates the elements in \code{x},
+    \item{\code{stackSamples(x)}}{
+      Concentrates the elements in \code{x},
       using \code{names(x)} to appropriately fill \code{sampleNames} in
       the result.
     }
