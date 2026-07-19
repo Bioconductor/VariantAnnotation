@@ -130,6 +130,24 @@ setMethod("predictCoding", c("VRanges", "TxDb", "ANY", "missing"),
 
     ## reference codon sequences
     altpos <- (start(mcols(txlocal)$CDSLOC) - 1L) %% 3L + 1L
+
+    ## Warn when multiple variants fall in the same codon of the same
+    ## transcript.  Each is evaluated independently against the reference
+    ## (not additively / as a compound haplotype), so VARAA may not reflect
+    ## the true amino acid if all mutations co-occur (#46).
+    codonIdx <- (start(mcols(txlocal)$CDSLOC) - 1L) %/% 3L
+    codonKey <- paste(mcols(txlocal)$TXID, codonIdx, sep = ":")
+    dupCodon <- duplicated(codonKey) | duplicated(codonKey, fromLast = TRUE)
+    if (any(dupCodon)) {
+        nCodon <- length(unique(codonKey[dupCodon]))
+        warning("predictCoding: ", nCodon,
+                " codon(s) contain multiple variants. Each variant is ",
+                "evaluated independently against the reference sequence; ",
+                "compound (haplotype-aware) consequences are not computed. ",
+                "Consider phasing variants before calling predictCoding(). ",
+                "(issue #46)")
+    }
+
     refCodon <- varCodon <- .getRefCodons(txlocal, altpos, seqSource, cdsbytx)
 
     ## allowed characters that can't be translated
