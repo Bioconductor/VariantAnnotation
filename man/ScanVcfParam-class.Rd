@@ -78,6 +78,17 @@
     sequences and ranges to be queried. Variants whose \code{POS} lies in the
     interval(s) \code{[start, end]} are returned. If \code{which} is not
     specified all ranges are returned.
+
+    \strong{Performance note:} \code{readVcf} issues one tabix seek per
+    range in \code{which}. Supplying a very long \code{GRanges} (e.g.\
+    millions of ranges from a genome-wide BED file) can be orders of
+    magnitude slower than reading the whole file and filtering afterwards.
+    Consider merging nearby ranges with
+    \code{\link[IRanges:reduce-methods]{reduce}(which, min.gapwidth = 500L)}
+    before passing to \code{ScanVcfParam}, or use
+    \code{\link[VariantAnnotation]{readVcf}} without \code{which} and apply
+    \code{\link[IRanges:findOverlaps-methods]{subsetByOverlaps}} on the
+    result. (GitHub issue \#70)
   }
   \item{object}{An instance of class \code{ScanVcfParam}.
   }
