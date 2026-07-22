@@ -15,7 +15,12 @@ test_predictCoding_empty <- function()
 {
     query <- GRanges("chr1", IRanges(start=c(1, 10, 20), width=1))
     current <- fun(query, cdsbytx, Hsapiens, DNAStringSet(c("G", "T", "A")))
-    checkIdentical(dim(mcols(current)), c(0L, 8L))
+    checkIdentical(dim(mcols(current)), c(0L, 14L))
+    ## issue #86: REFAA and VARAA should be empty AAStringSet, not NULL
+    checkTrue(is(mcols(current)$REFAA, "AAStringSet"))
+    checkTrue(is(mcols(current)$VARAA, "AAStringSet"))
+    checkIdentical(length(mcols(current)$REFAA), 0L)
+    checkIdentical(length(mcols(current)$VARAA), 0L)
 }
 
 test_predictCoding_varAllele <- function()
