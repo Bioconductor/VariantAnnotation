@@ -14,7 +14,7 @@ jobs:
     #   id-token: write
     uses: bioconductor/workflows/.github/workflows/bioccheck.yml@main
     with:
-      error_on: 'warning'
+      error_on: 'error'
       enable_pkgdown: false
     # Required only if you want test coverage via Codecov
     # secrets:
