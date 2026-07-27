@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+    branches: [ devel, main, master, RELEASE_* ]
+  pull_request:
+    branches: [ devel, main, master, RELEASE_* ]
+
+jobs:
+  bioccheck:
+    # Required only if you set enable_pkgdown: true
+    # permissions:
+    #   pages: write
+    #   id-token: write
+    uses: bioconductor/workflows/.github/workflows/bioccheck.yml@main
+    with:
+      error_on: 'warning'
+      enable_pkgdown: false
+    # Required only if you want test coverage via Codecov
+    # secrets:
+    #   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
