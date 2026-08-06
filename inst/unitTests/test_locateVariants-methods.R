@@ -178,3 +178,47 @@ test_locateVariants_match_predictCoding <- function()
         start=c(5, 77054, 77054, 77058, 77057, 77057, 77055), 
         end=c(55, 77055, 77055, 77058, 77058, 77058, 77054)),
         paramRangeID=rep(NA, 7))
+
+## ---------------------------------------------------------------
+## Test for GitHub issue #87: locateVariants failing on intronic
+## variants when GRangesList contains empty elements.
+## ---------------------------------------------------------------
+test_locateVariants_emptyGRangesList_issue87 <- function()
+{
+    ## Create a GRangesList with one real intron and one empty element.
+    ## The empty element simulates a transcript with no introns (e.g.,
+    ## single-exon non-coding RNA) — this is what caused the bug.
+    introns <- GRangesList(
+        "tx1" = GRanges("chr1", IRanges(100, 200), strand="+"),
+        "tx2" = GRanges()  # empty element — the culprit in #87
+    )
+
+    ## Query that falls within the intron of tx1
+    query <- GRanges("chr1", IRanges(150, 150))
+
+    ## Direct call to GRangesList method (no TxDb involved):
+    ## Even without the filter, the GRangesList method calls .makeResult()
+    ## which uses mapToTranscripts — but the original bug is that the TxDb
+    ## method didn't filter before calling the GRangesList method.
+    ## Still, verify the GRangesList method works with empty elements:
+    loc <- locateVariants(query, introns, IntronVariants())
+    checkTrue(length(loc) > 0L,
+        msg="locateVariants should find the intronic variant")
+    checkIdentical(mcols(loc)$QUERYID, 1L)
+    checkIdentical(mcols(loc)$TXID, "tx1")
+
+    ## Also test with the TxDb pathway using the chr22 example from the
+    ## issue report, but only if the TxDb is available:
+    if (requireNamespace("TxDb.Hsapiens.UCSC.hg19.knownGene", quietly=TRUE)) {
+        fl <- system.file("extdata", "chr22.vcf.gz",
+                          package="VariantAnnotation")
+        vcf <- readVcf(fl, "hg19")
+        seqlevels(vcf) <- "chr22"
+        rd <- rowRanges(vcf)
+        test_snps <- rd[1:10]
+        loc <- locateVariants(test_snps, txdb, IntronVariants())
+        checkTrue(length(loc) > 0L,
+            msg="issue #87: intronic variants must not be silently dropped")
+        checkTrue(all(mcols(loc)$LOCATION == "intron"))
+    }
+}
