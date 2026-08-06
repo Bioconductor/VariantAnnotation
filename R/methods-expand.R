@@ -13,17 +13,18 @@ setMethod("expand", "CollapsedVCF",
         if (all(elt == 1L)) {
             fxd <- fixed(x)
             fxd$ALT <- unlist(alt(x), use.names=FALSE)
-			ghdr <- geno(header(x))
-			varsR <- rownames(ghdr)[rownames(ghdr) == "AD" | ghdr$Number == "R"]
-			varsR <- varsR[varsR %in% names(geno(x))]
-			if (length(varsR) > 0){
-				geno(x)[varsR] <- endoapply(
-					geno(x)[varsR], function(i)
-						.expandAD(i, nrow(x), ncol(x))
-				)
-			}
-            return(VCF(rd, colData(x), metadata(x), fxd, .unlistAltInfo(x), 
-                       geno(x), ..., collapsed=FALSE))
+            ghdr <- geno(header(x))
+            varsR <- rownames(ghdr)[rownames(ghdr) == "AD" | ghdr$Number == "R"]
+            varsR <- varsR[varsR %in% names(geno(x))]
+            if (length(varsR) > 0){
+                geno(x)[varsR] <- endoapply(
+                    geno(x)[varsR], function(i)
+                        .expandAD(i, nrow(x), ncol(x))
+                )
+            }
+            res <- VCF(rd, colData(x), metadata(x), fxd, .unlistAltInfo(x),
+                       geno(x), ..., collapsed=FALSE)
+            return(.updateHeaderNumberA(res))
         }
 
         ## info, fixed, geno
@@ -40,16 +41,35 @@ setMethod("expand", "CollapsedVCF",
             mcols(rdexp) <- NULL
         } else rdexp <- rd[idx, "paramRangeID"]
 
-        tmp = VCF(rdexp, colData(x), metadata(x), fexp, iexp, gexp,
-            ..., collapsed=FALSE)  # https://github.com/Bioconductor/VariantAnnotation/issues/79 says 'A' should not occur in info(header())$Number
-        nhi = info(header(tmp))
-        num = nhi$Number
-        inda = grep("A", num)
-        if (length(inda)>0) num[inda] = "1"
-        info(header(tmp))$Number = num
-        tmp
+        res <- VCF(rdexp, colData(x), metadata(x), fexp, iexp, gexp,
+            ..., collapsed=FALSE)
+        .updateHeaderNumberA(res)
     }
 )
+
+## After expand(), each row has exactly one ALT allele, so per-ALT fields
+## (Number=A) are now scalar — update the header to reflect this.
+## (GitHub issue #79)
+.updateHeaderNumberA <- function(vcf)
+{
+    ## INFO header
+    ihdr <- info(header(vcf))
+    if (nrow(ihdr) > 0L) {
+        isA <- ihdr$Number == "A"
+        if (any(isA))
+            ihdr$Number[isA] <- "1"
+        info(header(vcf)) <- ihdr
+    }
+    ## FORMAT/geno header
+    ghdr <- geno(header(vcf))
+    if (nrow(ghdr) > 0L) {
+        isA <- ghdr$Number == "A"
+        if (any(isA))
+            ghdr$Number[isA] <- "1"
+        geno(header(vcf)) <- ghdr
+    }
+    vcf
+}
 
 .expandGeno <- function(x, hdr, elt, idx)
 {
