@@ -43,6 +43,9 @@ setMethod(readVcf, c(file="TabixFile", param="missing"),
 setMethod(readVcf, c(file="character", param="ANY"),
     function(file, genome, param, ..., row.names=TRUE)
 {
+    file <- .prepareFile(file)
+    if (!is.null(attr(file, "tmpfile")))
+        on.exit(unlink(attr(file, "tmpfile")), add=TRUE)
     file <- .checkFile(file)
     .readVcf(file, genome, param, row.names=row.names, ...)
 })
@@ -50,10 +53,70 @@ setMethod(readVcf, c(file="character", param="ANY"),
 setMethod(readVcf, c(file="character", param="missing"),
     function(file, genome, param, ..., row.names=TRUE)
 {
+    file <- .prepareFile(file)
+    if (!is.null(attr(file, "tmpfile")))
+        on.exit(unlink(attr(file, "tmpfile")), add=TRUE)
     file <- .checkFile(file)
     .readVcf(file, genome, param=ScanVcfParam(), 
              row.names=row.names, ...)
 })
+
+## Detect whether a file path points to a BGZF-compressed file.
+## BGZF is a specialisation of gzip: the first block has the 2-byte extra
+## subfield ID "BC" at byte positions 13-14 (1-based).  Regular gzip
+## (e.g. produced by bcftools -Oz) passes the is-gzip test but NOT the
+## BC-subfield test, so Rsamtools / htslib cannot index or read them.
+.is_bgzf <- function(path) {
+    raw_bytes <- tryCatch(
+        readBin(path, "raw", n = 18L),
+        error = function(e) raw(0)
+    )
+    if (length(raw_bytes) < 18L)
+        return(FALSE)
+    ## gzip magic (bytes 1-2) + FLG byte has FEXTRA bit (0x04) set (byte 4)
+    is_gzip  <- raw_bytes[1L] == as.raw(0x1f) &&
+                raw_bytes[2L] == as.raw(0x8b)
+    has_fextra <- bitwAnd(as.integer(raw_bytes[4L]), 4L) == 4L
+    ## BGZF extra subfield ID "BC" at byte positions 13-14
+    is_bgzf  <- is_gzip && has_fextra &&
+                raw_bytes[13L] == as.raw(0x42) &&   # 'B'
+                raw_bytes[14L] == as.raw(0x43)       # 'C'
+    is_bgzf
+}
+
+## Decompress a regular-gzip VCF (e.g. bcftools -Oz output) to a temp plain
+## VCF file.  Returns the path to the temp file; caller is responsible for
+## unlinking it.
+.ungzip_vcf <- function(path) {
+    tmp <- tempfile(fileext = ".vcf")
+    con_in <- gzcon(file(path, open = "rb"))
+    lines  <- readLines(con_in)
+    close(con_in)
+    writeLines(lines, tmp)
+    tmp
+}
+
+.prepareFile <- function(x)
+{
+    ## If file looks like gzip but is NOT BGZF (e.g. produced by bcftools -Oz
+    ## or plain `gzip`), Rsamtools/htslib cannot handle it.  Decompress to a
+    ## temporary plain-text VCF.  We tag the path with a "tmpfile" attribute
+    ## so the *caller* can register on.exit(unlink(...)) in its own frame,
+    ## ensuring the file lives for the full duration of the readVcf call.
+    is_gz <- grepl("\\.(gz|bgz)$", x, ignore.case = TRUE)
+    if (is_gz && !.is_bgzf(x)) {
+        message("Note: '", basename(x), "' appears to be gzip- (not BGZF-) ",
+                "compressed.\n",
+                "  Decompressing to a temporary file for reading. ",
+                "For faster repeated access\n",
+                "  consider re-compressing with Rsamtools::bgzip() and ",
+                "indexing with indexVcf().")
+        tmp <- .ungzip_vcf(x)
+        attr(tmp, "tmpfile") <- tmp   # signal caller to clean up
+        return(tmp)
+    }
+    x
+}
 
 .checkFile <- function(x)
 {
