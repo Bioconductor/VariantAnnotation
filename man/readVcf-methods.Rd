@@ -97,8 +97,15 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
   }
   \item{con}{The \code{VcfFile} object to import.}
   \item{format, text}{Ignored.}
-  \item{\dots}{Additional arguments, passed to methods. For
-    \code{import}, the arguments are passed to \code{readVcf}.
+  \item{\dots}{Additional arguments passed to methods.
+    \itemize{
+      \item For \code{readVcf}: additional arguments are passed
+        to the underlying \code{scanVcf} call.
+      \item For \code{readInfo}, \code{readGeno}, \code{readGT}:
+        additional arguments are passed to \code{readVcf}.
+      \item For \code{import}: arguments are passed to
+        \code{readVcf}.
+    }
   }
 }
 
