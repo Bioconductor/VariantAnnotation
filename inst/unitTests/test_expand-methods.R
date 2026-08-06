@@ -90,3 +90,32 @@ test_expand_adr_adf <- function()
 			})
 	
 }
+
+test_expand_preserves_nonstandard_mcols <- function()
+{
+    ## Issue #85: non-standard rowRanges columns were dropped by expand()
+    vcf <- VCF(rowRanges = GRanges("chr1", IRanges(1:4*3, width=c(1, 2, 1, 1))))
+    alt(vcf) <- DNAStringSetList("A", c("TT"), c("G", "A"), c("TT", "C"))
+    ref(vcf) <- DNAStringSet(c("G", "AA", "T", "G"))
+
+    ## Add non-standard columns to rowRanges
+    mcols(rowRanges(vcf))$SNP_name <- paste0("SNP_", seq_along(vcf))
+    mcols(rowRanges(vcf))$num_alts <- elementNROWS(alt(vcf))
+
+    ## Expand (rows 3 and 4 are multi-allelic)
+    exp <- expand(vcf)
+
+    ## Should have 6 rows (4 original, +1 for row 3, +1 for row 4)
+    checkTrue(nrow(exp) == 6L)
+
+    ## Non-standard columns should be preserved
+    rr <- rowRanges(exp, fixed=FALSE)
+    checkTrue("SNP_name" %in% names(mcols(rr)))
+    checkTrue("num_alts" %in% names(mcols(rr)))
+
+    ## Values should be expanded correctly (repeated for multi-allelic)
+    checkIdentical(mcols(rr)$SNP_name,
+                   c("SNP_1", "SNP_2", "SNP_3", "SNP_3", "SNP_4", "SNP_4"))
+    checkIdentical(mcols(rr)$num_alts,
+                   c(1L, 1L, 2L, 2L, 2L, 2L))
+}
