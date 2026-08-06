@@ -179,7 +179,10 @@ setMethod("predictCoding", c("VRanges", "ANY", "ANY", "missing"),
     consequence <- rep("synonymous", length(txlocal))
     consequence[nonsynonymous] <- "nonsynonymous" 
     consequence[fmshift] <- "frameshift"
-    consequence[nonsynonymous & (as.character(varAA) %in% "*")] <- "nonsense" 
+    ## Nonsense: VARAA contains stop codon '*'.
+    ## Use grepl rather than %in% "*" to catch DBS across codon boundaries
+    ## where VARAA is multi-character (e.g. "P*" for a two-codon DBS) (#84).
+    consequence[nonsynonymous & grepl("*", as.character(varAA), fixed=TRUE)] <- "nonsense"
     consequence[zwidth | noTrans] <- "not translated" 
     consequence <- factor(consequence) 
  
