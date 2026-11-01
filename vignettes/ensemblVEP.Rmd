@@ -20,6 +20,7 @@ library(BiocStyle)
 library(VariantAnnotation)
 library(jsonlite)
 library(httr)
+vep_avail <- FALSE
 ```
 
 # Introduction
@@ -53,8 +54,15 @@ We'll base our query on 100 positions in the chr22 VCF.
 ```{r lksnv}
 dr = which(width(rowRanges(r22))!=1)
 r22s = r22[-dr]
-res = vep_by_region(r22[1:100], snv_only=FALSE, chk_max=FALSE)
-jans = toJSON(content(res))
+res = tryCatch(
+    vep_by_region(r22[1:100], snv_only=FALSE, chk_max=FALSE),
+    error = function(e) {
+        message("Ensembl VEP REST API not available: ", conditionMessage(e))
+        NULL
+    }
+)
+vep_avail = !is.null(res)
+if (vep_avail) jans = toJSON(content(res))
 ```
 
 There are various ways to work with the result of this query to the API.
@@ -63,26 +71,26 @@ to dig in and understand aspects of the API behavior.
 
 First, the top-level concepts produced for each variant can
 be retrieved using
-```{r doj1, message=FALSE}
+```{r doj1, eval=vep_avail, message=FALSE}
 library(rjsoncons)
 names(jsonlite::fromJSON(jmespath(jans, "[*]")))
 ```
 
 Annotation of the most severe consequence known will typically
 be of interest:
-```{r doj2}
+```{r doj2, eval=vep_avail}
 table(jsonlite::fromJSON(jmespath(jans, "[*].most_severe_consequence")))
 ```
 
 There is variability in the structure of data returned for each query.
-```{r doj3}
+```{r doj3, eval=vep_avail}
 head(fromJSON(jmespath(jans, "[*].regulatory_feature_consequences")))
 ```
 
 Furthermore, the content of the motif feature consequences field seems
 very peculiar.
 
-```{r lktaaaa}
+```{r lktaaaa, eval=vep_avail}
 table(unlist(fromJSON(jmespath(jans, "[*].motif_feature_consequences"))))
 ```
 
@@ -92,7 +100,7 @@ We'll consider the following approach to converting
 the API response to a GenomicRanges GRanges instance.  Eventually
 this may become part of the package.
 
-```{r lkmakeg, message=FALSE}
+```{r lkmakeg, eval=vep_avail, message=FALSE}
 library(GenomicRanges)
 .make_GRanges = function( vep_response ) {
   stopifnot(inherits(vep_response, "response"))  # httr
@@ -112,7 +120,7 @@ Now information about variants can be retrieved with
 range operations.  Deep annotation
 requires nested structure of the metadata columns.
 
-```{r lkmc}
+```{r lkmc, eval=vep_avail}
 mcols(tstg)[1, "transcript_consequences"]
 ```
 
