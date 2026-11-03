@@ -24,7 +24,7 @@ Suggests: GenomeInfoDb, RUnit, AnnotationHub, BSgenome.Hsapiens.UCSC.hg19,
         SNPlocs.Hsapiens.dbSNP144.GRCh37, SIFT.Hsapiens.dbSNP132,
         SIFT.Hsapiens.dbSNP137, PolyPhen.Hsapiens.dbSNP131, snpStats,
         ggplot2, BiocStyle, knitr, magick, jsonlite, httr,
-	rjsoncons
+	rjsoncons, covr
 LinkingTo: S4Vectors, IRanges, XVector, Biostrings, Rhtslib (>= 2.99.0)
 SystemRequirements: GNU make
 LazyLoad: yes
