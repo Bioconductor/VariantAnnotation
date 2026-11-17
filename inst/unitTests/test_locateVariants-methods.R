@@ -178,3 +178,34 @@ test_locateVariants_match_predictCoding <- function()
         start=c(5, 77054, 77054, 77058, 77057, 77057, 77055), 
         end=c(55, 77055, 77055, 77058, 77058, 77058, 77054)),
         paramRangeID=rep(NA, 7))
+
+## ---------------------------------------------------------------
+## Test for GitHub issue #55: PRECEDEID/FOLLOWID should be
+## strand-aware for intergenic variants.
+## ---------------------------------------------------------------
+test_locateVariants_intergenic_strand_issue55 <- function()
+{
+    ## Variant at position 500.
+    ## Gene A: + strand, right of variant (700-1000)
+    ##   → variant is upstream of Gene A → PRECEDEID
+    ## Gene B: - strand, right of variant (700-1000)
+    ##   → variant is downstream of Gene B → FOLLOWID
+    ## Gene C: + strand, left of variant (100-300)
+    ##   → variant is downstream of Gene C → FOLLOWID
+    ## Gene D: - strand, left of variant (100-300)
+    ##   → variant is upstream of Gene D → PRECEDEID
+    query <- GRanges("chr1", IRanges(500, 500))
+    subject <- GRangesList(
+        "GeneA" = GRanges("chr1", IRanges(700, 1000), strand="+"),
+        "GeneB" = GRanges("chr1", IRanges(700, 1000), strand="-"),
+        "GeneC" = GRanges("chr1", IRanges(100, 300), strand="+"),
+        "GeneD" = GRanges("chr1", IRanges(100, 300), strand="-")
+    )
+    loc <- locateVariants(query, subject, IntergenicVariants(500, 500))
+    checkTrue(length(loc) == 1L)
+
+    prec <- sort(as.character(loc$PRECEDEID[[1]]))
+    foll <- sort(as.character(loc$FOLLOWID[[1]]))
+    checkIdentical(prec, c("GeneA", "GeneD"))
+    checkIdentical(foll, c("GeneB", "GeneC"))
+}

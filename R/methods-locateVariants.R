@@ -484,19 +484,53 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
         q_range <- query[intergenic]
         s_genes <- rep(names(subject), elementNROWS(s_range))
         s_unlist <- unlist(s_range, use.names=FALSE)
+        s_strand <- as.character(strand(s_unlist))
 
-        ## ID all genes that fall in upstream / downstream range.
-        ## upstream == follow:
+        ## Find genes in upstream window (left of variant for +/* queries)
         f_range <- .shiftRangeUpDown(q_range, upstream(region), TRUE)
-        f_fo <- findOverlaps(f_range, s_unlist, ignore.strand=ignore.strand)
-        f_factor <- factor(queryHits(f_fo), seq_len(queryLength(f_fo)))
-        f_genes <- unname(splitAsList(s_genes[subjectHits(f_fo)], f_factor))
- 
-        ## downstream == precede:
+        f_fo <- findOverlaps(f_range, s_unlist, ignore.strand=TRUE)
+
+        ## Find genes in downstream window (right of variant for +/* queries)
         p_range <- .shiftRangeUpDown(q_range, downstream(region), FALSE)
-        p_fo <- findOverlaps(p_range, s_unlist, ignore.strand=ignore.strand)
-        p_factor <- factor(queryHits(p_fo), seq_len(queryLength(p_fo)))
-        p_genes <- unname(splitAsList(s_genes[subjectHits(p_fo)], p_factor))
+        p_fo <- findOverlaps(p_range, s_unlist, ignore.strand=TRUE)
+
+        ## Strand-aware classification (GitHub issue #55):
+        ## PRECEDEID = genes the variant is upstream of (variant precedes gene TSS)
+        ##   - '+' strand gene to the RIGHT of variant (downstream window)
+        ##   - '-' strand gene to the LEFT of variant (upstream window)
+        ## FOLLOWID = genes the variant is downstream of (variant follows gene TSS)
+        ##   - '+' strand gene to the LEFT of variant (upstream window)
+        ##   - '-' strand gene to the RIGHT of variant (downstream window)
+
+        ## From upstream window: '+' genes → FOLLOWID, '-' genes → PRECEDEID
+        f_qhits <- queryHits(f_fo)
+        f_shits <- subjectHits(f_fo)
+        f_strands <- s_strand[f_shits]
+        f_gnames <- s_genes[f_shits]
+
+        ## From downstream window: '+' genes → PRECEDEID, '-' genes → FOLLOWID
+        p_qhits <- queryHits(p_fo)
+        p_shits <- subjectHits(p_fo)
+        p_strands <- s_strand[p_shits]
+        p_gnames <- s_genes[p_shits]
+
+        nq <- length(q_range)
+
+        ## Build PRECEDEID: '+' from downstream + '-' from upstream
+        prec_qhits <- c(p_qhits[p_strands != "-"],
+                         f_qhits[f_strands == "-"])
+        prec_genes <- c(p_gnames[p_strands != "-"],
+                         f_gnames[f_strands == "-"])
+        prec_factor <- factor(prec_qhits, seq_len(nq))
+        p_genes <- unname(splitAsList(prec_genes, prec_factor))
+
+        ## Build FOLLOWID: '+' from upstream + '-' from downstream
+        foll_qhits <- c(f_qhits[f_strands != "-"],
+                         p_qhits[p_strands == "-"])
+        foll_genes <- c(f_gnames[f_strands != "-"],
+                         p_gnames[p_strands == "-"])
+        foll_factor <- factor(foll_qhits, seq_len(nq))
+        f_genes <- unname(splitAsList(foll_genes, foll_factor))
 
         if (ignore.strand)
             strand(q_range) <- "*"
