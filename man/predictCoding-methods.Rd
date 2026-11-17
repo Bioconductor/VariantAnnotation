@@ -143,16 +143,29 @@
       sequence. `nonsense' is used for premature stop codons.
     }
     \item{\code{REFCODON}}{
-      The reference codon sequence. This range is typically greater
-      than the width of the range in the \code{GRanges} because it includes 
-      all codons involved in the sequence modification. If the reference 
-      sequence is of width 2 but the alternate allele is of width 4 then at 
-      least two codons must be included in the \code{REFSEQ}.
+      The reference codon sequence in \emph{transcript (coding) strand
+      coordinates}. This range is typically greater than the width of the
+      range in the \code{GRanges} because it includes all codons involved in
+      the sequence modification. If the reference sequence is of width 2 but
+      the alternate allele is of width 4 then at least two codons must be
+      included in the \code{REFSEQ}.
+
+      \strong{Note on strand:} \code{REFCODON} and \code{VARCODON} are always
+      reported in the orientation of the transcript, not the + genomic strand.
+      For variants on minus-strand genes, \code{REFCODON} will be the reverse
+      complement of what one would derive from the VCF \code{REF} field
+      directly. For example, REF=A on a minus-strand transcript contributes a
+      \code{T} to \code{REFCODON} (its complement). This is the correct
+      behavior: codons must be read in transcript orientation for accurate
+      amino acid translation.
     }
     \item{\code{VARCODON}}{
-      This sequence is the result of inserting, deleting or replacing the 
-      position(s) in the reference sequence alternate allele. If the result 
-      of this substitution is not a multiple of 3 it will not be translated.
+      This sequence is the result of inserting, deleting or replacing the
+      position(s) in the reference codon with the variant allele (in transcript
+      orientation). If the result of this substitution is not a multiple of 3
+      it will not be translated. Like \code{REFCODON}, this is reported in
+      transcript strand coordinates; the substituted base is the reverse
+      complement of the VCF \code{ALT} for minus-strand genes.
     }
     \item{\code{REFAA}}{
       The reference amino acid column contains the translated \code{REFSEQ}.
