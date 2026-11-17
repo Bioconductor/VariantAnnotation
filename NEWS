@@ -1,3 +1,18 @@
+CHANGES IN VERSION 1.59.1
+-------------------------
+
+BUG FIXES
+
+    o readVcf() now preserves '*' (spanning deletion) alleles instead of
+      converting them to empty strings. VCFs containing '*' alleles are
+      returned with a CharacterList ALT column (same as structural variant
+      VCFs), allowing faithful round-trip through writeVcf(). Previously,
+      '*' was erased at read time making it impossible to write valid VCF
+      output for files containing spanning deletions — IGV/htsjdk would
+      reject the output with "empty alleles are not permitted". VCFs
+      without '*' alleles continue to use DNAStringSetList as before.
+      (GitHub issue #65)
+
 CHANGES IN VERSION 1.36.0
 -------------------------
 
