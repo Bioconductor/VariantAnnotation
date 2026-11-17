@@ -111,8 +111,9 @@ setMethod("predictCoding", c("VRanges", "ANY", "ANY", "missing"),
         mcols(txlocal)$varAllele <- va
     }
 
-    ## frameshift
-    refwidth <- width(txlocal)
+    ## frameshift: use CDS-mapped width, not genomic width, because a
+    ## deletion extending into an intron has genomic width > CDS overlap (#83).
+    refwidth <- width(mcols(txlocal)$CDSLOC)
     altallele <- mcols(txlocal)$varAllele
     fmshift <- abs(width(altallele) - refwidth) %% 3 != 0 
     if (any(fmshift))
@@ -195,10 +196,13 @@ setMethod("predictCoding", c("VRanges", "ANY", "ANY", "missing"),
 .getRefCodons <- function(txlocal, altpos, seqSource, cdsbytx)
 { 
     ## adjust codon end for 
-    ## - width of the reference sequence
+    ## - width of the reference sequence in transcript space
     ## - position of alt allele substitution in the codon
+    ## Use CDSLOC width (transcript-space) not genomic width, because
+    ## a deletion extending into an intron has genomic width >> CDS width (#83).
+    cds_width <- width(mcols(txlocal)$CDSLOC)
     cstart <- ((start(mcols(txlocal)$CDSLOC) - 1L) %/% 3L) * 3L + 1L
-    cend <- cstart + (((altpos + width(txlocal) - 2L) %/% 3L) * 3L + 2L)
+    cend <- cstart + (((altpos + cds_width - 2L) %/% 3L) * 3L + 2L)
     txord <- match(mcols(txlocal)$TXID, names(cdsbytx))
     txseqs <- extractTranscriptSeqs(seqSource, cdsbytx[txord])
     DNAStringSet(substring(txseqs, cstart, cend))
