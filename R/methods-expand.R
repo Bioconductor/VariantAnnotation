@@ -34,11 +34,9 @@ setMethod("expand", "CollapsedVCF",
         fexp$ALT <- unlist(alt(x), use.names=FALSE)
         gexp <- .expandGeno(x, hdr, elt, idx)
 
-        ## rowRanges
-        if (is.null(rd$paramRangeID)) {
-            rdexp <- rd[idx, ]
-            mcols(rdexp) <- NULL
-        } else rdexp <- rd[idx, "paramRangeID"]
+        ## rowRanges: expand to match multi-allelic expansion.
+        ## Preserve all user-added mcols columns (#85).
+        rdexp <- rd[idx, ]
 
         tmp = VCF(rdexp, colData(x), metadata(x), fexp, iexp, gexp,
             ..., collapsed=FALSE)  # https://github.com/Bioconductor/VariantAnnotation/issues/79 says 'A' should not occur in info(header())$Number
