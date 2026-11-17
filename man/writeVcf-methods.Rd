@@ -2,6 +2,7 @@
 \alias{writeVcf}
 \alias{writeVcf,VCF,character-method}
 \alias{writeVcf,VCF,connection-method}
+\alias{writeVcf,VRanges,character-method}
 
 \title{Write VCF files}
 
@@ -10,11 +11,13 @@
 \usage{
 \S4method{writeVcf}{VCF,character}(obj, filename, index = FALSE, ...)
 \S4method{writeVcf}{VCF,connection}(obj, filename, index = FALSE, ...)
+\S4method{writeVcf}{VRanges,character}(obj, filename, index = FALSE,
+    info = character(), filter = character(), meta = character(), ...)
 }
 
 \arguments{
-  \item{obj}{Object containing data to be written out. At
-    present only accepts \linkS4class{VCF}.
+  \item{obj}{Object containing data to be written out. Accepts a
+    \linkS4class{VCF} or \linkS4class{VRanges} object.
   }
 
   \item{filename}{The character() name of the VCF file, or a connection
@@ -23,6 +26,19 @@
     the file does not already exist.}
 
   \item{index}{Whether to bgzip the output file and generate a tabix index.
+  }
+  \item{info}{A \code{character()} vector of \code{mcols(obj)} column
+    names to include as INFO fields (for \linkS4class{VRanges} input only).
+    By default all extra columns are written as FORMAT/genotype fields.
+    Passed to \code{\link{asVCF}}.
+  }
+  \item{filter}{A \code{character()} vector of \code{mcols(obj)} column
+    names to include as FILTER fields (for \linkS4class{VRanges} input only).
+    Passed to \code{\link{asVCF}}.
+  }
+  \item{meta}{A named \code{character()} of metadata strings to include in
+    the VCF header (for \linkS4class{VRanges} input only).
+    Passed to \code{\link{asVCF}}.
   }
   \item{\dots}{Additional arguments, passed to methods.
       \itemize{
