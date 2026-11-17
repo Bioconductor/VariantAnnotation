@@ -90,3 +90,37 @@ test_expand_adr_adf <- function()
 			})
 	
 }
+
+## ---------------------------------------------------------------
+## Test for GitHub issue #79: Number=A should become Number=1 in
+## both INFO and FORMAT headers after expand().
+## ---------------------------------------------------------------
+test_expand_numberA_to_1_issue79 <- function()
+{
+    ## Test with multi-allele VCF (exercises main expand path)
+    fl <- system.file("unitTests", "cases", "expand.vcf",
+                      package="VariantAnnotation")
+    vcf <- suppressWarnings(readVcf(fl, "hg19"))
+    checkIdentical(info(header(vcf))["AF", "Number"], "A")
+    exp <- expand(vcf)
+    checkIdentical(info(header(exp))["AF", "Number"], "1")
+    checkTrue(is.numeric(info(exp)$AF))
+
+    ## Test with biallelic VCF (exercises early-return path)
+    fl2 <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
+    vcf2 <- readVcf(fl2)
+    checkIdentical(info(header(vcf2))["AF", "Number"], "A")
+    exp2 <- expand(vcf2)
+    checkIdentical(info(header(exp2))["AF", "Number"], "1")
+    checkTrue(is.numeric(info(exp2)$AF))
+
+    ## Round-trip: writeVcf + readVcf + expand should keep AF as numeric
+    out <- tempfile(fileext=".vcf")
+    on.exit(unlink(out))
+    writeVcf(exp2, out)
+    rt <- readVcf(out, row.names=FALSE)
+    rt <- expand(rt)
+    checkIdentical(info(header(rt))["AF", "Number"], "1")
+    checkTrue(is.numeric(info(rt)$AF))
+    checkEquals(info(exp2)$AF, info(rt)$AF)
+}

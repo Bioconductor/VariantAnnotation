@@ -1,3 +1,16 @@
+CHANGES IN VERSION 1.59.1
+-------------------------
+
+BUG FIXES
+
+    o expand() now converts Number=A to Number=1 in both INFO and FORMAT
+      VCF header metadata. After expansion, each row contains exactly one
+      ALT allele, so per-ALT fields are scalar. This fixes the round-trip
+      discrepancy where writeVcf() followed by readVcf() + expand() would
+      produce a CompressedNumericList for fields like AF instead of a plain
+      numeric vector. The fix applies to both the multi-allele expansion
+      path and the biallelic early-return path. (GitHub issue #79)
+
 CHANGES IN VERSION 1.36.0
 -------------------------
 
