@@ -281,6 +281,19 @@
     ## 'to' is a GRangesList of cds by transcript
     map <- mapToTranscripts(unname(from), to, ignore.strand=ignore.strand, ...)
     if (length(map) == 0) {
+        ## Check if any variants overlap coding regions but couldn't be mapped
+        ## (large INDELs spanning multiple exons — issue #81)
+        fo <- findOverlaps(from, to, type="any",
+                           ignore.strand=ignore.strand)
+        if (length(fo) > 0L) {
+            n_dropped <- length(unique(queryHits(fo)))
+            warning(n_dropped,
+                    " variant(s) overlap coding regions but span multiple ",
+                    "exons and could not be mapped to transcript coordinates. ",
+                    "These are not included in predictCoding() results. ",
+                    "Consider using locateVariants() to identify them.",
+                    call.=FALSE)
+        }
         res <- GRanges()
         mcols(res) <- DataFrame(REF=DNAStringSet(), ALT=DNAStringSetList(),
                                 varAllele=DNAStringSet(), CDSLOC=IRanges(),
@@ -291,6 +304,24 @@
 
     xHits <- map$xHits
     txHits <- map$transcriptsHits
+
+    ## Warn about variants that overlap CDS but weren't mapped (issue #81)
+    all_idx <- seq_along(from)
+    dropped <- setdiff(all_idx, unique(xHits))
+    if (length(dropped) > 0L) {
+        fo <- findOverlaps(from[dropped], to, type="any",
+                           ignore.strand=ignore.strand)
+        if (length(fo) > 0L) {
+            n_dropped <- length(unique(queryHits(fo)))
+            warning(n_dropped,
+                    " variant(s) overlap coding regions but span multiple ",
+                    "exons and could not be mapped to transcript coordinates. ",
+                    "These are not included in predictCoding() results. ",
+                    "Consider using locateVariants() to identify them.",
+                    call.=FALSE)
+        }
+    }
+
     flat_to <- unlist(to) ## names needed for mapping
 
     ## FIXME: cdsid is expensive

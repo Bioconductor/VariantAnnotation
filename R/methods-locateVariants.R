@@ -545,14 +545,50 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
 
     map <- mapToTranscripts(unname(query), subject, 
                             ignore.strand=ignore.strand)
-    if (length(map) > 0) {
-        xHits <- map$xHits
-        txHits <- map$transcriptsHits
-        tx <- names(subject)[txHits]
-        if (!is.null(tx))
-            txid <- tx
-        else
-            txid <- NA_integer_
+
+    ## Rescue variants that overlap the transcript/CDS but were dropped
+    ## by mapToTranscripts due to the 'within' overlap requirement.
+    ## This handles large INDELs spanning multiple exons (issue #81).
+    mapped_idx <- integer(0)
+    if (length(map) > 0)
+        mapped_idx <- unique(map$xHits)
+    dropped <- setdiff(seq_along(query), mapped_idx)
+    rescued <- integer(0)
+    rescued_tx <- integer(0)
+    if (length(dropped) > 0L) {
+        ## Use type="any" to find variants that overlap the subject features
+        fo <- findOverlaps(query[dropped], subject, type="any",
+                           ignore.strand=ignore.strand)
+        if (length(fo) > 0L) {
+            rescued <- dropped[queryHits(fo)]
+            rescued_tx <- subjectHits(fo)
+            ## De-duplicate: keep first transcript hit per query
+            dup <- duplicated(rescued)
+            rescued <- rescued[!dup]
+            rescued_tx <- rescued_tx[!dup]
+            warning(length(rescued),
+                    " variant(s) span multiple exons/CDS and could not be ",
+                    "mapped to transcript coordinates. These are included in ",
+                    "results but LOCSTART/LOCEND are set to NA.",
+                    call.=FALSE)
+        }
+    }
+
+    if (length(map) > 0 || length(rescued) > 0L) {
+        ## --- Standard mapped results ---
+        if (length(map) > 0) {
+            xHits <- map$xHits
+            txHits <- map$transcriptsHits
+            tx <- names(subject)[txHits]
+            if (!is.null(tx))
+                txid <- tx
+            else
+                txid <- NA_integer_
+        } else {
+            xHits <- integer(0)
+            txHits <- integer(0)
+            txid <- character(0)
+        }
         ## FIXME: cdsid is expensive
         cdsid <- IntegerList(integer(0))
         ## CodingVariants() must fall within a coding region.
@@ -563,7 +599,7 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
         ## 'map' is a GRangesList and in 'map2' it's unlisted.)
         ## Only ranges identified by 'map' and 'map2' are kept.
         ## Ranges identified by 'map' only are discarded.
-        if (vtype == "coding") {
+        if (vtype == "coding" && length(map) > 0) {
            usub <- unlist(subject) ## names needed for mapping
             map2 <- mapToTranscripts(unname(query)[xHits], usub,
                                      ignore.strand=ignore.strand)
@@ -581,14 +617,17 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
             }
         }
 
-        ss <- runValue(strand(subject)[txHits])
-        if (any(elementNROWS(ss) > 1L)) {
-            warning("'subject' has multiple strands per list element; ",
-                    "setting strand to '*'")
-            sstrand <- Rle("*", length(txHits))
-        }
-        sstrand <- unlist(ss, use.names=FALSE)
-        GRanges(seqnames=seqnames(query)[xHits],
+        ## Build result for standard mapped variants
+        if (length(xHits) > 0L) {
+            ss <- runValue(strand(subject)[txHits])
+            if (any(elementNROWS(ss) > 1L)) {
+                warning("'subject' has multiple strands per list element; ",
+                        "setting strand to '*'")
+                sstrand <- Rle("*", length(txHits))
+            }
+            sstrand <- unlist(ss, use.names=FALSE)
+            mapped_result <- GRanges(
+                seqnames=seqnames(query)[xHits],
                 ranges=IRanges(ranges(query)[xHits]),
                 strand=sstrand,
                 LOCATION=.location(length(xHits), vtype),
@@ -600,6 +639,46 @@ setMethod("locateVariants", c("GRanges", "TxDb", "AllVariants"),
                 GENEID=NA_character_,
                 PRECEDEID=CharacterList(character(0)),
                 FOLLOWID=CharacterList(character(0)))
+        } else {
+            mapped_result <- GRanges()
+            mcols(mapped_result) <- DataFrame(
+                LOCATION=.location(), LOCSTART=integer(), LOCEND=integer(),
+                QUERYID=integer(), TXID=integer(), CDSID=IntegerList(),
+                GENEID=character(), PRECEDEID=CharacterList(),
+                FOLLOWID=CharacterList())
+        }
+
+        ## Build result for rescued multi-exon-spanning variants
+        if (length(rescued) > 0L) {
+            rtx <- names(subject)[rescued_tx]
+            if (is.null(rtx))
+                rtx <- rep(NA_integer_, length(rescued))
+            ## Use strand from the subject transcript
+            rss <- runValue(strand(subject)[rescued_tx])
+            rsstrand <- unlist(rss, use.names=FALSE)
+            rescued_result <- GRanges(
+                seqnames=seqnames(query)[rescued],
+                ranges=IRanges(ranges(query)[rescued]),
+                strand=rsstrand,
+                LOCATION=.location(length(rescued), vtype),
+                LOCSTART=rep(NA_integer_, length(rescued)),
+                LOCEND=rep(NA_integer_, length(rescued)),
+                QUERYID=rescued,
+                TXID=rtx,
+                CDSID=IntegerList(rep(list(integer(0)), length(rescued))),
+                GENEID=NA_character_,
+                PRECEDEID=CharacterList(rep(list(character(0)), length(rescued))),
+                FOLLOWID=CharacterList(rep(list(character(0)), length(rescued))))
+        } else {
+            rescued_result <- GRanges()
+            mcols(rescued_result) <- DataFrame(
+                LOCATION=.location(), LOCSTART=integer(), LOCEND=integer(),
+                QUERYID=integer(), TXID=integer(), CDSID=IntegerList(),
+                GENEID=character(), PRECEDEID=CharacterList(),
+                FOLLOWID=CharacterList())
+        }
+
+        c(mapped_result, rescued_result)
     } else {
         res <- GRanges()
         mcols(res) <- DataFrame(LOCATION=.location(),
