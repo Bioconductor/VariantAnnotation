@@ -1,3 +1,21 @@
+CHANGES IN VERSION 1.59.1
+-------------------------
+
+BUG FIXES
+
+    o writeVcf() now preserves the existing fileDate header value instead
+      of unconditionally replacing it with the current date. This restores
+      provenance information and enables faithful round-trips.
+
+    o writeVcf() no longer emits bare ##contig=<ID=X> header lines when
+      seqinfo contains only NA seqlengths and NA genomes. Such lines are
+      uninformative and were the primary cause of round-trip mismatches
+      (extra contig lines altered the header structure on re-read).
+
+    o Together these changes allow all.equal(readVcf(writeVcf(x)), x)
+      to succeed for VCFs whose seqinfo is all-NA (e.g., structural.vcf).
+      (GitHub issue #78)
+
 CHANGES IN VERSION 1.36.0
 -------------------------
 
