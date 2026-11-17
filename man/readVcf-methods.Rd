@@ -3,6 +3,8 @@
 \alias{readVcf,character,ANY-method}
 \alias{readVcf,character,missing-method}
 \alias{readVcf,character,missing-method}
+\alias{readVcf,connection,ANY-method}
+\alias{readVcf,connection,missing-method}
 \alias{readVcf,TabixFile,ScanVcfParam-method}
 \alias{readVcf,TabixFile,IntegerRangesList-method}
 \alias{readVcf,TabixFile,GRanges-method}
@@ -39,6 +41,10 @@
       ..., row.names=TRUE)
   \S4method{readVcf}{character,missing}(file, genome, param, 
       ..., row.names=TRUE)
+  \S4method{readVcf}{connection,ANY}(file, genome, param, 
+      ..., row.names=TRUE)
+  \S4method{readVcf}{connection,missing}(file, genome, param, 
+      ..., row.names=TRUE)
 
 ## Lightweight functions to read a single variable
 readInfo(file, x, param=ScanVcfParam(), ..., row.names=TRUE)
@@ -51,8 +57,10 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
 
 \arguments{
   \item{file}{A \code{\link{VcfFile}} (synonymous with
-    \code{\link[Rsamtools]{TabixFile}}) instance or character() name of the VCF
-    file to be processed. When ranges are specified in \code{param},
+    \code{\link[Rsamtools]{TabixFile}}) instance, a character() name of the VCF
+    file to be processed, or an open \code{connection} (e.g.\ a
+    \code{textConnection} or \code{url}) supplying VCF-formatted text lines.
+    When ranges are specified in \code{param},
     \code{file} must be a \code{\link{VcfFile}}.
 
     Use of the \code{\link{VcfFile}} methods are encouraged as they are
@@ -279,6 +287,15 @@ readGT(file, nucleotides=FALSE, param=ScanVcfParam(), ..., row.names=TRUE)
   fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation") 
   vcf <- readVcf(fl, "hg19")
   ## vcf <- readVcf(fl, c("20"="hg19"))  ## 'genome' as named vector
+
+  ## ---------------------------------------------------------------------
+  ## Reading from a connection (e.g. in-memory character vector)
+  ## This avoids writing to a temp file when VCF content is already in R.
+  ## ---------------------------------------------------------------------
+  lines <- readLines(fl)
+  con <- textConnection(lines)
+  vcf_from_con <- readVcf(con, "hg19")
+  identical(dim(vcf), dim(vcf_from_con))  # TRUE
 
   ## ---------------------------------------------------------------------
   ## Header and genome information 

@@ -38,6 +38,42 @@ setMethod(readVcf, c(file="TabixFile", param="missing"),
              row.names=row.names, ...)
 })
 
+## connection (textConnection, rawConnection, url, file, etc.)
+##
+## S3 connection classes are registered via setOldClass() in AllClasses.R so
+## that S4 dispatch can resolve "connection" before these setMethod() calls.
+
+.readVcf_connection <- function(file, genome, param, ..., row.names=TRUE) {
+    ## Read all lines from the connection.  If the caller opened it, leave it
+    ## open after we're done; otherwise close it once we're finished.
+    opened <- tryCatch(isOpen(file), error = function(e) FALSE)
+    if (!opened)
+        open(file, "r")
+    on.exit({
+        if (!opened) close(file)
+    })
+    lines <- readLines(file)
+
+    ## Write to a temporary plain-text .vcf file that Rsamtools can handle.
+    tmp <- tempfile(fileext = ".vcf")
+    on.exit(unlink(tmp), add = TRUE)
+    writeLines(lines, tmp)
+
+    readVcf(tmp, genome, param, ..., row.names = row.names)
+}
+
+setMethod(readVcf, c(file="connection", param="ANY"),
+    function(file, genome, param, ..., row.names=TRUE)
+{
+    .readVcf_connection(file, genome, param, ..., row.names=row.names)
+})
+
+setMethod(readVcf, c(file="connection", param="missing"),
+    function(file, genome, param, ..., row.names=TRUE)
+{
+    .readVcf_connection(file, genome, ScanVcfParam(), ..., row.names=row.names)
+})
+
 ## character
 
 setMethod(readVcf, c(file="character", param="ANY"),
