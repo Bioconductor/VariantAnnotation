@@ -118,6 +118,12 @@ setMethod("expand", "CollapsedVCF",
 .expandAD <- function(AD, idxlen, xcols)
 {
     if (is.list(AD)) {
+        ## No data to expand (e.g., sites-only VCF with 0 samples;
+        ## list elements may all be NULL). Return empty array.
+        ## (GitHub issue #72)
+        if (length(AD) == 0L || xcols == 0L)
+            return(array(integer(0L), c(idxlen, xcols, 2L)))
+
         adpart <- PartitioningByWidth(AD)
         if (any(zeros <- width(adpart) == 0L)) { 
             AD[zeros] <- list(rep(NA_integer_, 2L))

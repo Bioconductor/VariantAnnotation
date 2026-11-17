@@ -90,3 +90,34 @@ test_expand_adr_adf <- function()
 			})
 	
 }
+
+## ---------------------------------------------------------------
+## Test for GitHub issue #72: expand() errors with 'data' must be
+## of a vector type, was 'NULL' on sites-only VCFs (e.g. gnomAD).
+## ---------------------------------------------------------------
+test_expand_sitesOnly_issue72 <- function()
+{
+    fl <- system.file("unitTests", "cases", "sites_only.vcf",
+                      package="VariantAnnotation")
+    vcf <- readVcf(fl, "")
+
+    ## Verify this is indeed a sites-only VCF (0 samples)
+    checkIdentical(ncol(vcf), 0L)
+    checkTrue(nrow(vcf) > 0L)
+
+    ## expand() must not error on sites-only VCF with FORMAT headers
+    exp <- expand(vcf)
+    checkTrue(is(exp, "ExpandedVCF"))
+
+    ## Multi-allelic rows are expanded correctly
+    ## Input: 3 rows with ALT counts 2, 1, 3 => 6 expanded rows
+    checkIdentical(nrow(exp), 6L)
+    checkIdentical(ncol(exp), 0L)
+
+    ## INFO Number=A fields are expanded and scalar
+    checkTrue(is.numeric(info(exp)$AF))
+    checkEquals(info(exp)$AF, c(0.1, 0.2, 0.3, 0.4, 0.3, 0.1))
+
+    ## Geno data is preserved (empty but valid structure)
+    checkTrue(length(geno(exp)) >= 0L)
+}
