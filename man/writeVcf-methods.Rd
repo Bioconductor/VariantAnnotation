@@ -22,7 +22,12 @@
     with \code{open = "a"} will have header information written only if
     the file does not already exist.}
 
-  \item{index}{Whether to bgzip the output file and generate a tabix index.
+  \item{index}{Whether to bgzip the output file and generate a tabix
+    index. When \code{TRUE}, the output is BGZF-compressed regardless of
+    the \code{filename} suffix. If \code{filename} ends in \code{.gz}
+    (e.g.\ \code{"out.vcf.gz"}), the compressed file is written to that
+    path and the tabix index is placed alongside it (\code{"out.vcf.gz.tbi"}).
+    Otherwise the suffix is changed to \code{.bgz} as before.
   }
   \item{\dots}{Additional arguments, passed to methods.
       \itemize{

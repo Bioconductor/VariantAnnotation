@@ -255,9 +255,24 @@ setMethod(writeVcf, c("VCF", "connection"),
     flush(filename)
 
     if (index) {
+        ## Determine the desired output path before bgzip rewrites the
+        ## suffix.  bgzip() always writes to <stem>.bgz, but if the user
+        ## requested a .gz (or .vcf.gz) file we rename back so that
+        ## downstream tools that expect .vcf.gz find it there.
+        desiredPath <- scon$description
+        wantsGz <- grepl("\\.gz$", desiredPath)
         filenameGZ <- bgzip(scon$description, overwrite = TRUE)
         indexTabix(filenameGZ, format = "vcf")
         unlink(scon$description)
+        if (wantsGz && !identical(filenameGZ, desiredPath)) {
+            ## Rename .bgz -> requested .gz path (and its .tbi index)
+            file.rename(filenameGZ, desiredPath)
+            tbiOld <- paste0(filenameGZ, ".tbi")
+            tbiNew <- paste0(desiredPath, ".tbi")
+            if (file.exists(tbiOld))
+                file.rename(tbiOld, tbiNew)
+            filenameGZ <- desiredPath
+        }
         invisible(filenameGZ)
     } else {
         invisible(scon$description)
