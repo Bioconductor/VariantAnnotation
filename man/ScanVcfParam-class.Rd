@@ -74,10 +74,13 @@
   \item{trimEmpty}{A logical(1) indicating whether \sQuote{GENO} fields
     with no values should be returned.
   }
-  \item{which}{A \link[GenomicRanges]{GRanges} describing the
-    sequences and ranges to be queried. Variants whose \code{POS} lies in the
-    interval(s) \code{[start, end]} are returned. If \code{which} is not
-    specified all ranges are returned.
+  \item{which}{A \link[GenomicRanges]{GRanges},
+    \link[GenomicRanges]{GRangesList}, or
+    \link[IRanges]{IntegerRangesList} describing the sequences and ranges
+    to be queried. Variants whose \code{POS} lies in the interval(s)
+    \code{[start, end]} are returned. If \code{which} is not specified
+    all ranges are returned. Note that range-based subsetting requires
+    an index file (e.g.\ created with \code{\link{indexVcf}}).
   }
   \item{object}{An instance of class \code{ScanVcfParam}.
   }
@@ -123,8 +126,10 @@
   Constructor:
   \describe{
     \item{ScanVcfParam:}{Returns a \code{ScanVcfParam} object. 
-      The \code{which} argument to the constructor can be one of several types, 
-      as documented above.}  
+      The \code{which} argument to the constructor accepts a
+      \link[GenomicRanges]{GRanges}, \link[GenomicRanges]{GRangesList},
+      or \link[IRanges]{IntegerRangesList}; see the \code{which}
+      argument description above.}
   }
 
   Accessors:
