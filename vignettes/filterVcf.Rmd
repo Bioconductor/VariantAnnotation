@@ -158,7 +158,9 @@ they may be passed as parameters to *filterVcf*. We use them here to combine the
 library(VariantAnnotation)
 prefilters <- FilterRules(list(germline=isGermlinePrefilter,
                                dbsnp=notInDbsnpPrefilter))
-filters <- FilterRules(list(isSNV=isSNV, AD=allelicDepth))
+## wrap the isSNV() generic in a closure: FilterRules() does not accept
+## S4 generics directly with recent S4Vectors
+filters <- FilterRules(list(isSNV=function(x) isSNV(x), AD=allelicDepth))
 ```
 
 ## Create the Filtered file
