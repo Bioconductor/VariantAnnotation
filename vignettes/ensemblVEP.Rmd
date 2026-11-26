@@ -65,6 +65,12 @@ vep_avail = !is.null(res)
 if (vep_avail) jans = toJSON(content(res))
 ```
 
+```{r vepnote, eval=!vep_avail, echo=FALSE, results="asis"}
+cat("**Note:** the Ensembl REST API at https://rest.ensembl.org",
+    "could not be reached when this vignette was built, so the code",
+    "below is shown but was not run.\n")
+```
+
 There are various ways to work with the result of this query to the API.
 We'll use the `r CRANpkg('rjsoncons')` JSON processing infrastructure
 to dig in and understand aspects of the API behavior.
