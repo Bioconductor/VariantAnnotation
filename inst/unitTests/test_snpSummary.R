@@ -38,3 +38,42 @@ test_snpSummary_output <- function()
     checkEquals(round(res[["a1Freq"]], 2), c(0.50, 0.17, NA, NA, NA))
 }
 
+test_snpSummary_HWEzscore <- function()
+{
+    ## ex2.vcf: row 1 has (1, 1, 1) -> E[g01] = 1.5 > 1 (deficit, z < 0)
+    ##          row 2 has (2, 1, 0) -> E[g01] = 5/6 < 1 (excess, z > 0)
+    fl <- system.file("extdata", "ex2.vcf", package="VariantAnnotation")
+    res <- snpSummary(readVcf(fl, "hg19"))
+    checkEqualsNumeric(res$HWEzscore[1], -sqrt(1 / 3))
+    checkEqualsNumeric(res$HWEzscore[2], sqrt(0.12))
+
+    ## Synthetic VCF covering heterozygote excess (including N = 2),
+    ## heterozygote deficit, and exact HWE
+    gt <- rbind(
+        c("0/1", "0/1", "./.", "./.", "./.", "./.", "./.", "./.", "./.", "./."),
+        rep("0/1", 10L),
+        c(rep("0/0", 5L), rep("1/1", 5L)),
+        c("0/0", "0/1", "0/1", "1/1", rep("./.", 6L))
+    )
+    rownames(gt) <- paste0("snp", 1:4)
+    colnames(gt) <- paste0("s", 1:10)
+    rr <- GRanges("1", IRanges(1:4, width=1L),
+                  paramRangeID=factor(rep(NA, 4L)))
+    names(rr) <- rownames(gt)
+    fixed <- DataFrame(
+        REF=DNAStringSet(rep("A", 4L)),
+        ALT=DNAStringSetList("G", "G", "G", "G"),
+        QUAL=rep(NA_real_, 4L),
+        FILTER=rep("PASS", 4L)
+    )
+    vcf <- VCF(rowRanges=rr, fixed=fixed, geno=SimpleList(GT=gt),
+               colData=DataFrame(Samples=seq_len(ncol(gt)),
+                                 row.names=colnames(gt)),
+               collapsed=TRUE)
+    s <- snpSummary(vcf)
+
+    checkEqualsNumeric(s$HWEzscore, c(sqrt(2), sqrt(10), -sqrt(10), 0))
+    checkEqualsNumeric(s$HWEpvalue,
+                       pchisq(c(2, 10, 10, 0), df=1, lower.tail=FALSE))
+}
+
