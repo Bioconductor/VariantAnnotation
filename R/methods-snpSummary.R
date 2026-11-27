@@ -61,7 +61,7 @@ setMethod("snpSummary", "CollapsedVCF",
     expt <- rowSums(alleleCounts) * cbind(a0^2/2, a0*a1, a1^2/2)
     chisq <- rowSums((genoCounts - expt)^2 / expt)
     z <- rep(NA, nrow(genoCounts))
-    zsign <- sign(genoCounts[,"g01"] - expt[,2] * rowSums(genoCounts))
+    zsign <- sign(genoCounts[,"g01"] - expt[,2])
     zsign * sqrt(chisq)
 }
 
